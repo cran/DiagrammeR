@@ -1,14 +1,12 @@
-<img src="inst/DiagrammeR.png">
+<img src="inst/img/DiagrammeR.png">
 
-With the **DiagrammeR** package, you can create diagrams and flowcharts using **R**. Markdown-like text is used to describe a diagram and, by doing this in **R**, we can also add some **R** code into the mix and integrate these diagrams in the **R** console, through **R Markdown**, and in **shiny** apps. 
+With the **DiagrammeR** package, you can create graph diagrams and flowcharts using **R**. Markdown-like text is used to describe a diagram and, by doing this in **R**, we can also add some **R** code into the mix and integrate these diagrams in the **R** console, through **R Markdown**, and in **shiny** apps. 
 
-Want a more visual intro? Click or tap the image below to view a video walkthrough for a Graphviz diagram that's created with just a few lines of code.
-
-[![ScreenShot](https://raw.githubusercontent.com/rich-iannone/DiagrammeR/master/inst/DiagrammeR_video_link.png)](http://www.dailymotion.com/video/x2fga6w_the-diagrammer-r-package_tech)
+Go to the [**project website**](http://rich-iannone.github.io/DiagrammeR/) and view a video walkthrough for a graph diagram that's created with a few lines of text and is just as easily customizable.
 
 The package leverages the infrastructure provided by [**htmlwidgets**](http://htmlwidgets.org) to bridge **R** and  both [**mermaid.js**](https://github.com/knsv/mermaid) and [**viz.js**](https://github.com/mdaines/viz.js/).
 
-<img src="inst/DiagrammeR_flow_diagram.png">
+<img src="inst/img/DiagrammeR_flow_diagram.png">
 
 ### Installation
 
@@ -16,6 +14,12 @@ Install the development version of **DiagrammeR** from GitHub using the **devtoo
 
 ```R
 devtools::install_github('rich-iannone/DiagrammeR')
+```
+
+Or, get the 0.4 release from CRAN.
+
+```R
+install.packages('DiagrammeR')
 ```
 
 ### Graphviz Graphs
@@ -47,7 +51,8 @@ boxes_and_circles <- "
 digraph boxes_and_circles {
   
   # several 'node' statements
-  node [shape = box]
+  node [shape = box,
+        fontname = Helvetica]
     A; B; C; D; E; F
   
   node [shape = circle,
@@ -68,7 +73,7 @@ digraph boxes_and_circles {
 grViz(boxes_and_circles)
 ```
 
-<img src="inst/Example_7a.png">
+<img src="inst/img/grViz_1.png">
 
 The attributes of the nodes and the edges can be easily modified. In the following, colors can be selectively changed in attribute lists.
 
@@ -78,6 +83,7 @@ digraph boxes_and_circles {
   
   # several 'node' statements
   node [shape = box,
+        fontname = Helvetica,
         color = blue] // for the letter nodes, use box shapes
     A; B; C; D; E
     F [color = black]
@@ -105,7 +111,7 @@ digraph boxes_and_circles {
 grViz(boxes_and_circles)
 ```
 
-<img src="inst/Example_7b.png">
+<img src="inst/img/grViz_2.png">
 
 There are many more attributes. Here are the principal node attributes:
 
@@ -140,7 +146,7 @@ The edge attributes:
 |:-----------------|:-------------------------------------------------------------|:----------------|
 |`arrowhead`       | style of arrowhead at head end                               | normal          |
 |`arrowsize`       | scaling factor for arrowheads                                | `1.0`           |
-|`arrowtail`       | sytle of arrowhead at tail end                               | normal          |
+|`arrowtail`       | style of arrowhead at tail end                               | normal          |
 |`color`           | edge stroke color                                            | `black`         |
 |`colorscheme`     | the scheme for interpreting color names                      |                 |
 |`constraint`      | whether edge should affect node ranking                      | true            |
@@ -248,7 +254,7 @@ The graph attributes:
 
 #### Graphviz Substitution
 
-Inspired by Razor and Markdown footnotes, substitution allows for mixing in R expressions into a Graphviz graph specification without sacrificing readability. In the simple example of specifying a single node, the following substitution syntax would be used:
+Inspired by Razor and the footnote URLs from Markdown, substitution allows for mixing in R expressions into a Graphviz graph specification without sacrificing readability. In the simple example of specifying a single node, the following substitution syntax would be used:
 
 ```
 digraph {
@@ -292,16 +298,16 @@ F; G; H; I; J
 }
 ```
 
-To take advantage of substitution and render the graph, nest the `grViz` and `replace_in_spec` functions with the graph specification:
+To take advantage of substitution and render the graph, simply use the `grViz` function with the graph specification:
 
 ```R
-grViz(replace_in_spec("...graph spec with substitutions..."))
+grViz("...graph spec with substitutions...")
 ```
 
 A mixture of both types of subtitutions can be used. As an example:
 
 ```R
-grViz(replace_in_spec("
+grViz("
 digraph a_nice_graph {
 
 # node definitions with substituted label text
@@ -323,86 +329,172 @@ a -> {b c d e f g h i j}
 
 [1]: 'top'
 [2]: 10:20
-"))
+")
 ```
 
 As can be seen in the following output: (1) the node with ID `a` is given the label `top` (after substituting `@@1` with expression after the `[1]:` footnote expression), (2) the nodes with ID values from `b`-`j` are respectively provided values from indices 1 to 9 (using the hypenated form of `@@`) of the evaluated expression `10:20` (in the `[2]:` footnote expression).
 
-<img src="inst/Graphviz_substitution.png">
+<img src="inst/img/grViz_3.png">
 
 Footnote expressions are meant to be flexible. They can span multiple lines, and they can also take in objects that are available in the global workspace. So long as a vector object results from evaluation, substitution can be performed.
+
+Here is an example of a diagram created using R and RStudio information (obtained from the `R.Version` and `rstudio::versionInfo` functions):
+
+```R
+grViz("
+digraph nicegraph {
+
+  # graph, node, and edge definitions
+  graph [compound = true, nodesep = .5, ranksep = .25,
+         color = crimson]
+
+  node [fontname = Helvetica, fontcolor = darkslategray,
+        shape = rectangle, fixedsize = true, width = 1,
+        color = darkslategray]
+
+  edge [color = grey, arrowhead = none, arrowtail = none]
+
+  # subgraph for R information
+  subgraph cluster0 {
+    node [fixedsize = true, width = 3]
+    '@@1-1' -> '@@1-2' -> '@@1-3' -> '@@1-4'
+    '@@1-4' -> '@@1-5' -> '@@1-6' -> '@@1-7'
+  }
+
+  # subgraph for RStudio information
+  subgraph cluster1 {
+    node [fixedsize = true, width = 3]
+    '@@2' -> '@@3'
+  }
+
+  Information             [width = 1.5]
+  Information -> R
+  Information -> RStudio
+  R -> '@@1-1'            [lhead = cluster0]
+  RStudio -> '@@2'        [lhead = cluster1]
+
+}
+
+[1]: paste0(names(R.Version())[1:7], ':\\n ', R.Version()[1:7])
+[2]: paste0('RStudio version:\\n ', rstudio::versionInfo()[[1]])
+[3]: paste0('Current program mode:\\n ', rstudio::versionInfo()[[2]])
+
+")
+```
+
+The output will of course vary by the system on which it was generated. Here is my output:
+
+<img src="inst/img/grViz_4.png">
+
+#### Using Data Frames to Define Graphviz Graphs
+
+The `graphviz_single_df` function is provided for generating a chunk of **Graphviz** **DOT** code (specifically `node` and `edge` statements) from a single data frame. The basic idea is to have a prepared data frame available, call the `graphviz_single_df` function to create an string object with the **DOT** code, and then use substitution in the `grViz` function call to insert that **DOT** code.
+
+Edges can be defined between two different columns in the data frame by supplying a string in the form of `[dfcol_1] -> [dfcol_2]` for the `edge_between` argument.
+
+Node attributes can be defined using the `node_attr` argument. Here, a string vector is to be provided using the construction: `c("[dfcol_1]: [node_attr_1] = [value], [node_attr_2] = [value], ...", "[dfcol_2]: [node_attr_1] = [value], [node_attr_2] = [value], ...")`.
+ 
+Edge attributes can be provided as well. A string vector should be provided with the construction: `"1: [edge_attr_1] = [value], [edge_attr_2] = [value], ..."`. Additionally, edge attributes can be scaled to values in a data frame column. This is done by creating a statement in the form: `[edge_attr] [value_1] to [value_2] with [dfcol]`. Currently, scales can be generated from numeric and color values.
+
+The following example outlines how a data frame (with some beforehand preparation) can be used to generate a graph diagram. 
+
+```R
+# Get unique pairs of flight origin and destination as a df
+unique_routes <- unique(nycflights13::flights[,11:12])
+ 
+# Add column with number of flights for each route
+for (i in 1:nrow(unique_routes)){
+  if (i == 1) add_column <- ncol(unique_routes) + 1
+ 
+  unique_routes[i, add_column] <-
+    nrow(subset(nycflights13::flights,
+                origin == as.vector(unique_routes[i,1], mode = 'character') &
+                  dest == as.vector(unique_routes[i,2], mode = 'character')))
+ 
+  if (i == nrow(unique_routes)){
+    colnames(unique_routes)[ncol(unique_routes)] <- 'flights'
+  }
+}
+  
+# Sort 'unique_routes' by descending number of flights
+unique_routes <- unique_routes[with(unique_routes, order(-flights)), ]
+rownames(unique_routes) <- NULL
+ 
+# Use the 'graphviz_single_df' function to specify what to graph, using
+# the 'unique_routes' data frame
+nodes_edges <-
+  graphviz_single_df(
+    df = unique_routes,
+    edge_between = c("origin -> dest"),
+    node_attr = c("origin:
+                   shape = circle,
+                   style = filled,
+                   height = 2,
+                   layer = 'all',
+                   fontname = Helvetica,
+                   fontsize = 42,
+                   fillcolor = lightblue",
+                  "dest: 
+                   shape = circle,
+                   style = filled,
+                   height = 1,
+                   layer = 'all',
+                   fontname = Helvetica,
+                   fontsize = 0,
+                   fillcolor = seagreen3"),
+    edge_attr = "1:
+                   color = #ff000040,
+                   arrowhead = dot,
+                   penwidth 2 to 50 with flights,
+                   arrowsize 1 to 10 with flights,
+                   color blue to red with flights
+                  ")
+ 
+# Create the graph by inserting the 'nodes_edges' object into
+# the Graphviz DOT specification with the substitution syntax
+grViz("
+digraph flights {
+
+  # Graph statements
+  graph [layout = twopi,
+         overlap = false,
+         fixedsize = true,
+         ranksep = 11,
+         outputorder = edgesfirst]
+
+  # Nodes and edges
+  @@1
+
+}
+[1]: nodes_edges
+")
+```
+
+<img src="inst/img/grViz_8.png">
 
 #### Graphviz Engines
 
 Several **Graphviz** engines are available with **DiagrammeR** for rendering graphs. By default, the `grViz` function renders graphs using the standard **dot** engine. However, the **neato**, **twopi**, and **circo** engines are selectable by supplying those names to the `engine` argument. The **neato** engine provides spring model layouts. This is a suitable engine if the graph is not too large (<100 nodes) and you don't know anything else about it. The **neato** engine attempts to minimize a global energy function, which is equivalent to statistical multi-dimensional scaling. The **twopi** engine provides radial layouts. Nodes are placed on concentric circles depending their distance from a given root node. The **circo** engine provide circular layouts. This is suitable for certain diagrams of multiple cyclic structures, such as certain telecommunications networks.
 
-Here is how the 'boxes_and_circles' graph is rendered with the **neato** engine:
+Here is how the 'boxes_and_circles' graph is rendered with the **neato**, **twopi**, and **circo** engines:
 
 ```R
 grViz(boxes_and_circles, engine = "neato")
 ```
 
-<img src="inst/Example_7c_neato.png">
+<img src="inst/img/grViz_5.png">
 
 ```R
 grViz(boxes_and_circles, engine = "twopi")
 ```
 
-<img src="inst/Example_7d_twopi.png">
+<img src="inst/img/grViz_6.png">
 
 ```R
 grViz(boxes_and_circles, engine = "circo")
 ```
 
-<img src="inst/Example_7e_circo.png">
-
-#### Manually Mixing in R with Graphviz DOT
-
-Possibilities are interesting when combining **R** functions with **DiagrammeR** and the `grViz` function. Here's an example of how the **rvest** package and piping with **pipeR** can yield multiple graphs:
-
-```R
-library(rvest)
-library(XML)
-library(pipeR)
-
-# Generate all the examples from viz.js GitHub repo
-html("https://raw.githubusercontent.com/mdaines/viz.js/gh-pages/example.html") %>>%
-  html_nodes("script[type='text/vnd.graphviz']") %>>%
-  lapply(
-    function(x){
-      xmlValue(x) %>>% (~ htmltools::html_print(grViz(.)) ) %>>% grViz
-    }
-  )
-```
-
-<img src="inst/Example_8a.png">
-
-<img src="inst/Example_8b.png">
-
-<img src="inst/Example_8c.png">
-
-<img src="inst/Example_8d.png">
-
-<img src="inst/Example_8e.png">
-
-<img src="inst/Example_8f.png">
-
-Isn't this great? Let's take in some examples straight from the Graphviz gallery:
-
-```R
-readLines("http://www.graphviz.org/Gallery/directed/fsm.gv.txt") %>>%
-  grViz
-
-readLines("http://www.graphviz.org/Gallery/directed/Genetic_Programming.gv.txt") %>>%
-  grViz
-
-readLines("http://www.graphviz.org/Gallery/directed/unix.gv.txt") %>>%
-  grViz
-```
-
-You get some nice figures as a result. Try 'em, you'll see.
-
-For much more information on the **DOT** language, see the excellent [drawing graphs with *dot* manual](http://www.graphviz.org/pdf/dotguide.pdf).
+<img src="inst/img/grViz_7.png">
 
 ### Mermaid Graphs
 
@@ -440,7 +532,7 @@ mermaid(diagram)
 
 This renders the following image:
 
-<img src="inst/Example_1.png">
+<img src="inst/img/mermaid_1.png">
 
 The same result can be achieved in a more succinct manner with this **R** statement (using semicolons between statements in the **mermaid** diagram spec):
 
@@ -450,7 +542,7 @@ mermaid("graph LR; A-->B; A-->C; C-->E; B-->D; C-->D; D-->F; E-->F")
 
 Alternatively, here is the result of using the statement `graph TB` in place of `graph LR`:
 
-<img src="inst/Example_2.png">
+<img src="inst/img/mermaid_2.png">
 
 Keep in mind that external files can also be called by the `mermaid` function. The file `graph.mmd` can contain the text of the diagram spec as follows
 
@@ -493,13 +585,13 @@ mermaid(diagram)
 
 What you get is this:
 
-<img src="inst/Example_3.png">
+<img src="inst/img/mermaid_3.png">
 
 Here's an example with line text (that is, text appearing on connecting lines). Simply place text between pipe characters, just after the arrow, right before the node identifier. There are few more CSS properties for the boxes included in this example (`stroke`, `stroke-width`, and `stroke-dasharray`).
 
 ```R
 diagram <- "
-graph LR
+graph BT
 A(Start)-->|Line Text|B(Keep Going)
 B-->|More Line Text|C(Stop)
     
@@ -513,7 +605,7 @@ mermaid(diagram)
 
 The resultant graphic:
 
-<img src="inst/Example_4.png">
+<img src="inst/img/mermaid_4.png">
 
 Let's include the values of some **R** objects into a fresh diagram. The `mtcars` dataset is something I go to again and again, so, I'm going to load it up.
 
@@ -585,11 +677,11 @@ paste(connections, collapse = "\n"), "\n",
 mermaid(diagram)
 ```
 
-This is part of the resulting graphic (it's quite wide so I'm displaying just 8 of the 11 columns):
+This is the resulting graphic:
 
-<img src="inst/Example_5.png">
+<img src="inst/img/mermaid_5.png">
 
-The **mermaid.js** library also supports [sequence diagrams](http://knsv.github.io/mermaid/sequenceDiagram.html). The ["How to Draw Sequence Diagrams"](http://www.cs.uku.fi/research/publications/reports/A-2003-1/page91.pdf) report by Poranen, Makinen, and Nummenmaa offers a good introduction to sequence diagrams. Let's replicate the ticket-buying example from Figure 1 of this report and add in some conditionals.
+[Sequence diagrams](http://knsv.github.io/mermaid/sequenceDiagram.html) can be generated. The ["How to Draw Sequence Diagrams"](http://www.cs.uku.fi/research/publications/reports/A-2003-1/page91.pdf) report by Poranen, Makinen, and Nummenmaa offers a good introduction to sequence diagrams. Here's an example:
 
 ```R
 # Using this "How to Draw a Sequence Diagram" 
@@ -598,24 +690,57 @@ The **mermaid.js** library also supports [sequence diagrams](http://knsv.github.
 
 mermaid("
 sequenceDiagram
-  customer->>ticket seller: ask ticket
-  ticket seller->>database: seats
-  alt tickets available
-    database->>ticket seller: ok
-    ticket seller->>customer: confirm
-    customer->>ticket seller: ok
-    ticket seller->>database: book a seat
-    ticket seller->>printer: print ticket
-  else sold out
-    database->>ticket seller: none left
-    ticket seller->>customer: sorry
+  Customer->>Ticket Seller: Ask for a Ticket
+  Ticket Seller->>Database: Seats
+  alt Tickets Are Available
+    Database->>Ticket Seller: OK
+    Ticket Seller->>Customer: Confirm
+    Customer->>Ticket Seller: OK
+    Ticket Seller->>Database: Book a Seat
+    Ticket Seller->>Printer: Print a Ticket
+  else Sold Out
+    Database->>Ticket Seller: None Left
+    Ticket Seller->>Customer: Sorry!
   end
 ")
 ```
 
-<img src="inst/Example_6.png">
+<img src="inst/img/mermaid_6.png">
 
-For more examples and additional documentation, see the [`mermaid.js` Wiki](https://github.com/knsv/mermaid/wiki).
+Gannt diagrams can also be generated. Here is an example of how to generate that type of project management diagram.
+
+```R
+mermaid("
+gantt
+dateFormat  YYYY-MM-DD
+title A Very Nice Gantt Diagram
+
+section Basic Tasks
+This is completed                   :done,          first_1,    2014-01-06, 2014-01-08
+This is active                      :active,        first_2,    2014-01-09, 3d
+Do this later                       :               first_3,    after first_2, 5d
+Do this after that                  :               first_4,    after first_3, 5d
+
+section Important Things
+Completed, critical task            :crit, done,    import_1,   2014-01-06,24h
+Also done, also critical            :crit, done,    import_2,   after import_1, 2d
+Doing this important task now       :crit, active,  import_3,   after import_2, 3d
+Next critical task                  :crit,          import_4,   after import_3, 5d
+
+
+section The Extras
+First extras                        :active,        extras_1,   after import_4,  3d
+Second helping                      :               extras_2,   after extras_1, 20h
+More of the extras                  :               extras_3,   after extras_1, 48h
+
+section The Wrap Up
+Congratulations                     :               wrap_1,     after extras_3, 3d
+Some meetings                       :                           5d
+Additional meetings with cake       :                           18h
+")
+```
+
+<img src="inst/img/mermaid_7.png">
 
 ### DiagrammeR + shiny
 
@@ -628,30 +753,29 @@ Using `grViz` with [`shinyAce`](https://github.com/trestletech/shinyAce), we can
 library(shiny)
 library(shinyAce)
 
-ui = shinyUI(fluidPage(fluidRow(
+ui <- shinyUI(fluidPage(fluidRow(
   column(
-    width=4
-    , aceEditor("ace", selectionId = "selection",value="digraph {A;}")
+    width = 4
+    , aceEditor("ace", value = "graph {}")
   ),
   column(
     width = 6
-    , grVizOutput('diagram' )
+    , grVizOutput('diagram')
   )
 )))
 
-server = function(input, output){
+server <- function(input, output){
   output$diagram <- renderGrViz({
     grViz(
       input$ace
     )
   })
-
 }
 
 shinyApp(ui = ui, server = server)
 ```
 
-<img src="inst/Example_9.gif">
+<img src="inst/img/shiny_1.gif">
 
 Here is a quick example where we can provide a `mermaid` diagram spec in a `textInput`.
 
