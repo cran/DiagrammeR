@@ -1,10 +1,10 @@
 Package: DiagrammeR
 Type: Package
 Title: Create Diagrams and Flowcharts Using R
-Version: 0.5
-Date: 2015-03-03
+Version: 0.6
+Date: 2015-04-30
 Authors@R: c(
-    person("knsv", "", role = c("aut", "cph"), comment = "mermaid.js
+    person("Knut", "Sveidqvist", role = c("aut", "cph"), comment = "mermaid.js
     library in htmlwidgets/lib, http://github.com/knsv/mermaid/"),
     person("Mike", "Bostock", role = c("aut", "cph"), comment = "d3.js
     library in htmlwidgets/lib, http://d3js.org"),
@@ -16,16 +16,13 @@ Authors@R: c(
     interface", email = "riannone@me.com")
     )
 Maintainer: Richard Iannone <riannone@me.com>
-Description: With the DiagrammeR package, you can create diagrams and flowcharts using R.
-    Markdown-like text is used to describe a diagram and, by doing this in R, we can also
-    add some R code into the mix and integrate these diagrams in the R console, through R
-    Markdown, and in shiny apps.
+Description: Allows to create diagrams and flowcharts using R.
 License: MIT + file LICENSE
-Imports: htmlwidgets (>= 0.3.2), rstudioapi (>= 0.2), V8 (>= 0.5)
-Suggests: knitr
+Imports: htmlwidgets (>= 0.3.2), rstudioapi (>= 0.2)
+Suggests: knitr, V8 (>= 0.5)
 VignetteBuilder: knitr
-Packaged: 2015-03-19 00:47:26 UTC; riannone
-Author: knsv [aut, cph] (mermaid.js library in htmlwidgets/lib,
+Packaged: 2015-04-30 13:47:38 UTC; riannone
+Author: Knut Sveidqvist [aut, cph] (mermaid.js library in htmlwidgets/lib,
     http://github.com/knsv/mermaid/),
   Mike Bostock [aut, cph] (d3.js library in htmlwidgets/lib,
     http://d3js.org),
@@ -36,4 +33,4 @@ Author: knsv [aut, cph] (mermaid.js library in htmlwidgets/lib,
   Richard Iannone [aut, cre] (R interface)
 NeedsCompilation: no
 Repository: CRAN
-Date/Publication: 2015-03-19 15:04:14
+Date/Publication: 2015-04-30 20:25:56

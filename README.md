@@ -1,10 +1,10 @@
 <img src="inst/img/DiagrammeR.png">
 
-With the **DiagrammeR** package, you can create graph diagrams and flowcharts using **R**. Markdown-like text is used to describe a diagram and, by doing this in **R**, we can also add some **R** code into the mix and integrate these diagrams in the **R** console, through **R Markdown**, and in **shiny** apps. 
+With the **DiagrammeR** package, you can create graph diagrams and flowcharts using **R**. **Markdown**-like text is used to describe a diagram and, by doing this in **R**, we can also add some **R** code into the mix and integrate these diagrams in the **R** console, through **R Markdown**, and in **shiny** web apps. 
 
 Go to the [**project website**](http://rich-iannone.github.io/DiagrammeR/) and view a video walkthrough for a graph diagram that's created with a few lines of text and is just as easily customizable.
 
-The package leverages the infrastructure provided by [**htmlwidgets**](http://htmlwidgets.org) to bridge **R** and  both [**mermaid.js**](https://github.com/knsv/mermaid) and [**viz.js**](https://github.com/mdaines/viz.js/).
+The package leverages the infrastructure provided by [**htmlwidgets**](http://htmlwidgets.org) to bridge **R** and both [**mermaid.js**](https://github.com/knsv/mermaid) and [**viz.js**](https://github.com/mdaines/viz.js/).
 
 <img src="inst/img/DiagrammeR_flow_diagram.png">
 
@@ -12,21 +12,21 @@ The package leverages the infrastructure provided by [**htmlwidgets**](http://ht
 
 Install the development version of **DiagrammeR** from GitHub using the **devtools** package.
 
-```R
+```r
 devtools::install_github('rich-iannone/DiagrammeR')
 ```
 
-Or, get the 0.4 release from CRAN.
+Or, get the v0.5 release from **CRAN**.
 
-```R
+```r
 install.packages('DiagrammeR')
 ```
 
 ### Graphviz Graphs
 
-It's possible to make diagrams using the **Graphviz** support included in the **DiagrammeR** package. The processing function is called `grViz`. What you pass into `grViz` is a valid graph in the **DOT** language. The text can either exist in the form of a string, a reference to a **Graphviz** file (with a **.gv** file extension), or as a text connection.
+It's possible to make diagrams using the **Graphviz** support included in the **DiagrammeR** package. The processing function is called `grViz`. What you pass into `grViz` is a valid graph in the **DOT** language. The text can either exist in the form of a string, a reference to a **Graphviz** file (with a **.gv** file extension), or as a text connection. Furthermore, functions exist for generating graph diagrams without need for the user to directly manipulate **DOT** code.
 
-#### Defining a Graphviz Graph
+#### Directly Defining a Graphviz Graph
 
 The **Graphviz** graph specification must begin with a directive stating whether a directed graph (`digraph`) or an undirected graph (`graph`) is desired. Semantically, this indicates whether or not there is a natural direction from one of the edge's nodes to the other. An optional graph `ID` follows this and paired curly braces denotes the body of the statement list (`stmt_list`). 
 
@@ -36,225 +36,97 @@ Here is the basic structure:
 
 `[strict] (graph | digraph) [ID] '{' stmt_list '}'`
 
-#### Statements
+The `stmt_list` is made up of a collection of graph statements (`graph_stmt`), node statements (`node_stmt`), and edge statements (`edge_stmt`) (they are the three most commonly used statement types in the **Graphviz** **DOT** language). Graph statements allow for attributes to be set for all components of the graph. Node statements define and provide attributes for graph nodes. Edge statements specify the edge operations between nodes and they supply attributes to the edges. For the edge operations, a directed graph must specify an edge using the edge operator `->` while an undirected graph must use the `--` operator.
 
-The graph statement (`graph_stmt`), the node statement (`node_stmt`), and the edge statement (`edge_stmt`) are the three most commonly used statements in the **Graphviz** **DOT** language. Graph statements allow for attributes to be set for all components of the graph. Node statements define and provide attributes for graph nodes. Edge statements specify the edge operations between nodes and they supply attributes to the edges. For the edge operations, a directed graph must specify an edge using the edge operator `->` while an undirected graph must use the `--` operator.
-
-Within these statements follow statement lists. Thus for a node statement, a list of nodes is expected. For an edge statement, a list of edge operations. Any of the list item can optionally have an attribute list (`attr_list`) which modify the attributes of either the node or edge.
+For a node statement, a list of nodes is expected. For an edge statement, a list of edge operations. Any of the list item can optionally have an attribute list (`attr_list`) which modify the attributes of either the node or edge.
 
 Comments may be placed within the statement list. These can be marked using `//` or a `/* */` structure. Comment lines are denoted by a `#` character. Multiple statements within a statement list can be separated by linebreaks or `;` characters between multiple statements.
 
 Here is an example where nodes (in this case styled as boxes and circles) can be easily defined along with their connections:
 
-```R
-boxes_and_circles <- "
+```r
+grViz("
 digraph boxes_and_circles {
+  
+  # a 'graph' statement
+  graph [overlap = true]
   
   # several 'node' statements
   node [shape = box,
         fontname = Helvetica]
-    A; B; C; D; E; F
+  A; B; C; D; E; F
   
   node [shape = circle,
         fixedsize = true,
         width = 0.9] // sets as circles
-    1; 2; 3; 4; 5; 6; 7; 8
+  1; 2; 3; 4; 5; 6; 7; 8
 
   # several 'edge' statements
-    A->1; B->2; B->3; B->4; C->A
-    1->D; E->A; 2->4; 1->5; 1->F
-    E->6; 4->6; 5->7; 6->7; 3->8
-
-  # a 'graph' statement
-  graph [overlap = true, fontsize = 10]
+  A->1; B->2; B->3; B->4; C->A
+  1->D; E->A; 2->4; 1->5; 1->F
+  E->6; 4->6; 5->7; 6->7; 3->8
 }
-"
-
-grViz(boxes_and_circles)
+")
 ```
 
 <img src="inst/img/grViz_1.png">
 
 The attributes of the nodes and the edges can be easily modified. In the following, colors can be selectively changed in attribute lists.
 
-```R
-boxes_and_circles <- "
+```r
+grViz("
 digraph boxes_and_circles {
+  
+  # a 'graph' statement
+  graph [overlap = true]
   
   # several 'node' statements
   node [shape = box,
         fontname = Helvetica,
         color = blue] // for the letter nodes, use box shapes
-    A; B; C; D; E
-    F [color = black]
+  A; B; C; D; E
+  F [color = black]
   
   node [shape = circle,
         fixedsize = true,
         width = 0.9] // sets as circles
-    1; 2; 3; 4; 5; 6; 7; 8
+  1; 2; 3; 4; 5; 6; 7; 8
 
   # several 'edge' statements
   edge [color = gray] // this sets all edges to be gray (unless overridden)
-    A->1; B->2
-    B->3 [color = red]
-    B->4
-    C->A [color = green]
-    1->D; E->A; 2->4; 1->5; 1->F
-    E->6; 4->6; 5->7; 6->7
-    3->8 [color = blue]
-
-  # a 'graph' statement
-  graph [overlap = true, fontsize = 10]
+  A->1; B->2                   // gray
+  B->3 [color = red]           // red
+  B->4                         // gray
+  C->A [color = green]         // green
+  1->D; E->A; 2->4; 1->5; 1->F // gray
+  E->6; 4->6; 5->7; 6->7       // gray
+  3->8 [color = blue]          // blue
 }
-"
-
-grViz(boxes_and_circles)
+")
 ```
 
 <img src="inst/img/grViz_2.png">
 
-There are many more attributes. Here are the principal node attributes:
+#### Colors
 
-|Node Attribute| Description                                                 | Default          |
-|:-------------|:------------------------------------------------------------|:-----------------|
-|`color`       | the node shape color                                        | `black`          |
-|`colorscheme` | the scheme for interpreting color names                     |                  |
-|`distortion`  | node distortion for any `shape = polygon`                   |`0.0`             |
-|`fillcolor`   | node fill color                                             |`lightgrey/black` |
-|`fixedsize`   | label text has no affect on node size                       |`false`           |
-|`fontcolor`   | the font color                                              |`black`           |
-|`fontname`    | the font family                                             |`Times-Roman`     |
-|`fontsize`    | the point size of the label                                 |`14`              |
-|`group`       | the name of the node's horizontal alignment group           |                  |
-|`height`      | the minimum height in inches                                |`0.5`             |
-|`image`       | the image file name                                         |                  |
-|`labelloc`    | the node label vertical alignment                           |`c`               |
-|`margin`      | the space around a label                                    |`0.11, 0.55`      |
-|`orientation` | the node rotation angle                                     |`0.0`             |
-|`penwidth`    | the width of the pen (in point size) for drawing boundaries |`1.0`             |
-|`peripheries` | the number of node boundaries                               |                  |
-|`shape`       | the shape of the node                                       |`ellipse`         |
-|`sides`       | the number of sides for `shape = polygon`                   |`4`               |
-|`skew`        | the skewing of the node for `shape = polygon`               |`0.0`             |
-|`style`       | graphics options for the node                               |                  |
-|`tooltip`     | the tooltip annotation for the node                         |[*node label*]    |
-|`width`       | the minimum width in inches                                 |`0.75`            |
+By default, **Graphviz** can use colors provided as hexadecimal values, or, as **X11** color names. The following provides the entire list of **X11** color names. Some colors have additional 4-color palettes based on the named color. Those additional colors can be used by appending the digits `1`-`4` to the color name. Gray (or grey) has variations from `0`-`100`. Please note that, in all color names, 'gray' is interchangeable with 'grey'.
 
-The edge attributes:
+<img src="inst/img/X11_Color_Names.png">
 
-|Edge Attribute    | Description                                                  | Default         |
-|:-----------------|:-------------------------------------------------------------|:----------------|
-|`arrowhead`       | style of arrowhead at head end                               | normal          |
-|`arrowsize`       | scaling factor for arrowheads                                | `1.0`           |
-|`arrowtail`       | style of arrowhead at tail end                               | normal          |
-|`color`           | edge stroke color                                            | `black`         |
-|`colorscheme`     | the scheme for interpreting color names                      |                 |
-|`constraint`      | whether edge should affect node ranking                      | true            |
-|`decorate`        | setting this draws line between labels with their edges      |                 | 
-|`dir`             | direction; either `forward`, `back`, `both`, or `none`       | `forward`       |
-|`edgeURL`         | URL attached to non-label part of edge                       |                 |
-|`edgehref`        | same as `edgeURL` attribute                                  |                 |
-|`edgetarget`      | if an URL is set, this determines the browser window for URL |                 |
-|`edgetooltip`     | a tooltip annotation for the non-label part of edge          | label           |
-|`fontcolor`       | the font color                                               | `black`         |
-|`fontname`        | the font family                                              | `Times-Roman`   |
-|`fontsize`        | the point size of the label                                  | `14`            |
-|`headclip`        | if false, edge is not clipped to head node boundary          | true            |
-|`headhref`        | same as `headURL`                                            |                 |
-|`headlabel`       | label placed near head of edge                               |                 |
-|`headport`        | can be either: `n`, `ne`, `e`, `se`, `s`, `sw`, `w`, `nw`    |                 |
-|`headtarget`      | if `headURL` is set, determines the browser window for URL   |                 |
-|`headtooltip`     | a tooltip annotation near head of edge                       | label           |
-|`headURL`         | URL attached to head label                                   |                 |
-|`href`            | alias for URL                                                |                 |
-|`id`              | any string (user-defined output object tags)                 |                 |
-|`label`           | edge label                                                   |                 |
-|`labelangle`      | angle in degrees which head or tail label is rotated off edge| `-25.0`         |
-|`labeldistance`   | scaling factor for distance of head or tail label from node  | `1.0`           |
-|`labelfloat`      | lessen constraints on edge label placement                   | false           |
-|`labelfontcolor`  | typeface color for head and tail labels                      | `black`         |
-|`labelfontname`   | font family for head and tail labels                         | `Times-Roman`   |
-|`labelfontsize`   | point size for head and tail labels                          | `14`            |
-|`labelhref`       | same as `labelURL`                                           |                 |
-|`labelURL`        | URL for label, overrides `edgeURL`                           |                 |
-|`labeltarget`     | if `URL` or `labelURL` set, determines browser window for URL|                 |
-|`labeltooltip`    | tooltip annotation near label                                | label           |
-|`layer`           | `all`, *id* or *id*:*id*, or a comma-separated list          | overlay range   |
-|`lhead`           | name of cluster to use as head of edge                       |                 |
-|`ltail`           | name of cluster to use as tail of edge                       |                 |
-|`minlen`          | minimum rank distance between head and tail                  | `1`             |
-|`penwidth`        | width of pen for drawing edge stroke, in points              | `1.0`           |
-|`samehead`        | tag for head node; edge heads with the same tag are merged onto the same port ||
-|`sametail`        | tag for tail node; edge tails with the same tag are merged onto the same port ||
-|`style`           | graphics options                                             |                 |
-|`tailclip`        | if false, edge is not clipped to tail node boundary          | true            |
-|`tailhref`        | same as `tailURL`                                            |                 |
-|`taillabel`       | label placed near tail of edge                               |                 |
-|`tailport`        | can be either: `n`, `ne`, `e`, `se`, `s`, `sw`, `w`, `nw`    |                 |
-|`tailtarget`      | if `tailURL` is set, determines browser window for URL       |                 |
-|`tailtooltip`     | tooltip annotation near tail of edge                         | label           |
-|`tailURL`         | URL attached to tail label                                   |                 |
-|`target`          | if `URL` is set, determines browser window for URL           |                 |
-|`tooltip`         | tooltip annotation                                           | label           |
-|`weight`          | integer cost of stretching an edge                           | `1`             |
+#### Graphviz Engines
 
-The graph attributes:
+Several **Graphviz** engines are available with **DiagrammeR** for rendering graphs. By default, the `grViz` function renders graphs using the standard **dot** engine. However, the **neato**, **twopi**, and **circo** engines are selectable by doing either of the following:
 
-|Graph Attribute| Description                                                  | Default          |
-|:--------------|:-------------------------------------------------------------|:-----------------|
-|`aspect`       | controls aspect ratio adjustment                             |                  |
-|`bgcolor`      | background color for drawing and initial fill color          |                  |
-|`center`       | center drawing                                               | false            |
-|`clusterrank`  | `local` but optionally `global` or `none`                    | `local`          |
-|`color`        | the color for clusters, outline color, and fill color        | `black`          |
-|`colorscheme`  | the scheme for interpreting color names                      |                  |
-|`compound`     | allow edges between clusters                                 | false            |
-|`concentrate`  | enables edge concentrators                                   | false            |
-|`dpi`          | dpi for image output                                         | 96               |
-|`fillcolor`    | cluster fill color                                           | `black`          |
-|`fontcolor`    | typeface color                                               | `black`          |
-|`fontname`     | font family                                                  | `Times-Roman`    |
-|`fontpath`     | list of directories to search for paths                      |                  |
-|`fontsize`     | point size of label                                          | `14`             |
-|`id`           | any string (user-defined output object tags)                 |                  |
-|`label`        | any string                                                   |                  |
-|`labeljust`    | label justification; `l` or `r` for left or right            | centered         |
-|`labelloc`     | label location; `t` or `b` for top or bottom                 | top              |
-|`landscape`    | graph orientation; `true` for landscape                      |                  |
-|`layers`       | *id*:*id*:*id*...                                            |                  |
-|`layersep`     | specifies separator character to split `layers`              | `:`              |
-|`margin`       | margin (in inches) included in `page`                        | `0.5`            |
-|`mindist`      | minimum separation (in inches) between all nodes             | `1.0`            |
-|`nodesep`      | separation (in inches) between nodes                         | `0.25`           |
-|`nojustify`    | justify to label if set as true                              | false            |
-|`ordering`     | if `out` edge order is preserved                             |                  |
-|`orientation`  | if `rotate` is not used and the value is `landscape`, then landscape | `portrait` |
-|`outputorder`  | or `nodesfirst`, `edgesfirst`                                | breadthfirst     |
-|`page`         | unit of pagination (e.g., "`8.5,11`")                        |                  |
-|`pagedir`      | traversal order of pages                                     | `BL`             |
-|`pencolor`     | color for drawing cluster boundaries                         | `black`          |
-|`penwidth`     | width of pen, in points, for drawing boundaries              | `1.0`            |
-|`peripheries`  | number of cluster boundaries                                 | `1`              |
-|`rank`         | choices are: `same`, `min`, `max`, `source` or `sink`        |                  |
-|`rankdir`      | choices are: `LR` (left to right) or `TB` (top to bottom)    | `TB`             |
-|`ranksep`      | separation between ranks, in inches                          | `0.75`           |
-|`ratio`        | approximate aspect ratio desired: `fill` or `auto`           |                  |
-|`rotate`       | if set to `90`, set orientation to landscape                 |                  |
-|`samplepoints` | number of points used to represent ellipses and circles on output | `8`         | 
-|`searchsize`   | maximum edges with negative cut values to check when looking for a minimum one during network simplex| `30` |
-|`size`         | maximum drawing size, in inches                              |                  |
-|`splines`      | draw edges as splines, polylines, lines                      |                  |
-|`style`        | graphics options for clusters (e.g., `filled`)               |                  |
-|`stylesheet`   | pathname or URL to XML style sheet for SVG                   |                  |
-|`target`       | if `URL` is set, determines browser window for URL           |                  |
-|`tooltip`      | tooltip annotation for cluster                               | label            |
-|`truecolor`    | if set, force 24-bit or indexed color in image output        |                  |
-|`URL`          | URL associated with graph (format-dependent)                 |                  |
-|`viewport`     | clipping window on output                                    |                  |
+- supplying those names to the `engine` argument of the `grViz` function
+- setting the graph attribute `layout` equal to either `neato`, `twopi`, or `circo` in a **Graphviz** graph statement
+
+<img src="inst/img/Graphviz_Engines.png">
+
+The **neato** engine provides spring model layouts. This is a suitable engine if the graph is not too large (<100 nodes) and you don't know anything else about it. The **neato** engine attempts to minimize a global energy function, which is equivalent to statistical multi-dimensional scaling. The **twopi** engine provides radial layouts. Nodes are placed on concentric circles depending their distance from a given root node. The **circo** engine provide circular layouts. This is suitable for certain diagrams of multiple cyclic structures, such as certain telecommunications networks.
 
 #### Graphviz Substitution
 
-Inspired by Razor and the footnote URLs from Markdown, substitution allows for mixing in R expressions into a Graphviz graph specification without sacrificing readability. In the simple example of specifying a single node, the following substitution syntax would be used:
+Inspired by **Razor** and the footnote URLs from **Markdown**, substitution allows for mixing in **R** expressions into a **Graphviz** graph specification without sacrificing readability. In the simple example of specifying a single node, the following substitution syntax would be used:
 
 ```
 digraph {
@@ -276,7 +148,7 @@ Substitutions can also be used to insert values from vector indices into the gra
 
 `@@` + *`[footnote number]`* + `-` + *`[index number]`*
 
-Here is an example of substituting alphabet letters from **R**'s `LETTERS` constant into a Graphviz graph specification.
+Here is an example of substituting alphabet letters from **R**'s `LETTERS` constant into a **Graphviz** graph specification.
 
 ```
 digraph {
@@ -300,13 +172,13 @@ F; G; H; I; J
 
 To take advantage of substitution and render the graph, simply use the `grViz` function with the graph specification:
 
-```R
+```r
 grViz("...graph spec with substitutions...")
 ```
 
 A mixture of both types of subtitutions can be used. As an example:
 
-```R
+```r
 grViz("
 digraph a_nice_graph {
 
@@ -338,165 +210,545 @@ As can be seen in the following output: (1) the node with ID `a` is given the la
 
 Footnote expressions are meant to be flexible. They can span multiple lines, and they can also take in objects that are available in the global workspace. So long as a vector object results from evaluation, substitution can be performed.
 
-Here is an example of a diagram created using R and RStudio information (obtained from the `R.Version` and `rstudio::versionInfo` functions):
-
-```R
-grViz("
-digraph nicegraph {
-
-  # graph, node, and edge definitions
-  graph [compound = true, nodesep = .5, ranksep = .25,
-         color = crimson]
-
-  node [fontname = Helvetica, fontcolor = darkslategray,
-        shape = rectangle, fixedsize = true, width = 1,
-        color = darkslategray]
-
-  edge [color = grey, arrowhead = none, arrowtail = none]
-
-  # subgraph for R information
-  subgraph cluster0 {
-    node [fixedsize = true, width = 3]
-    '@@1-1' -> '@@1-2' -> '@@1-3' -> '@@1-4'
-    '@@1-4' -> '@@1-5' -> '@@1-6' -> '@@1-7'
-  }
-
-  # subgraph for RStudio information
-  subgraph cluster1 {
-    node [fixedsize = true, width = 3]
-    '@@2' -> '@@3'
-  }
-
-  Information             [width = 1.5]
-  Information -> R
-  Information -> RStudio
-  R -> '@@1-1'            [lhead = cluster0]
-  RStudio -> '@@2'        [lhead = cluster1]
-
-}
-
-[1]: paste0(names(R.Version())[1:7], ':\\n ', R.Version()[1:7])
-[2]: paste0('RStudio version:\\n ', rstudio::versionInfo()[[1]])
-[3]: paste0('Current program mode:\\n ', rstudio::versionInfo()[[2]])
-
-")
-```
-
-The output will of course vary by the system on which it was generated. Here is my output:
-
-<img src="inst/img/grViz_4.png">
-
 #### Using Data Frames to Define Graphviz Graphs
 
-The `graphviz_single_df` function is provided for generating a chunk of **Graphviz** **DOT** code (specifically `node` and `edge` statements) from a single data frame. The basic idea is to have a prepared data frame available, call the `graphviz_single_df` function to create an string object with the **DOT** code, and then use substitution in the `grViz` function call to insert that **DOT** code.
+If you're planning on creating larger graph diagrams and also making use of external datasets, it can be better to use a set of **DiagrammeR** functions that work with data frames. Here is a basic schematic of the graph workflow, using functions to build toward a graph object from a group of data frames.
 
-Edges can be defined between two different columns in the data frame by supplying a string in the form of `[dfcol_1] -> [dfcol_2]` for the `edge_between` argument.
+<img src="inst/img/Graph_Workflow.png">
 
-Node attributes can be defined using the `node_attr` argument. Here, a string vector is to be provided using the construction: `c("[dfcol_1]: [node_attr_1] = [value], [node_attr_2] = [value], ...", "[dfcol_2]: [node_attr_1] = [value], [node_attr_2] = [value], ...")`.
- 
-Edge attributes can be provided as well. A string vector should be provided with the construction: `"1: [edge_attr_1] = [value], [edge_attr_2] = [value], ..."`. Additionally, edge attributes can be scaled to values in a data frame column. This is done by creating a statement in the form: `[edge_attr] [value_1] to [value_2] with [dfcol]`. Currently, scales can be generated from numeric and color values.
+With the `graphviz_graph` function, it's possible to generate a graph diagram object without interacting directly with **DOT** code. The function has the following options:
 
-The following example outlines how a data frame (with some beforehand preparation) can be used to generate a graph diagram. 
-
-```R
-# Get unique pairs of flight origin and destination as a df
-unique_routes <- unique(nycflights13::flights[,11:12])
- 
-# Add column with number of flights for each route
-for (i in 1:nrow(unique_routes)){
-  if (i == 1) add_column <- ncol(unique_routes) + 1
- 
-  unique_routes[i, add_column] <-
-    nrow(subset(nycflights13::flights,
-                origin == as.vector(unique_routes[i,1], mode = 'character') &
-                  dest == as.vector(unique_routes[i,2], mode = 'character')))
- 
-  if (i == nrow(unique_routes)){
-    colnames(unique_routes)[ncol(unique_routes)] <- 'flights'
-  }
-}
-  
-# Sort 'unique_routes' by descending number of flights
-unique_routes <- unique_routes[with(unique_routes, order(-flights)), ]
-rownames(unique_routes) <- NULL
- 
-# Use the 'graphviz_single_df' function to specify what to graph, using
-# the 'unique_routes' data frame
-nodes_edges <-
-  graphviz_single_df(
-    df = unique_routes,
-    edge_between = c("origin -> dest"),
-    node_attr = c("origin:
-                   shape = circle,
-                   style = filled,
-                   height = 2,
-                   layer = 'all',
-                   fontname = Helvetica,
-                   fontsize = 42,
-                   fillcolor = lightblue",
-                  "dest: 
-                   shape = circle,
-                   style = filled,
-                   height = 1,
-                   layer = 'all',
-                   fontname = Helvetica,
-                   fontsize = 0,
-                   fillcolor = seagreen3"),
-    edge_attr = "1:
-                   color = #ff000040,
-                   arrowhead = dot,
-                   penwidth 2 to 50 with flights,
-                   arrowsize 1 to 10 with flights,
-                   color blue to red with flights
-                  ")
- 
-# Create the graph by inserting the 'nodes_edges' object into
-# the Graphviz DOT specification with the substitution syntax
-grViz("
-digraph flights {
-
-  # Graph statements
-  graph [layout = twopi,
-         overlap = false,
-         fixedsize = true,
-         ranksep = 11,
-         outputorder = edgesfirst]
-
-  # Nodes and edges
-  @@1
-
-}
-[1]: nodes_edges
-")
+```r
+graphviz_graph(
+    nodes_df,     # provide the name of the data frame with node info         
+    edges_df,     # provide the name of the data frame with edge info 
+    graph_attrs,  # provide a vector of 'graph' attributes
+    node_attrs,   # provide a vector of 'node' attributes as defaults
+    edge_attrs,   # provide a vector of 'edge' attributes as defaults
+    directed      # is the graph to be directed or undirected? Choose TRUE or FALSE
+    )
 ```
 
-<img src="inst/img/grViz_8.png">
+The `graphviz_graph` function returns a `gv_graph` object, which can be used by additional processing functions. One such function is the `graphviz_render` function, which allows for both visualizing the graph object and creating output files:
 
-#### Graphviz Engines
-
-Several **Graphviz** engines are available with **DiagrammeR** for rendering graphs. By default, the `grViz` function renders graphs using the standard **dot** engine. However, the **neato**, **twopi**, and **circo** engines are selectable by supplying those names to the `engine` argument. The **neato** engine provides spring model layouts. This is a suitable engine if the graph is not too large (<100 nodes) and you don't know anything else about it. The **neato** engine attempts to minimize a global energy function, which is equivalent to statistical multi-dimensional scaling. The **twopi** engine provides radial layouts. Nodes are placed on concentric circles depending their distance from a given root node. The **circo** engine provide circular layouts. This is suitable for certain diagrams of multiple cyclic structures, such as certain telecommunications networks.
-
-Here is how the 'boxes_and_circles' graph is rendered with the **neato**, **twopi**, and **circo** engines:
-
-```R
-grViz(boxes_and_circles, engine = "neato")
+```r
+graphviz_render(
+    graph,        # a 'gv_graph' object, created using the 'graphviz_graph' function
+    output,       # a string specifying the output type; 'graph' (the default) renders
+                  # the graph, 'DOT' outputs DOT code for the graph, and 'SVG' provides
+                  # SVG code for the rendered graph
+    width,        # optionally set a width in pixels
+    height        # optionally set a height in pixels
+    )
 ```
+
+With packages such as [**magrittr**](https://github.com/smbache/magrittr) or [**pipeR**](https://github.com/renkun-ken/pipeR), one can conveniently pipe output from `graphviz_graph` to `graphviz_render`. On the topic of packages, it is important to load the [**V8**](https://github.com/jeroenooms/V8) package as it will enable color scaling functionality (as will be seen in later examples).
+
+Before we get to using the `graphviz_graph` and `graphviz_render` functions, however, we'll need to create some specialized data frames. One is for nodes, the other concerns the edges. Both types of data frames are parsed by the `graphviz_graph` function and those column names that match attributes for either nodes (in the node data frame) or edges (in the edge data frame) will be used to provide attribute values on a per-node or per-edge basis. Columns with names that don't match are disregarded, so, there's no harm in having pre-existing or added columns with useful data for analysis.
+
+Which columns might a node data frame have? Well, it's important to have at least one column named either `node`, `nodes`, or `node_id`. That's where unique values for the node ID should reside. Here are some notable node attributes:
+
+- `color` -- provide an **X11** or hexadecimal color (append 2 digits to hex for alpha)
+- `distortion` -- the node distortion for any `shape = polygon`
+- `fillcolor` -- provide an **X11** or hexadecimal color (append 2 digits to hex for alpha)
+- `fixedsize` -- true or false
+- `fontcolor` -- provide an **X11** or hexadecimal color (append 2 digits to hex for alpha)
+- `fontname` -- the name of the font
+- `fontsize` -- the size of the font for the node label
+- `height` -- the height of the node
+- `label` -- the node label text that replaces the default text (which is the node ID)
+- `penwidth` -- the thickness of the stroke for the shape
+- `peripheries` -- the number of peripheries (essentially, additional shape outlines)
+- `shape` -- the node shape (e.g., ellipse, polygon, circle, etc.)
+- `sides` -- if `shape = polygon`, the number of sides can be provided here
+- `style` -- usually given the value `filled` if you'd like to fill a node with a color
+- `tooltip` -- provide text here for an unstyled browser tooltip
+- `width` -- the width of the node
+- `x` -- the x position of the node (requires graph attr `layout = neato` to use)
+- `y` -- the y position of the node (requires graph attr `layout = neato` to use)
+
+You don't need to use `data.frame` to make a node data frame: you can use the provided `create_nodes` function. It's similar in principle to the base **R** `data.frame` function except that it adds in the following conveniences for graph diagram work: 
+
+- single values are repeated for *n* number of nodes supplied
+- selective setting of attributes (i.e., giving attr values of 3 of 10 nodes, allowing non-set nodes to use defaults or globally set attr values)
+- supplying overlong vectors for attributes will result in trimming down to the number of nodes
+- setting `label = FALSE` will conveniently result in a non-labeled node
+
+Here's an example of how to create a node data frame:
+
+```r
+type_1_nodes <-
+  create_nodes(nodes = c("a", "b", "c", "d"),
+               label = "type 1",
+               style = "filled",
+               color = "aqua",
+               shape = c("circle", "circle",
+                         "triangle", "triangle"))
+```
+
+The `type_1_nodes` object is indeed a data frame, and, this is good since it's familar and easy to work with. Note that singly supplied attribute values are repeated throughout:
+
+```
+ nodes  label  style color    shape
+1    a type 1 filled  aqua   circle
+2    b type 1 filled  aqua   circle
+3    c type 1 filled  aqua triangle
+4    d type 1 filled  aqua triangle
+```
+
+Let's make another node data frame:
+
+```r
+type_2_nodes <-
+  create_nodes(nodes = c("e", "f", "g", "h"),
+               label = "type 2",
+               style = "filled",
+               color = "lightblue",
+               peripheries = c(2, 2))
+```
+
+Here is the resulting data frame (notice that values for the `peripheries` node attribute are only provided twice):
+
+```
+ nodes  label  style     color peripheries
+1    e type 2 filled lightblue           2
+2    f type 2 filled lightblue           2
+3    g type 2 filled lightblue
+4    h type 2 filled lightblue
+```
+
+Now that we have these groups of nodes in `type_1_nodes` and `type_2_nodes`, there may be occasion to combine them into a single node data frame. This can be done with the `combine_nodes` function (which works much like `rbind` except it accepts data frames with columns differing in number, names, and ordering).
+
+```r
+all_nodes <- combine_nodes(type_1_nodes, type_2_nodes)
+```
+
+This is the combined node data frame:
+
+```
+ nodes  label  style     color    shape peripheries
+1    a type 1 filled      aqua   circle
+2    b type 1 filled      aqua   circle
+3    c type 1 filled      aqua triangle
+4    d type 1 filled      aqua triangle
+5    e type 2 filled lightblue                    2
+6    f type 2 filled lightblue                    2
+7    g type 2 filled lightblue
+8    h type 2 filled lightblue
+```
+
+Let's look at the nodes that were created. Use the `graphviz_graph` (just provide the `all_nodes` object at this point) and pipe to `graphviz_render`. The **pipeR** package (used in these examples) provides a forward pipe with the `%>>%` operator. With **magrittr**, use `%>%` instead.
+
+```r
+library("pipeR")
+
+graphviz_graph(nodes_df = all_nodes) %>>% graphviz_render
+```
+
+This is what the diagram looks like, at this early stage:
 
 <img src="inst/img/grViz_5.png">
 
-```R
-grViz(boxes_and_circles, engine = "twopi")
+Want to extract a vector list of node IDs? You can use the `get_nodes` function. It can accept multiple node data frames, edge data frames, or graph objects.
+
+```r
+get_nodes(all_nodes)
+```
+
+```
+[1] "a" "b" "c" "d" "e" "f" "g" "h"
+```
+
+Let's make some edges now. For the edge data frame, there are two columns that need to be present: one for the outgoing node edge, and, another for the incoming node edge. These can be called either `edge_from`, `from`, `edge_to`, or `to`. Each of the two columns should contain node IDs and, ideally, they should match those provided in the node data frame that will be supplied to the `graphviz_graph` function.
+
+As in the nodes data frame, attributes can be provided. Here are some examples of edge attributes that can be used:
+
+- `arrowhead` -- the arrow style at the head end (e.g, `normal`, `dot`) 
+- `arrowsize` -- the scaling factor for the arrowhead and arrowtail
+- `arrowtail` -- the arrow style at the tail end (e.g, `normal`, `dot`) 
+- `color` -- the stroke color; an **X11** color or a hex code (add 2 digits for alpha)
+- `dir` -- the direction; either `forward`, `back`, `both`, or `none`
+- `fontcolor` -- choose an **X11** color or provide a hex code (append 2 digits for alpha)
+- `fontname` -- the name of the font
+- `fontsize` -- the size of the font for the node label
+- `headport` -- a cardinal direction for where the arrowhead meets the node
+- `label` -- label text for the line between nodes
+- `minlen` -- minimum rank distance between head and tail 
+- `penwidth` -- the thickness of the stroke for the arrow
+- `tailport` -- a cardinal direction for where the tail is emitted from the node
+- `tooltip` -- provide text here for an edge tooltip
+
+Let's create some edges between nodes using the `create_edges` function:
+
+```r
+type_1_edges <-
+  create_edges(edge_from = c("a", "a", "b", "c"),
+               edge_to = c("b", "d", "d", "a"))
+
+type_2_edges <-
+  create_edges(edge_from = c("e", "g", "h", "h"),
+               edge_to = c("g", "h", "f", "e"),
+               arrowhead = "dot",
+               color = "red")
+```
+
+Two edge data frames were just created. If you'd like to include all those edges in your graph, just use the `combine_edges` function:
+
+```r
+all_edges <- combine_edges(type_1_edges, type_2_edges)
+```
+
+Very nice, now we have graph-able node and edge data frames. Let's just go ahead and incorporate those edges into the `graphviz_graph` function and then see what that graph looks like:
+
+```r
+graphviz_graph(nodes_df = all_nodes,
+               edges_df = all_edges) %>>% graphviz_render
 ```
 
 <img src="inst/img/grViz_6.png">
 
-```R
-grViz(boxes_and_circles, engine = "circo")
+Not bad for an example graph. There may be cases where node or edge attributes should apply to all nodes and edges in the graph. In such cases, there's no need to create columns for those attributes where attribute values are repeated in all rows. Instead, supply vectors of attribute statements for the `node_attrs` or `edge_attrs` arguments in the `graphviz_graph` function. For example, you may want to use `Helvetica` as the label font. If so, use this in `graphviz_graph`:
+
+```r
+graphviz_graph(nodes_df = all_nodes,
+               edges_df = all_edges,
+               node_attrs = "fontname = Helvetica") %>>% graphviz_render
 ```
 
 <img src="inst/img/grViz_7.png">
 
-### Mermaid Graphs
+Likewise, for edges, you may want a certain uniform look that is different from the defaults. Perhaps, a grey line which has a thicker line stroke:
+
+```r
+graphviz_graph(nodes_df = all_nodes,
+               edges_df = all_edges,
+               node_attrs = "fontname = Helvetica",
+               edge_attrs = c("color = gray", "penwidth = 4")) %>>% graphviz_render
+```
+
+<img src="inst/img/grViz_8.png">
+
+The graph attributes can be set in a similar manner by supplying a vector to the `graph_attrs` argument. Here's an example where the layout engine is set to `circo`, node overlapping is suppressed, the separation between nodes is of factor 3, and the edges are drawn first (so as to not obscure the nodes):
+
+```r
+graphviz_graph(nodes_df = all_nodes,
+               edges_df = all_edges,
+               node_attrs = "fontname = Helvetica",
+               edge_attrs = c("color = gray", "penwidth = 4"),
+               graph_attrs = c("layout = circo",
+                               "overlap = false",
+                               "ranksep = 3",
+                               "outputorder = edgesfirst")) %>>% graphviz_render
+```
+
+<img src="inst/img/grViz_9.png">
+
+#### Creating Numeric and Color Scales for Node and Edge Attributes
+
+With the `scale_nodes` and `scale_edges` functions, it's possible to create and apply scaled node and edge attributes. These attributes can be either of the numeric or color variety. Ideally, the numerical data from which the scaled values are generated should reside in the node or edge data frames. This is recommended because the values need to be of the same length and order as the records in the node or edge data frame.
+
+For nodes, scales can be made for the following attributes:
+
+- `fontsize` *numeric*
+- `labelfontsize` *numeric*
+- `penwidth` *numeric*
+- `height` *numeric*
+- `weight` *numeric*
+- `x` *numeric*
+- `y` *numeric*
+- `color` *color*
+- `fillcolor` *color*
+- `fontcolor` *color*
+
+For edges, scales can be made for the following edge attributes:
+
+- `fontsize` *numeric*
+- `labelfontsize` *numeric*
+- `labelangle` *numeric*
+- `labeldistance` *numeric*
+- `penwidth` *numeric*
+- `arrowsize` *numeric*
+- `minlen` *numeric*
+- `weight` *numeric*
+- `color` *color*
+- `fontcolor` *color*
+- `labelfontcolor` *color*
+
+There is also another attribute for both nodes and edges called `alpha` which is a numeric value from `0`-`100` that modifies the opacity of a specified color attribute. A value of `0` is essentially invisible (i.e., completely transparent) whereas `100` is entirely opaque (i.e., no transparency applied). Creating an alpha scale can be done by either referencing a column containing color attribute values, or, by initializing a color attribute column and then creating an alpha scale at the same time. An example will be useful here, and **RStudio Viewer** output will be shown here after significant changes to the graph. Begin by randomly creating edges and nodes with static attributes:
+
+```r
+# Setting a seed to make the example reproducible
+set.seed(23)
+
+# Create an edge data frame and also include a column of 'random' data
+many_edges <-
+  create_edges(edge_from = sample(seq(1:100), 100, replace = TRUE),
+               edge_to = sample(seq(1:100), 100, replace = TRUE),
+               random_data = sample(seq(1:5000), 100, replace = TRUE))
+
+# Create the node data frame, using the nodes that are available in
+# the 'many_edges' data frame; provide 'shape' and 'fillcolor' attributes
+many_nodes <-
+  create_nodes(node = get_nodes(many_edges),
+               random_data = sample(seq(1:5000),
+                                    length(get_nodes(many_edges))),
+               label = FALSE,
+               shape = "circle",
+               fillcolor = "red")
+```
+
+View the graph and also ensure that `style = filled` is present to activate the `fillcolor` node attribute. This statement will be used repeatedly throughout without changing any of the argument values.
+
+```r
+graphviz_graph(nodes_df = many_nodes, edges_df = many_edges,
+               node_attrs = "style = filled",
+               graph_attrs = c("layout = twopi", "overlap = false")) %>>%
+  graphviz_render
+```
+
+<img src="inst/img/grViz_10.png">
+
+Create a scale for the node attribute `penwidth` (which changes the stroke thickness of the node shape). Using the data in the `random_data`, those values will be scaled linearly from `2` to `10`. 
+ 
+```r
+many_nodes <- scale_nodes(nodes_df = many_nodes,
+                          to_scale = many_nodes$random_data,
+                          node_attr = "penwidth",
+                          range = c(2, 10))
+```
+
+<img src="inst/img/grViz_11.png">
+
+To apply transparency to color values, use the `alpha` node attribute but reference the color attribute that should be modified with the syntax: '`alpha:`[color_attr]'. If the referenced color attribute doesn't exist, use the following syntax: '`alpha:`[color_attr]`=`[color]'. The color value can either be an **X11** color name or a hexadecimal color value.
+
+```r
+many_nodes <- scale_nodes(nodes_df = many_nodes,
+                          to_scale = many_nodes$random_data,
+                          node_attr = "alpha:fillcolor",
+                          range = c(5, 90))
+```
+
+<img src="inst/img/grViz_12.png">
+
+Edges can have scales applied to edge attributes:
+
+```r
+many_edges <- scale_edges(edges_df = many_edges,
+                          to_scale = many_edges$random_data,
+                          edge_attr = "penwidth",
+                          range = c(0.5, 10))
+```
+
+<img src="inst/img/grViz_13.png">
+
+You can linearly scale color values as well. When creating color scales, ensure that the **V8** library is installed and loaded.
+
+```r
+# install.packages("V8")
+library("V8")
+many_edges <- scale_edges(edges_df = many_edges,
+                          to_scale = many_edges$penwidth,
+                          edge_attr = "color",
+                          range = c("red", "green"))
+```
+
+<img src="inst/img/grViz_14.png">
+
+#### Exporting Graph Code
+
+If you'd like to return the **Graphviz** **DOT** code (to, perhaps, share it or use it directly with the **Graphviz** command-line utility), just use `output = "DOT"` in the `graphviz_render` function. Here's a simple example:
+
+```r
+graphviz_graph(nodes_df = data.frame(nodes = c("a", "b", "c")),
+               edges_df = data.frame(edge_from = c("a", "b", "c"),
+                                     edge_to = c("b", "c", "b")),
+               graph_attrs = c("layout = dot", "rankdir = LR"),
+               node_attrs = "fontname = Helvetica",
+               edge_attrs = "arrowhead = dot") %>>%
+  graphviz_render(output = "DOT") %>>% cat
+```
+
+The output is pretty clean **DOT** code:
+
+```
+digraph {
+
+graph [layout = dot,
+       rankdir = LR]
+
+node [fontname = Helvetica]
+
+edge [arrowhead = dot]
+
+  'a'
+  'b'
+  'c'
+  'a'->'b' 
+  'b'->'c' 
+  'c'->'b' 
+}
+```
+
+What about **SVG**s? Those are the things you should eat for breakfast, every day. Well, you can get those out as well. It's all part of maintaining a balanced diet:
+
+```r
+# install.packages("V8")
+library("V8")
+
+graphviz_graph(nodes_df = data.frame(nodes = c("a", "b", "c")),
+               edges_df = data.frame(edge_from = c("a", "b", "c"),
+                                     edge_to = c("b", "c", "b")),
+               graph_attrs = c("layout = dot", "rankdir = LR"),
+               node_attrs = "fontname = Helvetica",
+               edge_attrs = "arrowhead = dot") %>>%
+  graphviz_render(output = "SVG") %>>% cat             
+```
+
+The **SVG**:
+
+```html
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.28.0 (20140111.2315)
+ -->
+<!-- Title: %3 Pages: 1 -->
+<svg width="100pt" height="182pt"
+ viewBox="0.00 0.00 100.20 181.58" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 177.583)">
+<title>%3</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-177.583 96.196,-177.583 96.196,4 -4,4"/>
+<!-- a -->
+<g id="node1" class="node"><title>a</title>
+<ellipse fill="none" stroke="black" cx="65.196" cy="-155.583" rx="27" ry="18"/>
+<text text-anchor="middle" x="65.196" y="-151.383" font-family="Helvetica,sans-Serif" font-size="14.00">a</text>
+</g>
+<!-- b -->
+<g id="node2" class="node"><title>b</title>
+<ellipse fill="none" stroke="black" cx="56.8918" cy="-83.7744" rx="27" ry="18"/>
+<text text-anchor="middle" x="56.8918" y="-79.5744" font-family="Helvetica,sans-Serif" font-size="14.00">b</text>
+</g>
+<!-- a&#45;&gt;b -->
+<g id="edge1" class="edge"><title>a&#45;&gt;b</title>
+<path fill="none" stroke="black" d="M63.1005,-137.462C62.2124,-129.782 61.1563,-120.65 60.1692,-112.115"/>
+<polygon fill="black" stroke="black" points="63.6412,-111.67 59.0155,-102.139 56.6875,-112.475 63.6412,-111.67"/>
+</g>
+<!-- c -->
+<g id="node3" class="node"><title>c</title>
+<ellipse fill="none" stroke="black" cx="27" cy="-18" rx="27" ry="18"/>
+<text text-anchor="middle" x="27" y="-13.8" font-family="Helvetica,sans-Serif" font-size="14.00">c</text>
+</g>
+<!-- b&#45;&gt;c -->
+<g id="edge2" class="edge"><title>b&#45;&gt;c</title>
+<path fill="none" stroke="black" d="M55.1245,-65.7706C52.7511,-58.6375 49.2809,-50.3357 45.5321,-42.6655"/>
+<polygon fill="black" stroke="black" points="48.6057,-40.9899 40.8762,-33.7437 42.3999,-44.2284 48.6057,-40.9899"/>
+</g>
+<!-- c&#45;&gt;b -->
+<g id="edge3" class="edge"><title>c&#45;&gt;b</title>
+<path fill="none" stroke="black" d="M28.7673,-36.0038C31.1407,-43.1368 34.6109,-51.4386 38.3597,-59.1089"/>
+<polygon fill="black" stroke="black" points="35.2861,-60.7845 43.0155,-68.0306 41.4919,-57.5459 35.2861,-60.7845"/>
+</g>
+</g>
+</svg>
+```
+
+#### An Example with Data from the **nycflights13** Package
+
+Now, yet another example. This time with an external dataset. Let's use the **nycflights13** package to prepare some data frames and then create a graph diagram:
+
+```r
+# Get the 'nycflights13' package if not already installed
+# install.packages('nycflights13')
+ 
+# Get the 'lubridate' package if not already installed
+# install.packages('lubridate')
+ 
+# Get the latest build of the 'DiagrammeR' package from GitHub
+devtools::install_github('rich-iannone/DiagrammeR')
+ 
+library("nycflights13")
+library("lubridate")
+library("DiagrammeR")
+ 
+# Choose a day from 2013 for NYC flight data
+# (You can choose any Julian day, it's interesting to see results for different days)
+day_of_year <- 10 
+
+# Get a data frame of complete cases (e.g., flights have departure and arrival times)
+nycflights13 <-
+  nycflights13::flights[which(complete.cases(nycflights13::flights) == TRUE), ]
+
+# Generate a POSIXct vector of dates using the 'ISOdatetime' function
+# Columns 1, 2, and 3 are year, month, and day columns
+# Column 4 is a 4-digit combination of hours (00-23) and minutes (00-59)
+date_time <-
+  data.frame("date_time" =
+               ISOdatetime(year = nycflights13[,1],
+                           month = nycflights13[,2],
+                           day = nycflights13[,3],
+                           hour = gsub("[0-9][0-9]$", "", nycflights13[,4]),
+                           min = gsub(".*([0-9][0-9])$", "\\1", nycflights13[,4]),
+                           sec = 0, tz = "GMT"))
+
+# Add the POSIXct vector 'date_time' to the 'nycflights13' data frame
+nycflights13 <- cbind(date_time, nycflights13)
+
+# Select flights only from the specified day of the year 2013
+nycflights13_day <-
+  subset(nycflights13,
+         date_time >= ymd('2013-01-01', tz = "GMT") + days(day_of_year - 1) &
+           date_time < ymd('2013-01-01', tz = "GMT") + days(day_of_year))
+
+# Create the 'nodes' data frame where at least one column is named "nodes" or "node_id"
+# Column 12 is the 3-letter code for the airport departing from
+# Column 13 is for the airport arriving to
+# (Option: change df to 'nycflights13_day' and only airports used for the day will be included)
+nodes_df <- create_nodes(nodes = unique(c(nycflights13[,12],
+                                    nycflights13[,13])),
+                         label = FALSE)
+
+# The 'edges' data frame must have columns named 'edge_from' and 'edge_to'
+# The color attribute is determined with an 'ifelse' statement, where
+# column 8 is the minutes early (negative values) or minutes late (positive values)
+# for the flight arrival
+edges_df <- create_edges(edge_from = nycflights13_day[,12],
+                         edge_to = nycflights13_day[,13],
+                         color = ifelse(nycflights13_day[,8] < 0,
+                                    "green", "red"))
+
+# Set the graph diagram's default attributes for...
+
+# ...nodes
+node_attrs <- c("style = filled", "fillcolor = lightblue",
+                "color = gray", "shape = circle", "fontname = Helvetica",
+                "width = 1")
+
+# ...edges
+edge_attrs <- c("arrowhead = dot")
+
+# ...and the graph itself
+graph_attrs <- c("layout = circo",
+                 "overlap = false",
+                 "fixedsize = true",
+                 "ranksep = 3",
+                 "outputorder = edgesfirst")
+
+# Generate the graph diagram in the RStudio Viewer.
+# The green lines show flights that weren't late (red indicates late arrivals)
+# This graph is for a single day of flights, airports that are unconnected on a
+# given day may be destinations on another day
+graphviz_graph(nodes_df = nodes_df, edges_df = edges_df,
+               graph_attrs = graph_attrs, node_attrs = node_attrs,
+               edge_attrs = edge_attrs, directed = TRUE) %>>%
+  graphviz_render(width = 1200, height = 800)
+               
+```
+
+This outputs the following graph in the **RStudio** Viewer:
+
+<img src="inst/img/grViz_15.png">
+
+### Mermaid Diagrams
 
 The `mermaid` function processes the specification of a diagram and then renders the diagram. This diagram spec can either exist in the form of a string, a reference to a mermaid file (with a **.mmd** file extension), or as a connection. 
 
@@ -515,7 +767,7 @@ Nodes can be given arbitrary ID values and those IDs are displayed as text withi
 
 Simply joining up a series of nodes in a left-to-right graph can be done in a few lines:
 
-```R
+```r
 diagram <- "
 graph LR
   A-->B
@@ -536,7 +788,7 @@ This renders the following image:
 
 The same result can be achieved in a more succinct manner with this **R** statement (using semicolons between statements in the **mermaid** diagram spec):
 
-```R
+```r
 mermaid("graph LR; A-->B; A-->C; C-->E; B-->D; C-->D; D-->F; E-->F")
 ```
 
@@ -559,13 +811,13 @@ graph LR
 
 and be rendered through:
 
-```R
+```r
 mermaid("graph.mmd")
 ```
 
 Alright, here's another example. This one places some text inside the diagram objects. Also, there are some CSS styles to add a color fill to each of the diagram objects:
 
-```R
+```r
 diagram <- "
 graph LR
 A(Rounded)-->B[Squared]
@@ -589,7 +841,7 @@ What you get is this:
 
 Here's an example with line text (that is, text appearing on connecting lines). Simply place text between pipe characters, just after the arrow, right before the node identifier. There are few more CSS properties for the boxes included in this example (`stroke`, `stroke-width`, and `stroke-dasharray`).
 
-```R
+```r
 diagram <- "
 graph BT
 A(Start)-->|Line Text|B(Keep Going)
@@ -609,7 +861,7 @@ The resultant graphic:
 
 Let's include the values of some **R** objects into a fresh diagram. The `mtcars` dataset is something I go to again and again, so, I'm going to load it up.
 
-```R
+```r
 data(mtcars)
 ```
 
@@ -641,7 +893,7 @@ When you call the **R** `summary` function on this data frame, you obtain this:
 
 That information can placed into a diagram. First, we'll get a vector object for strings that specify each of the connections and the text inside the boxes (one for each `mtcars` dataset column). These strings will contain each of the statistics provided by the `summary` function (minimum, 1st quartile, median, mean, 3rd quartile, and maximum). We'll use a `sapply` to loop through each column.
 
-```R
+```r
 connections <- sapply(
   1:ncol(mtcars)
   , function(i){
@@ -665,7 +917,7 @@ This generates all of the syntax required for connections between column names t
 
 Now, to generate the code for the summary diagram, one can use a `paste0` statement and then a separate `paste` statement for the connection text (with the `collapse` argument set to `\n` to specify a linebreak for the output text). Note that within the `paste0` statement, there is a `\n` linebreak wherever you would need one. Finally, to style multiple objects, a `classDef` statement was used. Here, a class of type `column` was provided with values for certain CSS properties. On the final line, the `class` statement applied the class definition to nodes 1 through 11 (a comma-separated list generated by the `paste0` statement). 
 
-```R
+```r
 diagram <-
 paste0(
 "graph TD;", "\n",
@@ -683,7 +935,7 @@ This is the resulting graphic:
 
 [Sequence diagrams](http://knsv.github.io/mermaid/sequenceDiagram.html) can be generated. The ["How to Draw Sequence Diagrams"](http://www.cs.uku.fi/research/publications/reports/A-2003-1/page91.pdf) report by Poranen, Makinen, and Nummenmaa offers a good introduction to sequence diagrams. Here's an example:
 
-```R
+```r
 # Using this "How to Draw a Sequence Diagram" 
 # http://www.cs.uku.fi/research/publications/reports/A-2003-1/page91.pdf
 # draw some sequence diagrams with DiagrammeR
@@ -707,9 +959,9 @@ sequenceDiagram
 
 <img src="inst/img/mermaid_6.png">
 
-Gannt diagrams can also be generated. Here is an example of how to generate that type of project management diagram.
+Gantt diagrams can also be generated. Here is an example of how to generate that type of project management diagram:
 
-```R
+```r
 mermaid("
 gantt
 dateFormat  YYYY-MM-DD
@@ -727,7 +979,6 @@ Also done, also critical            :crit, done,    import_2,   after import_1, 
 Doing this important task now       :crit, active,  import_3,   after import_2, 3d
 Next critical task                  :crit,          import_4,   after import_3, 5d
 
-
 section The Extras
 First extras                        :active,        extras_1,   after import_4,  3d
 Second helping                      :               extras_2,   after extras_1, 20h
@@ -742,14 +993,14 @@ Additional meetings with cake       :                           18h
 
 <img src="inst/img/mermaid_7.png">
 
-### DiagrammeR + shiny
+### DiagrammeR + Shiny
 
-As with other **htmlwidgets**, we can easily dynamically bind **DiagrammeR** in **R** with **shiny**. Both `grViz` and `mermaid` (see table below) work with Shiny.
+As with other **htmlwidgets**, we can easily dynamically bind **DiagrammeR** in **R** with **shiny**. Both `grViz` and `mermaid` (see table below) work with **Shiny**.
 
-Using `grViz` with [`shinyAce`](https://github.com/trestletech/shinyAce), we can easily get an interactive playground for our graphviz diagram.
+Using `grViz` with [`shinyAce`](https://github.com/trestletech/shinyAce), we can easily get an interactive playground for our **Graphviz** diagram.
 
 
-```R
+```r
 library(shiny)
 library(shinyAce)
 
@@ -777,9 +1028,9 @@ shinyApp(ui = ui, server = server)
 
 <img src="inst/img/shiny_1.gif">
 
-Here is a quick example where we can provide a `mermaid` diagram spec in a `textInput`.
+Here is a quick example where we can provide a **mermaid** diagram spec in a `textInput`.
 
-```R
+```r
 library(shiny)
 
 ui = shinyUI(fluidPage(
@@ -796,7 +1047,7 @@ server = function(input, output){
 shinyApp(ui = ui, server = server)
 ```
 
-Not all browsers are currently compatible with the DiagrammeR `mermaid` Shiny app. The following table provides the status for a selection of current browsers.
+Not all browsers are currently compatible with the **DiagrammeR** **mermaid** **Shiny** app. The following table provides the status for a selection of current browsers.
 
 |Browser/Version             | Platform                       | Status           |
 |:---------------------------|:-------------------------------|:-----------------|
