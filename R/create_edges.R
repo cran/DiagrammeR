@@ -1,8 +1,16 @@
-#' Create edges for Graphviz graphs
-#' @description Combine several named vectors for edges and their attributes.
-#' @param ... one or more named vectors for edges and associated attributes
-#' @return an edge data frame
-#' @export
+#' Create a data frame with edges and their attributes
+#' @description Combine several named vectors for edges and their attributes into a data frame, which can be combined with other similarly-generated data frame, or, added to a graph object.
+#' @param ... one or more named vectors for edges and associated attributes; the names for the named vectors must include \code{from} and \code{to} alongside any named vectors for the edge attributes and ancillary data.
+#' @return a data frame.
+#' @examples
+#' \dontrun{
+#' # Create an edge data frame
+#' edges <-
+#'   create_edges(from = c("a", "b", "c"),
+#'                to = c("d", "c", "a"),
+#'                relationship = "leading_to")
+#' }
+#' @export create_edges
 
 create_edges <- function(...){
 
@@ -11,29 +19,15 @@ create_edges <- function(...){
   # Stop function if there are no list components
   stopifnot(!is.null(names(edges)))
 
-  # Attempt to obtain the number of edges from the 'edge_from' column
-  # If 'edge_from' column exists, ensure that it is classed as character
-  if ("edge_from" %in% names(edges)){
-    number_of_edges_from <- length(edges$edge_from)
-    edges$edge_from <- as.character(edges$edge_from)
-  }
-
-  # Attempt to obtain the number of edges from the 'from' column
-  # If 'from' column exists, ensure that it is classed as character
+  # Obtain the number of edges from the 'from' column
+  # Ensure that it is classed as character
   if ("from" %in% names(edges)){
     number_of_edges_from <- length(edges$from)
     edges$from <- as.character(edges$from)
   }
 
-  # Attempt to obtain the number of edges from the 'edge_to' column
-  # If 'edge_to' column exists, ensure that it is classed as character
-  if ("edge_to" %in% names(edges)){
-    number_of_edges_to <- length(edges$edge_to)
-    edges$edge_to <- as.character(edges$edge_to)
-  }
-
-  # Attempt to obtain the number of edges from the 'to' column
-  # If 'to' column exists, ensure that it is classed as character
+  # Obtain the number of edges from the 'to' column
+  # Ensure that it is classed as character
   if ("to" %in% names(edges)){
     number_of_edges_to <- length(edges$to)
     edges$to <- as.character(edges$to)

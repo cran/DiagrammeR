@@ -1,18 +1,137 @@
 #' Create a graph object using data frames representative of nodes and edges
-#'
-#' Generates a graph object using data frames for nodes and/or edges; the graph object can be manipulated by other functions.
-#'
-#' @param nodes_df a data frame containing, at minimum, a column (called 'nodes') which contains node IDs for the graph. Optionally, additional columns (named as Graphviz node attributes) can be included with values for the named node attribute.
-#' @param edges_df a data frame containing, at minimum, a column (called 'edge_op') with edge operations as character strings (in the form of '[node_id] -> [node_id]). Alternatively, there may be two columns (called 'edge_from' and 'edge_to') where node IDs are provided. Optionally, additional columns (named as Graphviz edge attributes) can be included with values for the named edge attribute.
+#' @description Generates a graph object using data frames for nodes and/or edges; the graph object can be manipulated by other functions.
+#' @param nodes_df an optional data frame containing, at minimum, a column (called \code{nodes}) which contains node IDs for the graph. Additional columns (named as Graphviz node attributes) can be included with values for the named node attribute.
+#' @param edges_df an optional data frame containing, at minimum, a column (called \code{edge_op}) with edge operations as character strings (in the form of \code{[node_id] -> [node_id]}). Alternatively, there may be two columns (called \code{from} and \code{to}) where node IDs are provided. Additional columns (named as Graphviz edge attributes) can be included with values for the named edge attribute.
 #' @param graph_attrs an optional vector of graph attribute statements that can serve as defaults for the graph.
 #' @param node_attrs an optional vector of node attribute statements that can serve as defaults for nodes.
 #' @param edge_attrs an optional vector of edge attribute statements that can serve as defaults for edges.
-#' @param directed with TRUE (the default) or FALSE, either directed or undirected edge operations will be generated, respectively.
-#' @export graphviz_graph
+#' @param directed with \code{TRUE} (the default) or \code{FALSE}, either directed or undirected edge operations will be generated, respectively.
+#' @param graph_name an optional string for labeling the graph object.
+#' @param graph_time a date or date-time string (required for insertion of graph into a graph series of the type \code{temporal}).
+#' @param graph_tz an optional value for the time zone (\code{tz}) corresponding to the date or date-time string supplied as a value to \code{graph_time}. If no time zone is provided then it will be set to \code{GMT}.
+#' @return a graph object of class \code{dgr_graph}.
+#' @examples
+#' \dontrun{
+#' # Create an empty graph
+#' graph <- create_graph()
+#'
+#' # Create a graph with nodes but no edges
+#' nodes <-
+#'   create_nodes(nodes = c("a", "b", "c", "d"),
+#'                label = FALSE,
+#'                type = "lower",
+#'                style = "filled",
+#'                color = "aqua",
+#'                shape = c("circle", "circle",
+#'                          "rectangle", "rectangle"),
+#'                data = c(3.5, 2.6, 9.4, 2.7))
+#'
+#' graph <- create_graph(nodes_df = nodes)
+#'
+#' # Create a graph with edges but no nodes
+#' edges <-
+#'   create_edges(from = c("a", "b", "c"),
+#'                to = c("d", "c", "a"),
+#'                relationship = "leading_to")
+#'
+#' graph <- create_graph(edges_df = edges)
+#'
+#' # Create a graph with both nodes and nodes defined, and,
+#' # add some default attributes
+#' graph <- create_graph(nodes_df = nodes,
+#'                       edges_df = edges,
+#'                       node_attrs = "fontname = Helvetica",
+#'                       edge_attrs = c("color = blue",
+#'                                      "arrowsize = 2"))
+#' }
+#' @export create_graph
 
-graphviz_graph <- function(nodes_df = NULL, edges_df = NULL,
-                           graph_attrs = NULL, node_attrs = NULL,
-                           edge_attrs = NULL, directed = TRUE){
+create_graph <- function(nodes_df = NULL,
+                         edges_df = NULL,
+                         graph_attrs = NULL,
+                         node_attrs = NULL,
+                         edge_attrs = NULL,
+                         directed = TRUE,
+                         graph_name = NULL,
+                         graph_time = NULL,
+                         graph_tz = NULL){
+
+  # Create vector of graph attributes
+  graph_attributes <- c("bgcolor", "layout", "overlap", "fixedsize", "mindist",
+                        "nodesep", "outputorder", "ranksep", "rankdir", "stylesheet")
+
+  # Create vector of node attributes
+  node_attributes <- c("color", "distortion", "fillcolor",
+                       "fixedsize", "fontcolor", "fontname", "fontsize",
+                       "group", "height", "label", "labelloc", "margin",
+                       "orientation", "penwidth", "peripheries", "pos", "shape",
+                       "sides", "skew", "style", "tooltip", "width", "img", "icon")
+
+  # Create vector of edge attributes
+  edge_attributes <- c("arrowhead", "arrowsize", "arrowtail", "color",
+                       "constraint", "decorate", "dir",
+                       "edgeURL", "edgehref", "edgetarget", "edgetooltip",
+                       "fontcolor", "fontname", "fontsize", "headclip",
+                       "headhref", "headlabel", "headport", "headtarget",
+                       "headtooltip", "headURL", "href", "id", "label",
+                       "labelangle", "labeldistance", "labelfloat", "labelfontcolor",
+                       "labelfontname", "labelfontsize", "labelhref", "labelURL",
+                       "labeltarget", "labeltooltip", "layer", "lhead",
+                       "ltail", "minlen", "penwidth", "samehead",
+                       "sametail", "style", "tailclip", "tailhref",
+                       "taillabel", "tailport", "tailtarget", "tailtooltip",
+                       "tailURL", "target", "tooltip", "weight")
+
+  # If nodes, edges, and attributes not provided, create empty graph
+  if (all(c(is.null(nodes_df), is.null(edges_df),
+            is.null(graph_attrs), is.null(node_attrs),
+            is.null(edge_attrs)))){
+
+    # Create DOT code with nothing in graph
+    dot_code <- paste0(ifelse(directed == TRUE, "digraph", "graph"),
+                       " {\n", "\n}")
+
+    # Create the 'dgr_graph' list object
+    dgr_graph <- list(graph_name = graph_name,
+                      graph_time = graph_time,
+                      graph_tz = graph_tz,
+                      nodes_df = NULL,
+                      edges_df = NULL,
+                      graph_attrs = NULL,
+                      node_attrs = NULL,
+                      edge_attrs = NULL,
+                      directed = ifelse(directed == TRUE, TRUE, FALSE),
+                      dot_code = dot_code)
+
+    attr(dgr_graph, "class") <- "dgr_graph"
+
+    return(dgr_graph)
+  }
+
+  # If nodes and edges not provided, but other attributes are,
+  # create any empty graph with attributes
+  if (all(c(is.null(nodes_df), is.null(edges_df)))){
+
+    # Create DOT code with nothing in graph
+    dot_code <- paste0(ifelse(directed == TRUE, "digraph", "graph"),
+                       " {\n", "\n}")
+
+    # Create the 'dgr_graph' list object
+    dgr_graph <- list(graph_name = graph_name,
+                      graph_time = graph_time,
+                      graph_tz = graph_tz,
+                      nodes_df = NULL,
+                      edges_df = NULL,
+                      graph_attrs = graph_attrs,
+                      node_attrs = node_attrs,
+                      edge_attrs = edge_attrs,
+                      directed = ifelse(directed == TRUE, TRUE, FALSE),
+                      dot_code = dot_code)
+
+    attr(dgr_graph, "class") <- "dgr_graph"
+
+    return(dgr_graph)
+  }
 
   # Perform basic checks of the inputs
   if (!is.null(nodes_df)){
@@ -29,8 +148,7 @@ graphviz_graph <- function(nodes_df = NULL, edges_df = NULL,
   if (class(edges_df) == "data.frame"){
     if (ncol(edges_df) > 2){
 
-      stopifnot(any(c("edge_op", "edge_ops", "edge", "edges",
-                      "edge_from", "edge_to", "from", "to") %in%
+      stopifnot(any(c("from", "to") %in%
                       colnames(edges_df)))
 
       # Force all columns to be of the character class
@@ -39,29 +157,6 @@ graphviz_graph <- function(nodes_df = NULL, edges_df = NULL,
       }
     }
   }
-
-  graph_attributes <- c("bgcolor", "layout", "overlap", "fixedsize", "mindist",
-                        "nodesep", "outputorder", "ranksep", "rankdir", "stylesheet")
-
-  node_attributes <- c("color", "distortion", "fillcolor",
-                       "fixedsize", "fontcolor", "fontname", "fontsize",
-                       "group", "height", "label", "labelloc", "margin",
-                       "orientation", "penwidth", "peripheries", "pos", "shape",
-                       "sides", "skew", "style", "tooltip", "width")
-
-  edge_attributes <- c("arrowhead", "arrowsize", "arrowtail", "color",
-                       "constraint", "decorate", "dir",
-                       "edgeURL", "edgehref", "edgetarget", "edgetooltip",
-                       "fontcolor", "fontname", "fontsize", "headclip",
-                       "headhref", "headlabel", "headport", "headtarget",
-                       "headtooltip", "headURL", "href", "id", "label",
-                       "labelangle", "labeldistance", "labelfloat", "labelfontcolor",
-                       "labelfontname", "labelfontsize", "labelhref", "labelURL",
-                       "labeltarget", "labeltooltip", "layer", "lhead",
-                       "ltail", "minlen", "penwidth", "samehead",
-                       "sametail", "style", "tailclip", "tailhref",
-                       "taillabel", "tailport", "tailtarget", "tailtooltip",
-                       "tailURL", "target", "tooltip", "weight")
 
   # Create the default attributes statement for graph attributes
   if (!is.null(graph_attrs)){
@@ -294,8 +389,9 @@ graphviz_graph <- function(nodes_df = NULL, edges_df = NULL,
 
   if (is.null(nodes_df) & !is.null(edges_df)){
 
-    from_to_columns <- ifelse(any(c("edge_from", "edge_to", "from", "to") %in%
-                                    colnames(edges_df)), "TRUE", "FALSE")
+    from_to_columns <-
+      ifelse(any(c("from", "to") %in%
+                   colnames(edges_df)), TRUE, FALSE)
 
     # Determine which columns in 'edges_df' contains edge attributes
     other_columns_with_edge_attributes <-
@@ -304,9 +400,9 @@ graphviz_graph <- function(nodes_df = NULL, edges_df = NULL,
     # Determine whether the complementary set of columns is present
     if (from_to_columns == TRUE){
 
-      both_from_to_columns <- all(c(any(c("edge_from", "from") %in%
+      both_from_to_columns <- all(c(any(c("from") %in%
                                           colnames(edges_df))),
-                                  any(c("edge_to", "to") %in%
+                                  any(c("to") %in%
                                         colnames(edges_df)))
     }
 
@@ -314,20 +410,20 @@ graphviz_graph <- function(nodes_df = NULL, edges_df = NULL,
 
       if (both_from_to_columns == TRUE){
 
-        from_column <- which(colnames(edges_df) %in% c("edge_from", "from"))[1]
+        from_column <- which(colnames(edges_df) %in% c("from"))[1]
 
-        to_column <- which(colnames(edges_df) %in% c("edge_to", "to"))[1]
+        to_column <- which(colnames(edges_df) %in% c("to"))[1]
       }
     }
 
-    nodes_df <- data.frame(nodes = unique(c(edges_df[,from_column],
-                                            edges_df[,to_column])))
+    nodes_df <- as.data.frame(get_nodes(edges_df), stringsAsFactors = FALSE)
+    colnames(nodes_df) <- "nodes"
 
-    for (i in 1:nrow(nodes_df)){
+    for (i in 1:length(nodes_df)){
 
       if (i == 1) node_block <- vector(mode = "character", length = 0)
 
-      node_block <- c(node_block, paste0("  '", nodes_df[i,1], "'"))
+      node_block <- c(node_block, paste0("  '", nodes_df[i], "'"))
     }
 
     # Construct the 'node_block' character object
@@ -341,8 +437,8 @@ graphviz_graph <- function(nodes_df = NULL, edges_df = NULL,
   if (!is.null(edges_df)){
 
     # Determine whether 'from' or 'to' columns are in 'edges_df'
-    from_to_columns <- ifelse(any(c("edge_from", "edge_to", "from", "to") %in%
-                                    colnames(edges_df)), "TRUE", "FALSE")
+    from_to_columns <- ifelse(any(c("from", "to") %in%
+                                    colnames(edges_df)), TRUE, FALSE)
 
     # Determine which columns in 'edges_df' contains edge attributes
     other_columns_with_edge_attributes <-
@@ -351,9 +447,9 @@ graphviz_graph <- function(nodes_df = NULL, edges_df = NULL,
     # Determine whether the complementary set of columns is present
     if (from_to_columns == TRUE){
 
-      both_from_to_columns <- all(c(any(c("edge_from", "from") %in%
+      both_from_to_columns <- all(c(any(c("from") %in%
                                           colnames(edges_df))),
-                                  any(c("edge_to", "to") %in%
+                                  any(c("to") %in%
                                         colnames(edges_df)))
     }
 
@@ -362,9 +458,9 @@ graphviz_graph <- function(nodes_df = NULL, edges_df = NULL,
 
       if (both_from_to_columns == TRUE){
 
-        from_column <- which(colnames(edges_df) %in% c("edge_from", "from"))[1]
+        from_column <- which(colnames(edges_df) %in% c("from"))[1]
 
-        to_column <- which(colnames(edges_df) %in% c("edge_to", "to"))[1]
+        to_column <- which(colnames(edges_df) %in% c("to"))[1]
       }
     }
 
@@ -458,7 +554,7 @@ graphviz_graph <- function(nodes_df = NULL, edges_df = NULL,
     # explicitly defined edge operations
     any_columns_with_edge_ops <-
       ifelse(any(c("edge_op", "edge_ops", "edge", "edges") %in%
-                   colnames(edges_df)), "TRUE", "FALSE")
+                   colnames(edges_df)), TRUE, FALSE)
 
     if (any_columns_with_edge_ops == TRUE){
 
@@ -565,15 +661,19 @@ graphviz_graph <- function(nodes_df = NULL, edges_df = NULL,
   # Remove empty node or edge attribute statements
   dot_code <- gsub(" \\[\\] ", "", dot_code)
 
-  # Create the 'gv_graph' list object
-  gv_graph <- list(nodes_df = nodes_df, edges_df = edges_df,
-                   graph_attrs = graph_attrs,
-                   node_attrs = node_attrs,
-                   edge_attrs = edge_attrs,
-                   directed = directed,
-                   dot_code = dot_code)
+  # Create the 'dgr_graph' list object
+  dgr_graph <- list(graph_name = graph_name,
+                    graph_time = graph_time,
+                    graph_tz = graph_tz,
+                    nodes_df = nodes_df,
+                    edges_df = edges_df,
+                    graph_attrs = graph_attrs,
+                    node_attrs = node_attrs,
+                    edge_attrs = edge_attrs,
+                    directed = directed,
+                    dot_code = dot_code)
 
-  attr(gv_graph, "class") <- "gv_graph"
+  attr(dgr_graph, "class") <- "dgr_graph"
 
-  return(gv_graph)
+  return(dgr_graph)
 }

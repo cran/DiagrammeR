@@ -2,17 +2,31 @@
 % Please edit documentation in R/create_nodes.R
 \name{create_nodes}
 \alias{create_nodes}
-\title{Create nodes for Graphviz graphs}
+\title{Create a data frame with nodes and their attributes}
 \usage{
 create_nodes(...)
 }
 \arguments{
-\item{...}{one or more named vectors for nodes and associated attributes}
+\item{...}{one or more named vectors for nodes and associated attributes.}
 }
 \value{
-a node data frame
+a data frame.
 }
 \description{
-Combine several named vectors for nodes and their attributes.
+Combine several named vectors for nodes and their attributes into a data frame, which can be combined with other similarly-generated data frame, or, added to a graph object.
+}
+\examples{
+\dontrun{
+# Create a node data frame
+nodes <-
+  create_nodes(nodes = c("a", "b", "c", "d"),
+               label = FALSE,
+               type = "lower",
+               style = "filled",
+               color = "aqua",
+               shape = c("circle", "circle",
+                         "rectangle", "rectangle"),
+               data = c(3.5, 2.6, 9.4, 2.7))
+}
 }
 

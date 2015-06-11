@@ -1,12 +1,25 @@
 #' Create numerical and color scales for node attributes
-#'
-#' Generates either numeric or color scales for specified node attributes and applies those scales to node data frames.
-#'
-#' @param nodes_df a data frame containing, at minimum, a column that contains node IDs for the graph. Optionally, additional columns (named as Graphviz node attributes) can be included with values for the named node attribute. These data frames can be conveniently generated using the 'create_nodes' function.
-#' @param to_scale a vector of numerical values to be scaled; these currently need to be of the same length and order as the node IDs in the supplied node data frame, so, it's recommended to reference a column of values available in 'nodes_df'.
+#' @description Generates either numeric or color scales for specified node attributes and applies those scales to node data frames.
+#' @param nodes_df a data frame containing, at minimum, a column that contains node IDs for the graph. Optionally, additional columns (named as Graphviz node attributes) can be included with values for the named node attribute. These data frames can be conveniently generated using the \code{create_nodes} function.
+#' @param to_scale a vector of numerical values serving as a basis for scaling; these currently need to be of the same length and order as the node IDs in the supplied node data frame, so, it's recommended that the value be a reference to a column of values residing in \code{nodes_df}.
 #' @param node_attr the name of the node attribute for which scaled values are to be created.
 #' @param range a vector of 2 elements providing either lower and upper numerical or X11 color values.
-#' @param scale_type the type of scaling to perform. Currently, "linear" is the only option available.
+#' @param scale_type the type of scaling to perform. Currently, \code{linear} is the only option available.
+#' @return a node data frame.
+#' @examples
+#' \dontrun{
+#' # Add a node attribute which has values scaled to
+#' # numeric data in another column
+#' nodes <- create_nodes(nodes = 1:5,
+#'                       label = FALSE,
+#'                       type = "example",
+#'                       data = sample(seq(1:20), 5))
+#'
+#' nodes <- scale_nodes(nodes_df = nodes,
+#'                      to_scale = nodes$data,
+#'                      node_attr = "penwidth",
+#'                      range = c(2, 5))
+#' }
 #' @export scale_nodes
 
 scale_nodes <- function(nodes_df,
@@ -170,7 +183,6 @@ scale_nodes <- function(nodes_df,
             colnames(nodes_df)[length(nodes_df)] <- attr_assign[1]
 
             apply_to_column_no <- which(colnames(nodes_df) %in% attr_assign[1])
-
           }
         }
       }
@@ -184,7 +196,6 @@ scale_nodes <- function(nodes_df,
           if (attr_in_df){
 
             apply_to_column_no <- which(colnames(nodes_df) %in% attr_assign[1])
-
           }
         }
       }
@@ -214,5 +225,4 @@ scale_nodes <- function(nodes_df,
 
     return(nodes_df)
   }
-
 }

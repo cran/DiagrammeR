@@ -1,10 +1,6 @@
-#' Razor-like Template for Diagram Spec
-#'
-#' Use Razor-like syntax to define a template for use in a \code{grViz}
-#' diagram.
-#'
-#' @param spec String spec to be parsed and evaluated
-#'
+#' Razor-like template for diagram specification
+#' @description Use Razor-like syntax to define a template for use in a \code{grViz} diagram.
+#' @param spec string spec to be parsed and evaluated
 #' @examples
 #' \dontrun{
 #'
@@ -40,7 +36,6 @@
 #' }
 #'
 #' @export
-
 
 replace_in_spec <- function(spec){
 
@@ -145,5 +140,4 @@ replace_in_spec <- function(spec){
   if (grepl("@@", spec) == FALSE){
     return(spec)
   }
-
 }

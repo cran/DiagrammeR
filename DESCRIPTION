@@ -1,8 +1,8 @@
 Package: DiagrammeR
 Type: Package
 Title: Create Diagrams and Flowcharts Using R
-Version: 0.6
-Date: 2015-04-30
+Version: 0.7
+Date: 2015-06-11
 Authors@R: c(
     person("Knut", "Sveidqvist", role = c("aut", "cph"), comment = "mermaid.js
     library in htmlwidgets/lib, http://github.com/knsv/mermaid/"),
@@ -16,12 +16,14 @@ Authors@R: c(
     interface", email = "riannone@me.com")
     )
 Maintainer: Richard Iannone <riannone@me.com>
-Description: Allows to create diagrams and flowcharts using R.
+Description: Create graph diagrams and flowcharts using R.
 License: MIT + file LICENSE
-Imports: htmlwidgets (>= 0.3.2), rstudioapi (>= 0.2)
+Imports: htmlwidgets (>= 0.3.2), rstudioapi (>= 0.2), stringr (>=
+        1.0.0)
 Suggests: knitr, V8 (>= 0.5)
 VignetteBuilder: knitr
-Packaged: 2015-04-30 13:47:38 UTC; riannone
+NeedsCompilation: no
+Packaged: 2015-06-11 16:50:44 UTC; riannone
 Author: Knut Sveidqvist [aut, cph] (mermaid.js library in htmlwidgets/lib,
     http://github.com/knsv/mermaid/),
   Mike Bostock [aut, cph] (d3.js library in htmlwidgets/lib,
@@ -31,6 +33,5 @@ Author: Knut Sveidqvist [aut, cph] (mermaid.js library in htmlwidgets/lib,
   Mike Daines [aut, cph] (viz.js library in htmlwidgets/lib,
     http://github.com/mdaines/viz.js/),
   Richard Iannone [aut, cre] (R interface)
-NeedsCompilation: no
 Repository: CRAN
-Date/Publication: 2015-04-30 20:25:56
+Date/Publication: 2015-06-11 21:46:52
