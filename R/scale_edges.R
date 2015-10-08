@@ -1,10 +1,20 @@
 #' Create numerical and color scales for edge attributes
-#' @description Generates either numeric or color scales for specified edge attributes and applies those scales to edge data frames.
-#' @param edges_df a data frame containing, at minimum, a column (called \code{edge_op}) with edge operations as character strings (in the form of \code{[node_id] -> [node_id]}). Alternatively, there may be two columns where node IDs specifying edges are provided.
-#' @param to_scale a vector of numerical values to be scaled; these currently need to be of the same length and order as the edge operations in the supplied edge data frame, so, it's recommended to reference a column of values available in \code{edges_df}.
-#' @param edge_attr the name of the edge attribute for which scaled values are to be created.
-#' @param range a vector of 2 elements providing either lower and upper numerical or X11 color values.
-#' @param scale_type the type of scaling to perform. Currently, \code{linear} is the only option available.
+#' @description Generates either numeric or color scales for specified edge
+#' attributes and applies those scales to edge data frames.
+#' @param edges_df a data frame containing, at minimum, a column (called
+#' \code{edge_op}) with edge operations as character strings (in the form of
+#' \code{[node_id] -> [node_id]}). Alternatively, there may be two columns
+#' where node IDs specifying edges are provided.
+#' @param to_scale a vector of numerical values to be scaled; these currently
+#' need to be of the same length and order as the edge operations in the
+#' supplied edge data frame, so, it's recommended to reference a column of
+#' values available in \code{edges_df}.
+#' @param edge_attr the name of the edge attribute for which scaled values are
+#' to be created.
+#' @param range a vector of 2 elements providing either lower and upper
+#' numerical or X11 color values.
+#' @param scale_type the type of scaling to perform. Currently, \code{linear}
+#' is the only option available.
 #' @return an edge data frame.
 #' @examples
 #' \dontrun{
@@ -13,7 +23,7 @@
 #' edges <- create_edges(from = c("a", "b", "c"),
 #'                       to = c("d", "d", "a"),
 #'                       label = '',
-#'                       relationship = "given_to",
+#'                       rel = "given_to",
 #'                       data = sample(seq(1:50), 10))
 #'
 #' edges <- scale_edges(edges_df = edges,
@@ -21,6 +31,7 @@
 #'                      edge_attr = "penwidth",
 #'                      range = c(1, 5))
 #' }
+#' @importFrom V8 new_context
 #' @export scale_edges
 
 scale_edges <- function(edges_df,
@@ -109,7 +120,7 @@ scale_edges <- function(edges_df,
                         hex_color_values[2], "', ",
                         j/number_of_stops, ", 'hsl');")
 
-      ct <- V8::new_context("window")
+      ct <- new_context("window")
       invisible(ct$source(system.file("htmlwidgets/lib/chromatography/chromatography.js",
                                       package = "DiagrammeR")))
 

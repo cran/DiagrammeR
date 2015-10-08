@@ -4,11 +4,11 @@
 \alias{add_edges}
 \title{Add edges to an existing graph object}
 \usage{
-add_edges(graph, edges_df = NULL, from = NULL, to = NULL,
-  relationship = NULL)
+add_edges(graph, edges_df = NULL, from = NULL, to = NULL, rel = NULL)
 }
 \arguments{
-\item{graph}{a graph object of class \code{dgr_graph} that is created using \code{create_graph}.}
+\item{graph}{a graph object of class \code{dgr_graph} that is created using
+\code{create_graph}.}
 
 \item{edges_df}{an edge data frame that is created using \code{create_edges}.}
 
@@ -16,22 +16,48 @@ add_edges(graph, edges_df = NULL, from = NULL, to = NULL,
 
 \item{to}{a vector of the incoming nodes to which each edge is connected.}
 
-\item{relationship}{a string specifying the relationship between the connected nodes.}
+\item{rel}{a string specifying the relationship between the
+connected nodes.}
 }
 \value{
 a graph object of class \code{dgr_graph}.
 }
 \description{
-With a graph object of class \code{dgr_graph}, add one or more edges of specified types to nodes within the graph.
+With a graph object of class \code{dgr_graph}, add one or more
+edges of specified types to nodes within the graph.
 }
 \examples{
 \dontrun{
 # Create a graph with two nodes
 graph <- create_graph(create_nodes(nodes = c("a", "b")))
 
-# Add an edge between those nodes and attach a relationship
+# Add an edge between those nodes and attach a relationship to the edge
 graph <- add_edges(graph, from = "a", to = "b",
-                   relationship = "to_get")
+                   rel = "to_get")
+
+# Examples of pipeable graph building using 'create_edges' with
+# 'add_edges' in order to include values for the 'style' edge attribute
+# (it modifies the style of the connecting line)
+
+library(magrittr)
+
+graph <- create_graph() \%>\%
+  add_node("a") \%>\%
+  add_node("b") \%>\%
+  add_edges(create_edges(from = "a", to = "b",
+                         style = "solid")) \%>\%
+  add_node("c") \%>\%
+  add_node("d") \%>\%
+  add_edges(create_edges(from = "c", to = "d",
+                         style = "dashed")) \%>\%
+  add_node("e") \%>\%
+  add_node("f") \%>\%
+  add_edges(create_edges(from = "e", to = "f",
+                         style = "dotted")) \%>\%
+  add_node("g") \%>\%
+  add_node("h") \%>\%
+  add_edges(create_edges(from = "g", to = "h",
+                         style = "bold"))
 }
 }
 

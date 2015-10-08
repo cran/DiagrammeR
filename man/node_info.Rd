@@ -10,10 +10,12 @@ node_info(graph)
 \item{graph}{a graph object of class \code{dgr_graph}.}
 }
 \value{
-a data frame containing information specific to each node within the graph.
+a data frame containing information specific to each node within
+the graph.
 }
 \description{
-Obtain a data frame with detailed information on nodes and their interrelationships within a graph.
+Obtain a data frame with detailed information on nodes and
+their interrelationships within a graph.
 }
 \examples{
 \dontrun{
@@ -30,7 +32,7 @@ edges <-
   create_edges(from = sample(LETTERS, replace = TRUE),
                to = sample(LETTERS, replace = TRUE),
                label = "edge",
-               relationship = "letter_to_letter")
+               rel = "letter_to_letter")
 
 graph <-
   create_graph(nodes_df = nodes,
@@ -47,6 +49,18 @@ node_info(graph)
 #> 4        L     L  h_to_p      1        0         1     0
 #> 5        F     F  a_to_g      0        0         0     0
 #>..      ...   ...     ...    ...      ...       ...   ...
+
+# Import a large graph
+power_grid <-
+import_graph(system.file("examples/power_grid.graphml",
+                         package = "DiagrammeR"))
+
+# Use dplyr::filter to determine which nodes are highly
+# connected in this graph
+library(dplyr)
+
+high_connect_nodes <-
+  filter(node_info(power_grid), degree > 10)$node_ID
 }
 }
 

@@ -13,16 +13,17 @@ exportSVG(gv)
 \code{string} of SVG XML text.
 }
 \description{
-Use viz.js with \code{V8} to get the diagram rendered as SVG in R instead of the browser.
+Use viz.js with \code{V8} to get the diagram rendered as SVG
+in R instead of the browser.
 }
 \examples{
 \dontrun{
  library(DiagrammeR)
- (svg <- exportSVG(grViz('digraph{a->b; c->a; c->b; c->d;}', engine = 'circo')))
+ (svg <- exportSVG(grViz('digraph{a->b; c->a; c->b; c->d;}',
+   engine = 'circo')))
 
- # this can then be used with htmltools
- #   can save significantly on size of output
- #   using svg rather than unrendered grViz
+ # this can then be used with htmltools and can save significantly
+ # on size of output using svg rather than unrendered grViz
  library(htmltools)
  html_print(HTML(svg))
 }

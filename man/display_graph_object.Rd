@@ -7,12 +7,15 @@
 display_graph_object(graph, width = 400)
 }
 \arguments{
-\item{graph}{a \code{dgr_graph} object, created using the \code{create_graph} function.}
+\item{graph}{a \code{dgr_graph} object, created using the
+\code{create_graph} function.}
 
 \item{width}{the width of the graph representation in pixels.}
 }
 \description{
-Using a \code{dgr_graph} object, update values of counts for nodes, edges, attributes, directed state, and display the schematic in the RStudio Viewer.
+Using a \code{dgr_graph} object, update values of counts for
+nodes, edges, attributes, directed state, and display the schematic in the
+RStudio Viewer.
 }
 \examples{
 \dontrun{
@@ -26,7 +29,7 @@ nodes <-
 edges <-
   create_edges(from = c("a", "b", "c"),
                to = c("d", "c", "a"),
-               relationship = "connected_to")
+               rel = "connected_to")
 
 graph <- create_graph(nodes_df = nodes,
                       edges_df = edges)

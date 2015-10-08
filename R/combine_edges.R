@@ -1,6 +1,8 @@
 #' Combine multiple edge data frames into a single edge data frame
-#' @description Combine several edge data frames in the style of \code{rbind}, except, it works regardless of the number and ordering of the columns.
-#' @param ... two or more edge data frames, which contain edge IDs and associated attributes.
+#' @description Combine several edge data frames in the style of \code{rbind},
+#' except, it works regardless of the number and ordering of the columns.
+#' @param ... two or more edge data frames, which contain edge IDs and
+#' associated attributes.
 #' @return a combined edge data frame.
 #' @examples
 #' \dontrun{
@@ -8,14 +10,14 @@
 #' edges_1 <-
 #'   create_edges(from = c("a", "a", "b", "c"),
 #'                to = c("b", "d", "d", "a"),
-#'                relationship = "requires",
+#'                rel = "requires",
 #'                color = "green",
 #'                data = c(2.7, 8.9, 2.6, 0.6))
 #'
 #' edges_2 <-
 #'   create_edges(from = c("e", "g", "h", "h"),
 #'                to = c("g", "h", "f", "e"),
-#'                relationship = "receives",
+#'                rel = "receives",
 #'                arrowhead = "dot",
 #'                color = "red")
 #'
@@ -99,8 +101,9 @@ combine_edges <- function(...){
     # Create a new data frame with combined rows
     for (i in 1:length(colnames(df1))){
 
-      if (i == 1) df_new <- data.frame(mat.or.vec(nr = nrow(df1) + nrow(df2),
-                                                  nc = 0), stringsAsFactors = FALSE)
+      if (i == 1) df_new <-
+          data.frame(mat.or.vec(nr = nrow(df1) + nrow(df2),
+                                nc = 0), stringsAsFactors = FALSE)
 
       df_col <- c(as.character(df1[,colnames(df1)[i]]),
                   as.character(df2[,colnames(df1)[i]]))

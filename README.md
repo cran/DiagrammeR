@@ -1,14 +1,18 @@
 <img src="inst/img/DiagrammeR.png">
 
-![](http://cranlogs.r-pkg.org/badges/grand-total/DiagrammeR?color=brightgreen) [![Issue Stats](http://issuestats.com/github/rich-iannone/DiagrammeR/badge/pr?style=flat)](http://issuestats.com/github/rich-iannone/DiagrammeR) [![Issue Stats](http://issuestats.com/github/rich-iannone/DiagrammeR/badge/issue?style=flat)](http://issuestats.com/github/rich-iannone/DiagrammeR)
+[![Travis-CI Build Status](https://travis-ci.org/rich-iannone/DiagrammeR.svg?branch=master)](https://travis-ci.org/rich-iannone/DiagrammeR)
+![](http://cranlogs.r-pkg.org/badges/grand-total/DiagrammeR?color=brightgreen)
+[![Issue Stats](http://issuestats.com/github/rich-iannone/DiagrammeR/badge/pr?style=flat)](http://issuestats.com/github/rich-iannone/DiagrammeR)
+[![Issue Stats](http://issuestats.com/github/rich-iannone/DiagrammeR/badge/issue?style=flat)](http://issuestats.com/github/rich-iannone/DiagrammeR)
+[![codecov.io](https://codecov.io/github/rich-iannone/DiagrammeR/coverage.svg?branch=master)](https://codecov.io/github/rich-iannone/DiagrammeR?branch=master) 
 
-With the **DiagrammeR** package, you can create easily graph diagrams using **R**. You can either use **Markdown**-like text to describe and render a diagram, or, use a collection of functions to create graph objects from **R** objects and render/export at will. The output can be viewed in the **RStudio** Viewer, it can be incorporated in **R Markdown**, and it can be integrated in **shiny** web apps. Because we are doing this in **R** we can and always should add much more **R** code into the mix.
+With the **DiagrammeR** **R** package, you can easily create graph diagrams. You can either use **Markdown**-like text to describe and render a diagram, or, use a collection of functions to create graph objects. The output can be viewed in the **RStudio** Viewer, it can be incorporated in **R Markdown**, and it can be integrated in **shiny** web apps. Because we are doing this in **R** we can and always should add much more **R** code into the mix.
 
 Go to the [**project website**](http://rich-iannone.github.io/DiagrammeR/) and view a video walkthrough for a graph diagram that's created with a few lines of text and is just as easily customizable. After being all fired up from that intense video-tutorial extravaganza, have a look at the [**DiagrammeR Docs**](http://rich-iannone.github.io/DiagrammeR/docs.html) to learn more.
 
 ## Creating Graphviz Graphs
 
-It's possible to make single graph diagrams using the **Graphviz** support included in package. Simply specify a valid **Graphviz** graph in the **DOT** language either in the form of a string, a reference to a **Graphviz** file (with a **.gv** file extension), or as a text connection.
+It's possible to make graph diagrams using the **Graphviz** support included in package. Simply specify a valid **Graphviz** graph in the **DOT** language either in the form of a string, a reference to a **Graphviz** file (with a **.gv** file extension), or as a text connection.
 
 Here is an example where nodes (in this case styled as rectangles and circles) can be easily defined along with their connections:
 
@@ -70,7 +74,7 @@ In the last example you saw what was essentially a text string being passed into
 
 <img src="inst/img/DiagrammeR_graph_functions.png">
 
-With the graph-building functions, it's possible to generate a graph with data available in a data frame. The general idea is to build specialized data frames for that contain either node data and attributes (node data frames) and those data frames that contain edge data and edge attributes (edge data frames). These data frames are permitted to have columns of arbitrary data alongside columns named for node or edge attributes. Because metadata can exist alongside the node and edge definitions, we can easily scale the values of the styling attributes and thus enable a highly visual means to differentiate nodes and edges by size, color, shape, opacity, length, etc.
+With the graph-building functions, it's possible to generate a graph with data available in a data frame. The general idea is to build specialized data frames that contain either node data and attributes (node data frames) and those data frames that contain edge data and edge attributes (edge data frames). These data frames are permitted to have columns of arbitrary data alongside columns named for node or edge attributes. Because metadata can exist alongside the node and edge definitions, we can easily scale the values of the styling attributes and thus enable a highly visual means to differentiate nodes and edges by size, color, shape, opacity, length, etc.
 
 Here is a simple workflow for building and rendering a graph object:
 
@@ -80,22 +84,19 @@ Want to learn more? Head over to the [**DiagrammeR Docs**](http://rich-iannone.g
 
 ## An Example with Data from the **nycflights13** Package
 
-Using the `flights` dataset from the **nycflights13** **R** package, create a graph diagram. Here, the green lines show flights that weren't late arriving at their destinations (red indicates those late arrivals). Things to note are:
+Using the `flights` dataset from the **nycflights13** **R** package, we can create a graph diagram. Here, the green lines show flights that weren't late arriving at their destinations (red indicates those late arrivals). Things to note are:
 
 - the use of other packages to modify a data frame (because we are using **R**, after all)
-- piped expressions with the `pipeR` package (the **DiagrammeR** functions are very pipe-able)
-- the `circo` layout for the graph (it's a nice circular arrangement of nodes)
+- piped expressions with the `magrittr` package (many **DiagrammeR** functions can be piped)
+- the `circo` layout for the graph (creating a circular arrangement of nodes)
 
 <img src="inst/img/flights.png">
 
 ```r
-# Get the latest build of the 'DiagrammeR' package from GitHub
-devtools::install_github('rich-iannone/DiagrammeR')
-
 library("DiagrammeR") 
 library("nycflights13")
 library("lubridate")
-library("pipeR")
+library("magrittr")
  
 # Choose a day from 2013 for NYC flight data
 # (You can choose any Julian day, it's interesting to see results for different days)
@@ -126,7 +127,7 @@ nycflights13_day <-
          date_time >= ymd('2013-01-01', tz = "GMT") + days(day_of_year - 1) &
            date_time < ymd('2013-01-01', tz = "GMT") + days(day_of_year))
 
-# Create the 'nodes' data frame where at least one column is named "nodes" or "node_id"
+# Create the node data frame
 # Column 12 is the 3-letter code for the airport departing from
 # Column 13 is for the airport arriving to
 # (Option: change df to 'nycflights13_day' and only airports used for the day will be included)
@@ -134,7 +135,7 @@ nodes_df <- create_nodes(nodes = unique(c(nycflights13[,12],
                                     nycflights13[,13])),
                          label = FALSE)
 
-# The 'edges' data frame must have columns named 'from' and 'to'
+# The edge data frame must have columns named 'from' and 'to'
 # The color attribute is determined with an 'ifelse' statement, where
 # column 8 is the minutes early (negative values) or minutes late (positive values)
 # for the flight arrival
@@ -163,25 +164,22 @@ graph_attrs <- c("layout = circo",
 # Generate the graph diagram in the RStudio Viewer.
 create_graph(nodes_df = nodes_df, edges_df = edges_df,
                graph_attrs = graph_attrs, node_attrs = node_attrs,
-               edge_attrs = edge_attrs, directed = TRUE) %>>%
+               edge_attrs = edge_attrs, directed = TRUE) %>%
   render_graph(width = 1200, height = 800)
 ```
 
 ## Installation
 
-If this package looks interesting then you'll want to install it for further testing.
-
 **DiagrammeR** is used in an **R** environment. If you don't have an **R** installation, it can be obtained from the [**Comprehensive R Archive Network (CRAN)**](http://cran.rstudio.com). It is recommended that [**RStudio**](http://www.rstudio.com/products/RStudio/) be used as the **R** IDE to take advantage of its rendering capabilities and the code-coloring support for **Graphviz** and **mermaid** diagrams.
 
-As for **DiagrammeR**, install the development version from GitHub using the **devtools** package.
+You can install the development version of **DiagrammeR** from **GitHub** using the **devtools** package.
 
 ```r
 devtools::install_github('rich-iannone/DiagrammeR')
 ```
 
-Or, get the v0.6 release from **CRAN**.
+Or, get the v0.7 release from **CRAN**.
 
 ```r
 install.packages('DiagrammeR')
 ```
-

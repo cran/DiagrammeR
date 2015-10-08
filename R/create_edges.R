@@ -1,6 +1,10 @@
 #' Create a data frame with edges and their attributes
-#' @description Combine several named vectors for edges and their attributes into a data frame, which can be combined with other similarly-generated data frame, or, added to a graph object.
-#' @param ... one or more named vectors for edges and associated attributes; the names for the named vectors must include \code{from} and \code{to} alongside any named vectors for the edge attributes and ancillary data.
+#' @description Combine several named vectors for edges and their attributes
+#' into a data frame, which can be combined with other similarly-generated data
+#' frame, or, added to a graph object.
+#' @param ... one or more named vectors for edges and associated attributes;
+#' the names for the named vectors must include \code{from} and \code{to}
+#' alongside any named vectors for the edge attributes and ancillary data.
 #' @return a data frame.
 #' @examples
 #' \dontrun{
@@ -8,7 +12,7 @@
 #' edges <-
 #'   create_edges(from = c("a", "b", "c"),
 #'                to = c("d", "c", "a"),
-#'                relationship = "leading_to")
+#'                rel = "leading_to")
 #' }
 #' @export create_edges
 
@@ -46,7 +50,8 @@ create_edges <- function(...){
 
     # Expand vectors with length > 1 and length < 'number_of_edges'
     if (length(edges[[i]]) > 1 & length(edges[[i]]) < number_of_edges){
-      edges[[i]] <- c(edges[[i]], rep("", (number_of_edges - length(edges[[i]]))))
+      edges[[i]] <- c(edges[[i]],
+                      rep("", (number_of_edges - length(edges[[i]]))))
     }
 
     # Trim vectors with number of values exceeding number of edges

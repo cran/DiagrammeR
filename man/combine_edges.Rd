@@ -7,13 +7,15 @@
 combine_edges(...)
 }
 \arguments{
-\item{...}{two or more edge data frames, which contain edge IDs and associated attributes.}
+\item{...}{two or more edge data frames, which contain edge IDs and
+associated attributes.}
 }
 \value{
 a combined edge data frame.
 }
 \description{
-Combine several edge data frames in the style of \code{rbind}, except, it works regardless of the number and ordering of the columns.
+Combine several edge data frames in the style of \code{rbind},
+except, it works regardless of the number and ordering of the columns.
 }
 \examples{
 \dontrun{
@@ -21,14 +23,14 @@ Combine several edge data frames in the style of \code{rbind}, except, it works 
 edges_1 <-
   create_edges(from = c("a", "a", "b", "c"),
                to = c("b", "d", "d", "a"),
-               relationship = "requires",
+               rel = "requires",
                color = "green",
                data = c(2.7, 8.9, 2.6, 0.6))
 
 edges_2 <-
   create_edges(from = c("e", "g", "h", "h"),
                to = c("g", "h", "f", "e"),
-               relationship = "receives",
+               rel = "receives",
                arrowhead = "dot",
                color = "red")
 

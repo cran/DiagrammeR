@@ -1,6 +1,9 @@
 #' Update and display graph object
-#' @description Using a \code{dgr_graph} object, update values of counts for nodes, edges, attributes, directed state, and display the schematic in the RStudio Viewer.
-#' @param graph a \code{dgr_graph} object, created using the \code{create_graph} function.
+#' @description Using a \code{dgr_graph} object, update values of counts for
+#' nodes, edges, attributes, directed state, and display the schematic in the
+#' RStudio Viewer.
+#' @param graph a \code{dgr_graph} object, created using the
+#' \code{create_graph} function.
 #' @param width the width of the graph representation in pixels.
 #' @examples
 #' \dontrun{
@@ -14,7 +17,7 @@
 #' edges <-
 #'   create_edges(from = c("a", "b", "c"),
 #'                to = c("d", "c", "a"),
-#'                relationship = "connected_to")
+#'                rel = "connected_to")
 #'
 #' graph <- create_graph(nodes_df = nodes,
 #'                       edges_df = edges)

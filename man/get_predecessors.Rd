@@ -15,7 +15,8 @@ get_predecessors(graph, node)
 a vector of node ID values.
 }
 \description{
-Provides a vector of node IDs for all nodes that have a link to the given node.
+Provides a vector of node IDs for all nodes that have a
+connection to the given node.
 }
 \examples{
 \dontrun{
@@ -33,7 +34,7 @@ edges <-
   create_edges(from = sample(LETTERS, replace = TRUE),
                to = sample(LETTERS, replace = TRUE),
                label = "edge",
-               relationship = "letter_to_letter")
+               rel = "letter_to_letter")
 
 graph <-
   create_graph(nodes_df = nodes,

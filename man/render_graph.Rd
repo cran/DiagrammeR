@@ -4,39 +4,53 @@
 \alias{render_graph}
 \title{Render the graph or output in various formats}
 \usage{
-render_graph(graph, output = "graph", width = NULL, height = NULL)
+render_graph(graph, output = "graph", layout = NULL, width = NULL,
+  height = NULL)
 }
 \arguments{
-\item{graph}{a \code{dgr_graph} object, created using the \code{create_graph} function.}
+\item{graph}{a \code{dgr_graph} object, created using the
+\code{create_graph} function.}
 
-\item{output}{a string specifying the output type; \code{graph} (the default) renders the graph using the \code{grViz} function, \code{DOT} outputs DOT code for the graph, and \code{SVG} provides SVG code for the rendered graph.}
+\item{output}{a string specifying the output type; \code{graph} (the
+default) renders the graph using the \code{grViz} function, \code{vivagraph}
+renders the graph using the \code{vivagraph} function, \code{visNetwork}
+renders the graph using the \code{visnetwork} function, \code{DOT} outputs
+DOT code for the graph, and \code{SVG} provides SVG code for the rendered
+graph.}
 
-\item{width}{an optional parameter for specifying the width of the resulting graphic in pixels.}
+\item{layout}{a string specifying a layout type for a \code{vivagraph}
+rendering of the graph, either \code{forceDirected} or \code{constant}.}
 
-\item{height}{an optional parameter for specifying the height of the resulting graphic in pixels.}
+\item{width}{an optional parameter for specifying the width of the resulting
+graphic in pixels.}
+
+\item{height}{an optional parameter for specifying the height of the
+resulting graphic in pixels.}
 }
 \description{
-Using a \code{dgr_graph} object, either render graph in the Viewer or output in various formats.
+Using a \code{dgr_graph} object, either render graph in the
+Viewer or output in various formats.
 }
 \examples{
 \dontrun{
 # Create a graph and then view it in the RStudio Viewer
 nodes <-
   create_nodes(nodes = LETTERS,
+               label = TRUE,
                type = "letter",
-               shape = sample(c("circle", "rectangle"),
+               shape = sample(c("circle", "square"),
                               length(LETTERS),
                               replace = TRUE),
-               fillcolor = sample(c("aqua", "gray80",
+               fillcolor = sample(c("aqua", "orange",
                                     "pink", "lightgreen",
-                                    "azure", "yellow"),
+                                    "black", "yellow"),
                                   length(LETTERS),
                                   replace = TRUE))
 
 edges <-
   create_edges(from = sample(LETTERS, replace = TRUE),
                to = sample(LETTERS, replace = TRUE),
-               relationship = "letter_to_letter")
+               rel = "letter_to_letter")
 
 
 graph <-
@@ -48,7 +62,14 @@ graph <-
                edge_attrs = c("color = gray20",
                               "arrowsize = 0.5"))
 
+# Render the graph using Graphviz
 render_graph(graph)
+
+# Render the graph using VivaGraph
+render_graph(graph, output = "vivagraph")
+
+# Render the graph using visNetwork
+render_graph(graph, output = "visNetwork")
 }
 }
 

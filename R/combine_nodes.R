@@ -1,6 +1,8 @@
 #' Combine multiple node data frames into a single node data frame
-#' @description Combine several node data frames in the style of \code{rbind}, except, it works regardless of the number and ordering of the columns.
-#' @param ... two or more node data frames, which contain node IDs and associated attributes.
+#' @description Combine several node data frames in the style of \code{rbind},
+#' except, it works regardless of the number and ordering of the columns.
+#' @param ... two or more node data frames, which contain node IDs and
+#' associated attributes.
 #' @return a combined node data frame.
 #' @examples
 #' \dontrun{
@@ -104,8 +106,9 @@ combine_nodes <- function(...){
     # Create a new data frame with combined rows
     for (i in 1:length(colnames(df1))){
 
-      if (i == 1) df_new <- data.frame(mat.or.vec(nr = nrow(df1) + nrow(df2),
-                                                  nc = 0), stringsAsFactors = FALSE)
+      if (i == 1) df_new <-
+          data.frame(mat.or.vec(nr = nrow(df1) + nrow(df2),
+                                nc = 0), stringsAsFactors = FALSE)
 
       df_col <- c(as.character(df1[,colnames(df1)[i]]),
                   as.character(df2[,colnames(df1)[i]]))

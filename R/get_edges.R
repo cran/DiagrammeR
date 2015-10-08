@@ -1,8 +1,14 @@
 #' Get node IDs associated with edges
-#' @description Provides information on the node IDs associated with edges from one or more edge data frames, or, a graph object.
+#' @description Provides information on the node IDs associated with edges from
+#' one or more edge data frames, or, a graph object.
 #' @param ... a collection of edge data frames or graph objects.
-#' @param return_type using \code{list} (the default) will provide a list object containing vectors of outgoing and incoming node IDs associated with edges. With \code{df}, a data frame containing outgoing and incoming node IDs associated with edges. With \code{vector} or \code{string}, a vector of character objects representing the edges is provided.
-#' @return a list, data frame, or a vector object, depending on the value given to \code{return_type}.
+#' @param return_type using \code{list} (the default) will provide a list
+#' object containing vectors of outgoing and incoming node IDs associated
+#' with edges. With \code{df}, a data frame containing outgoing and incoming
+#' node IDs associated with edges. With \code{vector} or \code{string}, a
+#' vector of character objects representing the edges is provided.
+#' @return a list, data frame, or a vector object, depending on the value
+#' given to \code{return_type}.
 #' @examples
 #' \dontrun{
 #' # Before getting node ID values, create a simple graph
@@ -18,7 +24,7 @@
 #'   create_edges(from = sample(LETTERS, replace = TRUE),
 #'                to = sample(LETTERS, replace = TRUE),
 #'                label = "edge",
-#'                relationship = "letter_to_letter")
+#'                rel = "letter_to_letter")
 #'
 #' graph <-
 #'   create_graph(nodes_df = nodes,
@@ -119,7 +125,7 @@ get_edges <- function(...,
 
     if (return_type == "df" & no_edges == TRUE){
 
-      edge_df <- as.data.frame(edge_list)
+      edge_df <- as.data.frame(edge_list, stringsAsFactors = FALSE)
       colnames(edge_df) <- c("from", "to")
 
       return(edge_df)
@@ -164,7 +170,7 @@ get_edges <- function(...,
 
   if (return_type == "df"){
 
-    edge_df <- as.data.frame(edge_list)
+    edge_df <- as.data.frame(edge_list, stringsAsFactors = FALSE)
     colnames(edge_df) <- c("from", "to")
 
     return(edge_df)

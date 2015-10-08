@@ -4,18 +4,24 @@
 \alias{edge_count}
 \title{Get count of all edges or edges with distinct relationship types}
 \usage{
-edge_count(graph, relationship = FALSE)
+edge_count(graph, rel = FALSE)
 }
 \arguments{
-\item{graph}{a graph object of class \code{dgr_graph} that is created using \code{create_graph}.}
+\item{graph}{a graph object of class \code{dgr_graph} that is created using
+\code{create_graph}.}
 
-\item{relationship}{either a logical value, where \code{TRUE} provides a named vector of edge count by type and \code{FALSE} (the default) provides a total count of edges, or, a string corresponding to one or more edge relationship types.}
+\item{rel}{either a logical value, where \code{TRUE} provides a
+named vector of edge count by type and \code{FALSE} (the default) provides
+a total count of edges, or, a string corresponding to one or more edge
+relationship types.}
 }
 \value{
 a numeric vector of single length.
 }
 \description{
-From a graph object of class \code{dgr_graph}, get a count of edges in the graph and optionally obtain a count of edges by their relationship type.
+From a graph object of class \code{dgr_graph}, get a count of
+edges in the graph and optionally obtain a count of edges by their
+relationship type.
 }
 \examples{
 \dontrun{
@@ -32,7 +38,7 @@ edges <-
   create_edges(from = sample(LETTERS, replace = TRUE),
                to = sample(LETTERS, replace = TRUE),
                label = "edge",
-               relationship = "letter_to_letter")
+               rel = "letter_to_letter")
 
 graph <-
   create_graph(nodes_df = nodes,
@@ -42,7 +48,7 @@ graph <-
                               "shape = circle"))
 
 # Get a total count of edges with no grouping
-edge_count(graph, relationship = FALSE)
+edge_count(graph, rel = FALSE)
 #> [1] 26
 }
 }

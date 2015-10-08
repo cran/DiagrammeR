@@ -10,10 +10,12 @@ edge_info(graph)
 \item{graph}{a graph object of class \code{dgr_graph}.}
 }
 \value{
-a data frame containing information specific to each edge within the graph.
+a data frame containing information specific to each edge within
+the graph.
 }
 \description{
-Obtain a data frame with detailed information on edges and their interrelationships within a graph.
+Obtain a data frame with detailed information on edges and
+their interrelationships within a graph.
 }
 \examples{
 \dontrun{
@@ -30,7 +32,7 @@ edges <-
   create_edges(from = sample(LETTERS, replace = TRUE),
                to = sample(LETTERS, replace = TRUE),
                label = "edge",
-               relationship = "letter_to_letter")
+               rel = "letter_to_letter")
 
 graph <-
   create_graph(nodes_df = nodes,
@@ -40,7 +42,7 @@ graph <-
                               "shape = circle"))
 
 edge_info(graph)
-#>    from   to     relationship label
+#>    from   to              rel label
 #> 1     A    Z letter_to_letter  edge
 #> 2     H    U letter_to_letter  edge
 #> 3     W    O letter_to_letter  edge
