@@ -1,7 +1,15 @@
 #' Get node IDs associated with edges
-#' @description Provides information on the node IDs associated with edges from
-#' one or more edge data frames, or, a graph object.
-#' @param ... a collection of edge data frames or graph objects.
+#' @description Obtain a list, data frame, or vector of node IDs from a graph
+#' object or an edge data frame. An optional filter by edge attribute
+#' can limit the set of edges returned.
+#' @param x either a graph object of class \code{dgr_graph} that is created
+#' using \code{create_graph} or an edge data frame.
+#' @param edge_attr an optional character vector of edge attribute values for
+#' filtering the edges returned.
+#' @param match an option to provide a logical expression with a comparison
+#' operator (\code{>}, \code{<}, \code{==}, or \code{!=}) followed by a number
+#' for numerical filtering, or, a character string for filtering the edges
+#' returned through string matching.
 #' @param return_type using \code{list} (the default) will provide a list
 #' object containing vectors of outgoing and incoming node IDs associated
 #' with edges. With \code{df}, a data frame containing outgoing and incoming
@@ -11,175 +19,206 @@
 #' given to \code{return_type}.
 #' @examples
 #' \dontrun{
-#' # Before getting node ID values, create a simple graph
+#' # Before getting edges, create a simple graph
 #' nodes <-
-#'   create_nodes(nodes = LETTERS,
-#'                label = TRUE,
-#'                type = c(rep("a_to_g", 7),
-#'                         rep("h_to_p", 9),
-#'                         rep("q_to_x", 8),
-#'                         rep("y_and_z",2)))
+#'   create_nodes(nodes = c("a", "b", "c", "d"),
+#'                type = "letter",
+#'                color = c("red", "green", "grey", "blue"),
+#'                value = c(3.5, 2.6, 9.4, 2.7))
 #'
 #' edges <-
-#'   create_edges(from = sample(LETTERS, replace = TRUE),
-#'                to = sample(LETTERS, replace = TRUE),
-#'                label = "edge",
-#'                rel = "letter_to_letter")
+#'   create_edges(from = c("a", "b", "c"),
+#'                to = c("d", "c", "a"),
+#'                rel = "leading_to",
+#'                color = c("pink", "blue", "red"),
+#'                value = c(3.9, 2.5, 7.3))
 #'
 #' graph <-
 #'   create_graph(nodes_df = nodes,
-#'                edges_df = edges,
-#'                graph_attrs = "layout = neato",
-#'                node_attrs = c("fontname = Helvetica",
-#'                               "shape = circle"))
+#'                edges_df = edges)
 #'
-#' # Can get the 'outgoing' and 'incoming' node ID values
-#' # in a list object
-#' get_edges(graph, return_type = "list") # the default
+#' # Get all edges within a graph, returned as a list
+#' get_edges(graph)
 #' #> [[1]]
-#' #>  [1] "A" "H" "W" "U" "I" "M" "U" "T" "I" "R" "O"
-#' #> [12] "G" "O" "A" "V" "I" "M" "K" "R" "T" "Y" "R"
-#' #> [23] "M" "L" "H" "V"
-#'
+#' #> [1] "a" "b" "c"
+#' #>
 #' #> [[2]]
-#' #>  [1] "Z" "U" "O" "K" "V" "M" "N" "C" "D" "Z" "B"
-#' #> [12] "G" "U" "Y" "H" "V" "R" "V" "Z" "S" "Q" "I"
-#' #> [23] "P" "S" "E" "P"
+#' #> [1] "d" "c" "a"
 #'
-#' # Similarly, you can specify that a data frame is given
+#' # Get all edges within a graph, returned as a data frame
 #' get_edges(graph, return_type = "df")
-#' #>    from to
-#' #> 1     A  Z
-#' #> 2     H  U
-#' #> 3     W  O
-#' #> 4     U  K
-#' #> 5     I  V
-#' #>..   ... ..
+#' #>   from to
+#' #> 1    a  d
+#' #> 2    b  c
+#' #> 3    c  a
 #'
-#' # A character string with node IDs can instead be gotten
+#' # Get all edges within a graph, returned as a vector
 #' get_edges(graph, return_type = "vector")
-#' #>  [1] "A -> Z" "H -> U" "W -> O" "U -> K" "I -> V"
-#' #>  [6] "M -> M" "U -> N" "T -> C" "I -> D" "R -> Z"
-#' #> [11] "O -> B" "G -> G" "O -> U" "A -> Y" "V -> H"
-#' #> [16] "I -> V" "M -> R" "K -> V" "R -> Z" "T -> S"
-#' #> [21] "Y -> Q" "R -> I" "M -> P" "L -> S" "H -> E"
-#' #> [26] "V -> P"
+#' #> [1] "a -> d" "b -> c" "c -> a"
+#'
+#' # Get a vector of edges using a numeric
+#' # comparison (i.e., all edges with 'value' attribute
+#' # greater than 3)
+#' get_edges(graph,
+#'           edge_attr = "value",
+#'           match = "> 3",
+#'           return_type = "vector")
+#' #> [1] "a -> d" "c -> a"
+#'
+#' # Get a vector of edges using a match
+#' get_edges(graph,
+#'           edge_attr = "color",
+#'           match = "pink",
+#'           return_type = "vector")
+#' #> [1] "a -> d"
 #' }
 #' @export get_edges
 
-get_edges <- function(...,
+get_edges <- function(x,
+                      edge_attr = NULL,
+                      match = NULL,
                       return_type = "list"){
 
-  objects <- list(...)
+  if (class(x) == "dgr_graph"){
 
-  for (i in 1:length(objects)){
+    if (is_graph_empty(x) | is.null(x$edges_df)){
 
-    if (i == 1) {
-      edge_list <- vector(mode = "list")
-      edge_list[[1]] <- edge_list[[2]] <- vector(mode = "character")
-    }
+      edges <- NA
 
-    object <- objects[[i]]
-
-    if (class(object) == "dgr_graph"){
-
-      object_type <- "dgr_graph"
-    }
-
-    if (any(c("from", "to") %in% colnames(object))){
-
-      object_type <- "edge_df"
-    }
-  }
-
-  if (object_type == "dgr_graph"){
-
-    object <- object$edges_df
-
-    no_edges <- FALSE
-
-    if ("from" %in% colnames(object)){
-
-      from_column <- which(colnames(object) == "from")
+      return(edges)
 
     } else {
 
-      no_edges <- TRUE
+      edges_df <- x$edges_df
     }
-
-    if ("to" %in% colnames(object)){
-
-      to_column <- which(colnames(object) == "to")
-
-    } else {
-
-      no_edges <- TRUE
-    }
-
-    if (return_type == "list" & no_edges == TRUE){
-
-      edge_list[[1]] <- edge_list[[2]] <- NA
-
-      return(edge_list)
-    }
-
-    if (return_type == "df" & no_edges == TRUE){
-
-      edge_df <- as.data.frame(edge_list, stringsAsFactors = FALSE)
-      colnames(edge_df) <- c("from", "to")
-
-      return(edge_df)
-    }
-
-    if (return_type %in% c("vector", "string") & no_edges == TRUE){
-
-      edge_vector <- NA
-
-      return(edge_vector)
-    }
-
-    edge_list[[1]] <- c(edge_list[[1]], object[,from_column])
-    edge_list[[2]] <- c(edge_list[[2]], object[,to_column])
   }
 
-  if (object_type == "edge_df"){
+  if (class(x) == "data.frame"){
 
-    both_from_to_columns <- all(c(any(c("from") %in%
-                                        colnames(object))),
-                                any(c("to") %in%
-                                      colnames(object)))
+    if (colnames(x)[1] == "from" &
+        colnames(x)[2] == "to"){
 
-    if (exists("both_from_to_columns")){
+      edges_df <- x
+    }
+  }
 
-      if (both_from_to_columns == TRUE){
+  if (!is.null(edge_attr)){
+    if (length(edge_attr) > 1){
+      stop("Only one edge attribute can be specified.")
+    }
 
-        from_column <- which(colnames(object) %in% "from")[1]
+    if (!(edge_attr %in% colnames(edges_df)[-(1:2)])){
+      stop("The specified attribute is not available.")
+    }
+  }
 
-        to_column <- which(colnames(object) %in% "to")[1]
+  if (is.null(edge_attr)){
+    from <- edges_df$from
+    to <- edges_df$to
+  }
+
+  if (!is.null(edge_attr)){
+
+    # If a match term provided, filter using a logical expression
+    # or a regex match
+    if (!is.null(match)){
+
+      if (grepl("^>.*", match) | grepl("^<.*", match) |
+          grepl("^==.*", match) | grepl("^!=.*", match)){
+        logical_expression <- TRUE } else {
+          logical_expression <- FALSE
+        }
+
+      column_number <-
+        which(colnames(edges_df) %in% edge_attr)
+
+      if (logical_expression){
+
+        if (grepl("^>.*", match)){
+          rows_where_true_le <-
+            which(edges_df[,column_number] >
+                    as.numeric(gsub(">(.*)", "\\1", match)))
+        }
+
+        if (grepl("^>=.*", match)){
+          rows_where_true_le <-
+            which(edges_df[,column_number] >=
+                    as.numeric(gsub(">=(.*)", "\\1", match)))
+        }
+
+        if (grepl("^<.*", match)){
+          rows_where_true_le <-
+            which(edges_df[,column_number] <
+                    as.numeric(gsub("<(.*)", "\\1", match)))
+        }
+
+        if (grepl("^<=.*", match)){
+          rows_where_true_le <-
+            which(edges_df[,column_number] <=
+                    as.numeric(gsub("<=(.*)", "\\1", match)))
+        }
+
+        if (grepl("^==.*", match)){
+          rows_where_true_le <-
+            which(edges_df[,column_number] ==
+                    as.numeric(gsub("==(.*)", "\\1", match)))
+        }
+
+        from <- edges_df[rows_where_true_le, 1]
+        to <- edges_df[rows_where_true_le, 2]
       }
     }
 
-    edge_list[[1]] <- c(edge_list[[1]], object[,from_column])
-    edge_list[[2]] <- c(edge_list[[2]], object[,to_column])
+    # Filter using a `match` value
+    if (logical_expression == FALSE){
+
+      if (is.numeric(match)){
+        match <- as.character(match)
+      }
+
+      rows_where_true_match <-
+        which(match == as.character(edges_df[,column_number]))
+
+      from <- edges_df[rows_where_true_match, 1]
+      to <- edges_df[rows_where_true_match, 2]
+    }
   }
 
   if (return_type == "list"){
 
-    return(edge_list)
+    edges_list <- vector(mode = "list")
+    edges_list[[1]] <- edges_list[[2]] <- vector(mode = "character")
+
+    edges_list[[1]] <- c(edges_list[[1]], from)
+    edges_list[[2]] <- c(edges_list[[2]], to)
+
+    return(edges_list)
   }
 
   if (return_type == "df"){
 
-    edge_df <- as.data.frame(edge_list, stringsAsFactors = FALSE)
-    colnames(edge_df) <- c("from", "to")
+    edges_list <- vector(mode = "list")
+    edges_list[[1]] <- edges_list[[2]] <- vector(mode = "character")
 
-    return(edge_df)
+    edges_list[[1]] <- c(edges_list[[1]], from)
+    edges_list[[2]] <- c(edges_list[[2]], to)
+
+    edges_df <- as.data.frame(edges_list, stringsAsFactors = FALSE)
+    colnames(edges_df) <- c("from", "to")
+
+    return(edges_df)
   }
 
-  if (return_type %in% c("vector", "string")){
+  if (return_type == "vector"){
 
-    edge_vector <- paste(edge_list[[1]], "->", edge_list[[2]])
+    edges_list <- vector(mode = "list")
+    edges_list[[1]] <- edges_list[[2]] <- vector(mode = "character")
 
-    return(edge_vector)
+    edges_list[[1]] <- c(edges_list[[1]], from)
+    edges_list[[2]] <- c(edges_list[[2]], to)
+
+    edges_vector <- paste(edges_list[[1]], "->", edges_list[[2]])
+
+    return(edges_vector)
   }
 }

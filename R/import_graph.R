@@ -3,8 +3,8 @@
 #' create a graph object.
 #' @param graph_file a connection to a graph file.
 #' @param file_type the type of file to be imported. Options are:
-#' \code{graphml} (GraphML) and \code{sif} (SIF). If not supplied, the function
-#' will infer the type by its file extension.
+#' \code{graphml} (GraphML), \code{gml} (GML), and \code{sif} (SIF). If not
+#' supplied, the function will infer the type by its file extension.
 #' @param graph_name an optional string for labeling the graph object.
 #' @param graph_time a date or date-time string (required for insertion of
 #' graph into a graph series of the type \code{temporal}).
@@ -25,16 +25,13 @@ import_graph <- function(graph_file,
 
   # Stop function if file doesn't exist
   if (file.exists(graph_file) == FALSE){
-
     stop("The file as specified doesn't exist.")
   }
 
   # Stop function if 'file_type' specified is not part of the group
   # that can be imported
   if (!is.null(file_type)){
-
-    if (!(tolower(file_type) %in% c("graphml", "sif"))){
-
+    if (!(tolower(file_type) %in% c("graphml", "gml", "sif"))){
       stop("The file type as specified cannot be imported.")
     }
   }
@@ -45,13 +42,12 @@ import_graph <- function(graph_file,
 
     # Determine file type from file extension
     if (file_extension == "graphml"){
-
       file_type <- "graphml"
+    } else if (file_extension == "gml"){
+      file_type <- "gml"
     } else if (file_extension == "sif"){
-
       file_type <- "sif"
     } else {
-
       stop("The file type is not known so it can't be imported.")
     }
   }
@@ -96,7 +92,6 @@ import_graph <- function(graph_file,
     node_attributes <- list()
 
     for (i in 1:length(node_key_names)){
-
       for (j in 1:length(xml_nodes[[1]])){
 
         if (j == 1) attribute <- vector(mode = "character")
@@ -151,7 +146,108 @@ import_graph <- function(graph_file,
                    graph_tz = graph_tz,
                    node_attrs = c("shape = circle", "width = 10",
                                   "style = filled", "color = black"),
-                   graph_attrs = "layout = neato")
+                   graph_attrs = "layout = neato",
+                   generate_dot = FALSE)
+
+    # Return the graph
+    return(the_graph)
+  }
+
+  if (file_type == "gml"){
+
+    # Read in the .gml document as a vector object
+    gml_document <- paste(readLines(graph_file), collapse = "")
+
+    # Extract information on whether graph is directed
+    graph_directed <-
+      unlist(
+        str_replace_all(
+          str_extract_all(gml_document, "directed [0-1]"),
+          "directed ", ""))
+
+    # Extract all node definitions
+    node_defs <- unlist(str_extract_all(gml_document, "node[ ]*?\\[.*?\\]"))
+
+    # Get all node ID values
+    node_id <-
+      str_replace_all(
+        str_extract_all(
+          node_defs,
+          "id [a-z0-9_]*"),
+        "id ", "")
+
+    # Get all node label values, if they exist
+    if (any(str_detect(node_defs, "label"))){
+      node_label <-
+        str_replace_all(
+          str_replace_all(
+            str_extract_all(node_defs,
+                            "label \\\".*?\\\""),
+            "label \"", ""),
+          "\"", "")
+    }
+
+    # Extract all edge definitions
+    edge_defs <- unlist(str_extract_all(gml_document, "edge[ ]*?\\[.*?\\]"))
+
+    edges_from <-
+      str_replace_all(
+        str_extract_all(
+          edge_defs,
+          "source [a-z0-9_]*"),
+        "source ", "")
+
+    edges_to <-
+      str_replace_all(
+        str_extract_all(
+          edge_defs,
+          "target [a-z0-9_]*"),
+        "target ", "")
+
+
+    if (any(str_detect(edge_defs, "label"))){
+      edge_label <-
+        str_replace_all(
+          str_replace_all(
+            str_extract_all(edge_defs,
+                            "label \\\".*?\\\""),
+            "label \"", ""),
+          "\"", "")
+    }
+
+    if (any(str_detect(edge_defs, "value"))){
+      edge_value <-
+        str_replace_all(
+          str_extract_all(edge_defs,
+                          "value [a-z0-9\\.]*"),
+          "value ", "")
+    }
+
+    # Create all nodes for graph
+    all_nodes <-
+      create_nodes(nodes = node_id,
+                   label = FALSE)
+
+    if (exists("node_label")){
+      all_nodes$label <- node_label
+    }
+
+    # Create all edges for graph
+    all_edges <-
+      create_edges(from = edges_from,
+                   to = edges_to)
+
+    if (exists("edge_value")){
+      all_edges$data_value <- edge_value
+    }
+
+    # Create the graph
+    the_graph <-
+      create_graph(nodes_df = all_nodes,
+                   edges_df = all_edges,
+                   directed = ifelse(graph_directed == "1",
+                                     TRUE, FALSE),
+                   generate_dot = FALSE)
 
     # Return the graph
     return(the_graph)
@@ -208,7 +304,8 @@ import_graph <- function(graph_file,
 
     # Create a graph object
     the_graph <- create_graph(nodes_df = nodes_df,
-                              edges_df = edges_df)
+                              edges_df = edges_df,
+                              generate_dot = FALSE)
 
     # Return the graph
     return(the_graph)

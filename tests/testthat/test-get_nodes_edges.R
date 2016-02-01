@@ -47,7 +47,19 @@ test_that("getting node IDs from various objects is possible", {
   # will be greater than the nodes associated with edges (since there
   # will be free nodes with no edges)
   expect_more_than(length(get_nodes(graph)),
-                   length(get_nodes(edges)))
+                   length(unique(c(graph$edges_df$from,
+                                   graph$edges_df$to))))
+
+  # Get the node df from the graph using `get_node_df()`
+  node_df_from_graph <- get_node_df(graph)
+
+  # Expect that the nodes from the graph and from the extracted
+  # node df are the same
+  expect_true(all(get_nodes(node_df_from_graph) == get_nodes(graph)))
+
+  # Expect that using `get_node_df()` on a graph with no nodes
+  # will return an NA
+  expect_true(is.na(get_node_df(create_graph())))
 })
 
 test_that("getting node IDs associated within a graph's edges is possible", {
@@ -122,6 +134,18 @@ test_that("getting node IDs associated within a graph's edges is possible", {
 
   # Expect that the ' -> ' substring is in each vector component
   expect_true(all(grepl(" -> ", gotten_edges_vector)))
+
+  # Get the edge df from the graph using `get_edge_df()`
+  edge_df_from_graph <- get_edge_df(graph)
+
+  # Expect that the edges from the graph and from the extracted
+  # edge df are the same
+  expect_true(all(get_edges(edge_df_from_graph, return_type = "vector") ==
+        get_edges(edge_df_from_graph, return_type = "vector")))
+
+  # Expect that using `get_edge_df()` on a graph with no edges
+  # will return an NA
+  expect_true(is.na(get_edge_df(create_graph(nodes_df = create_nodes("a")))))
 })
 
 test_that("getting edge information from an edge data frame is possible", {
@@ -193,25 +217,13 @@ test_that("getting edge information from a graph with no edges is possible ", {
   edges_list_from_graph_no_edges <-
     get_edges(graph_no_edges, return_type = "list")
 
-  # Expect that the list is of length 2
-  expect_true(length(edges_list_from_graph_no_edges) == 2)
-
-  # Expect character vectors of length 1 in 'gotten_edges_list'
-  expect_true(length(edges_list_from_graph_no_edges[[1]]) == 1)
-  expect_true(length(edges_list_from_graph_no_edges[[2]]) == 1)
+  # Expect that an NA is returned
+  expect_true(is.na(edges_list_from_graph_no_edges))
 
   # Get edges from an edgeless graph returned as a data frame
   edges_df_from_graph_no_edges <-
     get_edges(graph_no_edges, return_type = "df")
 
-  # Expect a data frame object
-  expect_is(edges_df_from_graph_no_edges, "data.frame")
-
-  # Expect that the data frame has 2 columns
-  expect_true(ncol(edges_df_from_graph_no_edges) == 2)
-
-  # Expect columns of class 'character' and 0 rows in 'gotten_edges_df'
-  expect_is(edges_df_from_graph_no_edges[,1], "character")
-  expect_is(edges_df_from_graph_no_edges[,2], "character")
-  expect_true(nrow(edges_df_from_graph_no_edges) == 0)
+  # Expect that an NA is returned
+  expect_true(is.na(edges_df_from_graph_no_edges))
 })

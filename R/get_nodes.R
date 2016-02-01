@@ -1,179 +1,151 @@
-#' Get vector of node IDs
-#' @description Provides information on the node IDs from one or several node
-#' data frames, edge data frames, or graph objects.
-#' @param ... a collection of node data frames, edge data frames, or a single
-#' graph object.
+#' Get a vector of node ID values
+#' @description Obtain a vector of node ID values from a graph object or
+#' a node data frame. An optional filter by node attribute can limit the set
+#' of node ID values returned.
+#' @param x either a graph object of class \code{dgr_graph} that is created
+#' using \code{create_graph} or a node data frame.
+#' @param node_attr an optional character vector of node attribute values for
+#' filtering the node ID values returned.
+#' @param match an option to provide a logical expression with a comparison
+#' operator (\code{>}, \code{<}, \code{==}, or \code{!=}) followed by a number
+#' for numerical filtering, or, a character string for filtering the edges
+#' returned through string matching.
 #' @return a vector of node ID values.
 #' @examples
 #' \dontrun{
 #' # Before getting node ID values, create a simple graph
 #' nodes <-
-#'   create_nodes(nodes = LETTERS,
-#'                label = TRUE,
-#'                type = c(rep("a_to_g", 7),
-#'                         rep("h_to_p", 9),
-#'                         rep("q_to_x", 8),
-#'                         rep("y_and_z",2)))
-#'
-#' edges <-
-#'   create_edges(from = sample(LETTERS, replace = TRUE),
-#'                to = sample(LETTERS, replace = TRUE),
-#'                label = "edge",
-#'                rel = "letter_to_letter")
+#'   create_nodes(nodes = c("a", "b", "c", "d"),
+#'                type = "letter",
+#'                color = c("red", "green", "grey", "blue"),
+#'                value = c(3.5, 2.6, 9.4, 2.7))
 #'
 #' graph <-
-#'   create_graph(nodes_df = nodes,
-#'                edges_df = edges,
-#'                graph_attrs = "layout = neato",
-#'                node_attrs = c("fontname = Helvetica",
-#'                               "shape = circle"))
+#'   create_graph(nodes_df = nodes)
 #'
 #' # Get a vector of all nodes in a graph
 #' get_nodes(graph)
-#' #> [1] "A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L"
-#' #> [13] "M" "N" "O" "P" "Q" "R" "S" "T" "U" "V" "W" "X"
-#' #> [25] "Y" "Z"
+#' #> [1] "a" "b" "c" "d"
 #'
 #' # Get a vector of node ID values from a node data frame
 #' get_nodes(nodes)
-#' #> [1] "A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L"
-#' #> [13] "M" "N" "O" "P" "Q" "R" "S" "T" "U" "V" "W" "X"
-#' #> [25] "Y" "Z"
+#' #> [1] "a" "b" "c" "d"
 #'
-#' # Get a vector of node ID values from an edge data frame
-#' get_nodes(edges)
-#' #> [1] "A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L"
-#' #> [13] "M" "N" "O" "P" "Q" "R" "S" "T" "U" "V" "W" "X"
-#' #> [25] "Y" "Z"
+#' # Get a vector of node ID values using a numeric
+#' # comparison (i.e., all nodes with 'value' attribute
+#' # greater than 3)
+#' get_nodes(graph,
+#'           node_attr = "value",
+#'           match = "> 3")
+#' #> [1] "a" "c"
+#'
+#' # Get a vector of node ID values using a match
+#' # pattern (i.e., all nodes with 'color' attribute
+#' # of "green")
+#' get_nodes(graph,
+#'           node_attr = "color",
+#'           match = "green")
+#' #> [1] "b"
 #' }
 #' @export get_nodes
 
-get_nodes <- function(...){
+get_nodes <- function(x,
+                      node_attr = NULL,
+                      match = NULL){
 
-  objects <- list(...)
+  if (class(x) == "dgr_graph"){
 
-  # Determine the length of the 'objects' list
-  length_of_objects <- length(objects)
+    if (is_graph_empty(x)){
 
-  # If there is more than one object supplied, check for existance
-  # of a graph object
-  if (length_of_objects > 1){
+      node_ID <- NA
 
-    # Determine the classes of the first two objects
-    class_object_1 <- class(objects[[1]])
-    class_object_2 <- class(objects[[2]])
+      return(node_ID)
 
-    if (any("dgr_graph" %in% c(class_object_1, class_object_2))){
+    } else {
 
-      stop("Only a single graph can be supplied.")
+      nodes_df <- x$nodes_df
     }
   }
 
-  for (i in 1:length(objects)){
+  if (class(x) == "data.frame"){
 
-    if (i == 1) node_ID <- vector(mode = "character")
+    if (colnames(x)[1] == "nodes"){
 
-    object <- objects[[i]]
+      nodes_df <- x
+    }
+  }
 
-    if (class(object) == "dgr_graph"){
-
-      object_type <- "dgr_graph"
+  if (!is.null(node_attr)){
+    if (length(node_attr) > 1){
+      stop("Only one node attribute can be specified.")
     }
 
-    if (class(object) == "data.frame"){
-
-      if (any(c("nodes", "node", "node_ID") %in% colnames(object))){
-
-        object_type <- "node_df"
-      }
-
-      if (any(c("from", "to") %in% colnames(object))){
-
-        object_type <- "edge_df"
-      }
+    if (!(node_attr %in% colnames(nodes_df)[-1])){
+      stop("The specified attribute is not available.")
     }
+  }
 
-    if (object_type == "dgr_graph"){
+  if (is.null(node_attr)){
+    nodes <- nodes_df$nodes
+  }
 
-      if (is_graph_empty(object)){
+  if (!is.null(node_attr)){
 
-        node_ID <- NA
+    column_number <-
+      which(colnames(nodes_df) %in% node_attr)
 
-        return(node_ID)
-      }
+    # Filter using a logical expression
+    if (!is.null(match)){
 
-      object <- object$nodes_df
-
-      if ("node" %in% colnames(object)){
-
-        nodes_column <- which("node" %in% colnames(object))
-
-      } else if ("nodes" %in% colnames(object)){
-
-        nodes_column <- which("nodes" %in% colnames(object))
-
-      } else if ("node_id" %in% colnames(object)){
-
-        nodes_column <- which("node_id" %in% colnames(object))
-
-      } else {
-
-        stop("There is no column with node ID information.")
-
-      }
-
-      node_ID <- c(node_ID, object[,nodes_column])
-    }
-
-    if (object_type == "node_df"){
-
-      if ("node" %in% colnames(object)){
-
-        nodes_column <- which("node" %in% colnames(object))
-
-      } else if ("nodes" %in% colnames(object)){
-
-        nodes_column <- which("nodes" %in% colnames(object))
-
-      } else if ("node_id" %in% colnames(object)){
-
-        nodes_column <- which("node_id" %in% colnames(object))
-
-      } else {
-
-        stop("There is no column with node ID information.")
-
-      }
-
-      node_ID <- c(node_ID, object[,nodes_column])
-    }
-
-    if (object_type == "edge_df"){
-
-      both_from_to_columns <- all(c(any(c("from") %in%
-                                          colnames(object))),
-                                  any(c("to") %in%
-                                        colnames(object)))
-
-      if (exists("both_from_to_columns")){
-
-        if (both_from_to_columns == TRUE){
-
-          from_column <- which(colnames(object) %in% "from")[1]
-
-          to_column <- which(colnames(object) %in% "to")[1]
+      if (grepl("^>.*", match) | grepl("^<.*", match) |
+          grepl("^==.*", match) | grepl("^!=.*", match)){
+        logical_expression <- TRUE } else {
+          logical_expression <- FALSE
         }
+
+      if (logical_expression){
+
+        if (grepl("^>.*", match)){
+          rows_where_true_le <-
+            which(nodes_df[,column_number] >
+                    as.numeric(gsub(">(.*)", "\\1", match)))
+        }
+
+        if (grepl("^<.*", match)){
+          rows_where_true_le <-
+            which(nodes_df[,column_number] <
+                    as.numeric(gsub("<(.*)", "\\1", match)))
+        }
+
+        if (grepl("^==.*", match)){
+          rows_where_true_le <-
+            which(nodes_df[,column_number] ==
+                    as.numeric(gsub("==(.*)", "\\1", match)))
+        }
+
+        if (grepl("^!=.*", match)){
+          rows_where_true_le <-
+            which(nodes_df[,column_number] !=
+                    as.numeric(gsub("!=(.*)", "\\1", match)))
+        }
+
+        nodes <- nodes_df[rows_where_true_le, 1]
+      }
+    }
+
+    # Filter using a `match` value
+    if (logical_expression == FALSE){
+
+      if (is.numeric(match)){
+        match <- as.character(match)
       }
 
-      node_ID <- c(node_ID, unique(c(object[,from_column],
-                                     object[,to_column])))
+      rows_where_true_match <-
+        which(match == as.character(nodes_df[,column_number]))
+
+      nodes <- nodes_df[rows_where_true_match, 1]
     }
   }
 
-  all_ID_unique <- ifelse(anyDuplicated(node_ID) == 0, TRUE, FALSE)
-
-  if (all_ID_unique == TRUE){
-
-    return(node_ID)
-  }
+  return(nodes)
 }

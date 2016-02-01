@@ -1,57 +1,44 @@
-context("Creating a subgraph from a graph object")
+context("Creating a subgraph")
 
-test_that("a subgraph can be created", {
+test_that("a subgraph can be created and such an object is correct", {
 
-  # Create a graph
-  set.seed(64)
-
+  # Create a simple graph
   nodes <-
-    create_nodes(nodes = LETTERS,
-                 type = "letter",
-                 shape = sample(c("circle", "rectangle"),
-                                length(LETTERS),
-                                replace = TRUE),
-                 fillcolor = sample(c("aqua", "gray80",
-                                      "pink", "lightgreen",
-                                      "azure", "yellow"),
-                                    length(LETTERS),
-                                    replace = TRUE))
+    create_nodes(nodes = c("a", "b", "c", "d",
+                           "e", "f", "g", "h"),
+                 value = c(3.5, 2.6, 9.4, 2.7,
+                           5.2, 2.1, 4.8, 8.5))
 
   edges <-
-    create_edges(from = sample(LETTERS, replace = TRUE),
-                 to = sample(LETTERS, replace = TRUE),
-                 rel = "letter_to_letter")
+    create_edges(from = c("a", "b", "c", "g", "e",
+                          "e", "h", "f", "a", "c"),
+                 to = c("d", "c", "a", "c", "h",
+                        "b", "d", "e", "f", "d"))
 
-  graph <- create_graph(nodes_df = nodes,
-                        edges_df = edges,
-                        graph_attrs = "layout = neato",
-                        node_attrs = c("fontname = Helvetica",
-                                       "style = filled"),
-                        edge_attrs = c("color = gray20",
-                                       "arrowsize = 0.5"))
+  graph <-
+    create_graph(nodes_df = nodes,
+                 edges_df = edges)
 
-  # Define a subgraph starting from node "U", with a distance of 2
-  subgraph <- create_subgraph(graph = graph,
-                              starting_node = "U",
-                              distance = 2)
+  # Create a selection of nodes, stored within the
+  # graph object
+  graph <-
+    select_nodes(graph,
+                 node_attr = "value",
+                 search = "> 3")
 
-  # Expect a graph object of class 'dgr_graph'
-  expect_true(class(subgraph) == "dgr_graph")
+  # Create a subgraph based on the selection
+  subgraph <-
+    create_subgraph_from_selection(graph)
 
-  # Expect that the use of 'is_graph_empty' function will result in FALSE
-  expect_false(is_graph_empty(subgraph))
+  # Expect that only those nodes with a value >3 are in the subgraph
+  expect_true(all(c("a", "c", "e", "g", "h") %in% get_nodes(subgraph)))
 
-  # Expect that the number of nodes and edges are less in the subgraph than
-  # those of the main graph
-  expect_less_than(nrow(subgraph$nodes_df), nrow(graph$nodes_df))
-  expect_less_than(nrow(subgraph$edges_df), nrow(graph$edges_df))
+  # Expect only certain edges to be present in the subgraph
+  expect_true(all(c("c -> a", "g -> c", "e -> h") %in%
+                    get_edges(subgraph, return_type = "vector")))
 
-  # Expect that the attributes/properties are retained in the subgraph
-  expect_equal(graph$graph_name, subgraph$graph_name)
-  expect_equal(graph$graph_time, subgraph$graph_time)
-  expect_equal(graph$graph_tz, subgraph$graph_tz)
-  expect_true(all(graph$graph_attrs == subgraph$graph_attrs))
-  expect_true(all(graph$node_attrs == subgraph$node_attrs))
-  expect_true(all(graph$edge_attrs == subgraph$edge_attrs))
-  expect_true(all(graph$directed == subgraph$directed))
+  # Expect an error when attempting to create a subgraph with
+  # a graph without an active selection
+  graph <- clear_selection(graph)
+  expect_error(create_subgraph_from_selection(graph))
 })

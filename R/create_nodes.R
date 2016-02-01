@@ -2,66 +2,101 @@
 #' @description Combine several named vectors for nodes and their attributes
 #' into a data frame, which can be combined with other similarly-generated data
 #' frame, or, added to a graph object.
-#' @param ... one or more named vectors for nodes and associated attributes.
+#' @param nodes the node ID value(s) for the node(s) to be created.
+#' @param type an optional 'type' description for each node.
+#' @param label an optional label for each node.
+#' @param ... one or more named vectors for associated attributes.
 #' @return a data frame.
 #' @examples
 #' \dontrun{
 #' # Create a node data frame
 #' nodes <-
 #'   create_nodes(nodes = c("a", "b", "c", "d"),
+#'                type = "letter",
 #'                label = TRUE,
-#'                type = c("lower", "lower", "upper", "upper"),
 #'                style = "filled",
 #'                color = "aqua",
 #'                shape = c("circle", "circle",
 #'                          "rectangle", "rectangle"),
-#'                data = c(3.5, 2.6, 9.4, 2.7))
+#'                value = c(3.5, 2.6, 9.4, 2.7))
 #' }
 #' @export create_nodes
 
-create_nodes <- function(...){
+create_nodes <- function(nodes,
+                         type = NULL,
+                         label = nodes,
+                         ...){
 
-  nodes <- list(...)
-
-  # Stop function if there are no named list components
-  stopifnot(!is.null(names(nodes)))
-
-  # Attempt to obtain the number of nodes from the 'nodes' column
-  if ("nodes" %in% names(nodes)){
-    nodes_column <- which("nodes" %in% names(nodes))
-    number_of_nodes <- length(nodes[nodes_column][[1]])
+  if (is.null(type)){
+    type <- as.character(rep("", length(nodes)))
   }
 
-  for (i in 1:length(nodes)){
+  if (!is.null(type)){
 
     # Expand vectors with single values to fill to number of nodes
-    if (length(nodes[[i]]) == 1){
-      nodes[[i]] <- rep(nodes[[i]], number_of_nodes)
+    if (length(type) == 1){
+      type <- rep(type, length(nodes))
     }
 
-    # Expand vectors with length > 1 and length < 'number_of_nodes'
-    if (length(nodes[[i]]) > 1 & length(nodes[[i]]) < number_of_nodes){
-      nodes[[i]] <-
-        c(nodes[[i]], rep("", (number_of_nodes - length(nodes[[i]]))))
+    # Expand vectors with length > 1 and length < 'length(nodes)'
+    if (length(type) > 1 & length(type) < length(nodes)){
+      type <-
+        c(type, rep("", (length(nodes) - length(type))))
     }
 
     # Trim vectors with number of values exceeding number of nodes
-    if (length(nodes[[i]]) > number_of_nodes){
-      nodes[[i]] <- nodes[[i]][1:number_of_nodes]
+    if (length(type) > length(nodes)){
+      type <- type[1:length(nodes)]
     }
+  }
 
-    # Change logical for labels to empty labels
-    if (names(nodes)[i] == "label" & class(nodes[[i]]) == "logical"){
-      nodes[[i]] <- as.character(nodes[[i]])
+  # Collect extra vectors of data as 'extras'
+  extras <- list(...)
 
-      for (j in 1:length(nodes[[i]])){
-        nodes[[i]][j] <-
-          ifelse(nodes[[i]][j] == "FALSE", " ", nodes[nodes_column][[1]][j])
+  if (length(extras) > 0){
+
+    for (i in 1:length(extras)){
+
+      # Expand vectors with single values to fill to number of nodes
+      if (length(extras[[i]]) == 1){
+        extras[[i]] <- rep(extras[[i]], length(nodes))
+      }
+
+      # Expand vectors with length > 1 and length < 'length(nodes)'
+      if (length(extras[[i]]) > 1 & length(extras[[i]]) < length(nodes)){
+        extras[[i]] <-
+          c(extras[[i]], rep("", (length(nodes) - length(extras[[i]]))))
+      }
+
+      # Trim vectors with number of values exceeding number of nodes
+      if (length(extras[[i]]) > length(nodes)){
+        extras[[i]] <- extras[[i]][1:length(nodes)]
       }
     }
   }
 
-  nodes_df <- as.data.frame(nodes, stringsAsFactors = FALSE)
+  # Change logical for labels to empty labels
+  if (class(label) == "logical" & length(label) == 1){
+
+    if (label == TRUE){
+
+      label <- as.character(nodes)
+
+    } else {
+
+      label <- rep("", length(nodes))
+    }
+  }
+
+  if (length(extras) > 0){
+
+    nodes_df <- data.frame(nodes = nodes, type = type, label = label,
+                           extras, stringsAsFactors = FALSE)
+  } else {
+
+    nodes_df <- data.frame(nodes = nodes, type = type, label = label,
+                           stringsAsFactors = FALSE)
+  }
 
   return(nodes_df)
 }

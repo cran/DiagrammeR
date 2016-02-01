@@ -17,7 +17,7 @@
 #' graph <- add_node(graph, node = "b")
 #'
 #' # Add an edge
-#' graph <- add_edges(graph, from = "a", to = "b")
+#' graph <- add_edge(graph, from = "a", to = "b")
 #'
 #' # Delete the edge
 #' graph <- delete_edge(graph, from = "a", to = "b")
@@ -64,10 +64,17 @@ delete_edge <- function(graph,
 
       row.names(revised_edges_df) <- NULL
 
-      dgr_graph <- create_graph(nodes_df = graph$nodes_df,
-                                edges_df = revised_edges_df,
-                                directed = graph$directed,
-                                graph_attrs = graph$graph_attrs)
+      dgr_graph <-
+        create_graph(nodes_df = graph$nodes_df,
+                     edges_df = revised_edges_df,
+                     directed = graph$directed,
+                     graph_attrs = graph$graph_attrs,
+                     node_attrs = graph$node_attrs,
+                     edge_attrs = graph$edge_attrs,
+                     graph_name = graph$graph_name,
+                     graph_tz = graph$graph_tz,
+                     graph_time = graph$graph_time
+        )
     }
   }
 

@@ -172,9 +172,6 @@ create_graph <- function(nodes_df = NULL,
   if (class(edges_df) == "data.frame"){
     if (ncol(edges_df) > 2){
 
-      stopifnot(any(c("from", "to") %in%
-                      colnames(edges_df)))
-
       # Force all columns to be of the character class
       for (i in 1:ncol(edges_df)){
         edges_df[,i] <- as.character(edges_df[,i])
@@ -282,7 +279,7 @@ create_graph <- function(nodes_df = NULL,
                                    nodes_df[,column_with_y],
                                    "!"))
 
-        nodes_df <- cbind(nodes_df, pos)
+        nodes_df$pos <- pos$pos
       }
 
       # Determine whether column 'alpha' exists
@@ -471,7 +468,8 @@ create_graph <- function(nodes_df = NULL,
         }
       }
 
-      nodes_df <- create_nodes(nodes = get_nodes(edges_df))
+      nodes_df <-
+        create_nodes(nodes = unique(c(edges_df$from, edges_df$to)))
 
       for (i in 1:nrow(nodes_df)){
 
