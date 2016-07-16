@@ -7,34 +7,45 @@
 create_nodes(nodes, type = NULL, label = nodes, ...)
 }
 \arguments{
-\item{nodes}{the node ID value(s) for the node(s) to be created.}
+\item{nodes}{the node ID value(s) for the node(s)
+to be created.}
 
-\item{type}{an optional 'type' description for each node.}
+\item{type}{an optional \code{type} label for each
+node.}
 
 \item{label}{an optional label for each node.}
 
-\item{...}{one or more named vectors for associated attributes.}
+\item{...}{one or more named vectors for associated
+attributes.}
 }
 \value{
-a data frame.
+a node data frame (ndf).
 }
 \description{
-Combine several named vectors for nodes and their attributes
-into a data frame, which can be combined with other similarly-generated data
-frame, or, added to a graph object.
+Combine several named vectors for nodes
+and their attributes into a data frame, which can be
+combined with other similarly-generated data frames,
+or, added to a graph object.
 }
 \examples{
-\dontrun{
-# Create a node data frame
+# Create a node data frame (ndf)
 nodes <-
-  create_nodes(nodes = c("a", "b", "c", "d"),
-               type = "letter",
-               label = TRUE,
-               style = "filled",
-               color = "aqua",
-               shape = c("circle", "circle",
-                         "rectangle", "rectangle"),
-               value = c(3.5, 2.6, 9.4, 2.7))
-}
+  create_nodes(
+    nodes = 1:4,
+    type = "a",
+    label = TRUE,
+    style = "filled",
+    color = "aqua",
+    shape = c("circle", "circle",
+              "rectangle", "rectangle"),
+    value = c(3.5, 2.6, 9.4, 2.7))
+
+# Display the `nodes` ndf
+nodes
+#>   nodes type label  style color     shape value
+#> 1     1    a     1 filled  aqua    circle   3.5
+#> 2     2    a     2 filled  aqua    circle   2.6
+#> 3     3    a     3 filled  aqua rectangle   9.4
+#> 4     4    a     4 filled  aqua rectangle   2.7
 }
 

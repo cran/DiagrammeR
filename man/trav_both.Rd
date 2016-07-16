@@ -2,30 +2,97 @@
 % Please edit documentation in R/trav_both.R
 \name{trav_both}
 \alias{trav_both}
-\title{Traverse from one or more selected nodes to predecessors and successors,
-irrespective of edges, creating a new node selection}
+\title{Traverse from one or more selected nodes to
+predecessors and successors, irrespective of edges,
+creating a new node selection}
 \usage{
 trav_both(graph, node_attr = NULL, match = NULL)
 }
 \arguments{
-\item{graph}{a graph object of class \code{dgr_graph} that is created
-using \code{create_graph}.}
+\item{graph}{a graph object of class
+\code{dgr_graph} that is created using
+\code{create_graph}.}
 
-\item{node_attr}{an optional character vector of node attribute values for
-filtering the node ID values returned.}
+\item{node_attr}{an optional character vector of
+node attribute values for filtering the node ID
+values returned.}
 
-\item{match}{an option to provide a logical expression with a comparison
-operator (\code{>}, \code{<}, \code{==}, or \code{!=}) followed by a number
-for numerical filtering, or, a character string for filtering the edges
-returned through string matching.}
+\item{match}{an option to provide a logical
+expression with a comparison operator (\code{>},
+\code{<}, \code{==}, or \code{!=}) followed by a
+number for numerical filtering, or, a character
+string for filtering the edges returned through
+string matching.}
 }
 \value{
 a graph object of class \code{dgr_graph}.
 }
 \description{
-From a graph object of class \code{dgr_graph} move toward both
-predecessor and successor nodes from one or more nodes present in a
-selection. The current nodes in the selection are replaced with those nodes
-traversed to.
+From a graph object of class
+\code{dgr_graph} move toward both predecessor and
+successor nodes from one or more nodes present in a
+selection. The current nodes in the selection are
+replaced with those nodes traversed to.
+}
+\examples{
+library(magrittr)
+
+# Create a graph
+graph <-
+create_graph() \%>\%
+  add_n_nodes(3) \%>\%
+  add_edge(1, 2) \%>\%
+  add_edge(2, 3)
+
+# Starting at node `2`, traverse to nodes `1` and
+# `2` with `trav_both()` (where the traversal leads
+# to any connected nodes, regardless of edge
+# direction); store the traversed locations as a
+# selection in the graph object
+graph <-
+  graph \%>\%
+  select_nodes_by_id(2) \%>\%
+  trav_both
+
+# Verify that the selection has been made by using
+# the `get_selection()` function
+get_selection(graph)
+#> [1] "3" "1"
+
+# Modify the graph by adding `type` values for
+# nodes `1` and `3`
+graph <-
+  graph \%>\%
+  clear_selection \%>\%
+  select_nodes_by_id(1) \%>\%
+  set_node_attrs_ws(
+    node_attr = "type", value = "a") \%>\%
+  clear_selection \%>\%
+  select_nodes_by_id(3) \%>\%
+  set_node_attrs_ws(
+    node_attr = "type", value = "z") \%>\%
+  clear_selection
+
+# When traversing from node `2` to both `1` and `3`,
+# you can set a condition that determines whether
+# such traversal is permitted; in this case the
+# condition is to traverse only to nodes where
+# the type value is set to `a` (since node `3` has
+# its `type` set to `z`, so, a traversal to `1`
+# proceeds but there will be no traversal to `3`)
+graph \%>\%
+  select_nodes_by_id(2) \%>\%
+  trav_both("type", "a") \%>\%
+  get_selection
+#> [1] "1"
+
+# We can also set traversal conditions to satisfy
+# numeric comparisons... the graph will be first
+# modified
+graph <-
+  graph \%>\%
+  set_node_attrs(1, "value", 3.4) \%>\%
+  set_node_attrs(2, "value", 6.7) \%>\%
+  set_node_attrs(3, "value", 9.1)
 }
 

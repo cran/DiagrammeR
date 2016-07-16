@@ -18,28 +18,31 @@ Obtain a data frame with detailed information on edges and
 their interrelationships within a graph.
 }
 \examples{
-\dontrun{
-# Create a simple graph and get edge information from it
+# Create a node data frame (ndf)
 nodes <-
-  create_nodes(nodes = LETTERS,
-               label = TRUE,
-               type = c(rep("a_to_g", 7),
-                        rep("h_to_p", 9),
-                        rep("q_to_x", 8),
-                        rep("y_and_z",2)))
+  create_nodes(
+    nodes = LETTERS,
+    label = TRUE,
+    type = c(rep("a_to_g", 7),
+             rep("h_to_p", 9),
+             rep("q_to_x", 8),
+             rep("y_and_z",2)))
 
+# Create an edge data frame (edf)
 edges <-
-  create_edges(from = sample(LETTERS, replace = TRUE),
-               to = sample(LETTERS, replace = TRUE),
-               rel = "letter_to_letter")
+  create_edges(
+    from = sample(LETTERS, replace = TRUE),
+    to = sample(LETTERS, replace = TRUE),
+    rel = "letter_to_letter")
 
+# Create a graph using the ndf and edf
 graph <-
-  create_graph(nodes_df = nodes,
-               edges_df = edges,
-               graph_attrs = "layout = neato",
-               node_attrs = c("fontname = Helvetica",
-                              "shape = circle"))
+  create_graph(
+    nodes_df = nodes,
+    edges_df = edges)
 
+# Get a data frame with information on the edges
+# of the graph
 edge_info(graph)
 #>    from   to              rel
 #> 1     A    Z letter_to_letter
@@ -48,6 +51,5 @@ edge_info(graph)
 #> 4     U    K letter_to_letter
 #> 5     I    V letter_to_letter
 #>..   ...  ...              ...
-}
 }
 

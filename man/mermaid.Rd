@@ -129,6 +129,5 @@ sequenceDiagram;
    end
 ")
 }
-
 }
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/create_graph.R
 \name{create_graph}
 \alias{create_graph}
-\title{Create a graph object using data frames representative of nodes and edges}
+\title{Create a graph object}
 \usage{
 create_graph(nodes_df = NULL, edges_df = NULL, graph_attrs = NULL,
   node_attrs = NULL, edge_attrs = NULL, directed = TRUE,
@@ -10,83 +10,119 @@ create_graph(nodes_df = NULL, edges_df = NULL, graph_attrs = NULL,
   generate_dot = TRUE)
 }
 \arguments{
-\item{nodes_df}{an optional data frame containing, at minimum, a column
-(called \code{nodes}) which contains node IDs for the graph. Additional
-columns (named as Graphviz node attributes) can be included with values for
-the named node attribute.}
+\item{nodes_df}{an optional data frame containing,
+at minimum, a column (called \code{nodes}) which
+contains node IDs for the graph. Additional
+columns (named as Graphviz node attributes) can be
+included with values for the named node attribute.}
 
-\item{edges_df}{an optional data frame containing, at minimum, two
-columns (called \code{from} and \code{to}) where node IDs are provided.
-Additional columns (named as Graphviz edge attributes) can be included with
-values for the named edge attribute.}
+\item{edges_df}{an optional data frame containing,
+at minimum, two columns (called \code{from} and
+\code{to}) where node IDs are provided. Additional
+columns (named as Graphviz edge attributes) can be
+included with values for the named edge attribute.}
 
-\item{graph_attrs}{an optional vector of graph attribute statements that
-can serve as defaults for the graph.}
+\item{graph_attrs}{an optional vector of graph
+attribute statements that can serve as defaults
+for the graph.}
 
-\item{node_attrs}{an optional vector of node attribute statements that can
-serve as defaults for nodes.}
+\item{node_attrs}{an optional vector of node
+attribute statements that can serve as defaults for
+nodes.}
 
-\item{edge_attrs}{an optional vector of edge attribute statements that can
-serve as defaults for edges.}
+\item{edge_attrs}{an optional vector of edge
+attribute statements that can serve as defaults for
+edges.}
 
-\item{directed}{with \code{TRUE} (the default) or \code{FALSE}, either
-directed or undirected edge operations will be generated, respectively.}
+\item{directed}{with \code{TRUE} (the default) or
+\code{FALSE}, either directed or undirected edge
+operations will be generated, respectively.}
 
-\item{graph_name}{an optional string for labeling the graph object.}
+\item{graph_name}{an optional string for labeling
+the graph object.}
 
-\item{graph_time}{a date or date-time string (required for insertion of
-graph into a graph series of the type \code{temporal}).}
+\item{graph_time}{a date or date-time string
+(required for insertion of graph into a graph series
+of the type \code{temporal}).}
 
-\item{graph_tz}{an optional value for the time zone (\code{tz})
-corresponding to the date or date-time string supplied as a value to
-\code{graph_time}. If no time zone is provided then it will be set to
+\item{graph_tz}{an optional value for the time zone
+(\code{tz}) corresponding to the date or date-time
+string supplied as a value to \code{graph_time}. If
+no time zone is provided then it will be set to
 \code{GMT}.}
 
-\item{generate_dot}{an option to generate Graphviz DOT code and place
-into the graph object.}
+\item{generate_dot}{an option to generate Graphviz
+DOT code and place into the graph object.}
 }
 \value{
 a graph object of class \code{dgr_graph}.
 }
 \description{
-Generates a graph object using data frames for nodes and/or
-edges; the graph object can be manipulated by other functions.
+Generates a graph object with the
+option to use node data frames (ndfs) and/or edge
+data frames (edfs) to populate the initial graph.
 }
 \examples{
-\dontrun{
 # Create an empty graph
 graph <- create_graph()
 
-# Create a graph with nodes but no edges
-nodes <- create_nodes(nodes = c("a", "b", "c", "d"))
+# A graph can be created with nodes and
+# without edges; this is usually done in 2 steps:
+# 1. create a node data frame (ndf) using the
+#    `create_nodes()` function
+nodes <-
+  create_nodes(
+    nodes = c("a", "b", "c", "d"))
+
+# 2. create the graph object with `create_graph()`
+#    and pass in the ndf to `nodes_df`
+graph <- create_graph(nodes_df = nodes)
+
+# You can create a similar graph with just nodes but
+# also provide a range of attributes for the nodes
+# (e.g., types, labels, arbitrary 'values')
+nodes <-
+  create_nodes(
+    nodes = c("a", "b", "c", "d"),
+    label = TRUE,
+    type = c("type_1", "type_1",
+             "type_5", "type_2"),
+    shape = c("circle", "circle",
+              "rectangle", "rectangle"),
+    values = c(3.5, 2.6, 9.4, 2.7))
 
 graph <- create_graph(nodes_df = nodes)
 
-# Create a graph with nodes with values, types, labels
-nodes <- create_nodes(nodes = c("a", "b", "c", "d"),
-               label = TRUE,
-               type = c("type_1", "type_1",
-                        "type_5", "type_2"),
-               shape = c("circle", "circle",
-                         "rectangle", "rectangle"),
-               values = c(3.5, 2.6, 9.4, 2.7))
+# A graph can also be created by just specifying the
+# edges between nodes (in this case the unique set
+# of nodes will be created added along with their
+# connections but there is no possibility to add
+# node attributes this way--they can be added later
+# with different function--although edge attributes
+# can specified); this is usually done in 2 steps:
+# 1. create an edge data frame (edf) using the
+#    `create_edges()` function:
+edges <-
+  create_edges(
+    from = c("a", "b", "c"),
+    to = c("d", "c", "a"),
+    rel = "leading_to",
+    values = c(7.3, 2.6, 8.3))
 
-graph <- create_graph(nodes_df = nodes)
-
-# Create a graph from an edge data frame, the nodes will
-edges <- create_edges(from = c("a", "b", "c"),
-                      to = c("d", "c", "a"),
-                      rel = "leading_to")
-
+# 2. create the graph object with `create_graph()`
+#    and pass in the edf to `edges_df`
 graph <- create_graph(edges_df = edges)
 
-# Create a graph with both nodes and nodes defined, and,
-# add some default attributes for nodes and edges
-graph <- create_graph(nodes_df = nodes,
-                      edges_df = edges,
-                      node_attrs = "fontname = Helvetica",
-                      edge_attrs = c("color = blue",
-                                     "arrowsize = 2"))
-}
+# You can create a graph with both nodes and nodes
+# defined, and, also add in some default attributes
+# to be applied to all the nodes (`node_attrs`) and
+# edges (`edge_attrs`) in this initial graph
+graph <-
+  create_graph(
+    nodes_df = nodes,
+    edges_df = edges,
+    node_attrs = "fontname = Helvetica",
+    edge_attrs = c("color = blue",
+                   "arrowsize = 2"))
 }
 

@@ -7,8 +7,9 @@
 set_graph_name(graph, name)
 }
 \arguments{
-\item{graph}{a graph object of class \code{dgr_graph} that is created
-using \code{create_graph}.}
+\item{graph}{a graph object of class
+\code{dgr_graph} that is created using
+\code{create_graph}.}
 
 \item{name}{the name to set for the graph.}
 }
@@ -16,15 +17,14 @@ using \code{create_graph}.}
 a graph object of class \code{dgr_graph}.
 }
 \description{
-Set a name for a graph object of class \code{dgr_graph}.
+Set a name for a graph object of class
+\code{dgr_graph}.
 }
 \examples{
-\dontrun{
 # Create an empty graph
 graph <- create_graph()
 
 # Provide the new graph with a name
 graph <- set_graph_name(graph, "example_name")
-}
 }
 

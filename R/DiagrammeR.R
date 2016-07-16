@@ -118,9 +118,7 @@
 #'    end
 #' ")
 #' }
-#'
 #' @import htmlwidgets
-#'
 #' @export
 
 DiagrammeR <- function(diagram = "", type = "mermaid", ...) {

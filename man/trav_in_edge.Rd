@@ -2,29 +2,65 @@
 % Please edit documentation in R/trav_in_edge.R
 \name{trav_in_edge}
 \alias{trav_in_edge}
-\title{Traverse from one or more selected nodes onto adjacent, inward edges}
+\title{Traverse from one or more selected nodes onto
+adjacent, inward edges}
 \usage{
 trav_in_edge(graph, edge_attr = NULL, match = NULL)
 }
 \arguments{
-\item{graph}{a graph object of class \code{dgr_graph} that is created
-using \code{create_graph}.}
+\item{graph}{a graph object of class
+\code{dgr_graph} that is created using
+\code{create_graph}.}
 
-\item{edge_attr}{an optional character vector of edge attribute values for
-filtering the node ID values returned.}
+\item{edge_attr}{an optional character vector of
+edge attribute values for filtering the node ID
+values returned.}
 
-\item{match}{an option to provide a logical expression with a comparison
-operator (\code{>}, \code{<}, \code{==}, or \code{!=}) followed by a number
-for numerical filtering, or, a character string for filtering the edges
-returned through string matching.}
+\item{match}{an option to provide a logical
+expression with a comparison operator (\code{>},
+\code{<}, \code{==}, or \code{!=}) followed by a
+number for numerical filtering, or, a character
+string for filtering the edges returned through
+string matching.}
 }
 \value{
 a graph object of class \code{dgr_graph}.
 }
 \description{
-From a graph object of class \code{dgr_graph} move to
-incoming edges from a selection of one or more selected nodes, thereby
-creating a selection of edges. An optional filter by edge attribute
-can limit the set of edges traversed to.
+From a graph object of class
+\code{dgr_graph} move to incoming edges from a
+selection of one or more selected nodes, thereby
+creating a selection of edges. An optional filter
+by edge attribute can limit the set of edges
+traversed to.
+}
+\examples{
+library(magrittr)
+
+# Create a simple graph
+graph <-
+ create_graph() \%>\%
+ add_n_nodes(4) \%>\%
+ add_edge(1, 2) \%>\%
+ add_edge(2, 3) \%>\%
+ add_edge(3, 4)
+
+# Traverse from nodes `4` to to `1` by, in an
+# alternating manner, moving from nodes onto edges,
+# from edges onto nodes
+graph <-
+  graph \%>\%
+  select_nodes_by_id(4) \%>\%
+  trav_in_edge \%>\%
+  trav_out_node \%>\%
+  trav_in_edge \%>\%
+  trav_out_node \%>\%
+  trav_in_edge \%>\%
+  trav_out_node
+
+# Verify that the selection has been made by using
+# the `get_selection()` function
+get_selection(graph)
+#> [1] "1"
 }
 

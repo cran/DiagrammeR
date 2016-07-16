@@ -7,14 +7,50 @@
 get_node_df(graph)
 }
 \arguments{
-\item{graph}{a graph object of class \code{dgr_graph} that is created
-using \code{create_graph}.}
+\item{graph}{a graph object of class
+\code{dgr_graph} that is created using
+\code{create_graph}.}
 }
 \value{
 a node data frame.
 }
 \description{
-From a graph, obtain a node data frame with all current
-node attributes.
+From a graph, obtain a node data frame
+with all current node attributes.
+}
+\examples{
+library(magrittr)
+
+# Create a graph using several piped functions
+graph <-
+  create_graph() \%>\%
+  add_n_nodes(1, "a") \%>\%
+  select_last_node \%>\%
+  add_n_nodes_ws(5, "from", "b") \%>\%
+  select_nodes_by_id(1) \%>\%
+  set_node_attrs_ws(
+    "value", 25.3) \%>\%
+  clear_selection \%>\%
+  select_nodes_by_id(2:4) \%>\%
+  set_node_attrs_ws(
+    "color", "grey70") \%>\%
+  invert_selection \%>\%
+  set_node_attrs_ws(
+    "color", "grey80") \%>\%
+  clear_selection \%>\%
+  select_nodes("value", "<15") \%>\%
+  set_node_attrs_ws(
+    "value", 10.0) \%>\%
+  clear_selection
+
+# Get the graph's internal node data frame (ndf)
+graph \%>\% get_node_df
+#>   nodes type label value  color
+#> 1     1    a        25.3 grey80
+#> 2     2    b     2    10 grey70
+#> 3     3    b     3    10 grey70
+#> 4     4    b     4    10 grey70
+#> 5     5    b     5    10 grey80
+#> 6     6    b     6    10 grey80
 }
 

@@ -2,29 +2,60 @@
 % Please edit documentation in R/trav_out_node.R
 \name{trav_out_node}
 \alias{trav_out_node}
-\title{Traverse from one or more selected edges toward adjacent outward nodes}
+\title{Traverse from one or more selected edges toward
+adjacent outward nodes}
 \usage{
 trav_out_node(graph, node_attr = NULL, match = NULL)
 }
 \arguments{
-\item{graph}{a graph object of class \code{dgr_graph} that is created
-using \code{create_graph}.}
+\item{graph}{a graph object of class
+\code{dgr_graph} that is created using
+\code{create_graph}.}
 
-\item{node_attr}{an optional character vector of node attribute values for
-filtering the node ID values returned.}
+\item{node_attr}{an optional character vector of
+node attribute values for filtering the node ID
+values returned.}
 
-\item{match}{an option to provide a logical expression with a comparison
-operator (\code{>}, \code{<}, \code{==}, or \code{!=}) followed by a number
-for numerical filtering, or, a character string for filtering the edges
-returned through string matching.}
+\item{match}{an option to provide a logical
+expression with a comparison operator (\code{>},
+\code{<}, \code{==}, or \code{!=}) followed by a
+number for numerical filtering, or, a character
+string for filtering the edges returned through
+string matching.}
 }
 \value{
 a graph object of class \code{dgr_graph}.
 }
 \description{
-From a graph object of class \code{dgr_graph} move to
-adjacent nodes from a selection of one or more selected edges where the
-edges are outward edges to those nodes. This creates a selection of nodes.
-An optional filter by node attribute can limit the set of nodes traversed to.
+From a graph object of class
+\code{dgr_graph} move to adjacent nodes from a
+selection of one or more selected edges where the
+edges are outward edges to those nodes. This creates
+a selection of nodes. An optional filter by node
+attribute can limit the set of nodes traversed to.
+}
+\examples{
+library(magrittr)
+
+# Create a simple graph
+graph <-
+ create_graph() \%>\%
+ add_n_nodes(2) \%>\%
+ add_edge(1, 2)
+
+# Traverse from node `1` to the outward edge and
+# immediately back to `1` by:
+# (1) moving from node `1` to edge `1` -> `2`
+# (2) moving from edge `1` -> `2` to node `1`
+graph <-
+  graph \%>\%
+  select_nodes_by_id(1) \%>\%
+  trav_out_edge \%>\%
+  trav_out_node
+
+# Verify that the selection of node `1` has been
+# made by using the `get_selection()` function
+get_selection(graph)
+#> [1] "1"
 }
 

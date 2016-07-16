@@ -2,33 +2,96 @@
 % Please edit documentation in R/node_type.R
 \name{node_type}
 \alias{node_type}
-\title{Create, read, update, delete, or report status of a node type definition}
+\title{Create, read, update, delete, or report status of a
+node type definition}
 \usage{
 node_type(graph, node, action = "read", value = NULL)
 }
 \arguments{
-\item{graph}{a graph object of class \code{dgr_graph} that is created
-using \code{create_graph}.}
+\item{graph}{a graph object of class
+\code{dgr_graph} that is created using
+\code{create_graph}.}
 
-\item{node}{a node ID corresponding to the node to be selected.}
+\item{node}{a node ID corresponding to the node to
+be selected.}
 
-\item{action}{the operation to perform on the node's type attribute. To
-remove the type definition from a node, use either \code{delete},
-\code{remove}, or \code{drop}. To add a type definition to a node with no
-type set, use \code{add} or \code{create}. To update a node's type
-definition, use \code{update}. To return the value of a node type, use
-\code{read}. To determine whether there is a type set for the selected node,
-use \code{check}.}
+\item{action}{the operation to perform on the node's
+type attribute. To remove the type definition from a
+node, use either \code{delete}, \code{remove}, or
+\code{drop}. To add a type definition to a node with
+no type set, use \code{add} or \code{create}. To
+update a node's type definition, use \code{update}.
+To return the value of a node type, use \code{read}.
+To determine whether there is a type set for the
+selected node, use \code{check}.}
 
-\item{value}{a string denoting the node type, to be supplied when either
-adding or updating a node type definition.}
+\item{value}{a string denoting the node type, to be
+supplied when either adding or updating a node type
+definition.}
 }
 \value{
 a graph object of class \code{dgr_graph}.
 }
 \description{
-From a graph object of class \code{dgr_graph}, query a node in
-the graph (using the node ID) and perform operations on the type definition
-for that node.
+From a graph object of class
+\code{dgr_graph}, query a node in the graph (using
+the node ID) and perform operations on the type
+definition for that node.
+}
+\examples{
+library(magrittr)
+
+# Create a node data frame (ndf)
+nodes <-
+  create_nodes(
+    nodes = 1:5,
+    type = c("a", "b", "c", "a", "c"))
+
+# Create an edge data frame (edf)
+edges <-
+  create_edges(
+    from = c(1, 3, 5, 2, 4),
+    to = c(2, 2, 4, 4, 3))
+
+# Create a graph
+graph <-
+  create_graph(nodes_df = nodes,
+               edges_df = edges)
+
+# Read the node `type` for node `1`
+graph \%>\%
+  node_type(1)
+#> [1] "a"
+
+# Remove the `type` value entirely from
+# node `1`
+graph \%<>\%
+  node_type(1, "delete")
+
+# Check that node `1` no longer has a
+# `type` assignment
+graph \%>\%
+  node_type(1, "check")
+#> [1] FALSE
+
+# Add the `type` value "b" to node `1`
+graph \%<>\%
+  node_type(1, "add", "b")
+
+# Read the node `type` for node `1`
+graph \%>\%
+  node_type(1)
+#> [1] "b"
+
+# Perform an in-place update of the `type`
+# value for node `1` ("b" to "a")
+graph \%<>\%
+  node_type(1, "update", "a")
+
+# Read the node `type` for node `1` to ensure
+# that the change was made
+graph \%>\%
+  node_type(1)
+#> [1] "a"
 }
 

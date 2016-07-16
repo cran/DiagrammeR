@@ -7,17 +7,19 @@
 is_graph_empty(graph)
 }
 \arguments{
-\item{graph}{a graph object of class \code{dgr_graph}.}
+\item{graph}{a graph object of class
+\code{dgr_graph}.}
 }
 \value{
 a logical value.
 }
 \description{
-Provides a logical value on whether the graph is empty (i.e.,
-contains no nodes).
+Provides a logical value on whether the
+graph is empty (i.e., contains no nodes).
 }
 \examples{
-\dontrun{
+library(magrittr)
+
 # Create an empty graph
 graph <- create_graph()
 
@@ -25,21 +27,13 @@ graph <- create_graph()
 is_graph_empty(graph)
 #> [1] TRUE
 
-# Create a graph with nodes and edges
-nodes <-
-  create_nodes(nodes = c("a", "b", "c", "d"))
-
-edges <-
-  create_edges(from = c("a", "b", "c"),
-               to = c("d", "c", "a"))
-
+# Create a non-empty graph
 graph <-
-  create_graph(nodes_df = nodes,
-               edges_df = edges)
+  create_graph() \%>\%
+  add_n_nodes(3)
 
-# Determine whether the graph is empty
+# Determine whether this graph is empty
 is_graph_empty(graph)
 #> [1] FALSE
-}
 }
 

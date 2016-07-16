@@ -113,7 +113,6 @@
 #'    end
 #' ")
 #' }
-#'
 #' @import htmlwidgets
 #' @export
 

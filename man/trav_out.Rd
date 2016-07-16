@@ -2,29 +2,118 @@
 % Please edit documentation in R/trav_out.R
 \name{trav_out}
 \alias{trav_out}
-\title{Traverse outward from a selected node, skipping over edges, and creating
-a new node selection}
+\title{Traverse outward from a selected node, skipping over
+edges, and creating a new node selection}
 \usage{
 trav_out(graph, node_attr = NULL, match = NULL)
 }
 \arguments{
-\item{graph}{a graph object of class \code{dgr_graph} that is created
-using \code{create_graph}.}
+\item{graph}{a graph object of class
+\code{dgr_graph} that is created using
+\code{create_graph}.}
 
-\item{node_attr}{an optional character vector of node attribute values for
-filtering the node ID values returned.}
+\item{node_attr}{an optional character vector of
+node attribute values for filtering the node ID
+values returned.}
 
-\item{match}{an option to provide a logical expression with a comparison
-operator (\code{>}, \code{<}, \code{==}, or \code{!=}) followed by a number
-for numerical filtering, or, a character string for filtering the edges
-returned through string matching.}
+\item{match}{an option to provide a logical
+expression with a comparison operator (\code{>},
+\code{<}, \code{==}, or \code{!=}) followed by a
+number for numerical filtering, or, a character
+string for filtering the edges returned through
+string matching.}
 }
 \value{
 a graph object of class \code{dgr_graph}.
 }
 \description{
-From a graph object of class \code{dgr_graph} move outward
-from one or more nodes present in a selection to other nodes, replacing
-the current nodes in the selection with those nodes traversed to.
+From a graph object of class
+\code{dgr_graph} move outward from one or more nodes
+present in a selection to other nodes, replacing
+the current nodes in the selection with those nodes
+traversed to.
+}
+\examples{
+\dontrun{
+library(magrittr)
+
+# Create a graph
+graph <-
+create_graph() \%>\%
+  add_n_nodes(4) \%>\%
+  add_edge(1, 2) \%>\%
+  add_edge(2, 3) \%>\%
+  add_edge(3, 4)
+
+# Starting at node `1`, traverse to node `4`,
+# storing the traversed location as a selection in
+# the graph object
+graph <-
+  graph \%>\%
+  select_nodes_by_id(1) \%>\%
+  trav_out \%>\% trav_out \%>\% trav_out
+
+# Verify that the selection has been made by using
+# the `get_selection()` function
+get_selection(graph)
+#> [1] "4"
+
+# Modify the graph by adding `type` values for
+# each of the nodes (recall that node `4` is now
+# selected since the traversal ended at that node)
+graph <-
+  graph \%>\%
+  set_node_attrs_ws(
+    node_attr = "type", value = "z") \%>\%
+  clear_selection \%>\%
+  select_nodes_by_id(1:3) \%>\%
+  set_node_attrs_ws(
+    node_attr = "type", value = "a") \%>\%
+  clear_selection
+
+# When traversing outward from node `3` to `4`,
+# you can set a condition that determines whether
+# such traversal is permitted; in this case the
+# condition is to traverse only to nodes where
+# the type value is set to `a` (but node `4` has
+# its `type` set to `z`, so, no traversal)
+graph \%>\%
+  select_nodes_by_id(3) \%>\%
+  trav_out("type", "a") \%>\%
+  get_selection
+#> [1] "3"
+
+# Setting the condition to traverse only to nodes
+# where the type is `z` will result in a traversal
+graph \%>\%
+  select_nodes_by_id(3) \%>\%
+  trav_out("type", "z") \%>\%
+  get_selection
+#> [1] "4"
+
+# We can also set traversal conditions to satisfy
+# numeric comparisons... the graph will be first
+# modified
+graph <-
+  graph \%>\%
+  set_node_attrs(1, "value", 3.4) \%>\%
+  set_node_attrs(2, "value", 6.7) \%>\%
+  set_node_attrs(3, "value", 9.1) \%>\%
+  set_node_attrs(4, "value", 2.5)
+
+# Traverse from nodes `1` to `4`, setting the
+# condition that each node traversed to must have
+# a `value` greater than 3.0 (although 3 separate
+# traversals are intended, the last traversal does
+# not reach node `4` since its value is not
+# greater than 3.0)
+graph \%>\%
+  select_nodes_by_id(1) \%>\%
+  trav_out("value", ">3.0") \%>\%
+  trav_out("value", ">3.0") \%>\%
+  trav_out("value", ">3.0") \%>\%
+  get_selection
+#> [1] "3"
+}
 }
 
