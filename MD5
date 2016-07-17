@@ -1,6 +1,6 @@
-264782ce1fbc42bfd36f31a65c3cb751 *DESCRIPTION
+275a36f8edf616bf0d993197208b32f7 *DESCRIPTION
 5bc3b4b14b49ebcc410d51288b2df7bc *LICENSE
-65b99318092093e04141da501d4b18b6 *NAMESPACE
+429df7d1d1a46d6810be7c5ddd753b1b *NAMESPACE
 ae45c226c52aaf0729c74e73d3a1ac67 *R/DiagrammeR.R
 c637cc37e7d92d843be4129e7956f42a *R/add_balanced_tree.R
 e5d8c605ac14c9e8c8a0b82cb1ebe0d8 *R/add_cycle.R
@@ -44,7 +44,7 @@ b50da95dae2bfcc6a737b5ee085ef11c *R/delete_edge.R
 ffcf5e73f4a3407c41745c5c914b8f8a *R/edge_present.R
 9205252bbd802207d86ee6c056da2bfe *R/edge_rel.R
 ef1b79cffe80bc4d76e3862d2fc00b5a *R/export_csv.R
-808e1321e60d67c0ee7d2e945c489150 *R/export_graph.R
+a5a4b6b098d271df3121de4db79825cf *R/export_graph.R
 b41ea8b6cae864dbe7dcaa847746b663 *R/get_all_connected_nodes.R
 39c4cddff3ba54ad908ce586fd9c9fa0 *R/get_articulation_points.R
 cd8e0a1e2a83a7b5cd22af3aa74d32e4 *R/get_betweenness.R
@@ -129,7 +129,7 @@ e7a9c3321bc0d78f8335d9187f782d85 *R/trav_out_node.R
 98c8d75dc6f57ab21d4519894b57fdf2 *R/visnetwork.R
 0eabd24ade177dfcaacc9ea5a1508f0f *R/vivagraph.R
 76999d50b56d69c5aaae746f729d5e55 *R/x11_hex.R
-51f7e3d3e71c311085bad60b0c90bae2 *README.md
+106dca83d5c9bd45af3ed66d455559d8 *README.md
 a7ff514631e9996df5c20bba4bcebc4e *inst/examples/Human_Interactome.sif
 978c1bee49d7ad5fc1a4d81099b13e18 *inst/examples/NFFFFFF-0.png
 5f54efc5e19ceef17c1dc8871d36649a *inst/examples/blue-circle.png
