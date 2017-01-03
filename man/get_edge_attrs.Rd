@@ -32,8 +32,6 @@ From a graph object of class
 attribute values for one or more edges.
 }
 \examples{
-library(magrittr)
-
 # Create a simple graph where edges have an edge
 # attribute named `value`
 graph <-
@@ -41,7 +39,7 @@ graph <-
   add_n_nodes(4) \%>\%
   {
     edges <-
-      create_edges(
+      create_edge_df(
         from = c(1, 2, 1, 4),
         to = c(2, 3, 4, 3),
         rel = "rel")
@@ -58,13 +56,13 @@ graph <-
 
 # Get the values for the `value` edge attribute
 graph \%>\% get_edge_attrs(edge_attr = "value")
-#> 1 -> 2 2 -> 3 1 -> 4 4 -> 3
-#> 1.6    2.9    4.3    8.4
+#> 1->2 2->3 1->4 4->3
+#>  1.6  2.9  4.3  8.4
 
 # To only return edge attribute values for specified
 # edges, use the `from` and `to` arguments
 graph \%>\% get_edge_attrs("value", c(1, 2), c(2, 3))
-#> 1 -> 2 2 -> 3
-#> 1.6    2.9
+#> 1->2 2->3
+#>  1.6  2.9
 }
 

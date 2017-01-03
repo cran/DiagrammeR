@@ -8,8 +8,7 @@ get_edge_df(graph)
 }
 \arguments{
 \item{graph}{a graph object of class
-\code{dgr_graph} that is created using
-\code{create_graph}.}
+\code{dgr_graph}.}
 }
 \value{
 an edge data frame.
@@ -19,8 +18,6 @@ From a graph, obtain an edge data frame
 with all current edge attributes.
 }
 \examples{
-library(magrittr)
-
 # Create a graph using several piped functions
 graph <-
   create_graph() \%>\%
@@ -37,15 +34,15 @@ graph <-
     "color", "blue") \%>\%
   set_edge_attrs_ws(
     "rel", "b") \%>\%
-  clear_selection
+  clear_selection()
 
 # Get the graph's internal edge data frame (edf)
-graph \%>\% get_edge_df
-#>   from to rel color
-#> 1    1  2   b  blue
-#> 2    1  3   a green
-#> 3    1  4   a green
-#> 4    1  5   a green
-#> 5    1  6   b  blue
+graph \%>\% get_edge_df()
+#>   id from to rel color
+#> 1  1    1  2   b  blue
+#> 2  2    1  3   a green
+#> 3  3    1  4   a green
+#> 4  4    1  5   a green
+#> 5  5    1  6   b  blue
 }
 

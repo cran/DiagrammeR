@@ -19,8 +19,6 @@ Get the betweenness centrality scores
 for all nodes in a graph.
 }
 \examples{
-library(magrittr)
-
 # Create a random graph
 graph <-
   create_random_graph(
@@ -28,25 +26,23 @@ graph <-
 
 # Get the betweenness scores for nodes in the graph
 get_betweenness(graph)
-#>    node betweenness
-#> 1     1    6.633333
-#> 2     2    5.638095
-#> 3     3    1.904762
-#> 4     4    4.019048
-#> 5     5    8.157143
-#> 6     6    2.000000
-#> 7     7   10.157143
-#> 8     8    8.857143
-#> 9     9    3.466667
-#> 10   10    1.166667
+#>    id betweenness
+#> 1   1    6.633333
+#> 2   2    5.638095
+#> 3   3    1.904762
+#> 4   4    4.019048
+#> 5   5    8.157143
+#> 6   6    2.000000
+#> 7   7   10.157143
+#> 8   8    8.857143
+#> 9   9    3.466667
+#> 10 10    1.166667
 
 # Add the betweenness values to the graph
 # as a node attribute
 graph <-
   graph \%>\%
   join_node_attrs(
-    get_betweenness(.),
-    by_graph = "nodes",
-    by_df = "node")
+    get_betweenness(.))
 }
 

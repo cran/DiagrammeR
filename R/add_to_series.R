@@ -9,27 +9,22 @@
 #' @return a graph series object of type
 #' \code{dgr_graph_1D}.
 #' @examples
-#' library(magrittr)
-#'
 #' # Create three graphs
 #' graph_1 <-
 #'   create_graph() %>%
-#'   add_node("a") %>%
-#'   add_node("b") %>%
-#'   add_node("c") %>%
-#'   add_edge("a", "c") %>%
-#'   add_edge("a", "b") %>%
-#'   add_edge("b", "c")
+#'   add_n_nodes(3) %>%
+#'   add_edges_w_string(
+#'     "1->3 1->2 2->3")
 #'
 #' graph_2 <-
 #'   graph_1 %>%
-#'   add_node("d") %>%
-#'   add_edge("d", "c")
+#'   add_node() %>%
+#'   add_edge(4, 3)
 #'
 #' graph_3 <-
 #'   graph_2 %>%
-#'   add_node("e") %>%
-#'   add_edge("e", "b")
+#'   add_node() %>%
+#'   add_edge(5, 2)
 #'
 #' # Create an empty graph series and add
 #' # the graphs
@@ -47,13 +42,13 @@
 add_to_series <- function(graph,
                           graph_series) {
 
+  # Validation: Graph object is valid
+  if (graph_object_valid(graph) == FALSE) {
+    stop("The graph object is not valid.")
+  }
+
   # Get the series type
   series_type <- graph_series$series_type
-
-  # Stop function if graph is not valid
-  if (class(graph) != "dgr_graph") {
-    stop("The supplied graph object is not valid.")
-  }
 
   # Stop function if graph series type is not valid
   if (!(series_type %in%
@@ -61,63 +56,8 @@ add_to_series <- function(graph,
     stop("The graph series type is neither 'sequential' nor 'temporal'")
   }
 
-  # If graph series type is `sequential`, add graph
-  # to series
-  if (series_type == "sequential") {
-    graph_series$graphs[[length(graph_series$graphs) + 1]] <- graph
-    return(graph_series)
-  }
+  # Add graph to series
+  graph_series$graphs[[length(graph_series$graphs) + 1]] <- graph
 
-  # For a graph series with a temporal type, determine
-  # if `graph_time` and, optionally, a `graph_tz` value
-  # is provided
-  if (series_type == "temporal") {
-    is_time_provided <-
-      ifelse(!is.null(graph$graph_time), TRUE, FALSE)
-
-    is_tz_provided <-
-      ifelse(!is.null(graph$graph_tz), TRUE, FALSE)
-
-    # Stop function if no time information available in
-    # a graph to be added to a graph series of the
-    # `temporal` type
-    if (is_time_provided == FALSE) {
-      stop("No time information is provided in this graph object.")
-    } else {
-
-      # If time zone not provided, automatically
-      # provide the `GMT` time zone
-      if (is_tz_provided == FALSE) {
-        graph$graph_tz <- "GMT"
-      }
-
-      is_time_in_correct_format <-
-        ifelse(
-          grepl("^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
-                graph$graph_time) |
-            grepl("^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}$",
-                  graph$graph_time) |
-            grepl("^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}$",
-                  graph$graph_time),
-          TRUE, FALSE)
-
-      is_tz_in_correct_format <-
-        ifelse(graph$graph_tz %in% OlsonNames(),
-               TRUE, FALSE)
-
-      if (is_time_in_correct_format == FALSE) {
-        stop("The time provided in this graph object is not in the correct format.")
-      }
-
-      if (is_tz_in_correct_format == FALSE) {
-        stop("The time zone provided in this graph object is not in the correct format.")
-      }
-
-      if (is_time_in_correct_format &
-          is_tz_in_correct_format) {
-        graph_series$graphs[[length(graph_series$graphs) + 1]] <- graph
-        return(graph_series)
-      }
-    }
-  }
+  return(graph_series)
 }

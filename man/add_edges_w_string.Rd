@@ -4,18 +4,29 @@
 \alias{add_edges_w_string}
 \title{Add one or more edges using a text string}
 \usage{
-add_edges_w_string(graph, edges, rel = NULL)
+add_edges_w_string(graph, edges, rel = NULL, use_labels = FALSE)
 }
 \arguments{
 \item{graph}{a graph object of class
-\code{dgr_graph} that is created using
-\code{create_graph}.}
+\code{dgr_graph}.}
 
 \item{edges}{a single-length vector with a character
-string specifying the edges.}
+string specifying the edges. For a directed graph,
+the string object should be formatted as a series of
+node ID values as \code{[node_ID_1]->[node_ID_2]}
+separated by a one or more space characters. For
+undirected graphs, \code{--} should replace
+\code{->}. Linebreaks in the vector won't cause an
+error.}
 
 \item{rel}{an optional vector specifying the
 relationship between the connected nodes.}
+
+\item{use_labels}{an option to use node \code{label}
+values in the \code{edges} string to define node
+connections. Note that this is only possible if all
+nodes have distinct \code{label} values set and
+none exist as an empty string.}
 }
 \value{
 a graph object of class \code{dgr_graph}.
@@ -23,24 +34,51 @@ a graph object of class \code{dgr_graph}.
 \description{
 With a graph object of class
 \code{dgr_graph}, add one or more edges to the graph
-using a text string. For a directed graph, the
-string object should be formatted as a series of
-node ID values as \code{[node_ID_1]->[node_ID_2]}
-separated by a single space. For undirected graphs,
-\code{--} should replace \code{->}.
+using a text string.
 }
 \examples{
-library(magrittr)
-
-# Create a graph with 10 nodes
+# Create a graph with 4 nodes
 graph <-
   create_graph() \%>\%
-  add_n_nodes(10)
+  add_node(label = "one") \%>\%
+  add_node(label = "two") \%>\%
+  add_node(label = "three") \%>\%
+  add_node(label = "four")
 
-# Add edges between nodes using a character string
-graph <-
+# Add edges between nodes using a
+# character string with node ID values
+graph_node_id <-
   graph \%>\%
   add_edges_w_string(
-    "1->2 1->3 2->4 2->5 3->6 3->7 4->8 4->9 5->10")
+    "1->2 1->3 2->4 2->3")
+
+# Show the graph's internal edge data frame
+get_edge_df(graph_node_id)
+#>   id from to  rel
+#> 1  1    1  2 <NA>
+#> 2  2    1  3 <NA>
+#> 3  3    2  4 <NA>
+#> 4  4    2  3 <NA>
+
+# Add edges between nodes using a
+# character string with node label values
+# and setting `use_labels = TRUE`; note
+# that all nodes must have unique `label`
+# values to use this option
+graph_node_label <-
+  graph \%>\%
+  add_edges_w_string(
+    "one->two one->three
+     two->four two->three",
+    use_labels = TRUE)
+
+# Show the graph's internal edge data frame
+# (it's the same as before)
+get_edge_df(graph_node_label)
+#>   id from to  rel
+#> 1  1    1  2 <NA>
+#> 2  2    1  3 <NA>
+#> 3  3    2  4 <NA>
+#> 4  4    2  3 <NA>
 }
 

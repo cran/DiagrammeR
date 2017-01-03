@@ -4,8 +4,7 @@
 \alias{import_graph}
 \title{Import a graph from various graph formats}
 \usage{
-import_graph(graph_file, file_type = NULL, graph_name = NULL,
-  graph_time = NULL, graph_tz = NULL)
+import_graph(graph_file, file_type = NULL)
 }
 \arguments{
 \item{graph_file}{a connection to a graph file.}
@@ -16,19 +15,6 @@ Options are: \code{graphml} (GraphML), \code{gml}
 file), and \code{mtx} (MatrixMarket format). If not
 supplied, the function will infer the type by its
 file extension.}
-
-\item{graph_name}{an optional string for labeling
-the graph object.}
-
-\item{graph_time}{a date or date-time string
-(required for insertion of graph into a graph series
-of the type \code{temporal}).}
-
-\item{graph_tz}{an optional value for the time zone
-(\code{tz})
-corresponding to the date or date-time string
-supplied as a value to \code{graph_time}. If no time
-zone is provided then it will be set to \code{GMT}.}
 }
 \value{
 a graph object of class \code{dgr_graph}.
@@ -39,12 +25,10 @@ different graph formats and create a graph object.
 }
 \examples{
 \dontrun{
-library(magrittr)
-
 # Import a GraphML graph file
 graphml_graph <-
   import_graph(
-    system.file("examples/power_grid.graphml",
+    system.file("extdata", "power_grid.graphml",
                 package = "DiagrammeR"))
 
 # Get a count of the graph's nodes
@@ -58,7 +42,7 @@ graphml_graph \%>\% edge_count
 # Import an SIF graph file
 sif_graph <-
   import_graph(
-    system.file("examples/Human_Interactome.sif",
+    system.file("extdata", "Human_Interactome.sif",
                 package = "DiagrammeR"))
 
 # Get a count of the graph's nodes
@@ -72,7 +56,7 @@ sif_graph \%>\% edge_count
 # Import a GML graph file
 gml_graph <-
   import_graph(
-    system.file("examples/karate.gml",
+    system.file("extdata", "karate.gml",
                 package = "DiagrammeR"))
 
 # Get a count of the graph's nodes

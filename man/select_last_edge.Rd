@@ -9,8 +9,7 @@ select_last_edge(graph)
 }
 \arguments{
 \item{graph}{a graph object of class
-\code{dgr_graph} that is created using
-\code{create_graph}.}
+\code{dgr_graph}.}
 }
 \value{
 a graph object of class \code{dgr_graph}.
@@ -23,13 +22,13 @@ of the graph's edge data frame. In practice, this
 will typically be the last edge created.
 }
 \examples{
-library(magrittr)
-
 # Create an empty graph
 graph <- create_graph()
 
 # Add three nodes to the graph
-graph \%<>\% add_n_nodes(3)
+graph <-
+  graph \%>\%
+  add_n_nodes(3)
 
 # Add two edges to the graph
 graph \%<>\%
@@ -37,15 +36,12 @@ graph \%<>\%
   add_edge(2, 3)
 
 # Select the last edge added
-graph \%<>\% select_last_edge
+graph <-
+  graph \%>\%
+  select_last_edge()
 
 # Get the current selection
-graph \%>\% get_selection
-#> $edges
-#> $edges$from
-#> [1] "2"
-#>
-#> $edges$to
-#> [1] "3"
+graph \%>\% get_selection()
+#> [1] 2
 }
 

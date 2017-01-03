@@ -3,8 +3,7 @@
 #' \code{dgr_graph} or an edge data frame, set edge
 #' attribute properties for one or more edges
 #' @param x either a graph object of class
-#' \code{dgr_graph} that is created using
-#' \code{create_graph}, or an edge data frame.
+#' \code{dgr_graph} or an edge data frame.
 #' @param edge_attr the name of the attribute to set.
 #' @param values the values to be set for the chosen
 #' attribute for the chosen edges.
@@ -19,44 +18,44 @@
 #' what type of object was supplied to \code{x}.
 #' @examples
 #' # Create a simple graph
-#' nodes <-
-#'   create_nodes(
-#'     nodes = c("a", "b", "c", "d"),
-#'     type = "letter",
+#' ndf <-
+#'   create_node_df(
+#'     n = 4,
+#'     type = "basic",
 #'     label = TRUE,
 #'     value = c(3.5, 2.6, 9.4, 2.7))
 #'
-#' edges <-
-#'   create_edges(
-#'     from = c("a", "b", "c"),
-#'     to = c("d", "c", "a"),
+#' edf <-
+#'   create_edge_df(
+#'     from = c(1, 2, 3),
+#'     to = c(4, 3, 1),
 #'     rel = "leading_to")
 #'
 #' graph <-
 #'   create_graph(
-#'     nodes_df = nodes,
-#'     edges_df = edges)
+#'     nodes_df = ndf,
+#'     edges_df = edf)
 #'
 #' # Set attribute `color = "green"` for edges
-#' # `a` -> `d` and `c` -> `a` using the graph object
+#' # `1`->`4` and `3`->`1` using the graph object
 #' graph <-
 #'   set_edge_attrs(
 #'     x = graph,
 #'     edge_attr = "color",
 #'     values = "green",
-#'     from = c("a", "c"),
-#'     to = c("d", "a"))
+#'     from = c(1, 3),
+#'     to = c(4, 1))
 #'
 #' # Set attribute `color = "green"` for edges
-#' # `a` -> `d` and `c` -> `a` using the edge
+#' # `1`->`4` and `3`->`1` using the edge
 #' # data frame
 #' edges <-
 #'   set_edge_attrs(
-#'     x = edges,
+#'     x = edf,
 #'     edge_attr = "color",
 #'     values = "green",
-#'     from = c("a", "c"),
-#'     to = c("d", "a"))
+#'     from = c(1, 3),
+#'     to = c(4, 1))
 #'
 #' # Set attribute `color = "blue"` for all edges
 #' # in the graph
@@ -67,22 +66,22 @@
 #'     values = "blue")
 #'
 #' # Set attribute `color = "pink"` for all edges in
-#' # graph outbound from `a`
+#' # graph outbound from node with ID value `1`
 #' graph <-
 #'   set_edge_attrs(
 #'     x = graph,
 #'     edge_attr = "color",
 #'     values = "pink",
-#'     from = "a")
+#'     from = 1)
 #'
 #' # Set attribute `color = "black"` for all edges in
-#' # graph inbound to `a`
+#' # graph inbound to node with ID `1`
 #' graph <-
 #'   set_edge_attrs(
 #'     x = graph,
 #'     edge_attr = "color",
 #'     values = "black",
-#'     to = "a")
+#'     to = 1)
 #' @export set_edge_attrs
 
 set_edge_attrs <- function(x,
@@ -91,13 +90,16 @@ set_edge_attrs <- function(x,
                            from = NULL,
                            to = NULL) {
 
-  if (edge_attr == "from" | edge_attr == "to") {
-    stop("You cannot alter values associated with node IDs.")
+  # Get the time of function start
+  time_function_start <- Sys.time()
+
+  if (edge_attr %in% c("id", "from", "to")) {
+    stop("You cannot alter edge ID values or attributes associated with node IDs.")
   }
 
   if (!is.null(from) & !is.null(to)) {
     if (length(from) != length(to)) {
-      stop("The number of nodes 'from' and 'to' must be the same.")
+      stop("The number of values specified in `from` and `to` must be the same.")
     }
   }
 
@@ -118,47 +120,43 @@ set_edge_attrs <- function(x,
     stop("The length of values provided must either be 1 or that of the number of rows in the edf.")
   }
 
+  # Get the indices for the edge data frame
+  # that require modification
+  if (is.null(from) & !is.null(to)) {
+    indices <-
+      which(edges_df$to %in% to)
+  } else if (!is.null(from) & is.null(to)) {
+    indices <-
+      which(edges_df$from %in% from)
+  } else if (is.null(from) & is.null(to)) {
+    indices <- 1:nrow(edges_df)
+  } else {
+    indices <-
+      which((edges_df$from %in% from) &
+              (edges_df$to %in% to))
+  }
+
+  # Apply single value to all target edges
   if (length(values) == 1) {
+
     if (edge_attr %in% colnames(edges_df)) {
-      if (is.null(from) & !is.null(to)) {
-        edges_df[which(edges_df$to %in% to),
-                 which(colnames(edges_df) %in%
-                         edge_attr)] <- values
-      } else if (!is.null(from) & is.null(to)) {
-        edges_df[which(edges_df$from %in% from),
-                 which(colnames(edges_df) %in%
-                         edge_attr)] <- values
-      } else if (is.null(from) & is.null(to)) {
-        edges_df[, which(colnames(edges_df) %in%
-                           edge_attr)] <- values
-      } else {
-        edges_df[which((edges_df$from %in% from) &
-                         (edges_df$to %in% to)),
-                 which(colnames(edges_df) %in%
-                         edge_attr)] <- values
-      }
+
+      edges_df[indices,
+               which(colnames(edges_df) %in%
+                       edge_attr)] <- values
     }
 
     if (!(edge_attr %in% colnames(edges_df))) {
-      edges_df <-
-        cbind(edges_df, rep("", nrow(edges_df)))
-      edges_df[, ncol(edges_df)] <-
-        as.character(edges_df[, ncol(edges_df)])
-      colnames(edges_df)[ncol(edges_df)] <- edge_attr
 
-      if (is.null(from) & !is.null(to)) {
-        edges_df[which(edges_df$to %in% to),
-                 ncol(edges_df)] <- values
-      } else if (!is.null(from) & is.null(to)) {
-        edges_df[which(edges_df$from %in% from),
-                 ncol(edges_df)] <- values
-      } else if (is.null(from) & is.null(to)) {
-        edges_df[, ncol(edges_df)] <- values
-      } else {
-        edges_df[which((edges_df$from %in% from) &
-                         (edges_df$to %in% to)),
-                 ncol(edges_df)] <- values
-      }
+      # Add a new column and map the edge attribute
+      # value to each of the indices in `edges_df`
+      edges_df <-
+        dplyr::mutate(
+          edges_df,
+          new_attr__ = ifelse(as.numeric(row.names(edges_df)) %in%
+                                indices, values, NA))
+
+      colnames(edges_df)[ncol(edges_df)] <- edge_attr
     }
   }
 
@@ -171,37 +169,44 @@ set_edge_attrs <- function(x,
 
     if (!(edge_attr %in% colnames(edges_df))) {
       edges_df <-
-        cbind(edges_df, rep("", nrow(edges_df)))
+        cbind(edges_df,
+              rep(as.character(NA), nrow(edges_df)))
+
       edges_df[, ncol(edges_df)] <-
-        as.character(edges_df[,ncol(edges_df)])
+        edges_df[, ncol(edges_df)]
+
       colnames(edges_df)[ncol(edges_df)] <- edge_attr
+
       edges_df[, ncol(edges_df)] <- values
     }
   }
 
   if (object_type == "dgr_graph") {
 
-    # Create new graph object
-    dgr_graph <-
-      create_graph(
-        nodes_df = x$nodes_df,
-        edges_df = edges_df,
-        graph_attrs = x$graph_attrs,
-        node_attrs = x$node_attrs,
-        edge_attrs = x$edge_attrs,
-        directed = ifelse(is_graph_directed(x),
-                          TRUE, FALSE),
-        graph_name = x$graph_name,
-        graph_time = x$graph_time,
-        graph_tz = x$graph_tz)
+    # Update the graph object
+    x$edges_df = edges_df
 
-    # Retain the edge selection
-    dgr_graph$selection <- x$selection
+    # Update the `graph_log` df with an action
+    x$graph_log <-
+      add_action_to_log(
+        graph_log = x$graph_log,
+        version_id = nrow(x$graph_log) + 1,
+        function_used = "set_edge_attrs",
+        time_modified = time_function_start,
+        duration = graph_function_duration(time_function_start),
+        nodes = nrow(x$nodes_df),
+        edges = nrow(x$edges_df))
 
-    return(dgr_graph)
+    # Write graph backup if the option is set
+    if (x$graph_info$write_backups) {
+      save_graph_as_rds(graph = x)
+    }
+
+    return(x)
   }
 
   if (object_type == "edge_df") {
+
     return(edges_df)
   }
 }

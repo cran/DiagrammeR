@@ -4,8 +4,8 @@
 \alias{create_random_graph}
 \title{Create a randomized graph}
 \usage{
-create_random_graph(n, m, directed = FALSE, fully_connected = FALSE,
-  display_labels = TRUE, set_seed = NULL, node_id = NULL)
+create_random_graph(n, m, directed = TRUE, display_labels = TRUE,
+  set_seed = NULL, write_backups = FALSE)
 }
 \arguments{
 \item{n}{the number of nodes to use in the
@@ -17,19 +17,17 @@ random graph.}
 \item{directed}{an option for whether the random
 graph should be undirected (default) or directed.}
 
-\item{fully_connected}{should the graph be fully
-connected (i.e., no free nodes).}
-
 \item{display_labels}{display node labels.}
 
 \item{set_seed}{supplying a value sets a random seed
 of the \code{Mersenne-Twister} implementation.}
 
-\item{node_id}{an optional vector of unique node ID
-values to apply to the randomized graph. The length
-of the vector should ideally correspond to the value
-supplied in \code{n}; vectors longer than the length
-of \code{n} will be truncated.}
+\item{write_backups}{an option to write incremental
+backups of changing graph states to disk. If
+\code{TRUE}, a subdirectory of the working directory
+will be used to store \code{RDS} files. The
+default value is \code{FALSE} so one has to opt in
+to use this functionality.}
 }
 \description{
 Create a graph of up to \code{n} nodes
@@ -41,32 +39,6 @@ with randomized edge assignments.
 random_graph_directed <-
   create_random_graph(
     n = 50,
-    m = 75,
-    directed = TRUE)
-
-# Create a random, undirected graph that's
-# fully connected
-random_graph_undirected <-
-  create_random_graph(
-    n = 30,
-    m = 30,
-    fully_connected = TRUE)
-
-# Create a directed graph with a seed set so that
-# it's reproducible
-directed_graph <-
-  create_random_graph(
-    n = 15,
-    m = 34,
-    set_seed = 50)
-
-# Create a directed, random graph with a supplied
-# set of node IDs
-random_directed_graph_letters <-
-  create_random_graph(
-    n = 10,
-    m = 20,
-    directed = TRUE,
-    node_id = LETTERS)
+    m = 75)
 }
 

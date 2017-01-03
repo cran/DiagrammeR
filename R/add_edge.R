@@ -3,8 +3,7 @@
 #' \code{dgr_graph}, add an edge to nodes within the
 #' graph.
 #' @param graph a graph object of class
-#' \code{dgr_graph} that is created using
-#' \code{create_graph}.
+#' \code{dgr_graph}.
 #' @param from the outgoing node from which the edge
 #' is connected.
 #' @param to the incoming nodes to which each edge
@@ -12,14 +11,20 @@
 #' @param rel an optional string specifying the
 #' relationship between the
 #' connected nodes.
+#' @param use_labels an option to use node \code{label}
+#' values in \code{from} and \code{to} for defining
+#' node connections. Note that this is only possible
+#' if all nodes have distinct \code{label} values set
+#' and none exist as an empty string.
 #' @return a graph object of class \code{dgr_graph}.
 #' @examples
-#' library(magrittr)
-#'
-#' # Create a graph with two nodes
+#' # Create a graph with 4 nodes
 #' graph <-
 #'   create_graph() %>%
-#'   add_n_nodes(2)
+#'   add_node(label = "one") %>%
+#'   add_node(label = "two") %>%
+#'   add_node(label = "three") %>%
+#'   add_node(label = "four")
 #'
 #' # Add an edge between those nodes and attach a
 #' # relationship to the edge
@@ -28,26 +33,82 @@
 #'    graph,
 #'    from = 1,
 #'    to = 2,
-#'    rel = "to_get")
+#'    rel = "A")
 #'
 #' # Use the `edge_info()` function to verify that
 #' # the edge has been created
 #' edge_info(graph)
-#' #>   from to    rel
-#' #> 1    1  2 to_get
+#' #>   id from to rel
+#' #> 1  1    1  2   A
+#'
+#' # Add another node and edge to the graph
+#' graph <-
+#'   graph %>%
+#'   add_edge(3, 2, "A")
+#'
+#' # Verify that the edge has been created by
+#' # getting a count of graph edges
+#' edge_count(graph)
+#' #> [1] 2
+#'
+#' # Add edges by specifying node `label` values
+#' # and setting `use_labels = TRUE`; note
+#' # that all nodes must have unique `label`
+#' # values to use this option
+#' graph <-
+#'   graph %>%
+#'   add_edge(
+#'     "three", "four", "L",
+#'     use_labels = TRUE) %>%
+#'   add_edge(
+#'     "four", "one", "L",
+#'     use_labels = TRUE)
+#'
+#' # Use the `get_edges()` function to verify
+#' # that the edges were added
+#' get_edges(graph)
+#' #> [1] "1->2" "3->2" "3->4" "4->1"
+#' @importFrom dplyr bind_rows
 #' @export add_edge
 
 add_edge <- function(graph,
                      from,
                      to,
-                     rel = NULL) {
+                     rel = NULL,
+                     use_labels = FALSE) {
 
-  if (is_graph_empty(graph)) {
-    stop("Edges cannot be added to an empty graph.")
+  # Get the time of function start
+  time_function_start <- Sys.time()
+
+  # Validation: Graph object is valid
+  if (graph_object_valid(graph) == FALSE) {
+    stop("The graph object is not valid.")
+  }
+
+  # Validation: Graph contains nodes
+  if (graph_contains_nodes(graph) == FALSE) {
+    stop("The graph contains no nodes, so, an edge cannot be added.")
   }
 
   if (length(from) > 1 | length(to) > 1) {
     stop("Only one edge can be specified.")
+  }
+
+  if (is.null(rel)) {
+    rel <- as.character(NA)
+  }
+
+  # If `use_label` is set to TRUE, treat values in
+  # list as labels; need to map to node ID values
+  if (use_labels) {
+    from_to_node_id <-
+      translate_to_node_id(
+        graph = graph,
+        from = from,
+        to = to)
+
+    from <- from_to_node_id$from
+    to <- from_to_node_id$to
   }
 
   # If an edge between nodes is requested and that
@@ -64,97 +125,43 @@ add_edge <- function(graph,
     }
   }
 
-  # If `graph$edges_df` is NULL then use
-  # `create_edges()` to add an edge
-  if (is.null(graph$edges_df)) {
-
-    # If a relationship is defined, add that in
-    # the `create_edges()` call
-    if (!is.null(rel)) {
-
-      dgr_graph <-
-        create_graph(
-          nodes_df = graph$nodes_df,
-          edges_df = create_edges(from = from,
-                                  to = to,
-                                  rel = rel),
-          graph_attrs = graph$graph_attrs,
-          node_attrs = graph$node_attrs,
-          edge_attrs = graph$edge_attrs,
-          directed = ifelse(is_graph_directed(graph),
-                            TRUE, FALSE),
-          graph_name = graph$graph_name,
-          graph_time = graph$graph_time,
-          graph_tz = graph$graph_tz)
-    }
-
-    # If a relationship is not defined, use a simpler
-    # `create_edges()` call
-    if (is.null(rel)) {
-
-      dgr_graph <-
-        create_graph(
-          nodes_df = graph$nodes_df,
-          edges_df = create_edges(from = from,
-                                  to = to),
-          graph_attrs = graph$graph_attrs,
-          node_attrs = graph$node_attrs,
-          edge_attrs = graph$edge_attrs,
-          directed = ifelse(is_graph_directed(graph),
-                            TRUE, FALSE),
-          graph_name = graph$graph_name,
-          graph_time = graph$graph_time,
-          graph_tz = graph$graph_tz)
-
-      return(dgr_graph)
-    }
-  }
-
-  # If `graph$edges_df` is not NULL then use both
-  # `combine_edges()` and `create_edges()` to
-  # add an edge
+  # Use `bind_rows()` to add an edge
   if (!is.null(graph$edges_df)) {
 
-    # If a relationship is defined, add that in the
-    # `create_edges()` call
-    if (!is.null(rel)) {
+    combined_edges <-
+      dplyr::bind_rows(
+        graph$edges_df,
+        data.frame(
+          id = as.integer(graph$last_edge + 1),
+          from = as.integer(from),
+          to = as.integer(to),
+          rel = as.character(rel),
+          stringsAsFactors = FALSE))
 
-      combined_edges <-
-        combine_edges(
-          graph$edges_df,
-          create_edges(from = from,
-                       to = to,
-                       rel = rel))
+    # Use the `combined_edges` object as a
+    # replacement for the graph's internal
+    # edge data frame
+    graph$edges_df <- combined_edges
+
+    # Modify the `last_edge` vector
+    graph$last_edge <- as.integer(graph$last_edge + 1)
+
+    # Update the `graph_log` df with an action
+    graph$graph_log <-
+      add_action_to_log(
+        graph_log = graph$graph_log,
+        version_id = nrow(graph$graph_log) + 1,
+        function_used = "add_edge",
+        time_modified = time_function_start,
+        duration = graph_function_duration(time_function_start),
+        nodes = nrow(graph$nodes_df),
+        edges = nrow(graph$edges_df))
+
+    # Write graph backup if the option is set
+    if (graph$graph_info$write_backups) {
+      save_graph_as_rds(graph = graph)
     }
 
-    # If a relationship is not defined, use a simpler
-    # `create_edges()` call
-    if (is.null(rel)) {
-
-      combined_edges <-
-        combine_edges(
-          graph$edges_df,
-          create_edges(from = from,
-                       to = to))
-    }
-
-    # Use the `combined_edges` object in either case to
-    # create an updated graph
-    dgr_graph <-
-      create_graph(
-        nodes_df = graph$nodes_df,
-        edges_df = combined_edges,
-        graph_attrs = graph$graph_attrs,
-        node_attrs = graph$node_attrs,
-        edge_attrs = graph$edge_attrs,
-        directed = ifelse(is_graph_directed(graph),
-                          TRUE, FALSE),
-        graph_name = graph$graph_name,
-        graph_time = graph$graph_time,
-        graph_tz = graph$graph_tz)
-
-    return(dgr_graph)
+    return(graph)
   }
-
-  return(dgr_graph)
 }

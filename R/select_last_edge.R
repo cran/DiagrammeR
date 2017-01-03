@@ -6,17 +6,16 @@
 #' of the graph's edge data frame. In practice, this
 #' will typically be the last edge created.
 #' @param graph a graph object of class
-#' \code{dgr_graph} that is created using
-#' \code{create_graph}.
+#' \code{dgr_graph}.
 #' @return a graph object of class \code{dgr_graph}.
 #' @examples
-#' library(magrittr)
-#'
 #' # Create an empty graph
 #' graph <- create_graph()
 #'
 #' # Add three nodes to the graph
-#' graph %<>% add_n_nodes(3)
+#' graph <-
+#'   graph %>%
+#'   add_n_nodes(3)
 #'
 #' # Add two edges to the graph
 #' graph %<>%
@@ -24,37 +23,64 @@
 #'   add_edge(2, 3)
 #'
 #' # Select the last edge added
-#' graph %<>% select_last_edge
+#' graph <-
+#'   graph %>%
+#'   select_last_edge()
 #'
 #' # Get the current selection
-#' graph %>% get_selection
-#' #> $edges
-#' #> $edges$from
-#' #> [1] "2"
-#' #>
-#' #> $edges$to
-#' #> [1] "3"
+#' graph %>% get_selection()
+#' #> [1] 2
+#' @importFrom dplyr select rename
 #' @export select_last_edge
 
 select_last_edge <- function(graph) {
 
-  if (is_graph_empty(graph)) {
-    stop("The graph is empty so no selections can be made.")
+  # Get the time of function start
+  time_function_start <- Sys.time()
+
+  # Validation: Graph object is valid
+  if (graph_object_valid(graph) == FALSE) {
+    stop("The graph object is not valid.")
   }
 
-  if (edge_count(graph) == 0) {
-    stop("The graph has no edges so no selections can be made.")
+  # Validation: Graph contains edges
+  if (graph_contains_edges(graph) == FALSE) {
+    stop("The graph contains no edges, so, no edge can be selected.")
   }
 
-  from <- graph$edges_df$from
-  to <- graph$edges_df$to
-  last_from <- from[length(from)]
-  last_to <- to[length(to)]
-  graph$selection$edges$from <- last_from
-  graph$selection$edges$to <- last_to
+  # Create bindings for specific variables
+  id <- from <- to <- NULL
 
-  if (!is.null(graph$selection$nodes)) {
-    graph$selection$nodes <- NULL
+  # Extract the graph's internal edf
+  edges_df <- graph$edges_df
+
+  # Get the last edge created
+  last_edge <-
+    edges_df[nrow(edges_df), ] %>%
+    dplyr::select(id, from, to) %>%
+    dplyr::rename(edge = id)
+
+  # Set the edge ID value as the active selection
+  # of edges in `graph$edge_selection`
+  graph$edge_selection <- last_edge
+
+  # Replace `graph$node_selection` with an empty df
+  graph$node_selection <- create_empty_nsdf()
+
+  # Update the `graph_log` df with an action
+  graph$graph_log <-
+    add_action_to_log(
+      graph_log = graph$graph_log,
+      version_id = nrow(graph$graph_log) + 1,
+      function_used = "select_last_edge",
+      time_modified = time_function_start,
+      duration = graph_function_duration(time_function_start),
+      nodes = nrow(graph$nodes_df),
+      edges = nrow(graph$edges_df))
+
+  # Write graph backup if the option is set
+  if (graph$graph_info$write_backups) {
+    save_graph_as_rds(graph = graph)
   }
 
   return(graph)

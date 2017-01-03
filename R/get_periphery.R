@@ -14,11 +14,16 @@
 #'     15, 24,
 #'     fully_connected = TRUE,
 #'     set_seed = 20))
-#' #> [1] "13"
+#' #> [1] 13
 #' }
 #' @export get_periphery
 
 get_periphery <- function(graph) {
+
+  # Validation: Graph object is valid
+  if (graph_object_valid(graph) == FALSE) {
+    stop("The graph object is not valid.")
+  }
 
   # Get the eccentricity for each of the graph's nodes
   eccentricity <- get_eccentricity(graph)
@@ -26,8 +31,11 @@ get_periphery <- function(graph) {
   # Return the node IDs for all nodes where the
   # eccentricity is equal to the graph diameter
   # (i.e., maximum eccentricity)
-  return(names(
-    eccentricity[
-      which(eccentricity %in%
-              max(eccentricity))]))
+  nodes <-
+    as.integer(names(
+      eccentricity[
+        which(eccentricity %in%
+                max(eccentricity))]))
+
+  return(nodes)
 }

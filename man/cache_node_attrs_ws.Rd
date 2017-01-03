@@ -9,8 +9,7 @@ cache_node_attrs_ws(graph, node_attr, mode = NULL)
 }
 \arguments{
 \item{graph}{a graph object of class
-\code{dgr_graph} that is created using
-\code{create_graph}.}
+\code{dgr_graph}.}
 
 \item{node_attr}{the node attribute from which to
 obtain values.}
@@ -28,5 +27,58 @@ From a graph object of class
 nodes available in a selection and cache those
 values in the graph for later retrieval using
 \code{get_cache}.
+
+Selections of nodes can be performed using
+the following \code{select_...} functions:
+\code{select_nodes()},
+\code{select_last_node()},
+\code{select_nodes_by_degree()},
+\code{select_nodes_by_id()}, or
+\code{select_nodes_in_neighborhood()}.
+Selections of nodes can also be performed using
+the following traversal functions:
+(\code{trav_...}):
+\code{trav_out()}, \code{trav_in()},
+\code{trav_both()}, \code{trav_in_node()},
+\code{trav_out_node()}.
+}
+\examples{
+# Set a seed
+set.seed(23)
+
+# Create a graph with 6 nodes and 5 edges
+graph <-
+  create_graph() \%>\%
+  add_path(6) \%>\%
+  set_node_attrs(
+    "value", rnorm(node_count(.), 5, 2))
+
+# Select all nodes where the node attribute `value`
+# is less than 5
+graph <-
+  graph \%>\%
+  select_nodes("value < 5.0")
+
+# Show the graph's node data frame
+graph \%>\% get_node_df
+#>   id type label    value
+#> 1  1 <NA>     1 5.090874
+#> 2  2 <NA>     2 8.151559
+#> 3  3 <NA>     3 5.436577
+#> 4  4 <NA>     4 2.906929
+#> 5  5 <NA>     5 4.422623
+#> 6  6 <NA>     6 5.963101
+
+# Cache available values from the node attribute
+# `value` from the nodes that are selected; ensure
+# that the cached vector is numeric
+graph <-
+  graph \%>\%
+  cache_node_attrs_ws("value", "numeric")
+
+# Get the cached vector and get its
+# difference from 5
+graph \%>\% get_cache() \%>\% {x <- .; 5 - x}
+#> [1] 2.0930707 0.5773773
 }
 

@@ -7,59 +7,38 @@
 #' random graph.
 #' @param directed an option for whether the random
 #' graph should be undirected (default) or directed.
-#' @param fully_connected should the graph be fully
-#' connected (i.e., no free nodes).
 #' @param display_labels display node labels.
 #' @param set_seed supplying a value sets a random seed
 #' of the \code{Mersenne-Twister} implementation.
-#' @param node_id an optional vector of unique node ID
-#' values to apply to the randomized graph. The length
-#' of the vector should ideally correspond to the value
-#' supplied in \code{n}; vectors longer than the length
-#' of \code{n} will be truncated.
+#' @param write_backups an option to write incremental
+#' backups of changing graph states to disk. If
+#' \code{TRUE}, a subdirectory of the working directory
+#' will be used to store \code{RDS} files. The
+#' default value is \code{FALSE} so one has to opt in
+#' to use this functionality.
 #' @examples
 #' # Create a random, directed graph with 50 nodes
 #' # and 75 edges
 #' random_graph_directed <-
 #'   create_random_graph(
 #'     n = 50,
-#'     m = 75,
-#'     directed = TRUE)
-#'
-#' # Create a random, undirected graph that's
-#' # fully connected
-#' random_graph_undirected <-
-#'   create_random_graph(
-#'     n = 30,
-#'     m = 30,
-#'     fully_connected = TRUE)
-#'
-#' # Create a directed graph with a seed set so that
-#' # it's reproducible
-#' directed_graph <-
-#'   create_random_graph(
-#'     n = 15,
-#'     m = 34,
-#'     set_seed = 50)
-#'
-#' # Create a directed, random graph with a supplied
-#' # set of node IDs
-#' random_directed_graph_letters <-
-#'   create_random_graph(
-#'     n = 10,
-#'     m = 20,
-#'     directed = TRUE,
-#'     node_id = LETTERS)
+#'     m = 75)
+#' @importFrom utils combn
+#' @importFrom tibble as_tibble
+#' @importFrom dplyr rename sample_n mutate select_
 #' @export create_random_graph
 
 create_random_graph <- function(n,
                                 m,
-                                directed = FALSE,
-                                fully_connected = FALSE,
+                                directed = TRUE,
                                 display_labels = TRUE,
                                 set_seed = NULL,
-                                node_id = NULL) {
+                                write_backups = FALSE) {
 
+  # Create bindings for specific variables
+  V1 <- V2 <- NULL
+
+  # If a seed value is supplied, set a seed
   if (!is.null(set_seed)) {
     set.seed(set_seed, kind = "Mersenne-Twister")
   }
@@ -72,98 +51,51 @@ create_random_graph <- function(n,
                 ")"))
   }
 
-  if (!is.null(node_id)) {
-    # Stop function if all node ID values are not unique
-    if (anyDuplicated(node_id) != 0) {
-      stop("The supplied node IDs are not unique.")
-    }
+  # Create a node data frame
+  ndf <-
+    create_node_df(
+      n = n,
+      label = ifelse(display_labels, TRUE, FALSE),
+      value = sample(seq(0.5, 10, 0.5), n, replace = TRUE))
 
-    # Stop function if insufficient node IDs
-    # values are provided
-    if (length(node_id) < n) {
-      stop("Not enough node ID values were provided.")
-    }
+  # Get all combinations of nodes (in one direction) and
+  # create a data frame of all possible edges
+  possible_edges <-
+    utils::combn(1:n, 2) %>%
+    t() %>%
+    tibble::as_tibble() %>%
+    dplyr::rename(from = V1, to = V2)
 
+  # Randomly choose `m` rows from all possible edges and
+  # create an edge data frame
+  if (m > 0) {
+    edf <-
+      dplyr::sample_n(possible_edges, m, replace = FALSE) %>%
+      dplyr::mutate(id = 1:n()) %>%
+      dplyr::mutate(rel = as.character(NA)) %>%
+      dplyr::select_("id", "from", "to", "rel") %>%
+      as.data.frame(stringsAsFactors = FALSE)
+
+    # Create the graph
     graph <-
       create_graph(
-        nodes_df =
-          create_nodes(
-            nodes = node_id[1:n],
-            label = ifelse(display_labels,
-                           TRUE, FALSE),
-            value = sample(seq(0.5, 10, 0.5),
-                           n, replace = TRUE)),
-        directed = ifelse(directed,
-                          TRUE, FALSE))
+        nodes_df = ndf,
+        edges_df = edf,
+        directed = ifelse(directed, TRUE, FALSE),
+        write_backups = write_backups)
+
   } else {
 
+    # Create the graph
     graph <-
       create_graph(
-        nodes_df =
-          create_nodes(
-            nodes = 1:n,
-            label = ifelse(display_labels,
-                           TRUE, FALSE),
-            value = sample(seq(0.5, 10, 0.5),
-                           n, replace = TRUE)),
-        directed = ifelse(directed,
-                          TRUE, FALSE))
+        nodes_df = ndf,
+        directed = ifelse(directed, TRUE, FALSE),
+        write_backups = write_backups)
   }
 
-  if (m > 0) {
-    for (i in 1:m) {
-      edge_placed <- FALSE
-
-      while (edge_placed == FALSE) {
-        edge_placed <- FALSE
-
-        node_a <-
-          sample(get_nodes(graph), 1)
-
-        node_b <-
-          sample(
-            get_nodes(graph)[-which(get_nodes(graph) %in% node_a)], 1)
-
-        edge_in_graph <-
-          edge_present(
-            graph,
-            from = node_a,
-            to = node_b) |
-          edge_present(
-            graph,
-            from = node_b,
-            to = node_a)
-
-        if (edge_in_graph == FALSE) {
-          graph <-
-            add_edge(
-              graph,
-              from = node_a,
-              to = node_b)
-          edge_placed <- TRUE
-        }
-      }
-    }
-  }
-
-  if (fully_connected) {
-
-    repeat {
-      if (any(node_info(graph)$degree == 0)) {
-
-        unconnected_nodes <-
-          node_info(graph)[which(node_info(graph)$degree == 0), 1]
-
-        connected_nodes <-
-          setdiff(get_nodes(graph), unconnected_nodes)
-
-        graph <-
-          add_edge(graph,
-                   from = sample(unconnected_nodes, 1),
-                   to = sample(connected_nodes, 1))
-      } else { break }
-    }
-  }
+  # Modify the `function_used` in the `graph_log` df
+  graph$graph_log$function_used[1] <- "create_random_graph"
 
   return(graph)
 }

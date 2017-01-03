@@ -4,8 +4,7 @@
 #' of nodes connected a specified distance from an
 #' initial node.
 #' @param graph a graph object of class
-#' \code{dgr_graph} that is created using
-#' \code{create_graph}.
+#' \code{dgr_graph}.
 #' @param node the node from which the traversal
 #' will originate.
 #' @param distance the maximum number of steps from
@@ -18,71 +17,67 @@
 #' selection, if it exists.
 #' @return a graph object of class \code{dgr_graph}.
 #' @examples
-#' library(magrittr)
-#'
-#' # Create a graph with a tree structure that's
-#' # 4 levels deep (begins with node `1`, branching
-#' # by 3 nodes at each level); the resulting graph
-#' # contains 40 nodes, numbered `1` through `40`
+#' # Create a graph containing a balanced tree
 #' graph <-
-#'   create_graph(graph_attrs = 'layout = twopi') %>%
-#'   add_node("A") %>% select_nodes %>%
-#'   add_n_nodes_ws(3, "from", "B") %>%
-#'   clear_selection %>%
-#'   select_nodes("type", "B") %>%
-#'   add_n_nodes_ws(3, "from", "C") %>%
-#'   clear_selection %>%
-#'   select_nodes("type", "C") %>%
-#'   add_n_nodes_ws(3, "from", "D") %>%
-#'   clear_selection
+#'   create_graph() %>%
+#'   add_balanced_tree(2, 3)
 #'
 #' # Create a graph selection by selecting nodes
 #' # in the neighborhood of node `1`, where the
 #' # neighborhood is limited by nodes that are 1
 #' # connection away from node `1`
-#' graph %<>%
+#' graph <-
+#'   graph %>%
 #'   select_nodes_in_neighborhood(
-#'     node = 1,
-#'     distance = 1)
+#'     node = 1, distance = 1)
 #'
 #' # Get the selection of nodes
-#' graph %>% get_selection
-#' #> $nodes
-#' #> [1] "1" "2" "3" "4"
+#' graph %>% get_selection()
+#' #> [1] 1 2 3
 #'
 #' # Perform another selection of nodes, this time
 #' # with a neighborhood spanning 2 nodes from node `1`
-#' graph %<>%
-#'   clear_selection %>%
+#' graph <-
+#'   graph %>%
+#'   clear_selection() %>%
 #'   select_nodes_in_neighborhood(
-#'     node = 1,
-#'     distance = 2)
+#'     node = 1, distance = 2)
+#'
+#' # Get the selection of nodes
+#' graph %>% get_selection()
+#' #> [1] 1 2 3 4 5 6 7
+#'
+#' # Perform a final selection of nodes, using
+#' # `distance = 3`, this effectively selects all
+#' # nodes in this graph
+#' graph <-
+#'   graph %>%
+#'   clear_selection() %>%
+#'   select_nodes_in_neighborhood(
+#'     node = 1, distance = 3)
 #'
 #' # Get the selection of nodes
 #' graph %>% get_selection
-#' #> $nodes
-#' #> [1] "1"  "2"  "3"  "4"  "5"  "6"  "7"  "8"  "9"
-#' #> [10] "10" "11" "12" "13"
-#'
-#' # Perform a final selection of nodes, using
-#' # `distance = 3`, this effectively selects all 40
-#' # nodes in this graph
-#' graph %<>%
-#'   clear_selection %>%
-#'   select_nodes_in_neighborhood(
-#'     node = 1,
-#'     distance = 3)
-#'
-#' # Get a count of the nodes selected to verify
-#' # that all 40 nodes have indeed been selected
-#' graph %>% get_selection %>% unlist %>% length
-#' #> [1] 40
+#' #> [1] 1  2  3  4  5  6  7  8  9 10 11 12 13 14 15
 #' @export select_nodes_in_neighborhood
 
 select_nodes_in_neighborhood <- function(graph,
                                          node,
                                          distance,
                                          set_op = "union") {
+
+  # Get the time of function start
+  time_function_start <- Sys.time()
+
+  # Validation: Graph object is valid
+  if (graph_object_valid(graph) == FALSE) {
+    stop("The graph object is not valid.")
+  }
+
+  # Validation: Graph contains nodes
+  if (graph_contains_nodes(graph) == FALSE) {
+    stop("The graph contains no nodes, so, no selections can be made.")
+  }
 
   # Create an empty list object
   nodes <- list()
@@ -91,12 +86,36 @@ select_nodes_in_neighborhood <- function(graph,
   for (i in 1:distance) {
     if (i == 1) {
 
-      nodes[[i]] <-
-        vector(mode = "character")
+      nodes[[i]] <- vector(mode = "integer")
 
       nodes[[i]] <-
         c(node,
-          as.character(
+          get_edges(
+            graph,
+            return_type = "df")[
+              which(
+                get_edges(
+                  graph,
+                  return_type = "df")[, 1] ==
+                  node), 2],
+          get_edges(
+            graph,
+            return_type = "df")[
+              which(
+                get_edges(
+                  graph,
+                  return_type = "df")[, 2] ==
+                  node), 1])
+    }
+
+    if (i > 1) {
+      for (j in 1:length(nodes[[i - 1]])) {
+        if (j == 1) {
+          nodes[[i]] <- vector(mode = "integer")
+        }
+
+        nodes[[i]] <-
+          c(nodes[[i]],
             get_edges(
               graph,
               return_type = "df")[
@@ -104,8 +123,7 @@ select_nodes_in_neighborhood <- function(graph,
                   get_edges(
                     graph,
                     return_type = "df")[, 1] ==
-                    node), 2]),
-          as.character(
+                    nodes[[i - 1]][j]), 2],
             get_edges(
               graph,
               return_type = "df")[
@@ -113,35 +131,7 @@ select_nodes_in_neighborhood <- function(graph,
                   get_edges(
                     graph,
                     return_type = "df")[, 2] ==
-                    node), 1]))
-    }
-
-    if (i > 1) {
-      for (j in 1:length(nodes[[i - 1]])) {
-        if (j == 1) {
-          nodes[[i]] <- vector(mode = "character")
-        }
-
-        nodes[[i]] <-
-          c(nodes[[i]],
-            as.character(
-              get_edges(
-                graph,
-                return_type = "df")[
-                  which(
-                    get_edges(
-                      graph,
-                      return_type = "df")[, 1] ==
-                      nodes[[i - 1]][j]), 2]),
-            as.character(
-              get_edges(
-                graph,
-                return_type = "df")[
-                  which(
-                    get_edges(
-                      graph,
-                      return_type = "df")[, 2] ==
-                      nodes[[i - 1]][j]), 1]))
+                    nodes[[i - 1]][j]), 1])
       }
     }
   }
@@ -150,15 +140,15 @@ select_nodes_in_neighborhood <- function(graph,
   # nodes as neighbors
   nodes_selected <- unique(unlist(nodes))
 
-  # Obtain vector of node IDs selection of nodes
-  # already present
-  if (!is.null(graph$selection)) {
-    if (!is.null(graph$selection$nodes)) {
-      nodes_prev_selection <- graph$selection$nodes
-    }
-  } else {
-    nodes_prev_selection <- vector(mode = "character")
+  # If no node ID values in `nodes_selected` return
+  # the graph without a changed node selection
+  if (length(nodes_selected) == 0) {
+    return(graph)
   }
+
+  # Obtain vector with node ID selection of nodes
+  # already present
+  nodes_prev_selection <- graph$node_selection$node
 
   # Incorporate selected nodes into graph's selection
   if (set_op == "union") {
@@ -172,7 +162,31 @@ select_nodes_in_neighborhood <- function(graph,
       setdiff(nodes_prev_selection, nodes_selected)
   }
 
-  graph$selection$nodes <- nodes_combined
+  # Add the node ID values to the active selection
+  # of nodes in `graph$node_selection`
+  graph$node_selection <-
+    replace_graph_node_selection(
+      graph = graph,
+      replacement = nodes_combined)
+
+  # Replace `graph$edge_selection` with an empty df
+  graph$edge_selection <- create_empty_esdf()
+
+  # Update the `graph_log` df with an action
+  graph$graph_log <-
+    add_action_to_log(
+      graph_log = graph$graph_log,
+      version_id = nrow(graph$graph_log) + 1,
+      function_used = "select_nodes_in_neighborhood",
+      time_modified = time_function_start,
+      duration = graph_function_duration(time_function_start),
+      nodes = nrow(graph$nodes_df),
+      edges = nrow(graph$edges_df))
+
+  # Write graph backup if the option is set
+  if (graph$graph_info$write_backups) {
+    save_graph_as_rds(graph = graph)
+  }
 
   return(graph)
 }

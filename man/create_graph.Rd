@@ -4,10 +4,8 @@
 \alias{create_graph}
 \title{Create a graph object}
 \usage{
-create_graph(nodes_df = NULL, edges_df = NULL, graph_attrs = NULL,
-  node_attrs = NULL, edge_attrs = NULL, directed = TRUE,
-  graph_name = NULL, graph_time = NULL, graph_tz = NULL,
-  generate_dot = TRUE)
+create_graph(nodes_df = NULL, edges_df = NULL, directed = TRUE,
+  graph_name = NULL, attr_theme = "default", write_backups = FALSE)
 }
 \arguments{
 \item{nodes_df}{an optional data frame containing,
@@ -22,18 +20,6 @@ at minimum, two columns (called \code{from} and
 columns (named as Graphviz edge attributes) can be
 included with values for the named edge attribute.}
 
-\item{graph_attrs}{an optional vector of graph
-attribute statements that can serve as defaults
-for the graph.}
-
-\item{node_attrs}{an optional vector of node
-attribute statements that can serve as defaults for
-nodes.}
-
-\item{edge_attrs}{an optional vector of edge
-attribute statements that can serve as defaults for
-edges.}
-
 \item{directed}{with \code{TRUE} (the default) or
 \code{FALSE}, either directed or undirected edge
 operations will be generated, respectively.}
@@ -41,18 +27,19 @@ operations will be generated, respectively.}
 \item{graph_name}{an optional string for labeling
 the graph object.}
 
-\item{graph_time}{a date or date-time string
-(required for insertion of graph into a graph series
-of the type \code{temporal}).}
+\item{attr_theme}{the theme (i.e., collection of
+\code{graph}, \code{node}, and \code{edge} global
+graph attributes) to use for this graph. The default
+theme is called \code{default}. If this is set to
+\code{NULL} then no global graph attributes will
+be applied to the graph upon creation.}
 
-\item{graph_tz}{an optional value for the time zone
-(\code{tz}) corresponding to the date or date-time
-string supplied as a value to \code{graph_time}. If
-no time zone is provided then it will be set to
-\code{GMT}.}
-
-\item{generate_dot}{an option to generate Graphviz
-DOT code and place into the graph object.}
+\item{write_backups}{an option to write incremental
+backups of changing graph states to disk. If
+\code{TRUE}, a subdirectory of the working directory
+will be used to store \code{RDS} files. The
+default value is \code{FALSE} so one has to opt in
+to use this functionality.}
 }
 \value{
 a graph object of class \code{dgr_graph}.
@@ -63,27 +50,35 @@ option to use node data frames (ndfs) and/or edge
 data frames (edfs) to populate the initial graph.
 }
 \examples{
-# Create an empty graph
+# With `create_graph()` we can simply create an
+# empty graph (and add in nodes and edges later,
+# with other functions)
 graph <- create_graph()
 
 # A graph can be created with nodes and
 # without edges; this is usually done in 2 steps:
 # 1. create a node data frame (ndf) using the
-#    `create_nodes()` function
-nodes <-
-  create_nodes(
-    nodes = c("a", "b", "c", "d"))
+#    `create_node_df()` function
+ndf <- create_node_df(n = 4)
 
 # 2. create the graph object with `create_graph()`
 #    and pass in the ndf to `nodes_df`
-graph <- create_graph(nodes_df = nodes)
+graph <- create_graph(nodes_df = ndf)
+
+# Get information on the graph's nodes
+node_info(graph)
+#>   id type label deg indeg outdeg loops
+#> 1  1 <NA>  <NA>   0     0      0     0
+#> 2  2 <NA>  <NA>   0     0      0     0
+#> 3  3 <NA>  <NA>   0     0      0     0
+#> 4  4 <NA>  <NA>   0     0      0     0
 
 # You can create a similar graph with just nodes but
 # also provide a range of attributes for the nodes
 # (e.g., types, labels, arbitrary 'values')
-nodes <-
-  create_nodes(
-    nodes = c("a", "b", "c", "d"),
+ndf <-
+  create_node_df(
+    n = 4,
     label = TRUE,
     type = c("type_1", "type_1",
              "type_5", "type_2"),
@@ -91,38 +86,49 @@ nodes <-
               "rectangle", "rectangle"),
     values = c(3.5, 2.6, 9.4, 2.7))
 
-graph <- create_graph(nodes_df = nodes)
+graph <- create_graph(nodes_df = ndf)
 
-# A graph can also be created by just specifying the
-# edges between nodes (in this case the unique set
-# of nodes will be created added along with their
-# connections but there is no possibility to add
-# node attributes this way--they can be added later
-# with different function--although edge attributes
-# can specified); this is usually done in 2 steps:
-# 1. create an edge data frame (edf) using the
-#    `create_edges()` function:
-edges <-
-  create_edges(
-    from = c("a", "b", "c"),
-    to = c("d", "c", "a"),
+# Get information on the graph's internal node
+# data frame (ndf)
+get_node_df(graph)
+#>   id   type label     shape values
+#> 1  1 type_1     1    circle    3.5
+#> 2  2 type_1     2    circle    2.6
+#> 3  3 type_5     3 rectangle    9.4
+#> 4  4 type_2     4 rectangle    2.7
+
+# A graph can also be created by specifying both
+# the nodes and edges; create an edge data frame
+# (edf) using the `create_edge_df()` function:
+edf <-
+  create_edge_df(
+    from = c(1, 2, 3),
+    to = c(4, 3, 1),
     rel = "leading_to",
     values = c(7.3, 2.6, 8.3))
 
 # 2. create the graph object with `create_graph()`
-#    and pass in the edf to `edges_df`
-graph <- create_graph(edges_df = edges)
-
-# You can create a graph with both nodes and nodes
-# defined, and, also add in some default attributes
-# to be applied to all the nodes (`node_attrs`) and
-# edges (`edge_attrs`) in this initial graph
+#    and pass in the ndf and edf
 graph <-
   create_graph(
-    nodes_df = nodes,
-    edges_df = edges,
-    node_attrs = "fontname = Helvetica",
-    edge_attrs = c("color = blue",
-                   "arrowsize = 2"))
+    nodes_df = ndf,
+    edges_df = edf)
+
+# Get information on the graph's internal edge
+# data frame (edf)
+get_edge_df(graph)
+#>   id from to        rel values
+#> 1  1    1  4 leading_to    7.3
+#> 2  2    2  3 leading_to    2.6
+#> 3  3    3  1 leading_to    8.3
+
+# Get information on the graph's internal node
+# data frame (ndf)
+get_node_df(graph)
+#>   id   type label     shape values
+#> 1  1 type_1     1    circle    3.5
+#> 2  2 type_1     2    circle    2.6
+#> 3  3 type_5     3 rectangle    9.4
+#> 4  4 type_2     4 rectangle    2.7
 }
 

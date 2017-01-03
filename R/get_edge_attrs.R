@@ -16,8 +16,6 @@
 #' @return a named vector of edge attribute values for
 #' the attribute given by \code{edge_attr} by edge.
 #' @examples
-#' library(magrittr)
-#'
 #' # Create a simple graph where edges have an edge
 #' # attribute named `value`
 #' graph <-
@@ -25,7 +23,7 @@
 #'   add_n_nodes(4) %>%
 #'   {
 #'     edges <-
-#'       create_edges(
+#'       create_edge_df(
 #'         from = c(1, 2, 1, 4),
 #'         to = c(2, 3, 4, 3),
 #'         rel = "rel")
@@ -42,14 +40,14 @@
 #'
 #' # Get the values for the `value` edge attribute
 #' graph %>% get_edge_attrs(edge_attr = "value")
-#' #> 1 -> 2 2 -> 3 1 -> 4 4 -> 3
-#' #> 1.6    2.9    4.3    8.4
+#' #> 1->2 2->3 1->4 4->3
+#' #>  1.6  2.9  4.3  8.4
 #'
 #' # To only return edge attribute values for specified
 #' # edges, use the `from` and `to` arguments
 #' graph %>% get_edge_attrs("value", c(1, 2), c(2, 3))
-#' #> 1 -> 2 2 -> 3
-#' #> 1.6    2.9
+#' #> 1->2 2->3
+#' #>  1.6  2.9
 #' @export get_edge_attrs
 
 get_edge_attrs <- function(x,
@@ -67,7 +65,7 @@ get_edge_attrs <- function(x,
     }
   }
 
-  if (class(x) == "dgr_graph") {
+  if (inherits(x, "dgr_graph")) {
     object_type <- "dgr_graph"
     edges_df <- x$edges_df
   }
@@ -87,23 +85,10 @@ get_edge_attrs <- function(x,
 
     # Extract the edge names
     edge_names <-
-      paste(edges_df$from, edges_df$to, sep = " -> ")
+      paste(edges_df$from, edges_df$to, sep = "->")
 
-    # If the values are numeric, coerce to numeric
-    edge_attr_vals_numeric <-
-      ifelse(
-        suppressWarnings(
-          any(is.na(as.numeric(edge_attr_vals)))),
-        FALSE, TRUE)
-
-    if (edge_attr_vals_numeric == TRUE) {
-      edge_attr_vals <- as.numeric(edge_attr_vals)
-      names(edge_attr_vals) <- edge_names
-    }
-
-    if (edge_attr_vals_numeric == FALSE) {
-      names(edge_attr_vals) <- edge_names
-    }
+    # Assign edge names
+    names(edge_attr_vals) <- edge_names
   }
 
   if (!is.null(from) & !is.null(to)) {
@@ -126,28 +111,15 @@ get_edge_attrs <- function(x,
         which(edges_df[
           , which(colnames(edges_df) ==
                     "from_to")] %in% edges),
-        1],
+        2],
         edges_df[
           which(edges_df[
             , which(colnames(edges_df) ==
                       "from_to")] %in% edges),
-          2], sep = " -> ")
+          3], sep = "->")
 
-    # If the values are numeric, coerce to numeric
-    edge_attr_vals_numeric <-
-      ifelse(
-        suppressWarnings(
-          any(is.na(as.numeric(edge_attr_vals)))),
-        FALSE, TRUE)
-
-    if (edge_attr_vals_numeric == TRUE) {
-      edge_attr_vals <- as.numeric(edge_attr_vals)
-      names(edge_attr_vals) <- edge_names
-    }
-
-    if (edge_attr_vals_numeric == FALSE) {
-      names(edge_attr_vals) <- edge_names
-    }
+    # Assign edge names
+    names(edge_attr_vals) <- edge_names
   }
 
   return(edge_attr_vals)

@@ -21,44 +21,27 @@
 #' @return a graph series object of type
 #' \code{dgr_graph_1D}.
 #' @examples
-#' library(magrittr)
-#'
 #' # Create three graphs
 #' graph_time_1 <-
 #'   create_graph(
-#'     graph_name = "graph_with_time_1",
-#'     graph_time = "2015-03-25 03:00",
-#'     graph_tz = "GMT") %>%
-#'   add_node("a") %>%
-#'   add_node("b") %>%
-#'   add_node("c") %>%
-#'   add_edge("a", "c") %>%
-#'   add_edge("a", "b") %>%
-#'   add_edge("b", "c")
+#'     graph_name = "graph_with_time_1") %>%
+#'   set_graph_time(
+#'     time = "2015-03-25 03:00",
+#'     tz = "GMT")
 #'
 #' graph_time_2 <-
 #'   create_graph(
-#'     graph_name = "graph_with_time_2",
-#'     graph_time = "2015-03-26 03:00",
-#'     graph_tz = "GMT") %>%
-#'   add_node("d") %>%
-#'   add_node("e") %>%
-#'   add_node("f") %>%
-#'   add_edge("d", "f") %>%
-#'   add_edge("d", "e") %>%
-#'   add_edge("e", "f")
+#'     graph_name = "graph_with_time_2") %>%
+#'   set_graph_time(
+#'     time = "2015-03-26 03:00",
+#'     tz = "GMT")
 #'
 #' graph_time_3 <-
 #'   create_graph(
-#'     graph_name = "graph_with_time_3",
-#'     graph_time = "2015-03-27 15:00",
-#'     graph_tz = "GMT") %>%
-#'   add_node("x") %>%
-#'   add_node("y") %>%
-#'   add_node("z") %>%
-#'   add_edge("x", "z") %>%
-#'   add_edge("x", "y") %>%
-#'   add_edge("y", "z")
+#'     graph_name = "graph_with_time_3") %>%
+#'   set_graph_time(
+#'     time = "2015-03-27 15:00",
+#'     tz = "GMT")
 #'
 #' # Create an empty graph series and add
 #' # the graphs
@@ -88,7 +71,7 @@
 #'     tz = "GMT")
 #'
 #' graph_count(series_time_subset)
-#' #> [1] 1
+#' #> [1] 2
 #' @export subset_series
 
 subset_series <- function(graph_series,
@@ -190,9 +173,9 @@ subset_series <- function(graph_series,
         }
 
         dates_times_in_series_with_tz[i] <-
-          as.POSIXct(dates_times_in_series[i], tz = tz_in_series[i])
+          as.POSIXct(dates_times_in_series[i], tz = tz_in_series[i],
+                     origin = "1970-01-01")
       }
-
 
       graphs_to_remove <-
         which(!(1:length(dates_times_in_series_with_tz) %in%
@@ -213,12 +196,6 @@ subset_series <- function(graph_series,
       }
 
       return(graph_series)
-    }
-
-    # Create subset based on exact time
-    if (length(values) == 1) {
-
-
     }
   }
 }

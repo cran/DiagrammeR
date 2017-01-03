@@ -9,8 +9,7 @@ edge_count(graph, rel = FALSE)
 }
 \arguments{
 \item{graph}{a graph object of class
-\code{dgr_graph} that is created using
-\code{create_graph}.}
+\code{dgr_graph}.}
 
 \item{rel}{either a logical value, where \code{TRUE}
 provides a named vector of edge count by type and
@@ -28,21 +27,24 @@ and optionally obtain a count of edges by their
 relationship type.
 }
 \examples{
+# Set a seed
+set.seed(24)
+
 # Create a node data frame (ndf)
-nodes <-
-  create_nodes(
-    nodes = LETTERS,
+ndf <-
+  create_node_df(
+    n = 26,
     label = TRUE,
-    type = c(rep("a_to_g", 7),
-             rep("h_to_p", 9),
-             rep("q_to_x", 8),
-             rep("y_and_z", 2)))
+    type = c(rep("a", 7),
+             rep("b", 9),
+             rep("c", 8),
+             rep("d", 2)))
 
 # Create an edge data frame (edf)
-edges <-
-  create_edges(
-    from = sample(LETTERS, replace = TRUE),
-    to = sample(LETTERS, replace = TRUE),
+edf <-
+  create_edge_df(
+    from = sample(1:26, replace = TRUE),
+    to = sample(1:26, replace = TRUE),
     rel = c(rep("rel_a", 7),
             rep("rel_b", 9),
             rep("rel_c", 8),
@@ -51,15 +53,15 @@ edges <-
 # Create a graph using the ndf and edf
 graph <-
   create_graph(
-    nodes_df = nodes,
-    edges_df = edges)
+    nodes_df = ndf,
+    edges_df = edf)
 
 # Get a total count of edges in the graph
 edge_count(graph, rel = FALSE)
 #> [1] 26
 
-# Get a count of edges that have the relationship
-# `rel_a`
+# Get a count of edges that have the
+# relationship of `rel_a`
 edge_count(graph, rel = "rel_a")
 #> [1] 7
 

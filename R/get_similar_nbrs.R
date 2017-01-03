@@ -7,8 +7,7 @@
 #' threshold values) node attribute to the starting
 #' node.
 #' @param graph a graph object of class
-#' \code{dgr_graph} that is created using
-#' \code{create_graph}.
+#' \code{dgr_graph}.
 #' @param node a single-length vector containing a
 #' node ID value.
 #' @param node_attr the name of the node attribute
@@ -28,27 +27,13 @@
 #' neighboring node similarity to the starting node.
 #' @return a vector of node ID values.
 #' @examples
-#' library(magrittr)
-#'
 #' # Getting similar neighbors can be done through
 #' # numerical comparisons; start with creating a
 #' # random, directed graph with 18 nodes and 22 edges
-#' random_graph <-
+#' graph <-
 #'   create_random_graph(
-#'     n = 18,
-#'     m = 22,
-#'     directed = TRUE,
-#'     fully_connected = TRUE,
-#'     set_seed = 20) %>%
-#'   set_global_graph_attrs(
-#'     'graph', 'layout', 'sfdp') %>%
-#'   set_global_graph_attrs(
-#'     'graph', 'overlap', 'false')
-#'
-#' # This graph cannot be shown in this help page
-#' # but you may be interested in displaying it with
-#' # `render_graph()`
-#' random_graph %>% render_graph
+#'     n = 18, m = 22,
+#'     set_seed = 23)
 #'
 #' # The `create_random_graph()` function randomly
 #' # assigns numerical values to all nodes (as the
@@ -56,16 +41,13 @@
 #' # place. By starting with node (`8`), we can test
 #' # whether any nodes adjacent and beyond are
 #' # numerically equivalent in `value`
-#' random_graph %>%
+#' graph %>%
 #'   get_similar_nbrs(
 #'     node = 8,
-#'     node_attr = 'value')
-#' #> [1] NA
+#'     node_attr = "value")
+#' #> [1] 7 10
 #'
-#' # There are no nodes neighboring `8` that have a
-#' # `value` node attribute equal to `1.0` as node does
-#' #
-#' # We can, however, set a tolerance for ascribing
+#' # We can also set a tolerance for ascribing
 #' # similarly by using either the `tol_abs` or
 #' # `tol_pct` arguments (the first applies absolute
 #' # lower and upper bounds from the value in the
@@ -73,24 +55,24 @@
 #' # difference to do the same); try setting `tol_abs`
 #' # with a fairly large range to determine if several
 #' # nodes can be selected
-#' random_graph %>%
+#' graph %>%
 #'   get_similar_nbrs(
 #'     node = 8,
-#'     node_attr = 'value',
+#'     node_attr = "value",
 #'     tol_abs = c(3, 3))
-#' #> [1] "3"  "9"  "10" "13" "17" "18"
+#' #> [1]  7  9 10 11 12
 #'
-#' # That resulted in a fairly large set of 7
+#' # That resulted in a fairly large set of 5
 #' # neigboring nodes; For sake of example, setting the
 #' # range to be very large will effectively return all
 #' # nodes in the graph except for the starting node
-#' random_graph %>%
+#' graph %>%
 #'   get_similar_nbrs(
 #'     node = 8,
-#'     node_attr = 'value',
+#'     node_attr = "value",
 #'     tol_abs = c(10, 10)) %>%
-#'     length
-#' #> [1] 17
+#'     length()
+#' #> [1] 13
 #' @export get_similar_nbrs
 
 get_similar_nbrs <- function(graph,
@@ -98,6 +80,11 @@ get_similar_nbrs <- function(graph,
                              node_attr,
                              tol_abs = NULL,
                              tol_pct = NULL) {
+
+  # Validation: Graph object is valid
+  if (graph_object_valid(graph) == FALSE) {
+    stop("The graph object is not valid.")
+  }
 
   # Get value to match on
   match <-
@@ -206,10 +193,9 @@ get_similar_nbrs <- function(graph,
 
     # Break if current iteration yields no change in
     # the `nodes` list
-    if (i > 1){
+    if (i > 1) {
       if (identical(nodes[[i]], nodes[[i - 1]])) break
     }
-
     i <- i + 1
   }
 
@@ -218,32 +204,10 @@ get_similar_nbrs <- function(graph,
   matching_nodes <-
     setdiff(nodes[length(nodes)][[1]], node)
 
-  # If there are no matching nodes, assign NA to
-  # `matching_nodes`
+  # If there are no matching nodes return `NA`
   if (length(matching_nodes) == 0) {
-    matching_nodes <- NA
+    return(NA)
+  } else {
+    return(sort(matching_nodes))
   }
-
-  # If `matching_nodes` has node ID values, determine
-  # if the node ID values are numeric and, if so, apply
-  # a numeric sort
-  if (all(!is.na(matching_nodes))) {
-
-    # Determine whether the node ID values are entirely
-    # numeric
-    node_id_numeric <-
-      ifelse(
-        suppressWarnings(
-          any(is.na(as.numeric(matching_nodes)))),
-        FALSE, TRUE)
-
-    # If the node ID values are numeric, then apply a
-    # numeric sort and reclass as a `character` type
-    if (node_id_numeric) {
-      matching_nodes <-
-        as.character(sort(as.numeric(matching_nodes)))
-    }
-  }
-
-  return(matching_nodes)
 }

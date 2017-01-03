@@ -1,6 +1,7 @@
 #' Export a graph to CSV files
 #' @description Export a graph to CSV files.
-#' @param graph a graph object.
+#' @param graph a graph object of class
+#' \code{dgr_graph}.
 #' @param ndf_name the name to provide to the CSV file
 #' containing node information. By default this CSV
 #' will be called \code{nodes.csv}.
@@ -19,31 +20,30 @@
 #' to match those required by the Spark GraphFrames
 #' package.
 #' @examples
-#' library(magrittr)
-#'
 #' # Create a node data frame (ndf)
-#' nodes <-
-#'   create_nodes(
-#'     nodes = c("a", "b", "c", "d"),
-#'     type = c("A", "A", "Z", "Z"),
+#' ndf <-
+#'   create_node_df(
+#'     n = 4,
+#'     type = c("a", "a", "z", "z"),
 #'     label = TRUE,
 #'     value = c(3.5, 2.6, 9.4, 2.7))
 #'
 #' # Create an edge data frame (edf)
-#' edges <-
-#'   create_edges(
-#'     from = c("a", "b", "c"),
-#'     to = c("d", "c", "a"),
-#'     rel = c("A", "Z", "A"))
+#' edf <-
+#'   create_edge_df(
+#'     from = c(1, 2, 3),
+#'     to = c(4, 3, 1),
+#'     rel = c("rel_a", "rel_z", "rel_a"))
 #'
 #' # Create a graph with the ndf and edf
 #' graph <-
-#'   create_graph(nodes_df = nodes,
-#'                edges_df = edges)
+#'   create_graph(
+#'     nodes_df = ndf,
+#'     edges_df = edf)
 #'
 #' # Create separate `nodes.csv` and `edges.csv`
 #' # files in the working directory
-#' graph %>% export_csv
+#' graph %>% export_csv()
 #' @importFrom utils write.csv
 #' @export export_csv
 
@@ -52,6 +52,11 @@ export_csv <- function(graph,
                        edf_name = "edges.csv",
                        output_path = getwd(),
                        colnames_type = NULL) {
+
+  # Validation: Graph object is valid
+  if (graph_object_valid(graph) == FALSE) {
+    stop("The graph object is not valid.")
+  }
 
   nodes_df <- get_node_df(graph)
   edges_df <- get_edge_df(graph)

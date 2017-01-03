@@ -2,17 +2,9 @@
 #' @description Select nodes from a graph object of
 #' class \code{dgr_graph}.
 #' @param graph a graph object of class
-#' \code{dgr_graph} that is created using
-#' \code{create_graph}.
-#' @param node_attr an optional character vector of
-#' node attribute values for filtering the node ID
-#' values returned.
-#' @param search an option to provide a logical
-#' expression with a comparison operator (\code{>},
-#' \code{<}, \code{==}, or \code{!=}) followed by a
-#' number for numerical filtering, or, a regular
-#' expression for filtering the nodes returned through
-#' string matching.
+#' \code{dgr_graph}.
+#' @param conditions an option to use filtering
+#' conditions for the retrieval of nodes.
 #' @param set_op the set operation to perform upon
 #' consecutive selections of graph nodes. This can
 #' either be as a \code{union} (the default), as an
@@ -23,194 +15,128 @@
 #' filtering list of nodes present in the graph.
 #' @return a graph object of class \code{dgr_graph}.
 #' @examples
-#' library(magrittr)
-#'
 #' # Create a node data frame (ndf)
-#' nodes <-
-#'   create_nodes(
-#'     nodes = c("a", "b", "c", "d"),
-#'     type = c("A", "A", "Z", "Z"),
+#' ndf <-
+#'   create_node_df(
+#'     n = 4,
+#'     type = c("a", "a", "z", "z"),
 #'     label = TRUE,
 #'     value = c(3.5, 2.6, 9.4, 2.7))
 #'
 #' # Create an edge data frame (edf)
-#' edges <-
-#'   create_edges(
-#'     from = c("a", "b", "c"),
-#'     to = c("d", "c", "a"),
-#'     rel = c("A", "Z", "A"))
+#' edf <-
+#'   create_edge_df(
+#'     from = c(1, 2, 3),
+#'     to = c(4, 3, 1),
+#'     rel = c("a", "z", "a"))
 #'
 #' # Create a graph with the ndf and edf
 #' graph <-
-#'   create_graph(nodes_df = nodes,
-#'                edges_df = edges)
+#'   create_graph(
+#'     nodes_df = ndf,
+#'     edges_df = edf)
 #'
-#' # Explicitly select nodes `a` and `c`
+#' # Explicitly select nodes `1` and `3`
 #' graph <-
 #'   graph %>%
-#'   select_nodes(
-#'     nodes = c("a", "c"))
+#'   select_nodes(nodes = c(1, 3))
 #'
 #' # Verify that the node selection has been made
 #' # using the `get_selection()` function
 #' get_selection(graph)
-#' #> $nodes
-#' #> [1] "a" "c"
+#' #> [1] 1 3
 #'
 #' # Select nodes based on the node `type`
-#' # being `Z`
+#' # being `z`
 #' graph <-
 #'   graph %>%
-#'   clear_selection %>%
+#'   clear_selection() %>%
 #'   select_nodes(
-#'     node_attr = "type",
-#'     search = "Z")
+#'     conditions = "type == 'z'")
 #'
 #' # Verify that an node selection has been made, and
-#' # recall that the `c` and `d` nodes are of the
-#' # `Z` type
+#' # recall that the `3` and `4` nodes are of the
+#' # `z` type
 #' get_selection(graph)
-#' #> $nodes
-#' #> [1] "c" "d"
+#' #> [1] 3 4
 #'
 #' # Select edges based on the node value attribute
 #' # being greater than 3.0 (first clearing the current
 #' # selection of nodes)
 #' graph <-
 #'   graph %>%
-#'   clear_selection %>%
+#'   clear_selection() %>%
 #'   select_nodes(
-#'     node_attr = "value",
-#'     search = ">3.0")
+#'     conditions = "value > 3.0")
 #'
 #' # Verify that the correct node selection has been
-#' # made; in this case, nodes `a` and `c` have values
+#' # made; in this case, nodes `1` and `3` have values
 #' # for `value` greater than 3.0
 #' get_selection(graph)
-#' #> $nodes
-#' #> [1] "a" "c"
+#' #> [1] 1 3
+#' @importFrom dplyr filter_
 #' @export select_nodes
 
 select_nodes <- function(graph,
-                         node_attr = NULL,
-                         search = NULL,
+                         conditions = NULL,
                          set_op = "union",
                          nodes = NULL) {
 
-  if (is_graph_empty(graph)) {
-    stop("The graph is empty so no selections can be made.")
+  # Get the time of function start
+  time_function_start <- Sys.time()
+
+  # Validation: Graph object is valid
+  if (graph_object_valid(graph) == FALSE) {
+    stop("The graph object is not valid.")
+  }
+
+  # Validation: Graph contains nodes
+  if (graph_contains_nodes(graph) == FALSE) {
+    stop("The graph contains no nodes, so, no selections can be made.")
+  }
+
+  # Stop function if `nodes` refers to node ID
+  # values that are not in the graph
+  if (!is.null(nodes)) {
+    if (!any(nodes %in% graph$nodes_df$id)) {
+      stop("The values provided in `nodes` do not all correspond to node ID values in the graph.")
+    }
   }
 
   # Remove any selection of edges
   graph$selection$edges <- NULL
 
   # Remove `graph$selection` if empty
-  if (length(graph$selection) == 0){
+  if (length(graph$selection) == 0) {
     graph$selection <- NULL
   }
 
   # Extract the graph's internal ndf
   nodes_df <- graph$nodes_df
 
-  if (!is.null(node_attr)) {
-    if (length(node_attr) > 1) {
-      stop("Only one node attribute can be specified.")
-    }
-
-    if (!(node_attr %in% colnames(nodes_df)[-1])) {
-      stop("The specified attribute is not available.")
-    }
-  }
-
-  if (is.null(node_attr)) {
-
-    nodes_selected <- nodes_df$nodes
-
-    if (!is.null(nodes)) {
-      if (any(!(nodes %in% nodes_selected))) {
-        stop("One of more of the nodes specified are not available in the graph.")
-      }
-      nodes_selected <- nodes
+  # If conditions are provided then
+  # pass in those conditions and filter the
+  # data frame of `nodes_df`
+  if (!is.null(conditions)) {
+    for (i in 1:length(conditions)) {
+      nodes_df <-
+        nodes_df %>%
+        dplyr::filter_(conditions[i])
     }
   }
 
-  if (!is.null(node_attr)) {
+  # Get the nodes as a vector
+  nodes_selected <- nodes_df$id
 
-    # Filter nodes_df by node ID values in 'nodes'
-    if (!is.null(nodes)) {
-      if (any(!(nodes %in% nodes_df$nodes))) {
-        stop("One of more of the nodes specified are not available in the graph.")
-      }
-
-      nodes_df <- nodes_df[which(nodes_df$nodes %in% nodes),]
-    }
-
-    # Determine the column number for which the value
-    # for `node_attr` is available
-    column_number <-
-      which(colnames(nodes_df) %in% node_attr)
-
-    # If a search term provided, filter using a logical
-    # expression or a regex match
-    if (!is.null(search)) {
-
-      if (grepl("^>.*", search) | grepl("^<.*", search) |
-          grepl("^==.*", search) | grepl("^!=.*", search)) {
-        logical_expression <- TRUE } else {
-          logical_expression <- FALSE
-        }
-
-      # Filter using a logical expression
-      if (logical_expression) {
-
-        if (grepl("^>.*", search)) {
-          rows_where_true_le <-
-            which(nodes_df[,column_number] >
-                    as.numeric(gsub(">(.*)", "\\1", search)))
-        }
-
-        if (grepl("^<.*", search)) {
-          rows_where_true_le <-
-            which(nodes_df[,column_number] <
-                    as.numeric(gsub("<(.*)", "\\1", search)))
-        }
-
-        if (grepl("^==.*", search)) {
-          rows_where_true_le <-
-            which(nodes_df[,column_number] ==
-                    as.numeric(gsub("==(.*)", "\\1", search)))
-        }
-
-        if (grepl("^!=.*", search)) {
-          rows_where_true_le <-
-            which(nodes_df[,column_number] !=
-                    as.numeric(gsub("!=(.*)", "\\1", search)))
-        }
-
-        nodes_selected <- nodes_df[rows_where_true_le, 1]
-      }
-
-      # Filter using a `search` value as a
-      # regular expression
-      if (logical_expression == FALSE) {
-
-        rows_where_true_regex <-
-          which(grepl(search, as.character(nodes_df[,column_number])))
-
-        nodes_selected <- nodes_df[rows_where_true_regex, 1]
-      }
-    }
+  # If a `nodes` vector provided, get the intersection
+  # of that vector with the filtered node IDs
+  if (!is.null(nodes)) {
+    nodes_selected <- intersect(nodes, nodes_selected)
   }
 
-  # Obtain vector of node IDs selection of nodes
+  # Obtain vector with node ID selection of nodes
   # already present
-  if (!is.null(graph$selection)) {
-    if (!is.null(graph$selection$nodes)) {
-      nodes_prev_selection <- graph$selection$nodes
-    }
-  } else {
-    nodes_prev_selection <- vector(mode = "character")
-  }
+  nodes_prev_selection <- graph$node_selection$node
 
   # Incorporate the selected nodes into the
   # graph's selection
@@ -222,7 +148,31 @@ select_nodes <- function(graph,
     nodes_combined <- setdiff(nodes_prev_selection, nodes_selected)
   }
 
-  graph$selection$nodes <- nodes_combined
+  # Add the node ID values to the active selection
+  # of nodes in `graph$node_selection`
+  graph$node_selection <-
+    replace_graph_node_selection(
+      graph = graph,
+      replacement = nodes_combined)
+
+  # Replace `graph$edge_selection` with an empty df
+  graph$edge_selection <- create_empty_esdf()
+
+  # Update the `graph_log` df with an action
+  graph$graph_log <-
+    add_action_to_log(
+      graph_log = graph$graph_log,
+      version_id = nrow(graph$graph_log) + 1,
+      function_used = "select_nodes",
+      time_modified = time_function_start,
+      duration = graph_function_duration(time_function_start),
+      nodes = nrow(graph$nodes_df),
+      edges = nrow(graph$edges_df))
+
+  # Write graph backup if the option is set
+  if (graph$graph_info$write_backups) {
+    save_graph_as_rds(graph = graph)
+  }
 
   return(graph)
 }

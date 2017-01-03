@@ -2,8 +2,7 @@
 #' @description With a graph object of class
 #' \code{dgr_graph}, add a node path to the graph.
 #' @param graph a graph object of class
-#' \code{dgr_graph} that is created using
-#' \code{create_graph}.
+#' \code{dgr_graph}.
 #' @param n the number of nodes comprising the path.
 #' @param type an optional string that describes the
 #' entity type for the nodes to be added.
@@ -15,117 +14,135 @@
 #' @param rel an optional string for providing a
 #' relationship label to all new edges created in the
 #' node path.
-#' @param nodes an optional vector of node IDs of
-#' length \code{n} for the newly created nodes. If
-#' nothing is provided, node IDs will assigned as
-#' monotonically increasing integers.
 #' @return a graph object of class \code{dgr_graph}.
 #' @examples
-#' library(magrittr)
-#'
-#' # Create a new graph and add 3 paths of varying
+#' # Create a new graph and add 2 paths of varying
 #' # lengths
 #' graph <-
 #'   create_graph() %>%
 #'   add_path(4, "four_path") %>%
-#'   add_path(5, "five_path") %>%
-#'   add_path(6, "six_path")
+#'   add_path(5, "five_path")
 #'
 #' # Get node information from this graph
 #' node_info(graph)
-#' #>    node label      type deg indeg outdeg loops
-#' #> 1     1     1 four_path   1     0      1     0
-#' #> 2     5     5 five_path   1     0      1     0
-#' #> 3    10    10  six_path   1     0      1     0
-#' #> 4     2     2 four_path   2     1      1     0
-#' #> 5     3     3 four_path   2     1      1     0
-#' #> 6     6     6 five_path   2     1      1     0
-#' #> 7     7     7 five_path   2     1      1     0
-#' #> 8     8     8 five_path   2     1      1     0
-#' #> 9    11    11  six_path   2     1      1     0
-#' #> 10   12    12  six_path   2     1      1     0
-#' #> 11   13    13  six_path   2     1      1     0
-#' #> 12   14    14  six_path   2     1      1     0
-#' #> 13    4     4 four_path   1     1      0     0
-#' #> 14    9     9 five_path   1     1      0     0
-#' #> 15   15    15  six_path   1     1      0     0
+#' #>   id      type label deg indeg outdeg loops
+#' #> 1  1 four_path     1   1     0      1     0
+#' #> 2  2 four_path     2   2     1      1     0
+#' #> 3  3 four_path     3   2     1      1     0
+#' #> 4  4 four_path     4   1     1      0     0
+#' #> 5  5 five_path     1   1     0      1     0
+#' #> 6  6 five_path     2   2     1      1     0
+#' #> 7  7 five_path     3   2     1      1     0
+#' #> 8  8 five_path     4   2     1      1     0
+#' #> 9  9 five_path     5   1     1      0     0
 #' @export add_path
 
 add_path <- function(graph,
                      n,
                      type = NULL,
                      label = TRUE,
-                     rel = NULL,
-                     nodes = NULL){
+                     rel = NULL) {
+
+  # Get the time of function start
+  time_function_start <- Sys.time()
+
+  # Validation: Graph object is valid
+  if (graph_object_valid(graph) == FALSE) {
+    stop("The graph object is not valid.")
+  }
 
   # Stop if n is too small
   if (n <= 1)  {
     stop("The value for n must be at least 2.")
   }
 
-  if (!is.null(nodes)) {
-    if (length(nodes) != n) {
-      stop("The number of node IDs supplied is not equal to n.")
-    }
+  # Get the number of nodes ever created for
+  # this graph
+  nodes_created <- graph$last_node
 
-    if (any(get_nodes(graph) %in% nodes)) {
-      stop("At least one of the node IDs is already present in the graph.")
-    }
-  }
+  # Get the number of edges ever created for
+  # this graph
+  edges_created <- graph$last_edge
 
-  # If node IDs are not provided, create a
-  # monotonically increasing ID value
-  if (is.null(nodes)){
+  # Get the graph's log
+  graph_log <- graph$graph_log
 
-    if (node_count(graph) == 0){
-      nodes <- seq(1, n)
-    }
+  # Get the graph's info
+  graph_info <- graph$graph_info
 
-    if (node_count(graph) > 0){
-      if (!is.na(suppressWarnings(
-        any(as.numeric(get_nodes(graph)))))){
+  # Get the sequence of nodes required
+  nodes <- seq(1, n)
 
-        numeric_components <-
-          suppressWarnings(which(!is.na(as.numeric(
-            get_nodes(graph)))))
-
-        nodes <-
-          seq(max(
-            as.integer(
-              as.numeric(
-                get_nodes(graph)[
-                  numeric_components]))) + 1,
-            max(
-              as.integer(
-                as.numeric(
-                  get_nodes(graph)[
-                    numeric_components]))) + n)
-      }
-
-      if (suppressWarnings(all(is.na(as.numeric(
-        get_nodes(graph)))))){
-        nodes <- seq(1, n)
-      }
-    }
-  }
-
+  # Create a node data frame for the path graph
   path_nodes <-
-    create_nodes(
-      nodes = nodes,
+    create_node_df(
+      n = n,
       type = type,
       label = label)
 
-  graph <-
-    add_node_df(graph, path_nodes)
-
+  # Create an edge data frame for the path graph
   path_edges <-
-    create_edges(
+    create_edge_df(
       from = nodes[1:length(nodes) - 1],
       to = nodes[2:length(nodes)],
       rel = rel)
 
-  graph <-
-    add_edge_df(graph, path_edges)
+  # Create the path graph
+  path_graph <- create_graph(path_nodes, path_edges)
 
-  return(graph)
+  # If the input graph is not empty, combine graphs
+  # using the `combine_graphs()` function
+  if (!is_graph_empty(graph)) {
+
+    combined_graph <- combine_graphs(graph, path_graph)
+
+    # Update the `last_node` counter
+    combined_graph$last_node <- nodes_created + nrow(path_nodes)
+
+    # Update the `last_edge` counter
+    combined_graph$last_edge <- edges_created + nrow(path_edges)
+
+    # Update the `graph_log` df with an action
+    graph_log <-
+      add_action_to_log(
+        graph_log = graph_log,
+        version_id = nrow(graph_log) + 1,
+        function_used = "add_balanced_tree",
+        time_modified = time_function_start,
+        duration = graph_function_duration(time_function_start),
+        nodes = nrow(combined_graph$nodes_df),
+        edges = nrow(combined_graph$edges_df))
+
+    combined_graph$graph_log <- graph_log
+    combined_graph$graph_info <- graph_info
+
+    # Write graph backup if the option is set
+    if (combined_graph$graph_info$write_backups) {
+      save_graph_as_rds(graph = combined_graph)
+    }
+
+    return(combined_graph)
+  } else {
+
+    # Update the `graph_log` df with an action
+    graph_log <-
+      add_action_to_log(
+        graph_log = graph_log,
+        version_id = nrow(graph_log) + 1,
+        function_used = "add_path",
+        time_modified = time_function_start,
+        duration = graph_function_duration(time_function_start),
+        nodes = nrow(path_graph$nodes_df),
+        edges = nrow(path_graph$edges_df))
+
+    path_graph$graph_log <- graph_log
+    path_graph$graph_info <- graph_info
+
+    # Write graph backup if the option is set
+    if (path_graph$graph_info$write_backups) {
+      save_graph_as_rds(graph = path_graph)
+    }
+
+    return(path_graph)
+  }
 }

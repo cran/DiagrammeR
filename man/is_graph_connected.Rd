@@ -19,8 +19,6 @@ connected graph.
 }
 \examples{
 \dontrun{
-library(magrittr)
-
 # This graph, created using `create_random_graph()`
 # is almost fully connected but there is an
 # isolated node with no edges
@@ -36,7 +34,7 @@ graph_2 <-
   create_random_graph(
     36, 50, set_seed = 1)
 
-graph_2 \%>\% is_graph_connected
+graph_2 \%>\% is_graph_connected()
 #> [1] TRUE
 
 # Modify `graph_2` so that there are two
@@ -50,7 +48,7 @@ graph_3 <-
   delete_edge(4, 29) \%>\%
   delete_edge(24, 32)
 
-graph_3 \%>\% is_graph_connected
+graph_3 \%>\% is_graph_connected()
 #> [1] FALSE
 }
 }

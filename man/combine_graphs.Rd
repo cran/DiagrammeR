@@ -4,28 +4,47 @@
 \alias{combine_graphs}
 \title{Combine two graphs into a single graph}
 \usage{
-combine_graphs(x, y, edges_df = NULL)
+combine_graphs(x, y)
 }
 \arguments{
 \item{x}{a \code{DiagrammeR} graph object to which
-another graph will be joined. This graph should be
-considered the host graph as the resulting graph
-will retain only the attributes of this graph.}
+another graph will be unioned. This graph should be
+considered the graph from which global graph
+attributes will be inherited in the resulting graph.}
 
 \item{y}{a \code{DiagrammeR} graph object that is to
-be joined with the graph suppled as \code{x}.}
-
-\item{edges_df}{an optional edge data frame that
-allows for connections between nodes across the
-graphs to be combined.}
+be unioned with the graph suppled as \code{x}.}
 }
 \value{
 a graph object of class \code{dgr_graph}.
 }
 \description{
 Combine two graphs in order to make a
-new graph, merging nodes and edges in the process.
-The use of an optional data frame allows for new
-edges to be formed across the combined graphs.
+new graph.
+}
+\examples{
+# Create a graph with a cycle with 6 nodes
+graph_cycle <-
+ create_graph() \%>\%
+   add_cycle(n = 6)
+
+# Create a random graph with 8 nodes, 15 edges
+graph_random <-
+  create_random_graph(
+    8, 15, set_seed = 1)
+
+# Combine the two graphs in a union operation
+combined_graph <-
+  combine_graphs(graph_cycle, graph_random)
+
+# Get the number of nodes in the combined graph
+node_count(combined_graph)
+#> [1] 14
+
+# The `combine_graphs()` function will renumber
+# node ID values in graph `y` during the union;
+# this ensures that node ID values are unique
+get_node_ids(combined_graph)
+#> [1]  1  2  3  4  5  6  7  8  9 10 11 12 13 14
 }
 

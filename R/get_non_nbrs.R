@@ -2,37 +2,29 @@
 #' @description Get the set of all nodes not
 #' neighboring a single graph node.
 #' @param graph a graph object of class
-#' \code{dgr_graph} that is created using
-#' \code{create_graph}.
+#' \code{dgr_graph}.
 #' @param node a single-length vector containing a
 #' node ID value.
 #' @return a vector of node ID values.
 #' @examples
-#' library(magrittr)
+#' # Create a simple, directed graph with 5
+#' # nodes and 4 edges
+#' graph <-
+#'   create_graph() %>%
+#'   add_path(5)
 #'
-#' # Create a random, directed graph with 18 nodes
-#' # and 22 edges
-#' random_graph <-
-#'   create_random_graph(
-#'     n = 18,
-#'     m = 22,
-#'     directed = TRUE,
-#'     fully_connected = TRUE,
-#'     set_seed = 20) %>%
-#'   set_global_graph_attrs(
-#'     'graph', 'layout', 'sfdp') %>%
-#'   set_global_graph_attrs(
-#'     'graph', 'overlap', 'false')
-#'
-#' # Find all non-neighbors of node `5`
-#' random_graph %>%
-#'   get_non_nbrs(5)
-#' #>  [1] "3"  "4"  "6"  "7"  "8"  "9"  "10" "11" "13"
-#' #> [12] "14" "15" "16" "17"
+#' # Find all non-neighbors of node `2`
+#' graph %>% get_non_nbrs(2)
+#' #> [1] 4 5
 #' @export get_non_nbrs
 
 get_non_nbrs <- function(graph,
                          node) {
+
+  # Validation: Graph object is valid
+  if (graph_object_valid(graph) == FALSE) {
+    stop("The graph object is not valid.")
+  }
 
   # Get predecessors and successors for the `node`
   node_nbrs <-
@@ -42,24 +34,16 @@ get_non_nbrs <- function(graph,
   # Get all non-neighbors to the `node`
   node_non_nbrs <-
     setdiff(
-      setdiff(get_nodes(graph), node),
+      setdiff(get_node_ids(graph), node),
       node_nbrs)
 
-  # Determine whether the node ID values are entirely
-  # numeric
-  node_id_numeric <-
-    ifelse(
-      suppressWarnings(
-        any(is.na(as.numeric(node_non_nbrs)))),
-      FALSE, TRUE)
+  # Get a unique set of node ID values
+  node_non_nbrs <- sort(unique(node_non_nbrs))
 
-  # If the node ID values are numeric, then apply a
-  # numeric sort and reclass as a `character` type
-  if (node_id_numeric) {
-    node_non_nbrs <-
-      as.character(sort(as.numeric(node_non_nbrs)))
+  # If there are no non-neighbors, then return `NA`
+  if (length(node_non_nbrs) == 0) {
+    return(NA)
+  } else {
+    return(node_non_nbrs)
   }
-
-  # Return the neighbor node ID values
-  return(node_non_nbrs)
 }

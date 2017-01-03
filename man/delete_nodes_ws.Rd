@@ -8,8 +8,7 @@ delete_nodes_ws(graph)
 }
 \arguments{
 \item{graph}{a graph object of class
-\code{dgr_graph} that is created using
-\code{create_graph}.}
+\code{dgr_graph}.}
 }
 \value{
 a graph object of class \code{dgr_graph}.
@@ -18,5 +17,42 @@ a graph object of class \code{dgr_graph}.
 In a graph object of class
 \code{dgr_graph}, delete all nodes present in a
 selection.
+
+Selections of nodes can be performed using
+the following \code{select_...} functions:
+\code{select_nodes()},
+\code{select_last_node()},
+\code{select_nodes_by_degree()},
+\code{select_nodes_by_id()}, or
+\code{select_nodes_in_neighborhood()}.
+Selections of nodes can also be performed using
+the following traversal functions:
+(\code{trav_...}):
+\code{trav_out()}, \code{trav_in()},
+\code{trav_both()}, \code{trav_in_node()},
+\code{trav_out_node()}.
+}
+\examples{
+# Create a graph with 3 nodes
+graph <-
+  create_graph() \%>\%
+  add_n_nodes(3) \%>\%
+  add_edges_w_string(
+    "1->3 1->2 2->3")
+
+# Select node with ID `1`
+graph <-
+  graph \%>\%
+  select_nodes_by_id(1)
+
+# Delete node in selection (this
+# also deletes any attached edges)
+graph <-
+  graph \%>\%
+  delete_nodes_ws()
+
+# Get a count of nodes in the graph
+node_count(graph)
+#> [1] 2
 }
 

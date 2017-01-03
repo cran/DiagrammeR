@@ -8,8 +8,7 @@ select_last_node(graph)
 }
 \arguments{
 \item{graph}{a graph object of class
-\code{dgr_graph} that is created using
-\code{create_graph}.}
+\code{dgr_graph}.}
 }
 \value{
 a graph object of class \code{dgr_graph}.
@@ -22,20 +21,21 @@ node data frame. In practice, this will typically be
 the last node added to the graph.
 }
 \examples{
-library(magrittr)
-
 # Create an empty graph
 graph <- create_graph()
 
 # Add three nodes to the graph
-graph \%<>\% add_n_nodes(3)
+graph <-
+  graph \%>\%
+  add_n_nodes(3)
 
 # Select the last node added
-graph \%<>\% select_last_node
+graph <-
+  graph \%>\%
+  select_last_node()
 
 # Get the current selection
-graph \%>\% get_selection
-#> $nodes
-#> [1] "3"
+graph \%>\% get_selection()
+#> [1] 3
 }
 

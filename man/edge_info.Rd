@@ -7,49 +7,46 @@
 edge_info(graph)
 }
 \arguments{
-\item{graph}{a graph object of class \code{dgr_graph}.}
+\item{graph}{a graph object of class
+\code{dgr_graph}.}
 }
 \value{
-a data frame containing information specific to each edge within
-the graph.
+a data frame containing information
+specific to each edge within the graph.
 }
 \description{
-Obtain a data frame with detailed information on edges and
+Obtain a data frame with
+detailed information on edges and
 their interrelationships within a graph.
 }
 \examples{
 # Create a node data frame (ndf)
-nodes <-
-  create_nodes(
-    nodes = LETTERS,
+ndf <-
+  create_node_df(
+    n = 4,
     label = TRUE,
-    type = c(rep("a_to_g", 7),
-             rep("h_to_p", 9),
-             rep("q_to_x", 8),
-             rep("y_and_z",2)))
+    type = c("A", "A", "B", "C"))
 
 # Create an edge data frame (edf)
-edges <-
-  create_edges(
-    from = sample(LETTERS, replace = TRUE),
-    to = sample(LETTERS, replace = TRUE),
-    rel = "letter_to_letter")
+edf <-
+  create_edge_df(
+    from = c(1, 3, 3, 4),
+    to = c(2, 2, 1, 3),
+    rel = c("X", "Y", "Y", "Z"))
 
 # Create a graph using the ndf and edf
 graph <-
   create_graph(
-    nodes_df = nodes,
-    edges_df = edges)
+    nodes_df = ndf,
+    edges_df = edf)
 
-# Get a data frame with information on the edges
-# of the graph
+# Get a data frame with information about
+# the graph's edges
 edge_info(graph)
-#>    from   to              rel
-#> 1     A    Z letter_to_letter
-#> 2     H    U letter_to_letter
-#> 3     W    O letter_to_letter
-#> 4     U    K letter_to_letter
-#> 5     I    V letter_to_letter
-#>..   ...  ...              ...
+#>   id from to rel
+#> 1  1    1  2   X
+#> 2  2    3  2   Y
+#> 3  3    3  1   Y
+#> 4  4    4  3   Z
 }
 

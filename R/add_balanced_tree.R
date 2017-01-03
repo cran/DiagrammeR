@@ -2,8 +2,7 @@
 #' @description With a graph object of class
 #' \code{dgr_graph}, add a balanced tree to the graph.
 #' @param graph a graph object of class
-#' \code{dgr_graph} that is created using
-#' \code{create_graph}.
+#' \code{dgr_graph}.
 #' @param k the branching factor for the tree.
 #' @param h the height of the tree.
 #' @param type an optional string that describes the
@@ -16,67 +15,24 @@
 #' @param rel an optional string for providing a
 #' relationship label to all new edges created in the
 #' node tree.
-#' @param nodes an optional vector of node IDs of
-#' length \code{n} for the newly created nodes. If
-#' nothing is provided, node IDs will assigned as
-#' monotonically increasing integers.
 #' @return a graph object of class \code{dgr_graph}.
 #' @examples
-#' library(magrittr)
-#'
-#' # Create a new graph and add 3 different types of
+#' # Create a new graph and add 2 different types of
 #' # balanced trees of height 2 (branching twice) and
 #' # different branching ratios
 #' graph <-
 #'   create_graph() %>%
 #'   add_balanced_tree(2, 2, "binary") %>%
-#'   add_balanced_tree(3, 2, "tertiary") %>%
-#'   add_balanced_tree(4, 2, "quaternary")
+#'   add_balanced_tree(3, 2, "tertiary")
 #'
-#' # Get node information from this graph
-#' node_info(graph)
-#' #>    node label       type deg indeg outdeg loops
-#' #> 1     1     1     binary   2     0      2     0
-#' #> 2     8     8   tertiary   3     0      3     0
-#' #> 3    21    21 quaternary   4     0      4     0
-#' #> 4     2     2     binary   3     1      2     0
-#' #> 5     3     3     binary   3     1      2     0
-#' #> 6     9     9   tertiary   4     1      3     0
-#' #> 7    10    10   tertiary   4     1      3     0
-#' #> 8    11    11   tertiary   4     1      3     0
-#' #> 9    22    22 quaternary   5     1      4     0
-#' #> 10   23    23 quaternary   5     1      4     0
-#' #> 11   24    24 quaternary   5     1      4     0
-#' #> 12   25    25 quaternary   5     1      4     0
-#' #> 13    4     4     binary   1     1      0     0
-#' #> 14    5     5     binary   1     1      0     0
-#' #> 15    6     6     binary   1     1      0     0
-#' #> 16    7     7     binary   1     1      0     0
-#' #> 17   12    12   tertiary   1     1      0     0
-#' #> 18   13    13   tertiary   1     1      0     0
-#' #> 19   14    14   tertiary   1     1      0     0
-#' #> 20   15    15   tertiary   1     1      0     0
-#' #> 21   16    16   tertiary   1     1      0     0
-#' #> 22   17    17   tertiary   1     1      0     0
-#' #> 23   18    18   tertiary   1     1      0     0
-#' #> 24   19    19   tertiary   1     1      0     0
-#' #> 25   20    20   tertiary   1     1      0     0
-#' #> 26   26    26 quaternary   1     1      0     0
-#' #> 27   27    27 quaternary   1     1      0     0
-#' #> 28   28    28 quaternary   1     1      0     0
-#' #> 29   29    29 quaternary   1     1      0     0
-#' #> 30   30    30 quaternary   1     1      0     0
-#' #> 31   31    31 quaternary   1     1      0     0
-#' #> 32   32    32 quaternary   1     1      0     0
-#' #> 33   33    33 quaternary   1     1      0     0
-#' #> 34   34    34 quaternary   1     1      0     0
-#' #> 35   35    35 quaternary   1     1      0     0
-#' #> 36   36    36 quaternary   1     1      0     0
-#' #> 37   37    37 quaternary   1     1      0     0
-#' #> 38   38    38 quaternary   1     1      0     0
-#' #> 39   39    39 quaternary   1     1      0     0
-#' #> 40   40    40 quaternary   1     1      0     0
-#' #> 41   41    41 quaternary   1     1      0     0
+#' # Get some node information from this graph
+#' node_info(graph) %>% head(5)
+#' #>    id     type label deg indeg outdeg loops
+#' #> 1   1   binary     1   2     0      2     0
+#' #> 2   2   binary     2   3     1      2     0
+#' #> 3   3   binary     3   3     1      2     0
+#' #> 4   4   binary     4   1     1      0     0
+#' #> 5   5   binary     5   1     1      0     0
 #' @export add_balanced_tree
 
 add_balanced_tree <- function(graph,
@@ -84,16 +40,23 @@ add_balanced_tree <- function(graph,
                               h,
                               type = NULL,
                               label = TRUE,
-                              rel = NULL,
-                              nodes = NULL){
+                              rel = NULL) {
+
+  # Get the time of function start
+  time_function_start <- Sys.time()
+
+  # Validation: Graph object is valid
+  if (graph_object_valid(graph) == FALSE) {
+    stop("The graph object is not valid.")
+  }
 
   # Stop if k is too small
-  if (k <= 1)  {
+  if (k <= 1) {
     stop("The value for k must be at least 2.")
   }
 
   # Stop if h is too small
-  if (h <= 1)  {
+  if (h <= 1) {
     stop("The value for h must be at least 2.")
   }
 
@@ -101,64 +64,33 @@ add_balanced_tree <- function(graph,
   n_nodes_tree <-
     (k^(h + 1) - 1) / (k - 1)
 
-  if (!is.null(nodes)) {
-    if (length(nodes) != n_nodes_tree) {
-      stop("The number of node IDs supplied is not equal to number of nodes in the tree.")
-    }
+  # Get the number of nodes ever created for
+  # this graph
+  nodes_created <- graph$last_node
 
-    if (any(get_nodes(graph) %in% nodes)) {
-      stop("At least one of the node IDs is already present in the graph.")
-    }
-  }
+  # Get the number of edges ever created for
+  # this graph
+  edges_created <- graph$last_edge
 
-  # If node IDs are not provided, create a
-  # monotonically increasing ID value
-  if (is.null(nodes)){
+  # Get the graph's log
+  graph_log <- graph$graph_log
 
-    if (node_count(graph) == 0){
-      nodes <- seq(1, n_nodes_tree)
-    }
+  # Get the graph's info
+  graph_info <- graph$graph_info
 
-    if (node_count(graph) > 0){
-      if (!is.na(suppressWarnings(
-        any(as.numeric(get_nodes(graph)))))){
+  # Get the sequence of nodes required
+  nodes <- seq(1, n_nodes_tree)
 
-        numeric_components <-
-          suppressWarnings(which(!is.na(as.numeric(
-            get_nodes(graph)))))
-
-        nodes <-
-          seq(max(
-            as.integer(
-              as.numeric(
-                get_nodes(graph)[
-                  numeric_components]))) + 1,
-            max(
-              as.integer(
-                as.numeric(
-                  get_nodes(graph)[
-                    numeric_components]))) +
-              n_nodes_tree)
-      }
-
-      if (suppressWarnings(all(is.na(as.numeric(
-        get_nodes(graph)))))){
-        nodes <- seq(1, n_nodes_tree)
-      }
-    }
-  }
-
+  # Create a node data frame for the tree graph
   tree_nodes <-
-    create_nodes(
-      nodes = nodes,
+    create_node_df(
+      n = n_nodes_tree,
       type = type,
       label = label)
 
-  graph <-
-    add_node_df(graph, tree_nodes)
-
+  # Create an edge data frame for the tree graph
   tree_edges <-
-    create_edges(
+    create_edge_df(
       from = sort(
         rep(seq(nodes[1],
                 nodes[length(
@@ -167,8 +99,63 @@ add_balanced_tree <- function(graph,
       to = seq(nodes[2], nodes[length(nodes)]),
       rel = rel)
 
-  graph <-
-    add_edge_df(graph, tree_edges)
+  # Create the tree graph
+  tree_graph <- create_graph(tree_nodes, tree_edges)
 
-  return(graph)
+  # If the input graph is not empty, combine graphs
+  # using the `combine_graphs()` function
+  if (!is_graph_empty(graph)) {
+
+    # Combine the graphs
+    combined_graph <- combine_graphs(graph, tree_graph)
+
+    # Update the `last_node` counter
+    combined_graph$last_node <- nodes_created + nrow(tree_nodes)
+
+    # Update the `last_edge` counter
+    combined_graph$last_edge <- edges_created + nrow(tree_edges)
+
+    # Update the `graph_log` df with an action
+    graph_log <-
+      add_action_to_log(
+        graph_log = graph_log,
+        version_id = nrow(graph_log) + 1,
+        function_used = "add_balanced_tree",
+        time_modified = time_function_start,
+        duration = graph_function_duration(time_function_start),
+        nodes = nrow(combined_graph$nodes_df),
+        edges = nrow(combined_graph$edges_df))
+
+    combined_graph$graph_log <- graph_log
+    combined_graph$graph_info <- graph_info
+
+    # Write graph backup if the option is set
+    if (combined_graph$graph_info$write_backups) {
+      save_graph_as_rds(graph = combined_graph)
+    }
+
+    return(combined_graph)
+  } else {
+
+    # Update the `graph_log` df with an action
+    graph_log <-
+      add_action_to_log(
+        graph_log = graph_log,
+        version_id = nrow(graph_log) + 1,
+        function_used = "add_balanced_tree",
+        time_modified = time_function_start,
+        duration = graph_function_duration(time_function_start),
+        nodes = nrow(tree_graph$nodes_df),
+        edges = nrow(tree_graph$edges_df))
+
+    tree_graph$graph_log <- graph_log
+    tree_graph$graph_info <- graph_info
+
+    # Write graph backup if the option is set
+    if (tree_graph$graph_info$write_backups) {
+      save_graph_as_rds(graph = tree_graph)
+    }
+
+    return(tree_graph)
+  }
 }

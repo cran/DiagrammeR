@@ -8,8 +8,7 @@ set_edge_attrs_ws(graph, edge_attr, value)
 }
 \arguments{
 \item{graph}{a graph object of class
-\code{dgr_graph} that is created using
-\code{create_graph}.}
+\code{dgr_graph}.}
 
 \item{edge_attr}{the name of the attribute to set.}
 
@@ -22,6 +21,41 @@ a graph object of class \code{dgr_graph}.
 \description{
 From a graph object of class
 \code{dgr_graph} or an edge data frame, set edge
-attribute properties for one or more edges
+attribute properties for one or more edges.
+
+Selections of edges can be performed using
+the following \code{select_...} functions:
+\code{select_edges()},
+\code{select_last_edge()}, or
+\code{select_edges_by_node_id()}.
+Selections of edges can also be performed using
+the following traversal functions:
+\code{trav_out_edge()}, \code{trav_in_edge()},
+or \code{trav_both_edge()}.
+}
+\examples{
+# Create a simple graph
+graph <-
+  create_graph() \%>\%
+  add_path(6)
+
+# Select specific edges from the graph and
+# apply the edge attribute `color = blue` to
+# those selected edges
+graph <-
+  graph \%>\%
+  select_nodes_by_id(2:4) \%>\%
+  trav_out_edge() \%>\%
+  set_edge_attrs_ws("color", "blue")
+
+# Show the internal edge data frame to verify
+# that the edge attribute has been set for
+# specific edges
+get_edge_df(graph)
+#> 1  1    1  2 <NA>  <NA>
+#> 2  2    2  3 <NA>  blue
+#> 3  3    3  4 <NA>  blue
+#> 4  4    4  5 <NA>  blue
+#> 5  5    5  6 <NA>  <NA>
 }
 

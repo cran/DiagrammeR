@@ -4,24 +4,14 @@
 \alias{select_nodes}
 \title{Select nodes in a graph}
 \usage{
-select_nodes(graph, node_attr = NULL, search = NULL, set_op = "union",
-  nodes = NULL)
+select_nodes(graph, conditions = NULL, set_op = "union", nodes = NULL)
 }
 \arguments{
 \item{graph}{a graph object of class
-\code{dgr_graph} that is created using
-\code{create_graph}.}
+\code{dgr_graph}.}
 
-\item{node_attr}{an optional character vector of
-node attribute values for filtering the node ID
-values returned.}
-
-\item{search}{an option to provide a logical
-expression with a comparison operator (\code{>},
-\code{<}, \code{==}, or \code{!=}) followed by a
-number for numerical filtering, or, a regular
-expression for filtering the nodes returned through
-string matching.}
+\item{conditions}{an option to use filtering
+conditions for the retrieval of nodes.}
 
 \item{set_op}{the set operation to perform upon
 consecutive selections of graph nodes. This can
@@ -41,71 +31,64 @@ Select nodes from a graph object of
 class \code{dgr_graph}.
 }
 \examples{
-library(magrittr)
-
 # Create a node data frame (ndf)
-nodes <-
-  create_nodes(
-    nodes = c("a", "b", "c", "d"),
-    type = c("A", "A", "Z", "Z"),
+ndf <-
+  create_node_df(
+    n = 4,
+    type = c("a", "a", "z", "z"),
     label = TRUE,
     value = c(3.5, 2.6, 9.4, 2.7))
 
 # Create an edge data frame (edf)
-edges <-
-  create_edges(
-    from = c("a", "b", "c"),
-    to = c("d", "c", "a"),
-    rel = c("A", "Z", "A"))
+edf <-
+  create_edge_df(
+    from = c(1, 2, 3),
+    to = c(4, 3, 1),
+    rel = c("a", "z", "a"))
 
 # Create a graph with the ndf and edf
 graph <-
-  create_graph(nodes_df = nodes,
-               edges_df = edges)
+  create_graph(
+    nodes_df = ndf,
+    edges_df = edf)
 
-# Explicitly select nodes `a` and `c`
+# Explicitly select nodes `1` and `3`
 graph <-
   graph \%>\%
-  select_nodes(
-    nodes = c("a", "c"))
+  select_nodes(nodes = c(1, 3))
 
 # Verify that the node selection has been made
 # using the `get_selection()` function
 get_selection(graph)
-#> $nodes
-#> [1] "a" "c"
+#> [1] 1 3
 
 # Select nodes based on the node `type`
-# being `Z`
+# being `z`
 graph <-
   graph \%>\%
-  clear_selection \%>\%
+  clear_selection() \%>\%
   select_nodes(
-    node_attr = "type",
-    search = "Z")
+    conditions = "type == 'z'")
 
 # Verify that an node selection has been made, and
-# recall that the `c` and `d` nodes are of the
-# `Z` type
+# recall that the `3` and `4` nodes are of the
+# `z` type
 get_selection(graph)
-#> $nodes
-#> [1] "c" "d"
+#> [1] 3 4
 
 # Select edges based on the node value attribute
 # being greater than 3.0 (first clearing the current
 # selection of nodes)
 graph <-
   graph \%>\%
-  clear_selection \%>\%
+  clear_selection() \%>\%
   select_nodes(
-    node_attr = "value",
-    search = ">3.0")
+    conditions = "value > 3.0")
 
 # Verify that the correct node selection has been
-# made; in this case, nodes `a` and `c` have values
+# made; in this case, nodes `1` and `3` have values
 # for `value` greater than 3.0
 get_selection(graph)
-#> $nodes
-#> [1] "a" "c"
+#> [1] 1 3
 }
 

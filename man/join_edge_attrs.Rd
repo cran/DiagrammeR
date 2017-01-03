@@ -7,7 +7,8 @@
 join_edge_attrs(graph, df, by_graph = NULL, by_df = NULL)
 }
 \arguments{
-\item{graph}{a graph object of class}
+\item{graph}{a graph object of class
+\code{dgr_graph}.}
 
 \item{df}{the data frame to use for joining.
 \code{dgr_graph} that is created using
@@ -37,8 +38,6 @@ in this function allows for no possibility that
 edges in the graph might be removed after the join.
 }
 \examples{
-library(magrittr)
-
 # Create a simple graph
 graph <-
   create_graph() \%>\%
@@ -48,26 +47,28 @@ graph <-
 # Create a data frame with node ID values
 # representing the graph edges (with `from` and `to`
 # columns), and, a set of numeric values
+set.seed(25)
+
 df <-
-  data.frame(from = c(1, 1, 2, 2, 3),
-             to = c(2, 3, 4, 5, 5),
-             values = rnorm(5, 5))
+  data.frame(
+    from = c(1, 1, 2, 2, 3),
+    to = c(2, 3, 4, 5, 5),
+    values = rnorm(5, 5))
 
 # Join the values in the data frame to the
 # graph's edges; this works as a left join using
 # identically-named columns in the graph and the df
 # (in this case `from` and `to` are common to both)
-graph <-
-  graph \%>\% join_edge_attrs(df)
+graph <- graph \%>\% join_edge_attrs(df)
 
 # Get the graph's internal edf to show that the
 # join has been made
 get_edge_df(graph)
-#>   from to rel           values
-#> 1    1  2     7.13009924330664
-#> 2    1  3     4.91228554626235
-#> 3    2  4     3.53310530960626
-#> 4    2  5      5.6516614809259
-#> 5    3  5     5.87955663602654
+#>   id from to  rel   values
+#> 1  1    1  2 <NA> 4.788166
+#> 2  2    1  3 <NA> 3.958409
+#> 3  3    2  4 <NA> 3.846692
+#> 4  4    2  5 <NA> 5.321531
+#> 5  5    3  5 <NA> 3.499870
 }
 

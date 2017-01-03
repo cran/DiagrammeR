@@ -3,62 +3,77 @@
 #' class \code{dgr_graph}. Optionally, set node
 #' \code{type} values for the new nodes.
 #' @param graph a graph object of class
-#' \code{dgr_graph} that is created using
-#' \code{create_graph}.
+#' \code{dgr_graph}.
 #' @param n the number of new nodes to add to the graph.
-#' @param set_node_type an optional string to apply a
-#' \code{type} attribute to all newly created nodes.
+#' @param type an optional character vector that
+#' provides group identifiers for the nodes to be added.
+#' @param label an optional character object that
+#' describes the nodes to be added.
 #' @return a graph object of class \code{dgr_graph}.
 #' @examples
-#' library(magrittr)
-#'
-#' # Create an empty graph and add 5 nodes to it; these
-#' # nodes will be given ID values from 1 to 5
+#' # Create an empty graph and add 5 nodes; these
+#' # nodes will be assigned ID values from `1` to `5`
 #' graph <-
 #'   create_graph() %>%
 #'   add_n_nodes(5)
 #'
 #' # Get the graph's nodes
-#' graph %>% get_nodes
-#' #> [1] "1" "2" "3" "4" "5"
+#' graph %>% get_node_ids()
+#' #> [1] 1 2 3 4 5
+#' @importFrom dplyr bind_rows
 #' @export add_n_nodes
 
 add_n_nodes <- function(graph,
                         n,
-                        set_node_type = NULL) {
+                        type = NULL,
+                        label = NULL) {
 
-  if (node_count(graph) == 0){
-    node <- 1
+  # Get the time of function start
+  time_function_start <- Sys.time()
+
+  # Validation: Graph object is valid
+  if (graph_object_valid(graph) == FALSE) {
+    stop("The graph object is not valid.")
   }
 
-  if (node_count(graph) > 0){
-    if (!is.na(suppressWarnings(any(as.numeric(get_nodes(graph)))))){
-
-      numeric_components <-
-        suppressWarnings(which(!is.na(as.numeric(get_nodes(graph)))))
-
-      node <-
-        max(as.integer(as.numeric(get_nodes(graph)[numeric_components]))) + 1
-    }
-
-    if (suppressWarnings(all(is.na(as.numeric(get_nodes(graph)))))){
-      node <- 1
-    }
+  if (is.null(type)) {
+    type <- as.character(NA)
   }
 
-  if (!is.null(set_node_type)) {
-    new_nodes <-
-      create_nodes(nodes = seq(node, node + n - 1, 1),
-                   label = FALSE,
-                   type = set_node_type)
-  } else {
-    new_nodes <-
-      create_nodes(nodes = seq(node, node + n - 1, 1),
-                   label = FALSE)
+  if (is.null(label)) {
+    label <- as.character(NA)
   }
 
-  graph <-
-    add_node_df(graph, new_nodes)
+  # Create a ndf of the correct length
+  new_nodes <-
+    create_node_df(
+      n = n,
+      type = type,
+      label = label)
+
+  new_nodes[, 1] <- new_nodes[, 1] + graph$last_node
+
+  graph$nodes_df <-
+    dplyr::bind_rows(graph$nodes_df, new_nodes)
+
+  # Update the `last_node` counter
+  graph$last_node <- graph$last_node + n
+
+  # Update the `graph_log` df with an action
+  graph$graph_log <-
+    add_action_to_log(
+      graph_log = graph$graph_log,
+      version_id = nrow(graph$graph_log) + 1,
+      function_used = "add_n_nodes",
+      time_modified = time_function_start,
+      duration = graph_function_duration(time_function_start),
+      nodes = nrow(graph$nodes_df),
+      edges = nrow(graph$edges_df))
+
+  # Write graph backup if the option is set
+  if (graph$graph_info$write_backups) {
+    save_graph_as_rds(graph = graph)
+  }
 
   return(graph)
 }

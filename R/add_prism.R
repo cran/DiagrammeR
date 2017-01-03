@@ -2,8 +2,7 @@
 #' @description With a graph object of class
 #' \code{dgr_graph}, add a node prism to the graph.
 #' @param graph a graph object of class
-#' \code{dgr_graph} that is created using
-#' \code{create_graph}.
+#' \code{dgr_graph}.
 #' @param n the number of nodes describing the shape
 #' of the prism. For example, the triangonal prism has
 #' \code{n} equal to 3 and it is composed of 6 nodes
@@ -20,99 +19,77 @@
 #' @param rel an optional string for providing a
 #' relationship label to all new edges created in the
 #' node prism.
-#' @param nodes an optional vector of node IDs of
-#' length \code{n} for the newly created nodes. If
-#' nothing is provided, node IDs will assigned as
-#' monotonically increasing integers.
 #' @return a graph object of class \code{dgr_graph}.
 #' @examples
-#' library(magrittr)
-#'
-#' # Create a new graph and add a prism
+#' # Create a new graph and add 2 prisms
 #' graph <-
 #'   create_graph() %>%
-#'   add_prism(3, "prism")
+#'   add_prism(3, "prism", "a") %>%
+#'   add_prism(3, "prism", "b")
 #'
 #' # Get node information from this graph
 #' node_info(graph)
-#' #>   node label  type deg indeg outdeg loops
-#' #> 1    1     1 prism   3     1      2     0
-#' #> 2    2     2 prism   3     1      2     0
-#' #> 3    3     3 prism   3     1      2     0
-#' #> 4    4     4 prism   3     2      1     0
-#' #> 5    5     5 prism   3     2      1     0
-#' #> 6    6     6 prism   3     2      1     0
+#' #>    id  type label deg indeg outdeg loops
+#' #> 1   1 prism     a   3     1      2     0
+#' #> 2   2 prism     a   3     1      2     0
+#' #> 3   3 prism     a   3     1      2     0
+#' #> 4   4 prism     a   3     2      1     0
+#' #> 5   5 prism     a   3     2      1     0
+#' #> 6   6 prism     a   3     2      1     0
+#' #> 7   7 prism     b   3     1      2     0
+#' #> 8   8 prism     b   3     1      2     0
+#' #> 9   9 prism     b   3     1      2     0
+#' #> 10 10 prism     b   3     2      1     0
+#' #> 11 11 prism     b   3     2      1     0
+#' #> 12 12 prism     b   3     2      1     0
 #' @export add_prism
 
 add_prism <- function(graph,
                       n,
                       type = NULL,
                       label = TRUE,
-                      rel = NULL,
-                      nodes = NULL){
+                      rel = NULL) {
+
+  # Get the time of function start
+  time_function_start <- Sys.time()
+
+  # Validation: Graph object is valid
+  if (graph_object_valid(graph) == FALSE) {
+    stop("The graph object is not valid.")
+  }
 
   # Stop if n is too small
   if (n <= 2)  {
     stop("The value for n must be at least 3.")
   }
 
-  if (!is.null(nodes)) {
-    if (length(nodes) != 2 * n) {
-      stop("The number of node IDs supplied is not equal to n.")
-    }
+  # Get the number of nodes ever created for
+  # this graph
+  nodes_created <- graph$last_node
 
-    if (any(get_nodes(graph) %in% nodes)) {
-      stop("At least one of the node IDs is already present in the graph.")
-    }
-  }
+  # Get the number of edges ever created for
+  # this graph
+  edges_created <- graph$last_edge
 
-  # If node IDs are not provided, create a
-  # monotonically increasing ID value
-  if (is.null(nodes)){
+  # Get the graph's log
+  graph_log <- graph$graph_log
 
-    if (node_count(graph) == 0){
-      nodes <- seq(1, 2 * n)
-    }
+  # Get the graph's info
+  graph_info <- graph$graph_info
 
-    if (node_count(graph) > 0){
-      if (!is.na(suppressWarnings(
-        any(as.numeric(get_nodes(graph)))))){
+  # Get the sequence of nodes required
+  nodes <- seq(1, 2 * n)
 
-        numeric_components <-
-          suppressWarnings(which(!is.na(as.numeric(
-            get_nodes(graph)))))
-
-        nodes <-
-          seq(max(
-            as.integer(
-              as.numeric(
-                get_nodes(graph)[
-                  numeric_components]))) + 1,
-            max(
-              as.integer(
-                as.numeric(
-                  get_nodes(graph)[
-                    numeric_components]))) + (2 * n))
-      }
-
-      if (suppressWarnings(all(is.na(as.numeric(
-        get_nodes(graph)))))){
-        nodes <- seq(1, 2 * n)
-      }
-    }
-  }
-
+  # Create a node data frame for the prism graph
   prism_nodes <-
-    create_nodes(
-      nodes = nodes,
+    create_node_df(
+      n = length(nodes),
       type = type,
       label = label)
 
-  graph <-
-    add_node_df(graph, prism_nodes)
-
+  # Create an edge data frame for the prism graph
   prism_edges <-
-    create_edges(
+    create_edge_df(
       from = c(nodes[1:(length(nodes)/2)],
                nodes[((length(nodes)/2) + 1):length(nodes)],
                nodes[1:(length(nodes)/2)]),
@@ -123,8 +100,62 @@ add_prism <- function(graph,
              nodes[1:(length(nodes)/2)] + n),
       rel = rel)
 
-  graph <-
-    add_edge_df(graph, prism_edges)
+  # Create the prism graph
+  prism_graph <- create_graph(prism_nodes, prism_edges)
 
-  return(graph)
+  # If the input graph is not empty, combine graphs
+  # using the `combine_graphs()` function
+  if (!is_graph_empty(graph)) {
+
+    combined_graph <- combine_graphs(graph, prism_graph)
+
+    # Update the `last_node` counter
+    combined_graph$last_node <- nodes_created + nrow(prism_nodes)
+
+    # Update the `last_edge` counter
+    combined_graph$last_edge <- edges_created + nrow(prism_edges)
+
+    # Update the `graph_log` df with an action
+    graph_log <-
+      add_action_to_log(
+        graph_log = graph_log,
+        version_id = nrow(graph_log) + 1,
+        function_used = "add_balanced_tree",
+        time_modified = time_function_start,
+        duration = graph_function_duration(time_function_start),
+        nodes = nrow(combined_graph$nodes_df),
+        edges = nrow(combined_graph$edges_df))
+
+    combined_graph$graph_log <- graph_log
+    combined_graph$graph_info <- graph_info
+
+    # Write graph backup if the option is set
+    if (combined_graph$graph_info$write_backups) {
+      save_graph_as_rds(graph = combined_graph)
+    }
+
+    return(combined_graph)
+  } else {
+
+    # Update the `graph_log` df with an action
+    graph_log <-
+      add_action_to_log(
+        graph_log = graph_log,
+        version_id = nrow(graph_log) + 1,
+        function_used = "add_prism",
+        time_modified = time_function_start,
+        duration = graph_function_duration(time_function_start),
+        nodes = nrow(prism_graph$nodes_df),
+        edges = nrow(prism_graph$edges_df))
+
+    prism_graph$graph_log <- graph_log
+    prism_graph$graph_info <- graph_info
+
+    # Write graph backup if the option is set
+    if (prism_graph$graph_info$write_backups) {
+      save_graph_as_rds(graph = prism_graph)
+    }
+
+    return(prism_graph)
+  }
 }

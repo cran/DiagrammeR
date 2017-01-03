@@ -4,17 +4,19 @@
 \alias{add_n_nodes}
 \title{Add one or several unconnected nodes to the graph}
 \usage{
-add_n_nodes(graph, n, set_node_type = NULL)
+add_n_nodes(graph, n, type = NULL, label = NULL)
 }
 \arguments{
 \item{graph}{a graph object of class
-\code{dgr_graph} that is created using
-\code{create_graph}.}
+\code{dgr_graph}.}
 
 \item{n}{the number of new nodes to add to the graph.}
 
-\item{set_node_type}{an optional string to apply a
-\code{type} attribute to all newly created nodes.}
+\item{type}{an optional character vector that
+provides group identifiers for the nodes to be added.}
+
+\item{label}{an optional character object that
+describes the nodes to be added.}
 }
 \value{
 a graph object of class \code{dgr_graph}.
@@ -25,16 +27,14 @@ class \code{dgr_graph}. Optionally, set node
 \code{type} values for the new nodes.
 }
 \examples{
-library(magrittr)
-
-# Create an empty graph and add 5 nodes to it; these
-# nodes will be given ID values from 1 to 5
+# Create an empty graph and add 5 nodes; these
+# nodes will be assigned ID values from `1` to `5`
 graph <-
   create_graph() \%>\%
   add_n_nodes(5)
 
 # Get the graph's nodes
-graph \%>\% get_nodes
-#> [1] "1" "2" "3" "4" "5"
+graph \%>\% get_node_ids()
+#> [1] 1 2 3 4 5
 }
 

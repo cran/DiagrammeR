@@ -8,8 +8,7 @@ select_nodes_by_id(graph, nodes, set_op = "union")
 }
 \arguments{
 \item{graph}{a graph object of class
-\code{dgr_graph} that is created using
-\code{create_graph}.}
+\code{dgr_graph}.}
 
 \item{nodes}{a vector of node IDs for the selection
 of nodes present in the graph.}
@@ -32,20 +31,17 @@ values, then numeric ranges can be used for the
 selection.
 }
 \examples{
-library(magrittr)
-
 # Create a node data frame (ndf)
-nodes <- create_nodes(nodes = 1:10)
+ndf <- create_node_df(10)
 
 # Create a graph
-graph <- create_graph(nodes_df = nodes)
+graph <- create_graph(nodes_df = ndf)
 
 # Select nodes `1` to `5` and show that
 # selection of nodes with `get_selection()`
 graph \%>\%
   select_nodes_by_id(1:5) \%>\%
-  get_selection
-#> $nodes
-#> [1] "1" "2" "3" "4" "5"
+  get_selection()
+#> [1] 1 2 3 4 5
 }
 

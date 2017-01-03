@@ -4,6 +4,7 @@
 #' in this function allows for no possibility that
 #' edges in the graph might be removed after the join.
 #' @param graph a graph object of class
+#' \code{dgr_graph}.
 #' @param df the data frame to use for joining.
 #' \code{dgr_graph} that is created using
 #' \code{create_graph}.
@@ -21,8 +22,6 @@
 #' @return a graph object of class
 #' \code{dgr_graph}.
 #' @examples
-#' library(magrittr)
-#'
 #' # Create a simple graph
 #' graph <-
 #'   create_graph() %>%
@@ -32,33 +31,44 @@
 #' # Create a data frame with node ID values
 #' # representing the graph edges (with `from` and `to`
 #' # columns), and, a set of numeric values
+#' set.seed(25)
+#'
 #' df <-
-#'   data.frame(from = c(1, 1, 2, 2, 3),
-#'              to = c(2, 3, 4, 5, 5),
-#'              values = rnorm(5, 5))
+#'   data.frame(
+#'     from = c(1, 1, 2, 2, 3),
+#'     to = c(2, 3, 4, 5, 5),
+#'     values = rnorm(5, 5))
 #'
 #' # Join the values in the data frame to the
 #' # graph's edges; this works as a left join using
 #' # identically-named columns in the graph and the df
 #' # (in this case `from` and `to` are common to both)
-#' graph <-
-#'   graph %>% join_edge_attrs(df)
+#' graph <- graph %>% join_edge_attrs(df)
 #'
 #' # Get the graph's internal edf to show that the
 #' # join has been made
 #' get_edge_df(graph)
-#' #>   from to rel           values
-#' #> 1    1  2     7.13009924330664
-#' #> 2    1  3     4.91228554626235
-#' #> 3    2  4     3.53310530960626
-#' #> 4    2  5      5.6516614809259
-#' #> 5    3  5     5.87955663602654
+#' #>   id from to  rel   values
+#' #> 1  1    1  2 <NA> 4.788166
+#' #> 2  2    1  3 <NA> 3.958409
+#' #> 3  3    2  4 <NA> 3.846692
+#' #> 4  4    2  5 <NA> 5.321531
+#' #> 5  5    3  5 <NA> 3.499870
+#' @importFrom dplyr select everything
 #' @export join_edge_attrs
 
 join_edge_attrs <- function(graph,
                             df,
                             by_graph = NULL,
                             by_df = NULL) {
+
+  # Get the time of function start
+  time_function_start <- Sys.time()
+
+  # Validation: Graph object is valid
+  if (graph_object_valid(graph) == FALSE) {
+    stop("The graph object is not valid.")
+  }
 
   if (is.null(by_graph) & !is.null(by_df)) {
     stop("Both column specifications must be provided.")
@@ -67,6 +77,9 @@ join_edge_attrs <- function(graph,
   if (!is.null(by_graph) & is.null(by_df)) {
     stop("Both column specifications must be provided.")
   }
+
+  # Create bindings for specific variables
+  id <- from <- to <- rel <- NULL
 
   # Extract the graph's edf
   edges <- get_edge_df(graph)
@@ -94,26 +107,29 @@ join_edge_attrs <- function(graph,
   new_col_names <-
     setdiff(colnames(edges), column_names)
 
-  # Get the column numbers for the new columns
-  col_numbers <-
-    which(colnames(edges) %in% new_col_names)
+  # Sort the columns in `edges`
+  edges <-
+    edges %>%
+    dplyr::select(id, from, to, rel, dplyr::everything())
 
-  # Replace string <NA> values with empty strings
-  for (i in 1:length(col_numbers)) {
-    edges[,col_numbers[i]][is.na(edges[,col_numbers[i]])] <- ""
+  # Modify the graph object
+  graph$edges_df <- edges
+
+  # Update the `graph_log` df with an action
+  graph$graph_log <-
+    add_action_to_log(
+      graph_log = graph$graph_log,
+      version_id = nrow(graph$graph_log) + 1,
+      function_used = "join_edge_attrs",
+      time_modified = time_function_start,
+      duration = graph_function_duration(time_function_start),
+      nodes = nrow(graph$nodes_df),
+      edges = nrow(graph$edges_df))
+
+  # Write graph backup if the option is set
+  if (graph$graph_info$write_backups) {
+    save_graph_as_rds(graph = graph)
   }
 
-  # Create a new graph object
-  dgr_graph <-
-    create_graph(nodes_df = graph$nodes_df,
-                 edges_df = edges,
-                 graph_attrs = graph$graph_attrs,
-                 node_attrs = graph$node_attrs,
-                 edge_attrs = graph$edge_attrs,
-                 directed = graph$directed,
-                 graph_name = graph$graph_name,
-                 graph_time = graph$graph_time,
-                 graph_tz = graph$graph_tz)
-
-  return(dgr_graph)
+  return(graph)
 }

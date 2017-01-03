@@ -8,8 +8,7 @@ set_node_attrs_ws(graph, node_attr, value)
 }
 \arguments{
 \item{graph}{a graph object of class
-\code{dgr_graph} that is created using
-\code{create_graph}.}
+\code{dgr_graph}.}
 
 \item{node_attr}{the name of the attribute to set.}
 
@@ -24,5 +23,46 @@ From a graph object of class
 \code{dgr_graph} or a node data frame, set node
 attribute properties for nodes present in a node
 selection.
+
+Selections of nodes can be performed using
+the following \code{select_...} functions:
+\code{select_nodes()},
+\code{select_last_node()},
+\code{select_nodes_by_degree()},
+\code{select_nodes_by_id()}, or
+\code{select_nodes_in_neighborhood()}.
+Selections of nodes can also be performed using
+the following traversal functions:
+(\code{trav_...}):
+\code{trav_out()}, \code{trav_in()},
+\code{trav_both()}, \code{trav_in_node()},
+\code{trav_out_node()}.
+}
+\examples{
+# Create a simple graph
+graph <-
+  create_graph() \%>\%
+  add_path(6)
+
+# Select specific nodes from the graph and
+# apply the node attribute `color = blue` to
+# those selected nodes
+graph <-
+  graph \%>\%
+  select_nodes_by_id(1:4) \%>\%
+  trav_out() \%>\%
+  set_node_attrs_ws("color", "blue")
+
+# Show the internal node data frame to verify
+# that the node attribute has been set for
+# specific node
+get_node_df(graph)
+#>   id type label color
+#> 1  1 <NA>     1  <NA>
+#> 2  2 <NA>     2  blue
+#> 3  3 <NA>     3  blue
+#> 4  4 <NA>     4  blue
+#> 5  5 <NA>     5  blue
+#> 6  6 <NA>     6  <NA>
 }
 

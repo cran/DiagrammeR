@@ -17,53 +17,60 @@ a graph object of class \code{dgr_graph}.
 }
 \description{
 Create a subgraph based on a
-selection of nodes or edges extant in the graph
-object.
+selection of nodes or edges stored in the graph
+object. Selections of nodes can be performed using
+the following \code{select_...} functions:
+\code{select_nodes()},
+\code{select_last_node()},
+\code{select_nodes_by_degree()},
+\code{select_nodes_by_id()}, or
+\code{select_nodes_in_neighborhood()}.
+Alternatively, selections of edges can be made
+with these functions: \code{select_edges()},
+\code{select_last_edge()}, or
+\code{select_edges_by_node_id()}. Selections of
+nodes or edges can also be performed using
+any of the traversal functions (\code{trav_...}).
 }
 \examples{
-# Create a simple graph
-nodes <-
-  create_nodes(
-    nodes = c("a", "b", "c", "d",
-              "e", "f", "g", "h"),
-    value = c(3.5, 2.6, 9.4, 2.7,
-              5.2, 2.1, 4.8, 8.5))
+# Create a node data frame (ndf)
+ndf <-
+  create_node_df(
+    n = 6,
+    value = c(3.5, 2.6, 9.4,
+              2.7, 5.2, 2.1))
 
-edges <-
-  create_edges(
-    from = c("a", "b", "c", "g", "e",
-             "e", "h", "f", "a", "c"),
-    to = c("d", "c", "a", "c", "h",
-           "b", "d", "e", "f", "d"))
+# Create an edge data frame (edf)
+edf <-
+  create_edge_df(
+    from = c(1, 2, 4, 5, 2, 6),
+    to = c(2, 4, 1, 3, 5, 5))
 
+# Create a graph
 graph <-
-  create_graph(nodes_df = nodes,
-               edges_df = edges)
+  create_graph(
+    nodes_df = ndf,
+    edges_df = edf)
 
-get_nodes(graph)
-#> [1] "a" "b" "c" "d" "e" "f" "g" "h"
-
-get_edges(graph, return_type = "vector")
-#> [1] "a -> d" "b -> c" "c -> a" "g -> c" "e -> h"
-#> [6] "e -> b" "h -> d" "f -> e" "a -> f" "c -> d"
-
-# Create a selection of nodes
+# Create a selection of nodes, this selects
+# nodes `1`, `3`, and `5`
 graph <-
-  select_nodes(
-    graph = graph,
-    node_attr = "value",
-    search = "> 3")
+  graph \%>\%
+  select_nodes("value > 3")
 
 # Create a subgraph based on the selection
-subgraph <-
-  create_subgraph_ws(graph)
+subgraph <- create_subgraph_ws(graph)
 
-# Check the nodes available in the subgraph
-get_nodes(subgraph)
-#> [1] "a" "c" "e" "g" "h"
+# Display the graph's node data frame
+get_node_df(subgraph)
+#>   id type label value
+#> 1  1 <NA>  <NA>   3.5
+#> 2  3 <NA>  <NA>   9.4
+#> 3  5 <NA>  <NA>   5.2
 
-# Check the edges available in the subgraph
-get_edges(subgraph, return_type = "vector")
-#> [1] "c -> a" "g -> c" "e -> h"
+# Display the graph's edge data frame
+get_edge_df(subgraph)
+#>   id from to  rel
+#> 1  4    5  3 <NA>
 }
 

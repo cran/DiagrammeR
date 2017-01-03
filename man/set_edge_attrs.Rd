@@ -8,8 +8,7 @@ set_edge_attrs(x, edge_attr, values, from = NULL, to = NULL)
 }
 \arguments{
 \item{x}{either a graph object of class
-\code{dgr_graph} that is created using
-\code{create_graph}, or an edge data frame.}
+\code{dgr_graph} or an edge data frame.}
 
 \item{edge_attr}{the name of the attribute to set.}
 
@@ -36,44 +35,44 @@ attribute properties for one or more edges
 }
 \examples{
 # Create a simple graph
-nodes <-
-  create_nodes(
-    nodes = c("a", "b", "c", "d"),
-    type = "letter",
+ndf <-
+  create_node_df(
+    n = 4,
+    type = "basic",
     label = TRUE,
     value = c(3.5, 2.6, 9.4, 2.7))
 
-edges <-
-  create_edges(
-    from = c("a", "b", "c"),
-    to = c("d", "c", "a"),
+edf <-
+  create_edge_df(
+    from = c(1, 2, 3),
+    to = c(4, 3, 1),
     rel = "leading_to")
 
 graph <-
   create_graph(
-    nodes_df = nodes,
-    edges_df = edges)
+    nodes_df = ndf,
+    edges_df = edf)
 
 # Set attribute `color = "green"` for edges
-# `a` -> `d` and `c` -> `a` using the graph object
+# `1`->`4` and `3`->`1` using the graph object
 graph <-
   set_edge_attrs(
     x = graph,
     edge_attr = "color",
     values = "green",
-    from = c("a", "c"),
-    to = c("d", "a"))
+    from = c(1, 3),
+    to = c(4, 1))
 
 # Set attribute `color = "green"` for edges
-# `a` -> `d` and `c` -> `a` using the edge
+# `1`->`4` and `3`->`1` using the edge
 # data frame
 edges <-
   set_edge_attrs(
-    x = edges,
+    x = edf,
     edge_attr = "color",
     values = "green",
-    from = c("a", "c"),
-    to = c("d", "a"))
+    from = c(1, 3),
+    to = c(4, 1))
 
 # Set attribute `color = "blue"` for all edges
 # in the graph
@@ -84,21 +83,21 @@ graph <-
     values = "blue")
 
 # Set attribute `color = "pink"` for all edges in
-# graph outbound from `a`
+# graph outbound from node with ID value `1`
 graph <-
   set_edge_attrs(
     x = graph,
     edge_attr = "color",
     values = "pink",
-    from = "a")
+    from = 1)
 
 # Set attribute `color = "black"` for all edges in
-# graph inbound to `a`
+# graph inbound to node with ID `1`
 graph <-
   set_edge_attrs(
     x = graph,
     edge_attr = "color",
     values = "black",
-    to = "a")
+    to = 1)
 }
 

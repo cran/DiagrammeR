@@ -5,8 +5,7 @@
 #' and optionally obtain a count of edges by their
 #' relationship type.
 #' @param graph a graph object of class
-#' \code{dgr_graph} that is created using
-#' \code{create_graph}.
+#' \code{dgr_graph}.
 #' @param rel either a logical value, where \code{TRUE}
 #' provides a named vector of edge count by type and
 #' \code{FALSE} (the default) provides a total count of
@@ -14,21 +13,24 @@
 #' edge relationship types.
 #' @return a numeric vector of single length.
 #' @examples
+#' # Set a seed
+#' set.seed(24)
+#'
 #' # Create a node data frame (ndf)
-#' nodes <-
-#'   create_nodes(
-#'     nodes = LETTERS,
+#' ndf <-
+#'   create_node_df(
+#'     n = 26,
 #'     label = TRUE,
-#'     type = c(rep("a_to_g", 7),
-#'              rep("h_to_p", 9),
-#'              rep("q_to_x", 8),
-#'              rep("y_and_z", 2)))
+#'     type = c(rep("a", 7),
+#'              rep("b", 9),
+#'              rep("c", 8),
+#'              rep("d", 2)))
 #'
 #' # Create an edge data frame (edf)
-#' edges <-
-#'   create_edges(
-#'     from = sample(LETTERS, replace = TRUE),
-#'     to = sample(LETTERS, replace = TRUE),
+#' edf <-
+#'   create_edge_df(
+#'     from = sample(1:26, replace = TRUE),
+#'     to = sample(1:26, replace = TRUE),
 #'     rel = c(rep("rel_a", 7),
 #'             rep("rel_b", 9),
 #'             rep("rel_c", 8),
@@ -37,15 +39,15 @@
 #' # Create a graph using the ndf and edf
 #' graph <-
 #'   create_graph(
-#'     nodes_df = nodes,
-#'     edges_df = edges)
+#'     nodes_df = ndf,
+#'     edges_df = edf)
 #'
 #' # Get a total count of edges in the graph
 #' edge_count(graph, rel = FALSE)
 #' #> [1] 26
 #'
-#' # Get a count of edges that have the relationship
-#' # `rel_a`
+#' # Get a count of edges that have the
+#' # relationship of `rel_a`
 #' edge_count(graph, rel = "rel_a")
 #' #> [1] 7
 #'
@@ -58,6 +60,11 @@
 edge_count <- function(graph,
                        rel = FALSE) {
 
+  # Validation: Graph object is valid
+  if (graph_object_valid(graph) == FALSE) {
+    stop("The graph object is not valid.")
+  }
+
   # If graph is empty, return 0
   if (is_graph_empty(graph)) {
     return(0)
@@ -65,22 +72,22 @@ edge_count <- function(graph,
 
   # If `rel` is a string, get a count of edges for
   # a specific rel
-  if (class(rel) == "character") {
+  if (inherits(rel, "character")) {
     count_of_rel <-
       length(which(graph$edges_df$rel %in% rel))
     return(count_of_rel)
   }
 
   # If `rel` is set to FALSE, get a total count of edges
-  if (all(class(rel) == "logical" &
+  if (all(inherits(rel, "logical") &
           rel == FALSE)) {
-    total_edge_count <- length(graph$edges_df$rel)
+    total_edge_count <- nrow(graph$edges_df)
     return(total_edge_count)
   }
 
   # If `rel` set to TRUE, get a named vector of counts
   # by relationship
-  if (all(class(rel) == "logical" & rel)) {
+  if (all(inherits(rel, "logical") & rel)) {
 
     all_relationships <- unique(graph$edges_df$rel)
 

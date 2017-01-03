@@ -4,18 +4,21 @@
 \alias{delete_edge}
 \title{Delete an edge from an existing graph object}
 \usage{
-delete_edge(graph, from, to)
+delete_edge(graph, from = NULL, to = NULL, id = NULL)
 }
 \arguments{
 \item{graph}{a graph object of class
-\code{dgr_graph} that is created using
-\code{create_graph}.}
+\code{dgr_graph}.}
 
 \item{from}{a node ID from which the edge to be
-removed is outgoing.}
+removed is outgoing. If an edge ID is provided to
+\code{id}, then this argument is ignored.}
 
 \item{to}{a node ID to which the edge to be removed
-is incoming.}
+is incoming. If an edge ID is provided to
+\code{id}, then this argument is ignored.}
+
+\item{id}{an edge ID of the edge to be removed.}
 }
 \value{
 a graph object of class \code{dgr_graph}.
@@ -23,29 +26,63 @@ a graph object of class \code{dgr_graph}.
 \description{
 From a graph object of class
 \code{dgr_graph}, delete an existing edge by
-specifying a pair of node IDs corresponding to the
-edge direction.
+specifying either: (1) a pair of node IDs
+corresponding to the edge (keeping into
+consideration the direction of the edge in
+a directed graph), or (2) an edge ID.
 }
 \examples{
 # Create an empty graph
 graph <- create_graph()
 
 # Add two nodes
-graph <- add_node(graph, node = "a")
-graph <- add_node(graph, node = "b")
+graph <- add_node(graph)
+graph <- add_node(graph)
 
 # Add an edge
 graph <-
   add_edge(
     graph = graph,
-    from = "a",
-    to = "b")
+    from = 1,
+    to = 2)
 
 # Delete the edge
 graph <-
   delete_edge(
     graph = graph,
-    from = "a",
-    to = "b")
+    from = 1,
+    to = 2)
+
+# Get the count of edges in the graph
+edge_count(graph)
+#> [1] 0
+
+# Create an undirected graph with
+# 2 nodes and an edge
+graph_undirected <-
+  create_graph(directed = FALSE) \%>\%
+  add_n_nodes(2) \%>\%
+  add_edge(1, 2)
+
+# Delete the edge; order of node ID
+# values provided in `from` and `to`
+# don't matter for the undirected case
+graph_undirected \%>\%
+  delete_edge(2, 1) \%>\%
+  edge_count()
+#> [1] 0
+
+graph_undirected \%>\%
+  delete_edge(1, 2) \%>\%
+  edge_count()
+#> [1] 0
+
+# The undirected graph has a single
+# edge with ID `1`; it can be
+# deleted by specifying `id`
+graph_undirected \%>\%
+  delete_edge(id = 1) \%>\%
+  edge_count()
+#> [1] 0
 }
 

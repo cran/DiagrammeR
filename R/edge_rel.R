@@ -6,8 +6,7 @@
 #' and perform operations on the relationship for that
 #' edge.
 #' @param graph a graph object of class
-#' \code{dgr_graph} that is created using
-#' \code{create_graph}.
+#' \code{dgr_graph}.
 #' @param from a node ID from which the edge to be
 #' queried is outgoing.
 #' @param to a node ID to which the edge to be queried
@@ -26,17 +25,15 @@
 #' relationship.
 #' @return a graph object of class \code{dgr_graph}.
 #' @examples
-#' library(magrittr)
-#'
 #' # Create a node data frame (ndf)
-#' nodes <-
-#'   create_nodes(
-#'     nodes = 1:5,
+#' ndf <-
+#'   create_node_df(
+#'     n = 5,
 #'     type = c("a", "b", "c", "a", "c"))
 #'
 #' # Create an edge data frame (edf)
-#' edges <-
-#'   create_edges(
+#' edf <-
+#'   create_edge_df(
 #'     from = c(1, 3, 5, 2, 4),
 #'     to = c(2, 2, 4, 4, 3),
 #'     rel = c("rel_a", "rel_b",
@@ -45,43 +42,43 @@
 #'
 #' # Create a graph
 #' graph <-
-#'   create_graph(nodes_df = nodes,
-#'                edges_df = edges)
+#'   create_graph(
+#'     nodes_df = ndf,
+#'     edges_df = edf)
 #'
-#' # Read the edge `rel` for edge `1` -> `2`
-#' graph %>%
-#'   edge_rel(1, 2)
+#' # Read the edge `rel` for edge `1`->`2`
+#' graph %>% edge_rel(1, 2)
 #' #> [1] "rel_a"
 #'
 #' # Remove the `rel` value entirely from
-#' # edge `1` -> `2`
-#' graph %<>%
+#' # edge `1`->`2`
+#' graph <-
+#'   graph %>%
 #'   edge_rel(1, 2, "delete")
 #'
-#' # Check that the edge `1` -> `2` no longer
+#' # Check that the edge `1`->`2` no longer
 #' # has a `rel` assignment
-#' graph %>%
-#'   edge_rel(1, 2, "check")
+#' graph %>% edge_rel(1, 2, "check")
 #' #> [1] FALSE
 #'
-#' # Add the `rel` value `rel_b`` to edge `1` -> `2`
-#' graph %<>%
+#' # Add the `rel` value `rel_b`` to edge `1`->`2`
+#' graph <-
+#'   graph %>%
 #'   edge_rel(1, 2, "add", "rel_b")
 #'
-#' # Read the edge `rel` for edge `1` -> `2`
-#' graph %>%
-#'   edge_rel(1, 2)
+#' # Read the edge `rel` for edge `1`->`2`
+#' graph %>% edge_rel(1, 2)
 #' #> [1] "rel_b"
 #'
 #' # Perform an in-place update of the `rel`
-#' # value for edge `1` -> `2` (`rel_b`` to `rel_a``)
-#' graph %<>%
+#' # value for edge `1`->`2` (`rel_b`` to `rel_a``)
+#' graph <-
+#'   graph %>%
 #'   edge_rel(1, 2, "update", "rel_a")
 #'
-#' # Read the edge `rel` for edge `1` -> `2`
+#' # Read the edge `rel` for edge `1`->`2`
 #' # to ensure that the change was made
-#' graph %>%
-#'   edge_rel(1, 2)
+#' graph %>% edge_rel(1, 2)
 #' #> [1] "rel a"
 #' @export edge_rel
 
@@ -90,6 +87,14 @@ edge_rel <- function(graph,
                      to,
                      action = "read",
                      value = NULL) {
+
+  # Get the time of function start
+  time_function_start <- Sys.time()
+
+  # Validation: Graph object is valid
+  if (graph_object_valid(graph) == FALSE) {
+    stop("The graph object is not valid.")
+  }
 
   # Determine if edge is present within the graph
   edge_is_in_graph <-
@@ -112,7 +117,7 @@ edge_rel <- function(graph,
 
     relationship_set <-
       ifelse(is.null(graph$edges_df$rel[edge_row]) ||
-               graph$edges_df$rel[edge_row] == "",
+               is.na(graph$edges_df$rel[edge_row]),
              FALSE, TRUE)
 
     # Remove relationship if a relationship is set
@@ -121,7 +126,7 @@ edge_rel <- function(graph,
         return(graph)
       }
       if (relationship_set) {
-        graph$edges_df$rel[edge_row] <- ""
+        graph$edges_df$rel[edge_row] <- as.character(NA)
         return(graph)
       }
     }

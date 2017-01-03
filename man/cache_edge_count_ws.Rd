@@ -9,16 +9,39 @@ cache_edge_count_ws(graph)
 }
 \arguments{
 \item{graph}{a graph object of class
-\code{dgr_graph} that is created using
-\code{create_graph}.}
+\code{dgr_graph}.}
 }
 \value{
 a graph object of class \code{dgr_graph}.
+# Create a graph with 5 nodes and 4 edges
+graph <-
+  create_graph() %>%
+  add_path(5)
+
+# Cache a count of edges after creating a selection
+graph <-
+  graph %>%
+  select_edges_by_node_id(2) %>%
+  cache_edge_count_ws()
+
+# Get the number of edges stored in the cache
+graph %>% get_cache()
+#> [1] 4
 }
 \description{
 From a graph object of class
 \code{dgr_graph}, get a count of edges available in
 a selection and cache that value in the graph for
 later retrieval using \code{get_cache}.
+
+Selections of edges can be performed using
+the following \code{select_...} functions:
+\code{select_edges()},
+\code{select_last_edge()}, or
+\code{select_edges_by_node_id()}.
+Selections of edges can also be performed using
+the following traversal functions:
+\code{trav_out_edge()}, \code{trav_in_edge()},
+or \code{trav_both_edge()}.
 }
 

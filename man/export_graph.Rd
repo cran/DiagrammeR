@@ -8,49 +8,57 @@ export_graph(graph, file_name = NULL, file_type = NULL, width = NULL,
   height = NULL)
 }
 \arguments{
-\item{graph}{a graph object.}
+\item{graph}{a graph object of class
+\code{dgr_graph}.}
 
 \item{file_name}{the name of the exported file
 (including it's extension).}
 
 \item{file_type}{the type of file to be exported.
-Options are: \code{png}, \code{pdf}, \code{svg},
-and \code{ps}.}
+Options for graph files are: \code{png}, \code{pdf},
+\code{svg}, and \code{ps}. Options for graph file
+formats are: \code{gexf}.}
 
 \item{width}{output width in pixels or \code{NULL}
-for default.}
+for default. Only useful for export to image file
+formats \code{png}, \code{pdf}, \code{svg}, and
+\code{ps}.}
 
 \item{height}{output height in pixels or \code{NULL}
-for default.}
+for default. Only useful for export to image file
+formats \code{png}, \code{pdf}, \code{svg}, and
+\code{ps}.}
 }
 \description{
 Export a graph to a variety of file
-formats such as PNG, PDF, SVG, and PostScript.
+formats, including image formats such as PNG, PDF,
+SVG, and PostScript, and graph file formats such
+as GEXF.
 }
 \examples{
 \dontrun{
-library(magrittr)
 library(DiagrammeRsvg)
 
 # Create a node data frame (ndf)
-nodes <-
-  create_nodes(
-    nodes = c("a", "b", "c", "d"),
-    type = c("A", "A", "Z", "Z"),
+ndf <-
+  create_node_df(
+    n = 4,
+    type = c("a", "a", "z", "z"),
     label = TRUE,
     value = c(3.5, 2.6, 9.4, 2.7))
 
 # Create an edge data frame (edf)
-edges <-
-  create_edges(
-    from = c("a", "b", "c"),
-    to = c("d", "c", "a"),
-    rel = c("A", "Z", "A"))
+edf <-
+  create_edge_df(
+    from = c(1, 2, 3),
+    to = c(4, 3, 1),
+    rel = c("rel_a", "rel_z", "rel_a"))
 
 # Create a graph with the ndf and edf
 graph <-
-  create_graph(nodes_df = nodes,
-               edges_df = edges)
+  create_graph(
+    nodes_df = ndf,
+    edges_df = edf)
 
 # Create a PDF file for the graph (`graph.pdf`)
 graph \%>\% export_graph("graph.pdf")

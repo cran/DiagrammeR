@@ -4,12 +4,11 @@
 \alias{add_prism}
 \title{Add a prism of nodes to the graph}
 \usage{
-add_prism(graph, n, type = NULL, label = TRUE, rel = NULL, nodes = NULL)
+add_prism(graph, n, type = NULL, label = TRUE, rel = NULL)
 }
 \arguments{
 \item{graph}{a graph object of class
-\code{dgr_graph} that is created using
-\code{create_graph}.}
+\code{dgr_graph}.}
 
 \item{n}{the number of nodes describing the shape
 of the prism. For example, the triangonal prism has
@@ -30,11 +29,6 @@ nodes, or, a boolean value where setting to
 \item{rel}{an optional string for providing a
 relationship label to all new edges created in the
 node prism.}
-
-\item{nodes}{an optional vector of node IDs of
-length \code{n} for the newly created nodes. If
-nothing is provided, node IDs will assigned as
-monotonically increasing integers.}
 }
 \value{
 a graph object of class \code{dgr_graph}.
@@ -44,21 +38,26 @@ With a graph object of class
 \code{dgr_graph}, add a node prism to the graph.
 }
 \examples{
-library(magrittr)
-
-# Create a new graph and add a prism
+# Create a new graph and add 2 prisms
 graph <-
   create_graph() \%>\%
-  add_prism(3, "prism")
+  add_prism(3, "prism", "a") \%>\%
+  add_prism(3, "prism", "b")
 
 # Get node information from this graph
 node_info(graph)
-#>   node label  type deg indeg outdeg loops
-#> 1    1     1 prism   3     1      2     0
-#> 2    2     2 prism   3     1      2     0
-#> 3    3     3 prism   3     1      2     0
-#> 4    4     4 prism   3     2      1     0
-#> 5    5     5 prism   3     2      1     0
-#> 6    6     6 prism   3     2      1     0
+#>    id  type label deg indeg outdeg loops
+#> 1   1 prism     a   3     1      2     0
+#> 2   2 prism     a   3     1      2     0
+#> 3   3 prism     a   3     1      2     0
+#> 4   4 prism     a   3     2      1     0
+#> 5   5 prism     a   3     2      1     0
+#> 6   6 prism     a   3     2      1     0
+#> 7   7 prism     b   3     1      2     0
+#> 8   8 prism     b   3     1      2     0
+#> 9   9 prism     b   3     1      2     0
+#> 10 10 prism     b   3     2      1     0
+#> 11 11 prism     b   3     2      1     0
+#> 12 12 prism     b   3     2      1     0
 }
 

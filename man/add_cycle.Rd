@@ -4,12 +4,11 @@
 \alias{add_cycle}
 \title{Add a cycle of nodes to the graph}
 \usage{
-add_cycle(graph, n, type = NULL, label = TRUE, rel = NULL, nodes = NULL)
+add_cycle(graph, n, type = NULL, label = TRUE, rel = NULL)
 }
 \arguments{
 \item{graph}{a graph object of class
-\code{dgr_graph} that is created using
-\code{create_graph}.}
+\code{dgr_graph}.}
 
 \item{n}{the number of nodes comprising the cycle.}
 
@@ -25,11 +24,6 @@ nodes, or, a boolean value where setting to
 \item{rel}{an optional string for providing a
 relationship label to all new edges created in the
 node cycle.}
-
-\item{nodes}{an optional vector of node IDs of
-length \code{n} for the newly created nodes. If
-nothing is provided, node IDs will assigned as
-monotonically increasing integers.}
 }
 \value{
 a graph object of class \code{dgr_graph}.
@@ -39,8 +33,6 @@ With a graph object of class
 \code{dgr_graph}, add a node cycle to the graph.
 }
 \examples{
-library(magrittr)
-
 # Create a new graph and add a cycle of nodes to it
 graph <-
   create_graph() \%>\%
@@ -48,12 +40,12 @@ graph <-
 
 # Get node information from this graph
 node_info(graph)
-#>   node label type deg indeg outdeg loops
-#> 1    1     1        2     1      1     0
-#> 2    2     2        2     1      1     0
-#> 3    3     3        2     1      1     0
-#> 4    4     4        2     1      1     0
-#> 5    5     5        2     1      1     0
-#> 6    6     6        2     1      1     0
+#>   id type label deg indeg outdeg loops
+#> 1  1 <NA>     1   2     1      1     0
+#> 2  2 <NA>     2   2     1      1     0
+#> 3  3 <NA>     3   2     1      1     0
+#> 4  4 <NA>     4   2     1      1     0
+#> 5  5 <NA>     5   2     1      1     0
+#> 6  6 <NA>     6   2     1      1     0
 }
 

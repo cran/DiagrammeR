@@ -9,8 +9,7 @@ edge_present(graph, from, to)
 }
 \arguments{
 \item{graph}{a graph object of class
-\code{dgr_graph} that is created using
-\code{create_graph}.}
+\code{dgr_graph}.}
 
 \item{from}{a node ID from which the edge to be
 queried is outgoing.}
@@ -28,37 +27,43 @@ From a graph object of class
 is present.
 }
 \examples{
+# Set a seed
+set.seed(24)
+
 # Create a node data frame (ndf)
-nodes <-
-  create_nodes(
-    nodes = LETTERS,
+ndf <-
+  create_node_df(
+    n = 26,
     label = TRUE,
-    type = c(rep("a_to_g", 7),
-             rep("h_to_p", 9),
-             rep("q_to_x", 8),
-             rep("y_and_z", 2)))
+    type = c(rep("a", 7),
+             rep("b", 9),
+             rep("c", 8),
+             rep("d", 2)))
 
 # Create an edge data frame (edf)
-edges <-
-  create_edges(
-    from = sample(LETTERS, replace = TRUE),
-    to = sample(LETTERS, replace = TRUE),
-    rel = "letter_to_letter")
+edf <-
+  create_edge_df(
+    from = sample(1:26, replace = TRUE),
+    to = sample(1:26, replace = TRUE),
+    rel = c(rep("rel_a", 7),
+            rep("rel_b", 9),
+            rep("rel_c", 8),
+            rep("rel_d", 2)))
 
 # Create a graph using the ndf and edf
 graph <-
   create_graph(
-    nodes_df = nodes,
-    edges_df = edges)
+    nodes_df = ndf,
+    edges_df = edf)
 
 # Is there any edge between nodes with IDs
-# `A` and `B`?
-edge_present(graph, from = "A", to = "B")
+# `1` and `2`?
+edge_present(graph, from = 1, to = 2)
 #> FALSE
 
 # Verify that there is an edge between nodes
-# `K` and `V`
-edge_present(graph, from = "K", to = "V")
+# `18` and `26`
+edge_present(graph, from = 18, to = 26)
 #> TRUE
 }
 

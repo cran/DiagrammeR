@@ -9,8 +9,7 @@ get_selection(graph)
 }
 \arguments{
 \item{graph}{a graph object of class
-\code{dgr_graph} that is created using
-\code{create_graph}.}
+\code{dgr_graph}.}
 }
 \value{
 a vector with the current selection of nodes
@@ -21,33 +20,31 @@ Get the current selection of nodes or
 edges from a graph object of class \code{dgr_graph}.
 }
 \examples{
-library(magrittr)
-
 # Create a simple graph
 graph <-
   create_graph() \%>\%
-  add_node_df(create_nodes(1:6)) \%>\%
-  add_edge("1", "2") \%>\%
-  add_edge("1", "3") \%>\%
-  add_edge("3", "4") \%>\%
-  add_edge("4", "5") \%>\%
-  add_edge("4", "6")
+  add_n_nodes(6) \%>\%
+  add_edge(1, 2) \%>\%
+  add_edge(1, 3) \%>\%
+  add_edge(3, 4) \%>\%
+  add_edge(4, 5) \%>\%
+  add_edge(4, 6)
 
 # Select node `4`, then select all nodes a
 # distance of 1 away from node `4`, and finally
 # return the selection of nodes as a vector object
 graph \%>\%
-  select_nodes(nodes = "4") \%>\%
+  select_nodes(nodes = 4) \%>\%
   select_nodes_in_neighborhood(
-    node = "4", distance = 1) \%>\%
-  get_selection
-#> [1] "4" "5" "6" "3"
+    node = 4, distance = 1) \%>\%
+  get_selection()
+#> [1] 3 4 5 6
 
 # Select edges associated with node `4` and return
 # the selection of edges
 graph \%>\%
   select_edges_by_node_id(4) \%>\%
-  get_selection
-#> [1] "4 -> 5" "4 -> 6" "3 -> 4"
+  get_selection()
+#> [1] 3 4 5
 }
 

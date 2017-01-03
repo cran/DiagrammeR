@@ -8,8 +8,7 @@ delete_edges_ws(graph)
 }
 \arguments{
 \item{graph}{a graph object of class
-\code{dgr_graph} that is created using
-\code{create_graph}.}
+\code{dgr_graph}.}
 }
 \value{
 a graph object of class \code{dgr_graph}.
@@ -18,5 +17,38 @@ a graph object of class \code{dgr_graph}.
 In a graph object of class
 \code{dgr_graph}, delete all edges present in a
 selection.
+
+Selections of edges can be performed using
+the following \code{select_...} functions:
+\code{select_edges()},
+\code{select_last_edge()}, or
+\code{select_edges_by_node_id()}.
+Selections of edges can also be performed using
+the following traversal functions:
+\code{trav_out_edge()}, \code{trav_in_edge()},
+or \code{trav_both_edge()}.
+}
+\examples{
+# Create a graph
+graph <-
+  create_graph() \%>\%
+  add_n_nodes(3) \%>\%
+  add_edges_w_string(
+    "1->3 1->2 2->3")
+
+# Select edges attached to node with ID `3`
+# (these are `1`->`3` and `2`->`3`)
+graph <-
+  graph \%>\%
+  select_edges_by_node_id(3)
+
+# Delete edges in selection
+graph <-
+  graph \%>\%
+  delete_edges_ws()
+
+# Get a count of edges in the graph
+edge_count(graph)
+#> [1] 1
 }
 

@@ -4,6 +4,7 @@
 #' in this function allows for no possibility that
 #' nodes in the graph might be removed after the join.
 #' @param graph a graph object of class
+#' \code{dgr_graph}.
 #' @param df the data frame to use for joining.
 #' @param by_graph optional specification of the column
 #' in the graph's internal node data frame for the left
@@ -18,11 +19,8 @@
 #' ndf and in \code{df} with identical names.
 #' \code{dgr_graph} that is created using
 #' \code{create_graph}.
-#' @return a graph object of class
-#' \code{dgr_graph}.
+#' @return a graph object of class \code{dgr_graph}.
 #' @examples
-#' library(magrittr)
-#'
 #' # Create a simple graph
 #' graph <-
 #'   create_graph() %>%
@@ -31,30 +29,62 @@
 #'
 #' # Create a data frame with node ID values and a
 #' # set of numeric values
-#' df <- data.frame(nodes = 1:6, values = rnorm(6, 5))
+#' set.seed(25)
+#'
+#' df <-
+#'   data.frame(
+#'     values = round(rnorm(6, 5), 2),
+#'     id = 1:6)
 #'
 #' # Join the values in the data frame to the
 #' # graph's nodes; this works as a left join using
 #' # identically-named columns in the graph and the df
-#' # (in this case `nodes` is common to both)
-#' graph <-
-#'   graph %>% join_node_attrs(df)
+#' # (in this case the `id` column is common to both)
+#' graph <- graph %>% join_node_attrs(df)
 #'
 #' # Get the graph's internal ndf to show that the
 #' # join has been made
 #' get_node_df(graph)
-#' #>   nodes type label           values
-#' #> 1     1            4.27988818205506
-#' #> 2     2             5.3499594040959
-#' #> 3     3            5.43965531750004
-#' #> 4     4            3.50233363164518
-#' #> 5     5            5.04599475422798
+#' #>   id type label values
+#' #> 1  1 <NA>  <NA>   4.79
+#' #> 2  2 <NA>  <NA>   3.96
+#' #> 3  3 <NA>  <NA>   3.85
+#' #> 4  4 <NA>  <NA>   5.32
+#' #> 5  5 <NA>  <NA>    3.5
+#'
+#' # Get betweenness values for each node and
+#' # add them as a node attribute (Note the
+#' # common column name `id` in the different
+#' # tables results in a natural join)
+#' graph <-
+#'   graph %>%
+#'   join_node_attrs(
+#'     get_betweenness(.))
+#'
+#' # Get the graph's internal ndf to show that
+#' # this join has been made
+#' get_node_df(graph)
+#' #>   id type label values betweenness
+#' #> 1  1 <NA>  <NA>   4.79           2
+#' #> 2  2 <NA>  <NA>   3.96           7
+#' #> 3  3 <NA>  <NA>   3.85           1
+#' #> 4  4 <NA>  <NA>   5.32           0
+#' #> 5  5 <NA>  <NA>   3.50           2
+#' @importFrom dplyr select everything
 #' @export join_node_attrs
 
 join_node_attrs <- function(graph,
                             df,
                             by_graph = NULL,
                             by_df = NULL) {
+
+  # Get the time of function start
+  time_function_start <- Sys.time()
+
+  # Validation: Graph object is valid
+  if (graph_object_valid(graph) == FALSE) {
+    stop("The graph object is not valid.")
+  }
 
   if (is.null(by_graph) & !is.null(by_df)) {
     stop("Both column specifications must be provided.")
@@ -63,6 +93,13 @@ join_node_attrs <- function(graph,
   if (!is.null(by_graph) & is.null(by_df)) {
     stop("Both column specifications must be provided.")
   }
+
+  # Create bindings for specific variables
+  id <- type <- label <- NULL
+
+  # Get the number of nodes ever created for
+  # this graph
+  nodes_created <- graph$last_node
 
   # Extract the graph's ndf
   nodes <- get_node_df(graph)
@@ -76,7 +113,17 @@ join_node_attrs <- function(graph,
   if (is.null(by_graph) & is.null(by_df)) {
 
     # Perform a left join on the `nodes` data frame
-    nodes <- merge(nodes, df, all.x = TRUE)
+    if ("id" %in% colnames(df)) {
+      nodes <-
+        merge(nodes, df,
+              all.x = TRUE,
+              by.x = "id",
+              by.y = "id")
+    } else {
+
+      # Perform a left join on the `nodes` data frame
+      nodes <- merge(nodes, df, all.x = TRUE)
+    }
   }
 
   if (!is.null(by_graph) & !is.null(by_df)) {
@@ -97,23 +144,30 @@ join_node_attrs <- function(graph,
   col_numbers <-
     which(colnames(nodes) %in% new_col_names)
 
-  # Replace string <NA> values with empty strings
-  for (i in 1:length(col_numbers)) {
-    nodes[,col_numbers[i]][
-      is.na(nodes[,col_numbers[i]])] <- ""
+  # Ensure that the column ordering is correct
+  nodes <-
+    nodes %>%
+    dplyr::select(id, type, label, dplyr::everything())
+
+  # Modify the graph object
+  graph$nodes_df <- nodes
+  graph$last_node <- nodes_created
+
+  # Update the `graph_log` df with an action
+  graph$graph_log <-
+    add_action_to_log(
+      graph_log = graph$graph_log,
+      version_id = nrow(graph$graph_log) + 1,
+      function_used = "join_node_attrs",
+      time_modified = time_function_start,
+      duration = graph_function_duration(time_function_start),
+      nodes = nrow(graph$nodes_df),
+      edges = nrow(graph$edges_df))
+
+  # Write graph backup if the option is set
+  if (graph$graph_info$write_backups) {
+    save_graph_as_rds(graph = graph)
   }
 
-  # Create a new graph object
-  dgr_graph <-
-    create_graph(nodes_df = nodes,
-                 edges_df = graph$edges_df,
-                 graph_attrs = graph$graph_attrs,
-                 node_attrs = graph$node_attrs,
-                 edge_attrs = graph$edge_attrs,
-                 directed = graph$directed,
-                 graph_name = graph$graph_name,
-                 graph_time = graph$graph_time,
-                 graph_tz = graph$graph_tz)
-
-  return(dgr_graph)
+  return(graph)
 }

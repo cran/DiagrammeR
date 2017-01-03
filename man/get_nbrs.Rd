@@ -8,8 +8,7 @@ get_nbrs(graph, nodes)
 }
 \arguments{
 \item{graph}{a graph object of class
-\code{dgr_graph} that is created using
-\code{create_graph}.}
+\code{dgr_graph}.}
 
 \item{nodes}{a vector of node ID values.}
 }
@@ -21,42 +20,29 @@ With one or more nodes, get the set of
 all neighboring nodes.
 }
 \examples{
-library(magrittr)
+# Create a simple, directed graph with 5
+# nodes and 4 edges
+graph <-
+  create_graph() \%>\%
+  add_path(5)
 
-# Create a random, directed graph with 18 nodes
-# and 22 edges
-random_graph <-
-  create_random_graph(
-    n = 18,
-    m = 22,
-    directed = TRUE,
-    fully_connected = TRUE,
-    set_seed = 20) \%>\%
-  set_global_graph_attrs(
-    'graph', 'layout', 'sfdp') \%>\%
-  set_global_graph_attrs(
-    'graph', 'overlap', 'false')
+# Find all neighbor nodes for node `2`
+graph \%>\% get_nbrs(2)
+#> [1] 1 3
 
-# Find all neighbor nodes for node `5`
-random_graph \%>\% get_nbrs(5)
-#> [1] "1"  "2"  "12" "18"
+# Find all neighbor nodes for nodes `1`
+# and `5`
+graph \%>\% get_nbrs(c(1, 5))
+#> [1] 2 4
 
-# Find all neighbor nodes for nodes `5`, `7`,
-# and `15`
-random_graph \%>\% get_nbrs(c(5, 7, 15))
-#> [1] "1"  "2"  "6"  "11" "12" "18"
-
-# Get neighbors for node `11` and add a node
-# attribute to color the nodes green, then, color
-# all other nodes light gray
-random_graph \%<>\%
-  select_nodes_by_id(get_nbrs(., 11)) \%>\%
-  set_node_attrs_ws('color', 'green') \%>\%
-  invert_selection \%>\%
-  set_node_attrs_ws('color', 'gray85') \%>\%
-  clear_selection
-
-# Render the graph to see the change
-random_graph \%>\% render_graph
+# Color node `3` with purple, get its
+# neighbors and color those nodes green
+graph <-
+  graph \%>\%
+  select_nodes_by_id(3) \%>\%
+  set_node_attrs_ws("color", "purple") \%>\%
+  clear_selection() \%>\%
+  select_nodes_by_id(get_nbrs(., 3)) \%>\%
+  set_node_attrs_ws("color", "green")
 }
 

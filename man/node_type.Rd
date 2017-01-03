@@ -9,8 +9,7 @@ node_type(graph, node, action = "read", value = NULL)
 }
 \arguments{
 \item{graph}{a graph object of class
-\code{dgr_graph} that is created using
-\code{create_graph}.}
+\code{dgr_graph}.}
 
 \item{node}{a node ID corresponding to the node to
 be selected.}
@@ -39,59 +38,57 @@ the node ID) and perform operations on the type
 definition for that node.
 }
 \examples{
-library(magrittr)
-
 # Create a node data frame (ndf)
-nodes <-
-  create_nodes(
-    nodes = 1:5,
+ndf <-
+  create_node_df(
+    n = 5,
     type = c("a", "b", "c", "a", "c"))
 
 # Create an edge data frame (edf)
-edges <-
-  create_edges(
+edf <-
+  create_edge_df(
     from = c(1, 3, 5, 2, 4),
     to = c(2, 2, 4, 4, 3))
 
 # Create a graph
 graph <-
-  create_graph(nodes_df = nodes,
-               edges_df = edges)
+  create_graph(
+    nodes_df = ndf,
+    edges_df = edf)
 
 # Read the node `type` for node `1`
-graph \%>\%
-  node_type(1)
+graph \%>\% node_type(1)
 #> [1] "a"
 
 # Remove the `type` value entirely from
 # node `1`
-graph \%<>\%
+graph <-
+  graph \%>\%
   node_type(1, "delete")
 
 # Check that node `1` no longer has a
 # `type` assignment
-graph \%>\%
-  node_type(1, "check")
+graph \%>\% node_type(1, "check")
 #> [1] FALSE
 
 # Add the `type` value "b" to node `1`
-graph \%<>\%
+graph <-
+  graph \%>\%
   node_type(1, "add", "b")
 
 # Read the node `type` for node `1`
-graph \%>\%
-  node_type(1)
+graph \%>\% node_type(1)
 #> [1] "b"
 
 # Perform an in-place update of the `type`
 # value for node `1` ("b" to "a")
-graph \%<>\%
+graph <-
+  graph \%>\%
   node_type(1, "update", "a")
 
 # Read the node `type` for node `1` to ensure
 # that the change was made
-graph \%>\%
-  node_type(1)
+graph \%>\% node_type(1)
 #> [1] "a"
 }
 

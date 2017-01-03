@@ -7,71 +7,71 @@
 #' @return a data frame containing information specific
 #' to each node within the graph.
 #' @examples
+#' # Set a seed
+#' set.seed(23)
+#'
 #' # Create a node data frame (ndf)
-#' nodes <-
-#'   create_nodes(
-#'     nodes = LETTERS,
+#' ndf <-
+#'   create_node_df(
+#'     n = 26,
 #'     label = TRUE,
-#'     type = c(rep("a_to_g", 7),
-#'              rep("h_to_p", 9),
-#'              rep("q_to_x", 8),
-#'              rep("y_and_z",2)))
+#'     type = c(rep("a", 7),
+#'              rep("b", 9),
+#'              rep("c", 8),
+#'              rep("d", 2)))
 #'
 #' # Create an edge data frame (edf)
-#' edges <-
-#'   create_edges(
-#'     from = sample(LETTERS, replace = TRUE),
-#'     to = sample(LETTERS, replace = TRUE),
-#'     rel = "letter_to_letter")
+#' edf <-
+#'   create_edge_df(
+#'     from = sample(1:26, replace = TRUE),
+#'     to = sample(1:26, replace = TRUE),
+#'     rel = c(rep("rel_a", 7),
+#'             rep("rel_b", 9),
+#'             rep("rel_c", 8),
+#'             rep("rel_d", 2)))
 #'
-#' # Create a graph
+#' # Create a graph using the ndf and edf
 #' graph <-
-#'   create_graph(nodes_df = nodes,
-#'                edges_df = edges)
+#'   create_graph(
+#'     nodes_df = ndf,
+#'     edges_df = edf)
 #'
 #' # Get information on the graph's nodes
 #' node_info(graph)
-#' #>    node label    type deg indeg outdeg loops
-#' #> 1     A     A  a_to_g   1     0      1     0
-#' #> 2     B     B  a_to_g   1     0      1     0
-#' #> 3     C     C  a_to_g   3     2      1     0
-#' #> 4     D     D  a_to_g   1     1      0     0
-#' #> 5     E     E  a_to_g   1     0      1     0
-#' #> 6     F     F  a_to_g   2     1      1     0
-#' #>..   ...   ...     ... ...   ...    ...   ...
+#' #>    id type label deg indeg outdeg loops
+#' #> 1   1    a     1   0     0      0     0
+#' #> 2   2    a     2   0     0      0     0
+#' #> 3   3    a     3   2     2      0     0
+#' #> 4   4    a     4   3     1      2     0
+#' #> 5   5    a     5   1     1      0     0
+#' #> 6   6    a     6   1     0      1     0
+#' #>.. ...  ...   ... ...   ...    ...   ...
+#' @importFrom dplyr mutate arrange
 #' @export node_info
 
 node_info <- function(graph) {
 
-  # If graph is empty, return an empty data frame
+  # Validation: Graph object is valid
+  if (graph_object_valid(graph) == FALSE) {
+    stop("The graph object is not valid.")
+  }
+
+  # Create bindings for specific variables
+  id <- NULL
+
+  # If graph is empty, return NULL
   if (is_graph_empty(graph)) {
-
-    node_properties <-
-      as.data.frame(mat.or.vec(nr = 0, nc = 7))
-
-    colnames(node_properties) <-
-      c("node", "label", "type", "deg",
-        "indeg", "outdeg", "loops")
-
-    return(node_properties)
+    return(NULL)
   }
 
-  if ("from" %in% colnames(graph$edges_df)) {
-    edge_from <- graph$edges_df$from
-  }
+  # Get vectors of nodes in edges and
+  # node `type` values
+  edge_from <- graph$edges_df$from
+  edge_to <- graph$edges_df$to
+  type <- graph$nodes_df$type
 
-  if ("to" %in% colnames(graph$edges_df)) {
-    edge_to <- graph$edges_df$to
-  }
-
-  if ("type" %in% colnames(graph$nodes_df)) {
-    type <- graph$nodes_df$type
-  }
-
-  # Get vector of all node IDs
-  all_nodes <- get_nodes(graph)
-
-  # Get vector of all labels
+  # Get vector of all node IDs and all labels
+  all_nodes <- graph$nodes_df$id
   labels <- graph$nodes_df$label
 
   # For graphs with no edges, create a
@@ -82,26 +82,24 @@ node_info <- function(graph) {
     node_properties <-
       as.data.frame(
         mat.or.vec(nr = length(all_nodes),
-                   nc = 7))
+                   nc = 7),
+        stringsAsFactors = FALSE)
 
     colnames(node_properties) <-
-      c("node", "label", "type", "deg",
+      c("id", "type", "label", "deg",
         "indeg", "outdeg", "loops")
 
-    node_properties[, 1] <- all_nodes
-    node_properties[, 2] <- labels
+    node_properties[, 1] <- graph$nodes_df[, 1]
+    node_properties[, 2] <- graph$nodes_df[, 2]
+    node_properties[, 3] <- graph$nodes_df[, 3]
 
-    if (exists("type")) {
-      node_properties[, 3] <- type
-    } else {
-      node_properties[, 3] <-
-        rep(NA, length(all_nodes))
-    }
+    # Ensure that the `id` column is an integer
+    node_properties <-
+      mutate(node_properties, id = as.integer(id))
 
-    node_properties[, 4] <- rep(0, length(all_nodes))
-    node_properties[, 5] <- rep(0, length(all_nodes))
-    node_properties[, 6] <- rep(0, length(all_nodes))
-    node_properties[, 7] <- rep(0, length(all_nodes))
+    # Arrange the table by `id` ascending
+    node_properties <-
+      arrange(node_properties, id)
 
     return(node_properties)
   }
@@ -110,13 +108,15 @@ node_info <- function(graph) {
 
     # Get vector of the top-level nodes
     top_nodes <-
-      unique(edge_from[which(!(edge_from %in%
-                                 edge_to))])
+      unique(
+        edge_from[which(!(edge_from %in%
+                            edge_to))])
 
     # Get vector of the bottom-level nodes
     bottom_nodes <-
-      unique(edge_to[which(!(edge_to %in%
-                               edge_from))])
+      unique(
+        edge_to[which(!(edge_to %in%
+                          edge_from))])
 
     # Get vector of all nodes neither at the top nor
     # the bottom level
@@ -131,14 +131,15 @@ node_info <- function(graph) {
 
     # Create data frame of node properties
     for (i in 1:length(ordered_nodes)) {
-
       if (i == 1) {
         node_properties <-
-          as.data.frame(mat.or.vec(nr = 0,
-                                   nc = 7))
+          as.data.frame(
+            mat.or.vec(nr = 0,
+                       nc = 7),
+            stringsAsFactors = FALSE)
 
         colnames(node_properties) <-
-          c("node", "label", "type", "deg",
+          c("id", "type", "label", "deg",
             "indeg", "outdeg", "loops")
       }
 
@@ -195,12 +196,17 @@ node_info <- function(graph) {
         sum(graph$edges_df$from == graph$edges_df$to &
               graph$edges_df$to == ordered_nodes[i])
 
-      # Collect information into the `node_properties`
-      # data frame
+      # Collect information into `node_properties`
       node_properties[i, 1] <-
         ordered_nodes[i]
 
       node_properties[i, 2] <-
+        ifelse(exists("type"),
+               type[which(all_nodes %in%
+                            ordered_nodes[i])],
+               rep(NA, length(ordered_nodes)))
+
+      node_properties[i, 3] <-
         ifelse(!is.null(
           labels[which(all_nodes %in%
                          ordered_nodes[i])]),
@@ -208,22 +214,21 @@ node_info <- function(graph) {
                          ordered_nodes[i])],
           NA)
 
-      node_properties[i, 3] <-
-        ifelse(exists("type"),
-               type[which(all_nodes %in%
-                            ordered_nodes[i])],
-               rep(NA, length(ordered_nodes)))
-
       node_properties[i, 4] <- degree
       node_properties[i, 5] <- indegree
       node_properties[i, 6] <- outdegree
       node_properties[i, 7] <- loops
     }
 
+    # Ensure that the `id` column is an integer
     node_properties <-
-      node_properties[order(node_properties[,1]), ]
+      dplyr::mutate(
+        node_properties, id = as.integer(id))
 
-    rownames(node_properties) <- NULL
+    # Arrange the table by `id` ascending
+    node_properties <-
+      dplyr::arrange(
+        node_properties, id)
 
     return(node_properties)
   }

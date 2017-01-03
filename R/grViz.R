@@ -1,22 +1,27 @@
 #' R + viz.js
 #' @description Make diagrams in R using
-#' \href{https://github.com/mdaines/viz.js}{viz.js} with infrastructure
-#' provided by \href{http://www.htmlwidgets.org/}{htmlwidgets}.
-#' @param diagram spec for a diagram as either text, filename string, or
-#' file connection.
-#' @param engine string for the Graphviz layout engine; can be
-#' \code{dot} (default), \code{neato}, \code{circo}, or \code{twopi}. For more
-#' information see \href{viz.js Usage}{https://github.com/mdaines/viz.js#usage}.
-#' @param allow_subst a boolean that enables/disables subsitution functionality.
-#' @param options parameters supplied to the htmlwidgets framework.
-#' @param width an optional parameter for specifying the width of the resulting
-#' graphic in pixels.
-#' @param height an optional parameter for specifying the height of the
-#' resulting graphic in pixels.
-#' @return An object of class \code{htmlwidget} that will
-#' intelligently print itself into HTML in a variety of contexts
-#' including the R console, within R Markdown documents,
-#' and within Shiny output bindings.
+#' \href{https://github.com/mdaines/viz.js}{viz.js}
+#' with infrastructure provided by
+#' \href{http://www.htmlwidgets.org/}{htmlwidgets}.
+#' @param diagram spec for a diagram as either text,
+#' filename string, or file connection.
+#' @param engine string for the Graphviz layout engine;
+#' can be \code{dot} (default), \code{neato},
+#' \code{circo}, or \code{twopi}. For more information
+#' see \href{viz.js Usage}{https://github.com/mdaines/viz.js#usage}.
+#' @param allow_subst a boolean that enables/disables
+#' subsitution functionality.
+#' @param options parameters supplied to the
+#' htmlwidgets framework.
+#' @param width an optional parameter for specifying
+#' the width of the resulting graphic in pixels.
+#' @param height an optional parameter for specifying
+#' the height of the resulting graphic in pixels.
+#' @return An object of class \code{htmlwidget} that
+#' will intelligently print itself into HTML in a
+#' variety of contexts including the R console, within
+#' R Markdown documents, and within Shiny output
+#' bindings.
 #' @importFrom rstudioapi isAvailable
 #' @export
 grViz <- function(diagram = "",
@@ -24,20 +29,22 @@ grViz <- function(diagram = "",
                   allow_subst = TRUE,
                   options = NULL,
                   width = NULL,
-                  height = NULL){
+                  height = NULL) {
 
   # Check for a connection or file
-  if (inherits(diagram, "connection") || file.exists(diagram)){
-    diagram <- readLines(diagram, warn = FALSE)
+  if (inherits(diagram, "connection") ||
+      file.exists(diagram)) {
+    diagram <-
+      readLines(diagram, encoding = "UTF-8", warn = FALSE)
     diagram <- paste0(diagram, collapse = "\n")
   } else {
     # Check for vector with length > 1 and concatenate
-    if (length(diagram) > 1){
+    if (length(diagram) > 1) {
       diagram <- paste0(diagram, collapse = "\n")
     }
   }
 
-  if (allow_subst == TRUE){
+  if (allow_subst == TRUE) {
     diagram <- replace_in_spec(diagram)
   }
 
@@ -92,7 +99,7 @@ grViz <- function(diagram = "",
 #'   )
 #' )))
 #'
-#' server = function(input, output){
+#' server = function(input, output) {
 #'   output$diagram <- renderGrViz({
 #'     grViz(
 #'       input$ace
@@ -106,7 +113,7 @@ grViz <- function(diagram = "",
 #' @export
 grVizOutput <- function(outputId,
                         width = '100%',
-                        height = '400px'){
+                        height = '400px') {
 
   shinyWidgetOutput(outputId,
                     'grViz',

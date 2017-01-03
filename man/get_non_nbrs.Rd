@@ -8,8 +8,7 @@ get_non_nbrs(graph, node)
 }
 \arguments{
 \item{graph}{a graph object of class
-\code{dgr_graph} that is created using
-\code{create_graph}.}
+\code{dgr_graph}.}
 
 \item{node}{a single-length vector containing a
 node ID value.}
@@ -22,26 +21,14 @@ Get the set of all nodes not
 neighboring a single graph node.
 }
 \examples{
-library(magrittr)
+# Create a simple, directed graph with 5
+# nodes and 4 edges
+graph <-
+  create_graph() \%>\%
+  add_path(5)
 
-# Create a random, directed graph with 18 nodes
-# and 22 edges
-random_graph <-
-  create_random_graph(
-    n = 18,
-    m = 22,
-    directed = TRUE,
-    fully_connected = TRUE,
-    set_seed = 20) \%>\%
-  set_global_graph_attrs(
-    'graph', 'layout', 'sfdp') \%>\%
-  set_global_graph_attrs(
-    'graph', 'overlap', 'false')
-
-# Find all non-neighbors of node `5`
-random_graph \%>\%
-  get_non_nbrs(5)
-#>  [1] "3"  "4"  "6"  "7"  "8"  "9"  "10" "11" "13"
-#> [12] "14" "15" "16" "17"
+# Find all non-neighbors of node `2`
+graph \%>\% get_non_nbrs(2)
+#> [1] 4 5
 }
 

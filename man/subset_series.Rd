@@ -37,44 +37,27 @@ graphs' index positions in the graph series or
 through selection via graphs' date-time attributes.
 }
 \examples{
-library(magrittr)
-
 # Create three graphs
 graph_time_1 <-
   create_graph(
-    graph_name = "graph_with_time_1",
-    graph_time = "2015-03-25 03:00",
-    graph_tz = "GMT") \%>\%
-  add_node("a") \%>\%
-  add_node("b") \%>\%
-  add_node("c") \%>\%
-  add_edge("a", "c") \%>\%
-  add_edge("a", "b") \%>\%
-  add_edge("b", "c")
+    graph_name = "graph_with_time_1") \%>\%
+  set_graph_time(
+    time = "2015-03-25 03:00",
+    tz = "GMT")
 
 graph_time_2 <-
   create_graph(
-    graph_name = "graph_with_time_2",
-    graph_time = "2015-03-26 03:00",
-    graph_tz = "GMT") \%>\%
-  add_node("d") \%>\%
-  add_node("e") \%>\%
-  add_node("f") \%>\%
-  add_edge("d", "f") \%>\%
-  add_edge("d", "e") \%>\%
-  add_edge("e", "f")
+    graph_name = "graph_with_time_2") \%>\%
+  set_graph_time(
+    time = "2015-03-26 03:00",
+    tz = "GMT")
 
 graph_time_3 <-
   create_graph(
-    graph_name = "graph_with_time_3",
-    graph_time = "2015-03-27 15:00",
-    graph_tz = "GMT") \%>\%
-  add_node("x") \%>\%
-  add_node("y") \%>\%
-  add_node("z") \%>\%
-  add_edge("x", "z") \%>\%
-  add_edge("x", "y") \%>\%
-  add_edge("y", "z")
+    graph_name = "graph_with_time_3") \%>\%
+  set_graph_time(
+    time = "2015-03-27 15:00",
+    tz = "GMT")
 
 # Create an empty graph series and add
 # the graphs
@@ -104,6 +87,6 @@ series_time_subset <-
     tz = "GMT")
 
 graph_count(series_time_subset)
-#> [1] 1
+#> [1] 2
 }
 

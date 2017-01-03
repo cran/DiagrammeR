@@ -2,60 +2,212 @@
 % Please edit documentation in R/trav_out_node.R
 \name{trav_out_node}
 \alias{trav_out_node}
-\title{Traverse from one or more selected edges toward
-adjacent outward nodes}
+\title{Traverse from one or more selected edges onto
+adjacent, outward nodes}
 \usage{
-trav_out_node(graph, node_attr = NULL, match = NULL)
+trav_out_node(graph, conditions = NULL, copy_attrs_from = NULL,
+  agg = "sum")
 }
 \arguments{
 \item{graph}{a graph object of class
-\code{dgr_graph} that is created using
-\code{create_graph}.}
+\code{dgr_graph}.}
 
-\item{node_attr}{an optional character vector of
-node attribute values for filtering the node ID
-values returned.}
+\item{conditions}{an option to use filtering
+conditions for the traversal.}
 
-\item{match}{an option to provide a logical
-expression with a comparison operator (\code{>},
-\code{<}, \code{==}, or \code{!=}) followed by a
-number for numerical filtering, or, a character
-string for filtering the edges returned through
-string matching.}
+\item{copy_attrs_from}{providing an edge attribute
+name will copy those edge attribute values to the
+traversed nodes. If the edge attribute already exists,
+the values will be merged to the traversed nodes;
+otherwise, a new node attribute will be created.}
+
+\item{agg}{if an edge attribute is provided
+to \code{copy_attrs_from}, then an aggregation
+function is required since there may be cases where
+multiple edge attribute values will be passed onto
+the traversed node(s). To pass only a single value,
+the following aggregation functions can be used:
+\code{sum}, \code{min}, \code{max}, \code{mean}, or
+\code{median}.}
 }
 \value{
 a graph object of class \code{dgr_graph}.
 }
 \description{
 From a graph object of class
-\code{dgr_graph} move to adjacent nodes from a
-selection of one or more selected edges where the
-edges are outward edges to those nodes. This creates
-a selection of nodes. An optional filter by node
-attribute can limit the set of nodes traversed to.
+\code{dgr_graph} with an active selection of
+edges move opposite to the edge direction to
+connected nodes, replacing the current edge selection
+with the selection with those nodes traversed to. An
+optional filter by node attribute can limit the set
+of nodes traversed to.
 }
 \examples{
-library(magrittr)
+# Set a seed
+set.seed(23)
 
 # Create a simple graph
 graph <-
- create_graph() \%>\%
- add_n_nodes(2) \%>\%
- add_edge(1, 2)
+  create_graph() \%>\%
+  add_n_nodes(
+    2, type = "a",
+    label = c("asd", "iekd")) \%>\%
+  add_n_nodes(
+    3, type = "b",
+    label = c("idj", "edl", "ohd")) \%>\%
+  add_edges_w_string(
+    "1->2 1->3 2->4 2->5 3->5",
+    rel = c(NA, "A", "B", "C", "D"))
 
-# Traverse from node `1` to the outward edge and
-# immediately back to `1` by:
-# (1) moving from node `1` to edge `1` -> `2`
-# (2) moving from edge `1` -> `2` to node `1`
+# Create a data frame with node ID values
+# representing the graph edges (with `from`
+# and `to` columns), and, a set of numeric values
+df_edges <-
+  data.frame(
+    from = c(1, 1, 2, 2, 3),
+    to = c(2, 3, 4, 5, 5),
+    values = round(rnorm(5, 5), 2))
+
+# Create a data frame with node ID values
+# representing the graph nodes (with the `id`
+# columns), and, a set of numeric values
+df_nodes <-
+  data.frame(
+    id = 1:5,
+    values = round(rnorm(5, 7), 2))
+
+# Join the data frame to the graph's internal
+# edge data frame (edf)
 graph <-
   graph \%>\%
-  select_nodes_by_id(1) \%>\%
-  trav_out_edge \%>\%
-  trav_out_node
+  join_edge_attrs(df_edges) \%>\%
+  join_node_attrs(df_nodes)
 
-# Verify that the selection of node `1` has been
-# made by using the `get_selection()` function
-get_selection(graph)
-#> [1] "1"
+get_node_df(graph)
+#>   id type label values
+#> 1  1    a   asd   8.58
+#> 2  2    a  iekd   7.22
+#> 3  3    b   idj   5.95
+#> 4  4    b   edl   6.71
+#> 5  5    b   ohd   7.48
+
+get_edge_df(graph)
+#>   id from to  rel values
+#> 1  1    1  2 <NA>   6.00
+#> 2  2    1  3    A   6.11
+#> 3  3    2  4    B   4.72
+#> 4  4    2  5    C   6.02
+#> 5  5    3  5    D   5.05
+
+# Perform a simple traversal from the
+# edge `1`->`3` to the attached node
+# in the direction of the edge; here, no
+# conditions are placed on the nodes
+# traversed to
+graph \%>\%
+  select_edges(from = 1, to = 3) \%>\%
+  trav_out_node() \%>\%
+  get_selection()
+#> [1] 1
+
+# Traverse from edges `2`->`5` and
+# `3`->`5` to the attached node along
+# the direction of the edge; here, the
+# traversals lead to different nodes
+graph \%>\%
+  select_edges(from = 2, to = 5) \%>\%
+  select_edges(from = 3, to = 5) \%>\%
+  trav_out_node() \%>\%
+  get_selection()
+#> [1] 2 3
+
+# Traverse from the edge `1`->`3`
+# to the attached node where the edge
+# is outgoing, this time filtering
+# numeric values greater than `7.0` for
+# the `values` node attribute
+graph \%>\%
+  select_edges(from = 1, to = 3) \%>\%
+  trav_out_node(
+    conditions = "values > 7.0") \%>\%
+  get_selection()
+#> [1] 1
+
+# Traverse from the edge `1`->`3`
+# to the attached node where the edge
+# is outgoing, this time filtering
+# numeric values less than `7.0` for
+# the `values` node attribute (the
+# condition is not met so the original
+# selection of edge `1`->`3` remains)
+graph \%>\%
+  select_edges(from = 1, to = 3) \%>\%
+  trav_out_node(
+    conditions = "values < 7.0") \%>\%
+  get_selection()
+#> [1] 2
+
+# Traverse from the edge `1`->`2` to
+# the node `2` using multiple conditions
+# with a single-length vector (here, using
+# a `|` to create a set of `OR` conditions)
+graph \%>\%
+  select_edges(from = 1, to = 2) \%>\%
+  trav_out_node(
+    conditions = "grepl('.*d$', label) | values < 6.0") \%>\%
+  get_selection()
+#> [1] 1
+
+# Create another simple graph to demonstrate
+# copying of edge attribute values to traversed
+# nodes
+graph <-
+  create_graph() \%>\%
+  add_node() \%>\%
+  select_nodes() \%>\%
+  add_n_nodes_ws(2, "from") \%>\%
+  clear_selection() \%>\%
+  select_nodes_by_id(2) \%>\%
+  set_node_attrs_ws("value", 8) \%>\%
+  clear_selection() \%>\%
+  select_edges_by_edge_id(1) \%>\%
+  set_edge_attrs_ws("value", 5) \%>\%
+  clear_selection() \%>\%
+  select_edges_by_edge_id(2) \%>\%
+  set_edge_attrs_ws("value", 5) \%>\%
+  clear_selection() \%>\%
+  select_edges()
+
+# Show the graph's internal edge data frame
+graph \%>\% get_edge_df()
+#>   id from to  rel value
+#> 1  1    1  2 <NA>     5
+#> 2  2    1  3 <NA>     5
+
+# Show the graph's internal node data frame
+graph \%>\% get_node_df()
+#>   id type label value
+#> 1  1 <NA>  <NA>    NA
+#> 2  2 <NA>  <NA>     8
+#> 3  3 <NA>  <NA>    NA
+
+# Perform a traversal from the edges to
+# the central node (`1`) while also applying
+# the edge attribute `value` to the node (in
+# this case summing the `value` of 5 from
+# both edges before adding as a node attribute)
+graph <-
+  graph \%>\%
+  trav_out_node(
+    copy_attrs_from = "value",
+    agg = "sum")
+
+# Show the graph's internal node data frame
+# after this change
+graph \%>\% get_node_df()
+#>   id type label value
+#> 1  1 <NA>  <NA>    10
+#> 2  2 <NA>  <NA>     8
+#> 3  3 <NA>  <NA>    NA
 }
 

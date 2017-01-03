@@ -5,13 +5,12 @@
 \title{Add a multiple of new nodes with edges to or from
 one or more selected nodes}
 \usage{
-add_n_nodes_ws(graph, n, direction = NULL, set_node_type = NULL,
-  set_edge_rel = NULL)
+add_n_nodes_ws(graph, n, direction = NULL, type = NULL, label = NULL,
+  rel = NULL)
 }
 \arguments{
 \item{graph}{a graph object of class
-\code{dgr_graph} that is created using
-\code{create_graph}.}
+\code{dgr_graph}.}
 
 \item{n}{the number of new nodes to attach as
 successor nodes to the nodes in the selection.}
@@ -21,10 +20,13 @@ edges from existing nodes to the new nodes. The
 \code{to} option will create new edges directed
 toward the existing nodes.}
 
-\item{set_node_type}{an optional string to apply a
-\code{type} attribute to all newly created nodes.}
+\item{type}{an optional character vector that
+provides group identifiers for the nodes to be added.}
 
-\item{set_edge_rel}{an optional string to apply a
+\item{label}{an optional character object that
+describes the nodes to be added.}
+
+\item{rel}{an optional string to apply a
 \code{rel} attribute to all newly created edges.}
 }
 \value{
@@ -41,10 +43,22 @@ alredy in the graph (using \code{direction = "to"}).
 Optionally, set node \code{type} and edge \code{rel}
 values for all the new nodes and edges created,
 respectively.
+
+Selections of nodes can be performed using
+the following \code{select_...} functions:
+\code{select_nodes()},
+\code{select_last_node()},
+\code{select_nodes_by_degree()},
+\code{select_nodes_by_id()}, or
+\code{select_nodes_in_neighborhood()}.
+Selections of nodes can also be performed using
+the following traversal functions:
+(\code{trav_...}):
+\code{trav_out()}, \code{trav_in()},
+\code{trav_both()}, \code{trav_in_node()},
+\code{trav_out_node()}.
 }
 \examples{
-library(magrittr)
-
 # Create an empty graph, add a node to it, select
 # that node, and then add 5 more nodes to the graph
 # with edges from the original node to all of the
@@ -52,16 +66,16 @@ library(magrittr)
 graph <-
   create_graph() \%>\%
   add_n_nodes(1) \%>\%
-  select_last_node \%>\%
+  select_last_node() \%>\%
   add_n_nodes_ws(5, "from")
 
 # Get the graph's nodes
-graph \%>\% get_nodes
-#> [1] "1" "2" "3" "4" "5" "6"
+graph \%>\% get_node_ids()
+#> [1] 1 2 3 4 5 6
 
 # Get the graph's edges
-graph \%>\% get_edges
-#> "1 -> 2" "1 -> 3" "1 -> 4" "1 -> 5" "1 -> 6"
+graph \%>\% get_edges()
+#> "1->2" "1->3" "1->4" "1->5" "1->6"
 
 # Create an empty graph, add a node to it, select
 # that node, and then add 5 more nodes to the graph
@@ -74,11 +88,11 @@ graph <-
   add_n_nodes_ws(5, "to")
 
 # Get the graph's nodes
-graph \%>\% get_nodes
-#> [1] "1" "2" "3" "4" "5" "6"
+graph \%>\% get_node_ids()
+#> [1] 1 2 3 4 5 6
 
 # Get the graph's edges
-graph \%>\% get_edges
-#> "2 -> 1" "3 -> 1" "4 -> 1" "5 -> 1" "6 -> 1"
+graph \%>\% get_edges()
+#> "2->1" "3->1" "4->1" "5->1" "6->1"
 }
 

@@ -4,95 +4,84 @@
 #' or \code{edge_attrs} for a graph object of class
 #' \code{dgr_graph}).
 #' @param graph a graph object of class
-#' \code{dgr_graph} that is created using
-#' \code{create_graph}.
-#' @param type the specific type of global graph
-#' attribute to set. The type is specified with
-#' \code{graph}, \code{node}, or \code{edge}.
-#' @param attr_for_type the name of the attribute to
+#' \code{dgr_graph}.
+#' @param attr the name of the attribute to
 #' set for the \code{type} of global attribute
 #' specified.
 #' @param value the value to be set for the chosen
 #' attribute specified in the \code{attr_for_type}
 #' argument.
+#' @param attr_type the specific type of global graph
+#' attribute to set. The type is specified with
+#' \code{graph}, \code{node}, or \code{edge}.
 #' @return a graph object of class \code{dgr_graph}.
 #' @examples
-#' library(magrittr)
-#'
 #' # Create a new graph and set some global attributes
 #' graph <- create_graph() %>%
 #'   set_global_graph_attrs(
-#'     "graph", "overlap", "true") %>%
-#'   set_global_graph_attrs(
-#'     "node", "fontname", "Helvetica") %>%
-#'   set_global_graph_attrs(
-#'     "edge", "color", "gray")
+#'     "overlap", "true", "graph")
 #'
 #' # Verify that the global attributes have been set
 #' get_global_graph_attrs(graph)
-#' #> $graph_attrs
-#' #> [1] "overlap = true"
-#' #>
-#' #> $node_attrs
-#' #> [1] "fontname = Helvetica"
-#' #>
-#' #> $edge_attrs
-#' #> [1] "color = gray"
+#' #>      attr value attr_type
+#' #> 1 overlap  true     graph
+#' @importFrom tibble tibble
 #' @export set_global_graph_attrs
 
 set_global_graph_attrs <- function(graph,
-                                   type,
-                                   attr_for_type,
-                                   value){
+                                   attr,
+                                   value,
+                                   attr_type) {
 
-  # Create a statement based on the attribute name
-  # and the value
-  attr_stmt <- paste(attr_for_type, value, sep = " = ")
+  # Get the time of function start
+  time_function_start <- Sys.time()
 
-  if (type == "graph"){
-    dgr_graph <-
-      create_graph(
-        nodes_df = graph$nodes_df,
-        edges_df = graph$edges_df,
-        graph_attrs = c(graph$graph_attrs, attr_stmt),
-        node_attrs = graph$node_attrs,
-        edge_attrs = graph$edge_attrs,
-        directed = ifelse(is_graph_directed(graph),
-                          TRUE, FALSE),
-        graph_name = graph$graph_name,
-        graph_time = graph$graph_time,
-        graph_tz = graph$graph_tz)
+  # Validation: Graph object is valid
+  if (graph_object_valid(graph) == FALSE) {
+    stop("The graph object is not valid.")
   }
 
-  if (type == "node"){
-    dgr_graph <-
-      create_graph(
-        nodes_df = graph$nodes_df,
-        edges_df = graph$edges_df,
-        graph_attrs = graph$graph_attrs,
-        node_attrs = c(graph$node_attrs, attr_stmt),
-        edge_attrs = graph$edge_attrs,
-        directed = ifelse(is_graph_directed(graph),
-                          TRUE, FALSE),
-        graph_name = graph$graph_name,
-        graph_time = graph$graph_time,
-        graph_tz = graph$graph_tz)
+  # Ensure that the lengths of vectors for `attr`,
+  # `value`, and `attr_type` are equivalent
+  if ((length(attr) != length(value)) |
+      (length(value) != length(attr_type)) |
+      (length(attr) != length(attr_type))) {
+    stop("Vector lengths for `attr`, `value`, and `attr_type` must be equal.")
   }
 
-  if (type == "edge"){
-    dgr_graph <-
-      create_graph(
-        nodes_df = graph$nodes_df,
-        edges_df = graph$edges_df,
-        graph_attrs = graph$graph_attrs,
-        node_attrs = graph$node_attrs,
-        edge_attrs =c(graph$edge_attrs, attr_stmt),
-        directed = ifelse(is_graph_directed(graph),
-                          TRUE, FALSE),
-        graph_name = graph$graph_name,
-        graph_time = graph$graph_time,
-        graph_tz = graph$graph_tz)
+  # Coerce any logical value for `value` to a
+  # lowercase character value
+  if (length(value) == 1) {
+    if (inherits(value, "logical") & value %in% c(TRUE, FALSE)) {
+      value <- tolower(as.character(value))
+    }
   }
 
-  return(dgr_graph)
+  # Create a table for the attributes
+  global_attrs <-
+    tibble::tibble(
+      attr = as.character(attr),
+      value = as.character(value),
+      attr_type = as.character(attr_type)) %>%
+    as.data.frame(stringsAsFactors = FALSE)
+
+  graph$global_attrs <- global_attrs
+
+  # Update the `graph_log` df with an action
+  graph$graph_log <-
+    add_action_to_log(
+      graph_log = graph$graph_log,
+      version_id = nrow(graph$graph_log) + 1,
+      function_used = "set_global_graph_attrs",
+      time_modified = time_function_start,
+      duration = graph_function_duration(time_function_start),
+      nodes = nrow(graph$nodes_df),
+      edges = nrow(graph$edges_df))
+
+  # Write graph backup if the option is set
+  if (graph$graph_info$write_backups) {
+    save_graph_as_rds(graph = graph)
+  }
+
+  return(graph)
 }

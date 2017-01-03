@@ -4,40 +4,28 @@
 \alias{add_nodes_from_table}
 \title{Add nodes and attributes to graph from a table}
 \usage{
-add_nodes_from_table(graph, table, set_type = NULL, select_cols = NULL,
-  drop_cols = NULL, rename_attrs = NULL, id_col = NULL, type_col = NULL,
-  label_col = NULL)
+add_nodes_from_table(graph, table, label_col = NULL, type_col = NULL,
+  set_type = NULL, drop_cols = NULL)
 }
 \arguments{
 \item{graph}{a graph object of class
-\code{dgr_graph} that is created using
-\code{create_graph}.}
+\code{dgr_graph}.}
 
 \item{table}{either a path to a CSV file, or, a data
 frame object.}
+
+\item{label_col}{an option to apply a column of data
+in the table as \code{label} attribute values.}
+
+\item{type_col}{an option to apply a column of data
+in the table as \code{type} attribute values.}
 
 \item{set_type}{an optional string to apply a
 \code{type} attribute to all nodes created from the
 table records.}
 
-\item{select_cols}{an optional character vector for
-specifying which columns in the table that should be
-imported as node attributes.}
-
 \item{drop_cols}{an optional character vector for
 dropping columns from the incoming data.}
-
-\item{rename_attrs}{an optional character for
-renaming node attributes.}
-
-\item{id_col}{an option to apply a column of data in
-the table as node ID values.}
-
-\item{type_col}{an option to apply a column of data
-in the table as \code{type} attribute values.}
-
-\item{label_col}{an option to apply a column of data
-in the table as \code{label} attribute values.}
 }
 \value{
 a graph object of class \code{dgr_graph}.
@@ -49,12 +37,11 @@ data frame.
 }
 \examples{
 \dontrun{
-library(magrittr)
 library(dplyr)
 
 # Specify a path to a CSV file
 path_to_csv <-
-  system.file("examples/currencies.csv",
+  system.file("extdata", "currencies.csv",
               package = "DiagrammeR")
 
 # To add nodes from a CSV file, call the
@@ -65,26 +52,16 @@ graph_1 <-
   create_graph() \%>\%
   add_nodes_from_table(path_to_csv)
 
-# View the graph's internal node data frame (ndf)
-# with `get_node_df()` and dplyr's `as.tbl()`
-graph_1 \%>\% get_node_df \%>\% as.tbl
-#> Source: local data frame [171 x 7]
-#>
-#>    nodes  type label iso_4217_code curr_number
-#>    (chr) (chr) (chr)         (chr)       (chr)
-#> 1      1                       AED         784
-#> 2      2                       AFN         971
-#> 3      3                       ALL           8
-#> 4      4                       AMD          51
-#> 5      5                       ANG         532
-#> 6      6                       AOA         973
-#> 7      7                       ARS          32
-#> 8      8                       AUD          36
-#> 9      9                       AWG         533
-#> 10    10                       AZN         944
-#> ..   ...   ...   ...           ...         ...
-#> Variables not shown: exponent (chr)
-#>   currency_name (chr)
+# View part of the graph's internal node data
+# frame (ndf) using `get_node_df()`
+graph_1 \%>\% get_node_df \%>\% .[, 1:5] \%>\% head
+#>   id type label iso_4217_code curr_number
+#> 1  1 <NA>  <NA>           AED         784
+#> 2  2 <NA>  <NA>           AFN         971
+#> 3  3 <NA>  <NA>           ALL           8
+#> 4  4 <NA>  <NA>           AMD          51
+#> 5  5 <NA>  <NA>           ANG         532
+#> 6  6 <NA>  <NA>           AOA         973
 
 # If you would like to assign any of the table's
 # columns as `type` or `label` attributes, this can
@@ -95,19 +72,18 @@ graph_2 <-
   create_graph() \%>\%
   add_nodes_from_table(
     path_to_csv,
-    set_type = "currency",
-    label_col = "iso_4217_code")
+    label_col = "iso_4217_code",
+    set_type = "currency")
 
-# View the first 3 lines of the graph's internal ndf
-graph_2 \%>\% get_node_df \%>\% head(3) \%>\% as.tbl
-#> Source: local data frame [3 x 6]
-#>
-#>   nodes     type label curr_number exponent
-#>   (chr)    (chr) (chr)       (chr)    (chr)
-#> 1     1 currency   AED         784        2
-#> 2     2 currency   AFN         971        2
-#> 3     3 currency   ALL           8        2
-#> Variables not shown: currency_name (chr)
+# View part of the graph's internal ndf
+graph_2 \%>\% get_node_df() \%>\% .[, 1:5] \%>\% head()
+#>   id     type label iso_4217_code curr_number
+#> 1  1 currency   AED           AED         784
+#> 2  2 currency   AFN           AFN         971
+#> 3  3 currency   ALL           ALL           8
+#> 4  4 currency   AMD           AMD          51
+#> 5  5 currency   ANG           ANG         532
+#> 6  6 currency   AOA           AOA         973
 
 # Suppose you would like to not include certain
 # columns from the table in the resulting graph; you
@@ -117,19 +93,14 @@ graph_3 <-
   create_graph() \%>\%
   add_nodes_from_table(
     path_to_csv,
-    set_type = "currency",
     label_col = "iso_4217_code",
-    drop_cols = "exponent")
+    set_type = "currency",
+    drop_cols = c("exponent", "currency_name"))
 
-graph_3 \%>\% get_node_df \%>\% head(3) \%>\% as.tbl
-#> Source: local data frame [3 x 5]
-#>
-#>   nodes     type label curr_number
-#>   (chr)    (chr) (chr)       (chr)
-#> 1     1 currency   AED         784
-#> 2     2 currency   AFN         971
-#> 3     3 currency   ALL           8
-#> Variables not shown: currency_name (chr)
+# Show the node attribute names for the graph
+graph_3 \%>\% get_node_df() \%>\% colnames()
+#> [1] "id"  type"  "label"  "iso_4217_code"
+#> [5] "curr_number"
 }
 }
 

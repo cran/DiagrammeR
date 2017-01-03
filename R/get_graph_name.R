@@ -2,8 +2,10 @@
 #' @description Get the name of a graph object of class
 #' \code{dgr_graph}.
 #' @param graph a graph object of class
-#' \code{dgr_graph} that is created using
-#' \code{create_graph}.
+#' \code{dgr_graph}.
+#' @return a single-length character vector with the
+#' assigned graph name. If a graph name has not been
+#' set, NA is returned.
 #' @examples
 #' # Create an empty graph
 #' graph <- create_graph()
@@ -14,20 +16,14 @@
 #' # Get the graph's name
 #' get_graph_name(graph)
 #' #> [1] "the_name"
-#' @return a single-length character vector with the
-#' assigned graph name. If a graph name has not been
-#' set, NA is returned.
 #' @export get_graph_name
 
 get_graph_name <- function(graph) {
 
-  if (is.null(graph$graph_name)) {
-    graph_name <- NA
+  # Validation: Graph object is valid
+  if (graph_object_valid(graph) == FALSE) {
+    stop("The graph object is not valid.")
   }
 
-  if (!is.null(graph$graph_name)) {
-    graph_name <- graph$graph_name
-  }
-
-  return(graph_name)
+  return(graph$graph_info$graph_name)
 }

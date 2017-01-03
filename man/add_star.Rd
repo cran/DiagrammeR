@@ -4,12 +4,11 @@
 \alias{add_star}
 \title{Add a star of nodes to the graph}
 \usage{
-add_star(graph, n, type = NULL, label = TRUE, rel = NULL, nodes = NULL)
+add_star(graph, n, type = NULL, label = TRUE, rel = NULL)
 }
 \arguments{
 \item{graph}{a graph object of class
-\code{dgr_graph} that is created using
-\code{create_graph}.}
+\code{dgr_graph}.}
 
 \item{n}{the number of nodes comprising the star.
 The first node will be the center of the star.}
@@ -26,12 +25,6 @@ nodes, or, a boolean value where setting to
 \item{rel}{an optional string for providing a
 relationship label to all new edges created in the
 node star.}
-
-\item{nodes}{an optional vector of node IDs of
-length \code{n} for the newly created nodes. If
-nothing is provided, node IDs will assigned as
-monotonically increasing integers. The center node
-is considered the first node in this series.}
 }
 \value{
 a graph object of class \code{dgr_graph}.
@@ -41,33 +34,24 @@ With a graph object of class
 \code{dgr_graph}, add a node star to the graph.
 }
 \examples{
-library(magrittr)
-
-# Create a new graph and add 3 stars of varying
+# Create a new graph and add 2 stars of varying
 # numbers of nodes
 graph <-
   create_graph() \%>\%
   add_star(4, "four_star") \%>\%
-  add_star(5, "five_star") \%>\%
-  add_star(6, "six_star")
+  add_star(5, "five_star")
 
 # Get node information from this graph
 node_info(graph)
-#>    node label      type deg indeg outdeg loops
-#> 1     1     1 four_star   3     0      3     0
-#> 2     5     5 five_star   4     0      4     0
-#> 3    10    10  six_star   5     0      5     0
-#> 4     2     2 four_star   1     1      0     0
-#> 5     3     3 four_star   1     1      0     0
-#> 6     4     4 four_star   1     1      0     0
-#> 7     6     6 five_star   1     1      0     0
-#> 8     7     7 five_star   1     1      0     0
-#> 9     8     8 five_star   1     1      0     0
-#> 10    9     9 five_star   1     1      0     0
-#> 11   11    11  six_star   1     1      0     0
-#> 12   12    12  six_star   1     1      0     0
-#> 13   13    13  six_star   1     1      0     0
-#> 14   14    14  six_star   1     1      0     0
-#> 15   15    15  six_star   1     1      0     0
+#>   id      type label deg indeg outdeg loops
+#> 1  1 four_star     1   3     0      3     0
+#> 2  2 four_star     2   1     1      0     0
+#> 3  3 four_star     3   1     1      0     0
+#> 4  4 four_star     4   1     1      0     0
+#> 5  5 five_star     1   4     0      4     0
+#> 6  6 five_star     2   1     1      0     0
+#> 7  7 five_star     3   1     1      0     0
+#> 8  8 five_star     4   1     1      0     0
+#> 9  9 five_star     5   1     1      0     0
 }
 

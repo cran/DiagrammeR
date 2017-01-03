@@ -18,33 +18,33 @@ a vector of node ID values.
 }
 \description{
 Provides a vector of node IDs for all
-nodes that have a
-connection from the given node.
+nodes that have a connection from the given node.
 }
 \examples{
+# Set a seed
+set.seed(24)
+
 # Create a node data frame (ndf)
-nodes <-
-  create_nodes(
-    nodes = LETTERS)
+ndf <- create_node_df(26)
 
 # Create an edge data frame (edf)
-edges <-
-  create_edges(
-    from = sample(LETTERS, replace = TRUE),
-    to = sample(LETTERS, replace = TRUE))
+edf <-
+  create_edge_df(
+    from = sample(1:26, replace = TRUE),
+    to = sample(1:26, replace = TRUE))
 
 # From the ndf and edf, create a graph object
 graph <-
   create_graph(
-    nodes_df = nodes,
-    edges_df = edges)
+    nodes_df = ndf,
+    edges_df = edf)
 
-# Get sucessors for node `A` in the graph
-get_successors(graph, node = "A")
-#> [1] "Z" "Y"
+# Get sucessors for node `4` in the graph
+get_successors(graph, node = 4)
+#> [1] 2 9
 
 # If there are no successors, NA is returned
-get_successors(graph, node = "Z")
+get_successors(graph, node = 1)
 #> [1] NA
 }
 

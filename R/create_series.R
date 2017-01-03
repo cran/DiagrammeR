@@ -15,27 +15,22 @@
 #' @return a graph series object of type
 #' \code{dgr_graph_1D}.
 #' @examples
-#' library(magrittr)
-#'
 #' # Create three graphs
 #' graph_1 <-
 #'   create_graph() %>%
-#'   add_node("a") %>%
-#'   add_node("b") %>%
-#'   add_node("c") %>%
-#'   add_edge("a", "c") %>%
-#'   add_edge("a", "b") %>%
-#'   add_edge("b", "c")
+#'   add_n_nodes(3) %>%
+#'   add_edges_w_string(
+#'     "1->3 1->2 2->3")
 #'
 #' graph_2 <-
 #'   graph_1 %>%
-#'   add_node("d") %>%
-#'   add_edge("d", "c")
+#'   add_node() %>%
+#'   add_edge(4, 3)
 #'
 #' graph_3 <-
 #'   graph_2 %>%
-#'   add_node("e") %>%
-#'   add_edge("e", "b")
+#'   add_node() %>%
+#'   add_edge(5, 2)
 #'
 #' # Create an empty graph series and add
 #' # the graphs
@@ -54,6 +49,13 @@ create_series <- function(graph = NULL,
                           series_name = NULL,
                           series_type = "sequential",
                           series_scripts = NULL) {
+
+  # Validation: Graph object is valid
+  if (!is.null(graph))  {
+    if (graph_object_valid(graph) == FALSE) {
+      stop("The graph object is not valid.")
+    }
+  }
 
   # Initialize an empty graph series object
   graph_series <-

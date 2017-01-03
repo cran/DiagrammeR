@@ -8,25 +8,13 @@
 #' file), and \code{mtx} (MatrixMarket format). If not
 #' supplied, the function will infer the type by its
 #' file extension.
-#' @param graph_name an optional string for labeling
-#' the graph object.
-#' @param graph_time a date or date-time string
-#' (required for insertion of graph into a graph series
-#' of the type \code{temporal}).
-#' @param graph_tz an optional value for the time zone
-#' (\code{tz})
-#' corresponding to the date or date-time string
-#' supplied as a value to \code{graph_time}. If no time
-#' zone is provided then it will be set to \code{GMT}.
 #' @return a graph object of class \code{dgr_graph}.
 #' @examples
 #' \dontrun{
-#' library(magrittr)
-#'
 #' # Import a GraphML graph file
 #' graphml_graph <-
 #'   import_graph(
-#'     system.file("examples/power_grid.graphml",
+#'     system.file("extdata", "power_grid.graphml",
 #'                 package = "DiagrammeR"))
 #'
 #' # Get a count of the graph's nodes
@@ -40,7 +28,7 @@
 #' # Import an SIF graph file
 #' sif_graph <-
 #'   import_graph(
-#'     system.file("examples/Human_Interactome.sif",
+#'     system.file("extdata", "Human_Interactome.sif",
 #'                 package = "DiagrammeR"))
 #'
 #' # Get a count of the graph's nodes
@@ -54,7 +42,7 @@
 #' # Import a GML graph file
 #' gml_graph <-
 #'   import_graph(
-#'     system.file("examples/karate.gml",
+#'     system.file("extdata", "karate.gml",
 #'                 package = "DiagrammeR"))
 #'
 #' # Get a count of the graph's nodes
@@ -67,13 +55,18 @@
 #' }
 #' @importFrom stringr str_extract str_detect str_split str_count
 #' str_replace_all str_extract_all
+#' @importFrom tibble tibble
+#' @importFrom dplyr right_join select rename
 #' @export import_graph
 
 import_graph <- function(graph_file,
-                         file_type = NULL,
-                         graph_name = NULL,
-                         graph_time = NULL,
-                         graph_tz = NULL) {
+                         file_type = NULL) {
+
+  # Get the time of function start
+  time_function_start <- Sys.time()
+
+  # Assign NULL to several objects
+  id <- to_label <- from_label <-  NULL
 
   # Stop function if file doesn't exist
   if (file.exists(graph_file) == FALSE) {
@@ -120,7 +113,7 @@ import_graph <- function(graph_file,
 
     # Create an edge data frame
     edges <-
-      create_edges(
+      create_edge_df(
         from = sapply(
           strsplit(
             edges_document[first_line:length(edges_document)],
@@ -132,27 +125,25 @@ import_graph <- function(graph_file,
 
     # Create a node data frame
     nodes <-
-      create_nodes(
-        nodes = unique(
+      tibble::tibble(
+        id = as.integer(unique(
           unlist(
             strsplit(
               edges_document[first_line:length(edges_document)],
-              " "))))
+              " ")))),
+        type = as.character(NA),
+        label = as.integer(unique(
+          unlist(
+            strsplit(
+              edges_document[first_line:length(edges_document)],
+              " "))))) %>%
+      as.data.frame(stringsAsFactors = FALSE)
 
     # Create the graph
     the_graph <-
       create_graph(
         nodes_df = nodes,
-        edges_df = edges,
-        graph_name = graph_name,
-        graph_time = graph_time,
-        graph_tz = graph_tz,
-        node_attrs = c("shape = circle",
-                       "width = 10",
-                       "style = filled",
-                       "color = black"),
-        graph_attrs = "layout = neato",
-        generate_dot = FALSE)
+        edges_df = edges)
 
     # Return the graph
     return(the_graph)
@@ -168,7 +159,7 @@ import_graph <- function(graph_file,
 
     # Create an edge data frame
     edges <-
-      create_edges(
+      create_edge_df(
         from = sapply(
           strsplit(
             mtx_document[first_line:length(mtx_document)],
@@ -180,27 +171,25 @@ import_graph <- function(graph_file,
 
     # Create a node data frame
     nodes <-
-      create_nodes(
-        nodes = unique(
+      tibble::tibble(
+        id = as.integer(unique(
           unlist(
             strsplit(
               mtx_document[first_line:length(mtx_document)],
-              " "))))
+              " ")))),
+        type = as.character(NA),
+        label = as.integer(unique(
+          unlist(
+            strsplit(
+              mtx_document[first_line:length(mtx_document)],
+              " "))))) %>%
+      as.data.frame(stringsAsFactors = FALSE)
 
     # Create the graph
     the_graph <-
       create_graph(
         nodes_df = nodes,
-        edges_df = edges,
-        graph_name = graph_name,
-        graph_time = graph_time,
-        graph_tz = graph_tz,
-        node_attrs = c("shape = circle",
-                       "width = 10",
-                       "style = filled",
-                       "color = black"),
-        graph_attrs = "layout = neato",
-        generate_dot = FALSE)
+        edges_df = edges)
 
     # Return the graph
     return(the_graph)
@@ -273,8 +262,11 @@ import_graph <- function(graph_file,
 
     # Create all nodes for graph
     all_nodes <-
-      cbind(create_nodes(nodes = nodes_ids),
-            data.frame(node_attributes))
+      cbind(
+        tibble::tibble(
+          id = as.integer(nodes_ids),
+          type = as.character(NA)),
+        data.frame(node_attributes))
 
     # Determine all edge values for the graph
     for (i in 1:length(xml_edges[[1]])) {
@@ -301,7 +293,7 @@ import_graph <- function(graph_file,
 
     # Create all edges for graph
     all_edges <-
-      create_edges(
+      create_edge_df(
         from = edges_from,
         to = edges_to)
 
@@ -309,16 +301,7 @@ import_graph <- function(graph_file,
     the_graph <-
       create_graph(
         nodes_df = all_nodes,
-        edges_df = all_edges,
-        graph_name = graph_name,
-        graph_time = graph_time,
-        graph_tz = graph_tz,
-        node_attrs = c("shape = circle",
-                       "width = 10",
-                       "style = filled",
-                       "color = black"),
-        graph_attrs = "layout = neato",
-        generate_dot = FALSE)
+        edges_df = all_edges)
 
     # Return the graph
     return(the_graph)
@@ -346,11 +329,12 @@ import_graph <- function(graph_file,
 
     # Get all node ID values
     node_id <-
-      str_replace_all(
-        str_extract_all(
-          node_defs,
-          "id [a-z0-9_]*"),
-        "id ", "")
+      as.integer(
+        str_replace_all(
+          str_extract_all(
+            node_defs,
+            "id [a-z0-9_]*"),
+          "id ", ""))
 
     # Get all node label values, if they exist
     if (any(str_detect(node_defs, "label"))) {
@@ -371,18 +355,20 @@ import_graph <- function(graph_file,
         "edge[ ]*?\\[.*?\\]"))
 
     edges_from <-
-      str_replace_all(
-        str_extract_all(
-          edge_defs,
-          "source [a-z0-9_]*"),
-        "source ", "")
+      as.integer(
+        str_replace_all(
+          str_extract_all(
+            edge_defs,
+            "source [a-z0-9_]*"),
+          "source ", ""))
 
     edges_to <-
-      str_replace_all(
-        str_extract_all(
-          edge_defs,
-          "target [a-z0-9_]*"),
-        "target ", "")
+      as.integer(
+        str_replace_all(
+          str_extract_all(
+            edge_defs,
+            "target [a-z0-9_]*"),
+          "target ", ""))
 
 
     if (any(str_detect(edge_defs, "label"))) {
@@ -407,8 +393,11 @@ import_graph <- function(graph_file,
 
     # Create all nodes for graph
     all_nodes <-
-      create_nodes(nodes = node_id,
-                   label = FALSE)
+      tibble::tibble(
+        id = node_id,
+        type = as.character(NA),
+        label = as.character(NA)) %>%
+      as.data.frame(stringsAsFactors = FALSE)
 
     if (exists("node_label")) {
       all_nodes$label <- node_label
@@ -416,8 +405,9 @@ import_graph <- function(graph_file,
 
     # Create all edges for graph
     all_edges <-
-      create_edges(from = edges_from,
-                   to = edges_to)
+      create_edge_df(
+        from = edges_from,
+        to = edges_to)
 
     if (exists("edge_value")) {
       all_edges$data_value <- edge_value
@@ -429,8 +419,7 @@ import_graph <- function(graph_file,
         nodes_df = all_nodes,
         edges_df = all_edges,
         directed = ifelse(graph_directed == "1",
-                          TRUE, FALSE),
-        generate_dot = FALSE)
+                          TRUE, FALSE))
 
     # Return the graph
     return(the_graph)
@@ -459,16 +448,19 @@ import_graph <- function(graph_file,
     nodes <- unique(nodes)
 
     # Create a node data frame
-    nodes_df <- create_nodes(nodes = nodes)
+    ndf <-
+      create_node_df(
+        n = length(nodes),
+        label = nodes)
 
     # Determine which lines have single nodes
     if (any(!str_detect(sif_document, "\\t"))) {
-
       single_nodes <- which(!str_detect(sif_document, "\\t"))
     }
 
     # Initialize vectors for an edge data frame
-    from <- to <- rel <- vector(mode = "character")
+    from <- to <- vector(mode = "integer")
+    rel <- vector(mode = "character")
 
     # Obtain complete vectors for the edge data frame
     for (i in which(str_count(sif_document, "\\t") > 1)) {
@@ -479,18 +471,24 @@ import_graph <- function(graph_file,
     }
 
     # Create an edge data frame
-    edges_df <-
-      create_edges(
-        from = from,
-        to = to,
-        rel = rel)
+    edf <-
+      tibble::tibble(
+        from_label = from,
+        to_label = to,
+        rel = rel) %>%
+      dplyr::right_join(ndf, c("from_label" = "label")) %>%
+      dplyr::select(id, to_label, rel) %>%
+      dplyr::rename(from = id) %>%
+      dplyr::right_join(ndf, c("to_label" = "label")) %>%
+      dplyr::select(from, id, rel) %>%
+      dplyr::rename(to = id) %>%
+      as.data.frame(stringsAsFactors = FALSE)
 
     # Create a graph object
     the_graph <-
       create_graph(
-        nodes_df = nodes_df,
-        edges_df = edges_df,
-        generate_dot = FALSE)
+        nodes_df = ndf,
+        edges_df = edf)
 
     # Return the graph
     return(the_graph)

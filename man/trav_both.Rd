@@ -2,97 +2,213 @@
 % Please edit documentation in R/trav_both.R
 \name{trav_both}
 \alias{trav_both}
-\title{Traverse from one or more selected nodes to
-predecessors and successors, irrespective of edges,
-creating a new node selection}
+\title{Traverse from one or more selected nodes onto
+neighboring nodes}
 \usage{
-trav_both(graph, node_attr = NULL, match = NULL)
+trav_both(graph, conditions = NULL, copy_attrs_from = NULL, agg = "sum")
 }
 \arguments{
 \item{graph}{a graph object of class
-\code{dgr_graph} that is created using
-\code{create_graph}.}
+\code{dgr_graph}.}
 
-\item{node_attr}{an optional character vector of
-node attribute values for filtering the node ID
-values returned.}
+\item{conditions}{an option to use filtering
+conditions for the traversal.}
 
-\item{match}{an option to provide a logical
-expression with a comparison operator (\code{>},
-\code{<}, \code{==}, or \code{!=}) followed by a
-number for numerical filtering, or, a character
-string for filtering the edges returned through
-string matching.}
+\item{copy_attrs_from}{providing a node attribute
+name will copy those node attribute values to the
+traversed nodes. Any values extant on the nodes
+traversed to will be replaced.}
+
+\item{agg}{if a node attribute is provided
+to \code{copy_attrs_from}, then an aggregation
+function is required since there may be cases where
+multiple edge attribute values will be passed onto
+the traversed node(s). To pass only a single value,
+the following aggregation functions can be used:
+\code{sum}, \code{min}, \code{max}, \code{mean}, or
+\code{median}.}
 }
 \value{
 a graph object of class \code{dgr_graph}.
 }
 \description{
 From a graph object of class
-\code{dgr_graph} move toward both predecessor and
-successor nodes from one or more nodes present in a
-selection. The current nodes in the selection are
-replaced with those nodes traversed to.
+\code{dgr_graph} move from one or more nodes
+present in a selection to other nodes that are
+connected by edges, replacing the current nodes in
+the selection with those nodes traversed to. An
+optional filter by node attribute can limit the set
+of nodes traversed to.
 }
 \examples{
-library(magrittr)
+# Set a seed
+set.seed(23)
 
-# Create a graph
+# Create a simple graph
 graph <-
-create_graph() \%>\%
-  add_n_nodes(3) \%>\%
-  add_edge(1, 2) \%>\%
-  add_edge(2, 3)
+  create_graph() \%>\%
+  add_n_nodes(
+    2, type = "a",
+    label = c("asd", "iekd")) \%>\%
+  add_n_nodes(
+    3, type = "b",
+    label = c("idj", "edl", "ohd")) \%>\%
+  add_edges_w_string(
+    "1->2 1->3 2->4 2->5 3->5",
+    rel = c(NA, "A", "B", "C", "D"))
 
-# Starting at node `2`, traverse to nodes `1` and
-# `2` with `trav_both()` (where the traversal leads
-# to any connected nodes, regardless of edge
-# direction); store the traversed locations as a
-# selection in the graph object
+# Create a data frame with node ID values
+# representing the graph edges (with `from`
+# and `to` columns), and, a set of numeric values
+df_edges <-
+  data.frame(
+    from = c(1, 1, 2, 2, 3),
+    to = c(2, 3, 4, 5, 5),
+    values = round(rnorm(5, 5), 2))
+
+# Create a data frame with node ID values
+# representing the graph nodes (with the `id`
+# columns), and, a set of numeric values
+df_nodes <-
+  data.frame(
+    id = 1:5,
+    values = round(rnorm(5, 7), 2))
+
+# Join the data frame to the graph's internal
+# edge data frame (edf)
 graph <-
   graph \%>\%
-  select_nodes_by_id(2) \%>\%
-  trav_both
+  join_edge_attrs(df_edges) \%>\%
+  join_node_attrs(df_nodes)
 
-# Verify that the selection has been made by using
-# the `get_selection()` function
-get_selection(graph)
-#> [1] "3" "1"
+get_node_df(graph)
+#>   id type label values
+#> 1  1    a   asd   8.58
+#> 2  2    a  iekd   7.22
+#> 3  3    b   idj   5.95
+#> 4  4    b   edl   6.71
+#> 5  5    b   ohd   7.48
 
-# Modify the graph by adding `type` values for
-# nodes `1` and `3`
-graph <-
-  graph \%>\%
-  clear_selection \%>\%
-  select_nodes_by_id(1) \%>\%
-  set_node_attrs_ws(
-    node_attr = "type", value = "a") \%>\%
-  clear_selection \%>\%
+get_edge_df(graph)
+#>   id from to  rel values
+#> 1  1    1  2 <NA>   6.00
+#> 2  2    1  3    A   6.11
+#> 3  3    2  4    B   4.72
+#> 4  4    2  5    C   6.02
+#> 5  5    3  5    D   5.05
+
+# Perform a simple traversal from node `3`
+# to adjacent nodes with no conditions on
+# the nodes traversed to
+graph \%>\%
   select_nodes_by_id(3) \%>\%
-  set_node_attrs_ws(
-    node_attr = "type", value = "z") \%>\%
-  clear_selection
+  trav_both() \%>\%
+  get_selection()
+#> [1] 1 5
 
-# When traversing from node `2` to both `1` and `3`,
-# you can set a condition that determines whether
-# such traversal is permitted; in this case the
-# condition is to traverse only to nodes where
-# the type value is set to `a` (since node `3` has
-# its `type` set to `z`, so, a traversal to `1`
-# proceeds but there will be no traversal to `3`)
+# Traverse from node `2` to any adjacent
+# nodes, filtering to those nodes that have
+# numeric values less than `8.0` for
+# the `values` node attribute
 graph \%>\%
   select_nodes_by_id(2) \%>\%
-  trav_both("type", "a") \%>\%
-  get_selection
-#> [1] "1"
+  trav_both(
+    conditions = "values < 8.0") \%>\%
+  get_selection()
+#> [1] 4 5
 
-# We can also set traversal conditions to satisfy
-# numeric comparisons... the graph will be first
-# modified
+# Traverse from node `5` to any adjacent
+# nodes, filtering to those nodes that
+# have a `type` attribute of `b`
+graph \%>\%
+  select_nodes_by_id(5) \%>\%
+  trav_both(
+    conditions = "type == 'b'") \%>\%
+  get_selection()
+#> [1] 3
+
+# Traverse from node `2` to any adjacent
+# nodes, and use multiple conditions for the
+# traversal (using a vector in `conditions`
+# creates a set of `AND` conditions)
+graph \%>\%
+  select_nodes_by_id(2) \%>\%
+  trav_both(
+    conditions = c(
+      "type == 'a'",
+      "values > 8.0")) \%>\%
+  get_selection()
+#> [1] 1
+
+# Traverse from node `2` to any adjacent
+# nodes, and use multiple conditions with
+# a single-length vector (here, using a
+# `|` to create a set of `OR` conditions)
+graph \%>\%
+  select_nodes_by_id(2) \%>\%
+  trav_both(
+    conditions = c(
+      "type == 'a' | values > 8.0")) \%>\%
+  get_selection()
+#> [1] 1
+
+# Traverse from node `2` to any adjacent
+# nodes, and use a regular expression as
+# a filtering condition
+graph \%>\%
+  select_nodes_by_id(2) \%>\%
+  trav_both(
+    conditions = "grepl('..d', label)") \%>\%
+  get_selection()
+#> [1] 1 5
+
+# Create another simple graph to demonstrate
+# copying of node attribute values to traversed
+# nodes
+graph <-
+  create_graph() \%>\%
+  add_path(5) \%>\%
+  select_nodes_by_id(c(2, 4)) \%>\%
+  set_node_attrs_ws("value", 5)
+
+# Show the graph's internal node data frame
+graph \%>\% get_node_df()
+#>   id type label value
+#> 1  1 <NA>     1    NA
+#> 2  2 <NA>     2     5
+#> 3  3 <NA>     3    NA
+#> 4  4 <NA>     4     5
+#> 5  5 <NA>     5    NA
+
+# Show the graph's internal edge data frame
+graph \%>\% get_edge_df()
+#>   id from to  rel
+#> 1  1    1  2 <NA>
+#> 2  2    2  3 <NA>
+#> 3  3    3  4 <NA>
+#> 4  4    4  5 <NA>
+
+# Perform a traversal from the inner nodes
+# (`2` and `4`) to their adjacent nodes (`1`,
+# `3`, and `5`) while also applying the node
+# attribute `value` to target nodes; node `3`
+# will obtain a `value` of 10 since a traversal
+# to `3` will occur from `2` and `4` (and
+# multiple values passed will be summed)
 graph <-
   graph \%>\%
-  set_node_attrs(1, "value", 3.4) \%>\%
-  set_node_attrs(2, "value", 6.7) \%>\%
-  set_node_attrs(3, "value", 9.1)
+  trav_both(
+    copy_attrs_from = "value",
+    agg = "sum")
+
+# Show the graph's internal node data frame
+# after this change
+graph \%>\% get_node_df()
+#>   id type label value
+#> 1  1 <NA>     1     5
+#> 2  2 <NA>     2     5
+#> 3  3 <NA>     3    10
+#> 4  4 <NA>     4     5
+#> 5  5 <NA>     5     5
 }
 

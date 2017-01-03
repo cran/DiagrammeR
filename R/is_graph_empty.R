@@ -5,8 +5,6 @@
 #' \code{dgr_graph}.
 #' @return a logical value.
 #' @examples
-#' library(magrittr)
-#'
 #' # Create an empty graph
 #' graph <- create_graph()
 #'
@@ -26,9 +24,16 @@
 
 is_graph_empty <- function(graph) {
 
-  # Determine if graph is empty by checking for
-  # a NULL value at `graph$nodes_df`
-  graph_is_empty <- is.null(graph$nodes_df)
+  # Validation: Graph object is valid
+  if (graph_object_valid(graph) == FALSE) {
+    stop("The graph object is not valid.")
+  }
 
-  return(graph_is_empty)
+  # Determine if graph is empty by checking the
+  # number of rows in `graph$nodes_df`
+  if (nrow(graph$nodes_df) == 0) {
+    return(TRUE)
+  } else {
+    return(FALSE)
+  }
 }
