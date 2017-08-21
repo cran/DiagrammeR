@@ -20,14 +20,12 @@ in the graph).
 }
 \examples{
 \dontrun{
-# Get the nodes that are in the graph periphery of
-# a randomly-created graph
-get_periphery(
-  create_random_graph(
-    15, 24,
-    fully_connected = TRUE,
-    set_seed = 20))
-#> [1] 13
+# Get the nodes that are in the graph periphery
+# of a randomly-created graph
+create_random_graph(
+    n = 15, m = 24,
+    set_seed = 23) \%>\%
+  get_periphery()
+#> [1] 3 6
 }
 }
-

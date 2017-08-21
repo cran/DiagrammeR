@@ -20,7 +20,9 @@
 #' graph <-
 #'   create_graph() %>%
 #'   set_global_graph_attrs(
-#'     "overlap", "true", "graph")
+#'     attr = "overlap",
+#'     value = "true",
+#'     attr_type = "graph")
 #'
 #' # Verify that the global attributes have been set
 #' get_global_graph_attrs(graph)
@@ -33,7 +35,9 @@
 #' graph <-
 #'   graph %>%
 #'   add_global_graph_attrs(
-#'     "penwidth", 12, "node")
+#'     attr = "penwidth",
+#'     value = 12,
+#'     attr_type = "node")
 #'
 #' get_global_graph_attrs(graph)
 #' #>       attr value attr_type
@@ -45,7 +49,9 @@
 #' # will serve as an update
 #' graph %>%
 #'   add_global_graph_attrs(
-#'     "penwidth", 15, "node") %>%
+#'     attr = "penwidth",
+#'     value = 15,
+#'     attr_type = "node") %>%
 #'   get_global_graph_attrs()
 #' #>       attr value attr_type
 #' #> 1  overlap  true     graph
@@ -95,9 +101,9 @@ add_global_graph_attrs <- function(graph,
   # on the `attr` and `attr_type` columns
   global_attrs_joined <-
     global_attrs_available %>%
-    dplyr::full_join(global_attrs_to_add,
-                     by = c("attr",
-                            "attr_type")) %>%
+    dplyr::full_join(
+      global_attrs_to_add,
+      by = c("attr", "attr_type")) %>%
     dplyr::transmute(
       attr, attr_type,
       value = dplyr::coalesce(value.y, value.x)) %>%
@@ -123,5 +129,5 @@ add_global_graph_attrs <- function(graph,
     save_graph_as_rds(graph = graph)
   }
 
-  return(graph)
+  graph
 }

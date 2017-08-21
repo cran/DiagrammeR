@@ -15,7 +15,8 @@
 #'
 #' # Get the graph's time as a POSIXct
 #' # object using `get_graph_time()`
-#' graph %>% get_graph_time()
+#' graph %>%
+#'   get_graph_time()
 #' #> [1] "2015-10-25 15:23:00 GMT"
 #' @export get_graph_time
 
@@ -26,5 +27,5 @@ get_graph_time <- function(graph) {
     stop("The graph object is not valid.")
   }
 
-  return(graph$graph_info$graph_time)
+  graph$graph_info$graph_time
 }

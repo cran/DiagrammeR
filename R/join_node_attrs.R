@@ -21,16 +21,18 @@
 #' \code{create_graph}.
 #' @return a graph object of class \code{dgr_graph}.
 #' @examples
+#' # Set a seed
+#' set.seed(23)
+#'
 #' # Create a simple graph
 #' graph <-
 #'   create_graph() %>%
-#'   add_n_nodes(5) %>%
-#'   add_edges_w_string("1->2 1->3 2->4 2->5 3->5")
+#'   add_n_nodes(n = 5) %>%
+#'   add_edges_w_string(
+#'     edges = "1->2 1->3 2->4 2->5 3->5")
 #'
 #' # Create a data frame with node ID values and a
 #' # set of numeric values
-#' set.seed(25)
-#'
 #' df <-
 #'   data.frame(
 #'     values = round(rnorm(6, 5), 2),
@@ -40,17 +42,20 @@
 #' # graph's nodes; this works as a left join using
 #' # identically-named columns in the graph and the df
 #' # (in this case the `id` column is common to both)
-#' graph <- graph %>% join_node_attrs(df)
+#' graph <-
+#'   graph %>%
+#'   join_node_attrs(
+#'     df = df)
 #'
 #' # Get the graph's internal ndf to show that the
 #' # join has been made
 #' get_node_df(graph)
 #' #>   id type label values
-#' #> 1  1 <NA>  <NA>   4.79
-#' #> 2  2 <NA>  <NA>   3.96
-#' #> 3  3 <NA>  <NA>   3.85
-#' #> 4  4 <NA>  <NA>   5.32
-#' #> 5  5 <NA>  <NA>    3.5
+#' #> 1  1 <NA>  <NA>   6.00
+#' #> 2  2 <NA>  <NA>   6.11
+#' #> 3  3 <NA>  <NA>   4.72
+#' #> 4  4 <NA>  <NA>   6.02
+#' #> 5  5 <NA>  <NA>   5.05
 #'
 #' # Get betweenness values for each node and
 #' # add them as a node attribute (Note the
@@ -59,17 +64,17 @@
 #' graph <-
 #'   graph %>%
 #'   join_node_attrs(
-#'     get_betweenness(.))
+#'     df = get_betweenness(.))
 #'
 #' # Get the graph's internal ndf to show that
 #' # this join has been made
 #' get_node_df(graph)
 #' #>   id type label values betweenness
-#' #> 1  1 <NA>  <NA>   4.79           2
-#' #> 2  2 <NA>  <NA>   3.96           7
-#' #> 3  3 <NA>  <NA>   3.85           1
-#' #> 4  4 <NA>  <NA>   5.32           0
-#' #> 5  5 <NA>  <NA>   3.50           2
+#' #> 1  1 <NA>  <NA>   6.00           2
+#' #> 2  2 <NA>  <NA>   6.11           7
+#' #> 3  3 <NA>  <NA>   4.72           1
+#' #> 4  4 <NA>  <NA>   6.02           0
+#' #> 5  5 <NA>  <NA>   5.05           2
 #' @importFrom dplyr select everything
 #' @export join_node_attrs
 
@@ -169,5 +174,5 @@ join_node_attrs <- function(graph,
     save_graph_as_rds(graph = graph)
   }
 
-  return(graph)
+  graph
 }

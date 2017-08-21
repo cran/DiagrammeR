@@ -9,19 +9,29 @@
 #' \code{dgr_graph}.
 #' @param from a node ID from which the edge to be
 #' removed is outgoing. If an edge ID is provided to
-#' \code{id}, then this argument is ignored.
+#' \code{id}, then this argument is ignored. There
+#' is the option to use a node \code{label}
+#' value here (and this must correspondingly also be
+#' done for the \code{to} argument) for defining
+#' node connections. Note that this is only possible
+#' if all nodes have distinct \code{label} values set
+#' and none exist as an empty string.
 #' @param to a node ID to which the edge to be removed
 #' is incoming. If an edge ID is provided to
-#' \code{id}, then this argument is ignored.
+#' \code{id}, then this argument is ignored. There
+#' is the option to use a node \code{label}
+#' value here (and this must correspondingly also be
+#' for the \code{from} argument) for defining
+#' node connections. Note that this is only possible
+#' if all nodes have distinct \code{label} values set
+#' and none exist as an empty string.
 #' @param id an edge ID of the edge to be removed.
 #' @return a graph object of class \code{dgr_graph}.
 #' @examples
-#' # Create an empty graph
-#' graph <- create_graph()
-#'
-#' # Add two nodes
-#' graph <- add_node(graph)
-#' graph <- add_node(graph)
+#' # Create a graph with 2 nodes
+#' graph <-
+#'   create_graph() %>%
+#'   add_n_nodes(n = 2)
 #'
 #' # Add an edge
 #' graph <-
@@ -45,19 +55,25 @@
 #' # 2 nodes and an edge
 #' graph_undirected <-
 #'   create_graph(directed = FALSE) %>%
-#'   add_n_nodes(2) %>%
-#'   add_edge(1, 2)
+#'   add_n_nodes(n = 2) %>%
+#'   add_edge(
+#'     from = 1,
+#'     to = 2)
 #'
-#' # Delete the edge; order of node ID
+#' # Delete the edge; the order of node ID
 #' # values provided in `from` and `to`
 #' # don't matter for the undirected case
 #' graph_undirected %>%
-#'   delete_edge(2, 1) %>%
+#'   delete_edge(
+#'     from = 2,
+#'     to = 1) %>%
 #'   edge_count()
 #' #> [1] 0
 #'
 #' graph_undirected %>%
-#'   delete_edge(1, 2) %>%
+#'   delete_edge(
+#'     from = 1,
+#'     to = 2) %>%
 #'   edge_count()
 #' #> [1] 0
 #'
@@ -68,7 +84,29 @@
 #'   delete_edge(id = 1) %>%
 #'   edge_count()
 #' #> [1] 0
-#' @importFrom dplyr filter
+#'
+#' # Create a directed graph with 2
+#' # labeled nodes and an edge
+#' graph_labeled_nodes <-
+#'   create_graph() %>%
+#'   add_n_nodes(
+#'     n = 2,
+#'     label = c("one", "two")) %>%
+#'   add_edge(
+#'     from = "one",
+#'     to = "two")
+#'
+#' # Delete the edge using the node
+#' # labels in `from` and `to`; this
+#' # is analogous to creating the
+#' # edge using node labels
+#' graph_labeled_nodes %>%
+#'   delete_edge(
+#'     from = "one",
+#'     to = "two") %>%
+#'   edge_count()
+#' #> [1] 0
+#' @importFrom dplyr filter select
 #' @export delete_edge
 
 delete_edge <- function(graph,
@@ -93,6 +131,9 @@ delete_edge <- function(graph,
   if (graph_contains_edges(graph) == FALSE) {
     stop("The graph contains no edges, so, no selections can be made.")
   }
+
+  # Create bindings for specific variables
+  label <- NULL
 
   # If a value is supplied for `id`, determine which
   # node ID values the edge ID references
@@ -124,9 +165,52 @@ delete_edge <- function(graph,
       stop("Single-length vectors for `from` and `to` should be specified.")
     }
 
-    # Change variable names
-    from_id <- from
-    to_id <- to
+    # If `from` and `to` values provided as character
+    # values, assume that these values refer to node
+    # `label` attr values
+    if (is.character(from) & is.character(to)) {
+
+      # Stop function if the label for `from` exists in the graph
+      if (!(from %in% graph$nodes_df$label)) {
+        stop("The value provided in `from` does not exist as a node `label` value.")
+      }
+
+      # Stop function if the label for `from` is not distinct in the graph
+      if (graph$nodes_df %>%
+          dplyr::select(label) %>%
+          dplyr::filter(label == from) %>%
+          nrow() > 1) {
+        stop("The node `label` provided in `from` is not distinct in the graph.")
+      }
+
+      # Stop function if the label for `to` exists in the graph
+      if (!(to %in% graph$nodes_df$label)) {
+        stop("The value provided in `to` does not exist as a node `label` value.")
+      }
+
+      # Stop function if the label for `to` is not distinct in the graph
+      if (graph$nodes_df %>%
+          dplyr::select(label) %>%
+          dplyr::filter(label == to) %>%
+          nrow() > 1) {
+        stop("The node `label` provided in `to` is not distinct in the graph.")
+      }
+
+      # Use the `translate_to_node_id()` helper function to map
+      # node `label` values to node `id` values
+      from_to_node_id <-
+        translate_to_node_id(
+          graph = graph,
+          from = from,
+          to = to)
+
+      from_id <- from_to_node_id$from
+      to_id <- from_to_node_id$to
+    } else {
+
+      from_id <- from
+      to_id <- to
+    }
   }
 
   # Determine whether the pair of nodes provided
@@ -191,6 +275,11 @@ delete_edge <- function(graph,
     graph$edges_df <- edf
   }
 
+  # Scavenge any invalid, linked data frames
+  graph <-
+    graph %>%
+    remove_linked_dfs()
+
   # Update the `graph_log` df with an action
   graph$graph_log <-
     add_action_to_log(
@@ -202,10 +291,17 @@ delete_edge <- function(graph,
       nodes = nrow(graph$nodes_df),
       edges = nrow(graph$edges_df))
 
+  # Perform graph actions, if any are available
+  if (nrow(graph$graph_actions) > 0) {
+    graph <-
+      graph %>%
+      trigger_graph_actions()
+  }
+
   # Write graph backup if the option is set
   if (graph$graph_info$write_backups) {
     save_graph_as_rds(graph = graph)
   }
 
-  return(graph)
+  graph
 }

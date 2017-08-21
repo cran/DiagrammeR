@@ -35,7 +35,8 @@
 #' # Create a random graph
 #' graph <-
 #'   create_random_graph(
-#'     5, 5, set_seed = 23)
+#'     n = 5, m = 5,
+#'     set_seed = 23)
 #'
 #' # For node ID values of `1` to `3`, choose
 #' # to display the node `value` attribute (for
@@ -43,7 +44,9 @@
 #' graph <-
 #'   graph %>%
 #'   set_node_attr_to_display(
-#'     nodes = 1:3, attr = "value", default = NA)
+#'     nodes = 1:3,
+#'     attr = value,
+#'     default = NA)
 #'
 #' # Show the graph's node data frame; the
 #' # `display` node attribute will show for
@@ -64,9 +67,11 @@
 #' # be used
 #' graph %>%
 #'   set_node_attr_to_display(
-#'     nodes = 4, attr = "label") %>%
+#'     nodes = 4,
+#'     attr = label) %>%
 #'   set_node_attr_to_display(
-#'     nodes = c(1, 5), attr = "id") %>%
+#'     nodes = c(1, 5),
+#'     attr = id) %>%
 #'   get_node_df()
 #' #>   id type label display value
 #' #> 1  1 <NA>     1      id   6.0
@@ -76,6 +81,7 @@
 #' #> 5  5 <NA>     5      id   8.5
 #' @importFrom dplyr mutate left_join coalesce bind_cols select everything case_when
 #' @importFrom tibble tibble
+#' @importFrom rlang enquo UQ
 #' @export set_node_attr_to_display
 
 set_node_attr_to_display <- function(graph,
@@ -85,6 +91,13 @@ set_node_attr_to_display <- function(graph,
 
   # Get the time of function start
   time_function_start <- Sys.time()
+
+  attr <- rlang::enquo(attr)
+  attr <- (rlang::UQ(attr) %>% paste())[2]
+
+  if (attr == "NULL") {
+    attr <- NULL
+  }
 
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
@@ -123,7 +136,7 @@ set_node_attr_to_display <- function(graph,
   # `attr` does not exist in the ndf
   if (!is.null(attr)) {
     if (!(attr %in% colnames(ndf))) {
-      stop("The node attribute given in `attr` in not in the graph's ndf.")
+      stop("The node attribute given in `attr` is not in the graph's ndf.")
     }
   }
 
@@ -210,5 +223,5 @@ set_node_attr_to_display <- function(graph,
     save_graph_as_rds(graph = graph)
   }
 
-  return(graph)
+  graph
 }

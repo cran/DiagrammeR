@@ -10,8 +10,9 @@ graph_object_valid <- function(graph) {
              "global_attrs", "directed",
              "last_node", "last_edge",
              "node_selection", "edge_selection",
-             "graph_log") %in%
+             "cache", "graph_log") %in%
            names(graph))) {
+
     return(FALSE)
   }
 
@@ -27,7 +28,9 @@ graph_object_valid <- function(graph) {
     inherits(graph$directed, "logical") == FALSE,
     inherits(graph$node_selection, "data.frame") == FALSE,
     inherits(graph$edge_selection, "data.frame") == FALSE,
+    inherits(graph$cache, "list") == FALSE,
     inherits(graph$graph_log, "data.frame") == FALSE)) {
+
     return(FALSE)
   }
 
@@ -39,9 +42,9 @@ graph_contains_nodes <- function(graph) {
 
   if (node_count(graph) == 0) {
     return(FALSE)
+  } else {
+    return(TRUE)
   }
-
-  return(TRUE)
 }
 
 # Function to check whether a graph contains any edges
@@ -49,9 +52,9 @@ graph_contains_edges <- function(graph) {
 
   if (edge_count(graph) == 0) {
     return(FALSE)
+  } else {
+    return(TRUE)
   }
-
-  return(TRUE)
 }
 
 # Function to check whether a graph contains a valid edge selection
@@ -76,12 +79,12 @@ graph_contains_node_selection <- function(graph) {
   }
 }
 
-
 # Function to replace the `node_selection` df with
 # different node ID values
 #' @importFrom tibble tibble as_tibble
 #' @importFrom dplyr bind_rows
-replace_graph_node_selection <- function(graph, replacement) {
+replace_graph_node_selection <- function(graph,
+                                         replacement) {
 
   # Get the graph's `node_selection` df
   node_selection <- graph$node_selection
@@ -96,20 +99,20 @@ replace_graph_node_selection <- function(graph, replacement) {
     as.data.frame(stringsAsFactors = FALSE)
 
   # Add replacement to `graph$node_selection`
-  node_selection <-
-    node_selection %>%
+  node_selection %>%
     dplyr::bind_rows(
       tibble::tibble(
         node = as.integer(replacement)))
-
-  return(node_selection)
 }
 
 # Function to replace the `edge_selection` df with
 # different node ID values
 #' @importFrom tibble tibble as_tibble
 #' @importFrom dplyr bind_rows
-replace_graph_edge_selection <- function(graph, edge_id, from_node, to_node) {
+replace_graph_edge_selection <- function(graph,
+                                         edge_id,
+                                         from_node,
+                                         to_node) {
 
   # Get the graph's `edge_selection` df
   edge_selection <- graph$edge_selection
@@ -124,39 +127,30 @@ replace_graph_edge_selection <- function(graph, edge_id, from_node, to_node) {
     as.data.frame(stringsAsFactors = FALSE)
 
   # Add replacement to `graph$edge_selection`
-  edge_selection <-
-    edge_selection %>%
+  edge_selection %>%
     dplyr::bind_rows(
       tibble::tibble(
         edge = as.integer(edge_id),
         from = as.integer(from_node),
         to = as.integer(to_node)))
-
-  return(edge_selection)
 }
 
 create_empty_nsdf <- function() {
 
   # Create empty `nsdf`
-  nsdf <-
-    tibble::tibble(
-      node = as.integer(NA))[-1, ] %>%
+  tibble::tibble(
+    node = as.integer(NA))[-1, ] %>%
     as.data.frame(stringsAsFactors = FALSE)
-
-  return(nsdf)
 }
 
 create_empty_esdf <- function() {
 
   # Create empty `esdf`
-  esdf <-
-    tibble::tibble(
-      edge = as.integer(NA),
-      from = as.integer(NA),
-      to = as.integer(NA))[-1, ] %>%
+  tibble::tibble(
+    edge = as.integer(NA),
+    from = as.integer(NA),
+    to = as.integer(NA))[-1, ] %>%
     as.data.frame(stringsAsFactors = FALSE)
-
-  return(esdf)
 }
 
 # Function to determine whether a node or edge
@@ -197,11 +191,9 @@ is_attr_unique_and_non_na <- function(graph,
   }
 }
 
-
 ###
 # Graph transformation functions
 ###
-
 
 # Function to take a graph object and labels for `from`
 # and `to` values, and, translate the `from`/`to` label
@@ -245,9 +237,7 @@ translate_to_node_id <- function(graph, from, to) {
   from <- from_id
   to <- to_id
 
-  id_from_to <- list(from = from_id, to = to_id)
-
-  return(id_from_to)
+  list(from = from_id, to = to_id)
 }
 
 
@@ -298,10 +288,7 @@ add_action_to_log <- function(graph_log,
       stringsAsFactors = FALSE)
 
   # Append the log line to `graph_log`
-  graph_log <-
-    dplyr::bind_rows(graph_log, graph_log_line)
-
-  return(graph_log)
+  dplyr::bind_rows(graph_log, graph_log_line)
 }
 
 # Function to save the graph as an RDS file within
@@ -335,3 +322,350 @@ save_graph_as_rds <- function(graph) {
   saveRDS(graph, file = paste0(rds_dir_name, "/", rds_filename))
 }
 
+###
+# Aesthetic attribute functions
+###
+
+# Function to get the ideal contrasting text color
+# (black or white) given the fillcolor of a node
+#' @importFrom grDevices col2rgb
+contrasting_text_color <- function(background_color) {
+
+  rgb_colors <-
+    ((grDevices::col2rgb(background_color) %>%
+        as.numeric()) / 255)^2.2
+
+  luminance <-
+    (0.2126 * rgb_colors[1]) +
+    (0.7152 * rgb_colors[2]) +
+    (0.0722 * rgb_colors[3])
+
+  saturation <-
+    (max(rgb_colors) - min(rgb_colors) + 0.00001) /
+    (max(rgb_colors) + 0.00001)
+
+  if (saturation < 0.35) {
+    if (luminance > 0.5) {
+      contrasting_color <- "#000000"
+    }
+  } else {
+    contrasting_color <- "#FFFFFF"
+  }
+
+  contrasting_color
+}
+
+###
+# Functions that produce useful vectors
+###
+
+# Function that yields vector of node
+# creation function names
+node_creation_functions <- function() {
+
+  c("add_node", "add_n_nodes", "add_n_node_clones",
+    "add_n_nodes_ws", "add_node_df",
+    "add_nodes_from_df_cols",
+    "add_nodes_from_table", "add_full_graph",
+    "add_balanced_tree", "add_cycle",
+    "add_path", "add_prism", "add_star")
+}
+
+# Function that yields vector of node
+# deletion function names
+node_deletion_functions <- function() {
+
+  c("create_subgraph_ws", "create_complement_graph",
+    "delete_node", "delete_nodes_ws")
+}
+
+# Function that yields vector of edge
+# creation function names
+edge_creation_functions <- function() {
+
+  c("add_edge", "add_edge_clone", "add_edges_w_string",
+    "add_edge_df", "add_forward_edges_ws",
+    "add_reverse_edges_ws",
+    "add_edges_from_table", "add_full_graph",
+    "add_balanced_tree", "add_cycle",
+    "add_path", "add_prism", "add_star")
+}
+
+# Function that yields vector of edge
+# deletion function names
+edge_deletion_functions <- function() {
+
+  c("delete_edge", "delete_edges_ws",
+    "create_subgraph_ws", "create_complement_graph",
+    "delete_node", "delete_nodes_ws")
+}
+
+# Function that yields vector of graph
+# initializing function names
+graph_init_functions <- function() {
+
+  c("create_graph", "create_random_graph",
+    "from_igraph", "from_adj_matrix",
+    "import_graph")
+}
+
+# Function that to create a list of data frames
+# for functions that get node properties using
+# whole-graph methods
+value_per_node_functions <- function() {
+
+  list(
+    "get_alpha_centrality" =
+      data.frame(
+        arg = c("alpha", "exo", "weights_attr", "tol"),
+        value_type = c("numeric", "numeric", "character", "numeric"),
+        stringsAsFactors = FALSE
+      ),
+    "get_authority_centrality" =
+      data.frame(
+        arg = "weights_attr",
+        value_type = "character",
+        stringsAsFactors = FALSE
+      ),
+    "get_betweenness" =
+      data.frame(
+        arg = NULL,
+        value_type = NULL
+      ),
+    "get_bridging" =
+      data.frame(
+        arg = NULL,
+        value_type = NULL
+      ),
+    "get_closeness" =
+      data.frame(
+        arg = "direction",
+        value_type = "character",
+        stringsAsFactors = FALSE
+      ),
+    "get_cmty_edge_btwns" =
+      data.frame(
+        arg = NULL,
+        value_type = NULL
+      ),
+    "get_cmty_fast_greedy" =
+      data.frame(
+        arg = NULL,
+        value_type = NULL
+      ),
+    "get_cmty_l_eigenvec" =
+      data.frame(
+        arg = NULL,
+        value_type = NULL
+      ),
+    "get_cmty_louvain" =
+      data.frame(
+        arg = NULL,
+        value_type = NULL
+      ),
+    "get_cmty_walktrap" =
+      data.frame(
+        arg = "steps",
+        value_type = "numeric",
+        stringsAsFactors = FALSE
+      ),
+    "get_constraint" =
+      data.frame(
+        arg = "nodes",
+        value_type = "numeric",
+        stringsAsFactors = FALSE
+      ),
+    "get_degree_distribution" =
+      data.frame(
+        arg = "mode",
+        value_type = "character",
+        stringsAsFactors = FALSE
+      ),
+    "get_degree_histogram" =
+      data.frame(
+        arg = "mode",
+        value_type = "character",
+        stringsAsFactors = FALSE
+      ),
+    "get_degree_in" =
+      data.frame(
+        arg = "normalized",
+        value_type = "logical",
+        stringsAsFactors = FALSE
+      ),
+    "get_degree_out" =
+      data.frame(
+        arg = "normalized",
+        value_type = "logical",
+        stringsAsFactors = FALSE
+      ),
+    "get_degree_total" =
+      data.frame(
+        arg = "normalized",
+        value_type = "logical",
+        stringsAsFactors = FALSE
+      ),
+    "get_eccentricity" =
+      data.frame(
+        arg = NULL,
+        value_type = NULL
+      ),
+    "get_eigen_centrality" =
+      data.frame(
+        arg = "weights_attr",
+        value_type = "character",
+        stringsAsFactors = FALSE
+      ),
+    "get_pagerank" =
+      data.frame(
+        arg = c("directed", "damping"),
+        value_type = c("logical", "numeric"),
+        stringsAsFactors = FALSE
+      ),
+    "get_s_connected_cmpts" =
+      data.frame(
+        arg = NULL,
+        value_type = NULL
+      ),
+    "get_w_connected_cmpts" =
+      data.frame(
+        arg = NULL,
+        value_type = NULL
+      )
+  )
+}
+
+
+# Function to determine the `df_id` values
+# for a graph's internal ndf or edf
+#' @importFrom dplyr select filter pull
+get_df_ids <- function(graph_df) {
+
+  # Create binding for a specific variable
+  df_id <- NULL
+
+  if (nrow(graph_df) > 0) {
+
+    if ("df_id" %in% colnames(graph_df)) {
+
+      graph_df %>%
+        dplyr::select(df_id) %>%
+        dplyr::filter(!is.na(df_id)) %>%
+        dplyr::pull(df_id)
+    } else {
+      return(as.character(NA))
+    }
+
+  } else if (nrow(graph_df) == 0) {
+    return(as.character(NA))
+  }
+}
+
+
+# Function to scavenge the graph$df_storage
+# list and remove any linked data frames if
+# the associated nodes or edges no longer exist
+#' @importFrom dplyr bind_rows filter select distinct pull
+remove_linked_dfs <- function(graph) {
+
+  # Create bindings for specific variables
+  node_edge__ <- df_id__ <- df_id <- NULL
+
+  if (is.null(graph$df_storage)) {
+    return(graph)
+  }
+
+  ndf_df_ids <-
+    graph %>%
+    get_node_df() %>%
+    get_df_ids()
+
+  edf_df_ids <-
+    graph %>%
+    get_edge_df() %>%
+    get_df_ids()
+
+  # Determine if any of the stored
+  # data frames are not available in
+  # the graph's internal node data frame
+  if (length(graph$df_storage) > 0) {
+
+    ndf_df_id_to_remove <-
+      graph$df_storage %>%
+      dplyr::bind_rows() %>%
+      dplyr::filter(node_edge__ == "node") %>%
+      dplyr::select(df_id__) %>%
+      dplyr::distinct() %>%
+      dplyr::pull(df_id__) %>%
+      setdiff(ndf_df_ids)
+
+    # If any stored data frames are associated
+    # with edges that no longer exist, remove them
+    if (length(ndf_df_id_to_remove) > 0) {
+
+      for (i in 1:length(ndf_df_id_to_remove)) {
+
+        graph$df_storage[ndf_df_id_to_remove[i]] <- NULL
+      }
+    }
+  }
+
+  # Determine if any of the stored
+  # data frames are not available in
+  # the graph's internal edge data frame
+  if (length(graph$df_storage) > 0) {
+    edf_df_id_to_remove <-
+      graph$df_storage %>%
+      dplyr::bind_rows() %>%
+      dplyr::filter(node_edge__ == "edge") %>%
+      dplyr::select(df_id__) %>%
+      dplyr::distinct() %>%
+      dplyr::pull(df_id__) %>%
+      setdiff(edf_df_ids)
+
+
+    # If any stored data frames are associated
+    # with edges that no longer exist, remove them
+    if (length(edf_df_id_to_remove) > 0) {
+
+      for (i in 1:length(edf_df_id_to_remove)) {
+
+        graph$df_storage[edf_df_id_to_remove[i]] <- NULL
+      }
+    }
+  }
+
+  # Check the type of list that remains
+  if (length(graph$df_storage) == 0) {
+    graph$df_storage <-
+      graph$df_storage %>% unname()
+  }
+
+  # Remove the `df_id` column from the
+  # graph's ndf if there are no referenced
+  # data frames within (i.e., all NA)
+  if ("df_id" %in% colnames(graph$nodes_df)) {
+
+    if (all(is.na(graph$nodes_df$df_id))) {
+
+      graph$nodes_df <-
+        graph$nodes_df %>%
+        dplyr::select(-df_id)
+    }
+  }
+
+  # Remove the `df_id` column from the
+  # graph's edf if there are no referenced
+  # data frames within (i.e., all NA)
+  if ("df_id" %in% colnames(graph$edges_df)) {
+
+    if (all(is.na(graph$edges_df$df_id))) {
+
+      graph$edges_df <-
+        graph$edges_df %>%
+        dplyr::select(-df_id)
+    }
+  }
+
+  graph
+}

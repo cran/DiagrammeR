@@ -12,11 +12,23 @@ delete_edge(graph, from = NULL, to = NULL, id = NULL)
 
 \item{from}{a node ID from which the edge to be
 removed is outgoing. If an edge ID is provided to
-\code{id}, then this argument is ignored.}
+\code{id}, then this argument is ignored. There
+is the option to use a node \code{label}
+value here (and this must correspondingly also be
+done for the \code{to} argument) for defining
+node connections. Note that this is only possible
+if all nodes have distinct \code{label} values set
+and none exist as an empty string.}
 
 \item{to}{a node ID to which the edge to be removed
 is incoming. If an edge ID is provided to
-\code{id}, then this argument is ignored.}
+\code{id}, then this argument is ignored. There
+is the option to use a node \code{label}
+value here (and this must correspondingly also be
+for the \code{from} argument) for defining
+node connections. Note that this is only possible
+if all nodes have distinct \code{label} values set
+and none exist as an empty string.}
 
 \item{id}{an edge ID of the edge to be removed.}
 }
@@ -32,12 +44,10 @@ consideration the direction of the edge in
 a directed graph), or (2) an edge ID.
 }
 \examples{
-# Create an empty graph
-graph <- create_graph()
-
-# Add two nodes
-graph <- add_node(graph)
-graph <- add_node(graph)
+# Create a graph with 2 nodes
+graph <-
+  create_graph() \%>\%
+  add_n_nodes(n = 2)
 
 # Add an edge
 graph <-
@@ -61,19 +71,25 @@ edge_count(graph)
 # 2 nodes and an edge
 graph_undirected <-
   create_graph(directed = FALSE) \%>\%
-  add_n_nodes(2) \%>\%
-  add_edge(1, 2)
+  add_n_nodes(n = 2) \%>\%
+  add_edge(
+    from = 1,
+    to = 2)
 
-# Delete the edge; order of node ID
+# Delete the edge; the order of node ID
 # values provided in `from` and `to`
 # don't matter for the undirected case
 graph_undirected \%>\%
-  delete_edge(2, 1) \%>\%
+  delete_edge(
+    from = 2,
+    to = 1) \%>\%
   edge_count()
 #> [1] 0
 
 graph_undirected \%>\%
-  delete_edge(1, 2) \%>\%
+  delete_edge(
+    from = 1,
+    to = 2) \%>\%
   edge_count()
 #> [1] 0
 
@@ -84,5 +100,26 @@ graph_undirected \%>\%
   delete_edge(id = 1) \%>\%
   edge_count()
 #> [1] 0
-}
 
+# Create a directed graph with 2
+# labeled nodes and an edge
+graph_labeled_nodes <-
+  create_graph() \%>\%
+  add_n_nodes(
+    n = 2,
+    label = c("one", "two")) \%>\%
+  add_edge(
+    from = "one",
+    to = "two")
+
+# Delete the edge using the node
+# labels in `from` and `to`; this
+# is analogous to creating the
+# edge using node labels
+graph_labeled_nodes \%>\%
+  delete_edge(
+    from = "one",
+    to = "two") \%>\%
+  edge_count()
+#> [1] 0
+}

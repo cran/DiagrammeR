@@ -1,5 +1,5 @@
 #' Get Jaccard similarity coefficient scores
-#' @description Get the Jaccard similiarity coefficient
+#' @description Get the Jaccard similarity coefficient
 #' scores for one or more nodes in a graph.
 #' @param graph a graph object of class
 #' \code{dgr_graph}.
@@ -15,21 +15,22 @@
 #' @param round_to the maximum number of decimal places
 #' to retain for the Jaccard similarity coefficient
 #' scores. The default value is \code{3}.
-#' @return a matrix with Jaccard similiarity values
+#' @return a matrix with Jaccard similarity values
 #' for each pair of nodes considered.
 #' @examples
 #' # Create a random graph
 #' graph <-
 #'   create_random_graph(
-#'     10, 22, set_seed = 1)
+#'     n = 10, m = 22,
+#'     set_seed = 23)
 #'
 #' # Get the Jaccard similarity values for
 #' # nodes `5`, `6`, and `7`
-#' get_jaccard_similarity(graph, 5:7)
+#' get_jaccard_similarity(graph, nodes = 5:7)
 #' #>       5     6     7
-#' #> 5 1.000 0.286 0.500
-#' #> 6 0.286 1.000 0.286
-#' #> 7 0.500 0.286 1.000
+#' #> 5 1.000 0.333 0.286
+#' #> 6 0.333 1.000 0.375
+#' #> 7 0.286 0.375 1.000
 #' @importFrom igraph similarity V
 #' @export get_jaccard_similarity
 
@@ -41,6 +42,13 @@ get_jaccard_similarity <- function(graph,
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
     stop("The graph object is not valid.")
+  }
+
+  # Ensure that values provided for the
+  # `direction` argument are from the
+  # valid options
+  if (!(direction %in% c("all", "in", "out"))) {
+    stop("Valid options for `direction` are `all`, `in`, or `out`.")
   }
 
   # Convert the graph to an igraph object
@@ -104,7 +112,5 @@ get_jaccard_similarity <- function(graph,
   }
 
   # Round all values in matrix to set SD
-  j_sim_values <- round(j_sim_values, round_to)
-
-  return(j_sim_values)
+  round(j_sim_values, round_to)
 }

@@ -28,6 +28,8 @@
 #' connected graph by removing loops (edges from and
 #' to the same node). The default value is
 #' \code{FALSE}.
+#' @param ... optional node attributes supplied as
+#' vectors.
 #' @return a graph object of class \code{dgr_graph}.
 #' @examples
 #' # Create a new graph object and add a directed and
@@ -50,7 +52,7 @@
 #' # Using `keep_loops = FALSE` (the default)
 #' # will remove the loops
 #' create_graph() %>%
-#'   add_full_graph(3) %>%
+#'   add_full_graph(n = 3) %>%
 #'   node_info()
 #' #>   id type label deg indeg outdeg loops
 #' #> 1  1 <NA>     1   4     2      2     0
@@ -68,14 +70,16 @@
 #'     rel = "connected_to")
 #'
 #' # Show the graph's node data frame (ndf)
-#' graph %>% get_node_df()
+#' graph %>%
+#'   get_node_df()
 #' #>   id      type label
 #' #> 1  1 connected   1st
 #' #> 2  2 connected   2nd
 #' #> 3  3 connected   3rd
 #'
 #' # Show the graph's edge data frame (edf)
-#' graph %>% get_edge_df()
+#' graph %>%
+#'   get_edge_df()
 #' #>   id from to          rel
 #' #> 1  1    1  2 connected_to
 #' #> 2  2    1  3 connected_to
@@ -96,7 +100,8 @@
 #'   sample(9, FALSE) %>%
 #'   round(2) %>%
 #'   matrix(
-#'     nc = 3, nr = 3,
+#'     nc = 3,
+#'     nr = 3,
 #'     dimnames = list(c("a", "b", "c")))
 #'
 #' # Create the fully-connected graph (without
@@ -112,14 +117,16 @@
 #'     keep_loops = FALSE)
 #'
 #' # Show the graph's node data frame (ndf)
-#' graph %>% get_node_df
+#' graph %>%
+#'   get_node_df()
 #' #>   id     type label
 #' #> 1  1 weighted     a
 #' #> 2  2 weighted     b
 #' #> 3  3 weighted     c
 #'
 #' # Show the graph's edge data frame (edf)
-#' graph %>% get_edge_df()
+#' graph %>%
+#'   get_edge_df()
 #' #>   id from to        rel weight
 #' #> 1  1    1  2 related_to   3.30
 #' #> 2  2    1  3 related_to   5.02
@@ -153,7 +160,8 @@ add_full_graph <- function(graph,
                            label = TRUE,
                            rel = NULL,
                            edge_wt_matrix = NULL,
-                           keep_loops = FALSE) {
+                           keep_loops = FALSE,
+                           ...) {
 
   # Get the time of function start
   time_function_start <- Sys.time()
@@ -163,6 +171,9 @@ add_full_graph <- function(graph,
     stop("The graph object is not valid.")
   }
 
+  # Create bindings for specific variables
+  id <- index__ <- NULL
+
   # Get the number of nodes ever created for
   # this graph
   nodes_created <- graph$last_node
@@ -170,6 +181,9 @@ add_full_graph <- function(graph,
   # Get the number of edges ever created for
   # this graph
   edges_created <- graph$last_edge
+
+  # Get the graph's global attributes
+  global_attrs <- graph$global_attrs
 
   # Get the graph's log
   graph_log <- graph$graph_log
@@ -186,6 +200,29 @@ add_full_graph <- function(graph,
     adj_matrix <-
       adj_matrix -
       diag(1, nrow = nrow(adj_matrix), ncol = ncol(adj_matrix))
+  }
+
+  # Collect extra vectors of data as `extras`
+  extras <- list(...)
+
+  if (length(extras) > 0) {
+
+    extras_tbl <- tibble::as_tibble(extras)
+
+    if (nrow(extras_tbl) < n) {
+
+      extras$index__ <- 1:n
+
+      extras_tbl <-
+        tibble::as_tibble(extras) %>%
+        dplyr::select(-index__)
+    }
+
+    if ("id" %in% colnames(extras_tbl)) {
+      extras_tbl <-
+        extras_tbl %>%
+        dplyr::select(-id)
+    }
   }
 
   if (is_graph_directed(graph)) {
@@ -281,6 +318,14 @@ add_full_graph <- function(graph,
     new_graph$edges_df[, 4] <- rel
   }
 
+  # Add extra columns if available
+  if (exists("extras_tbl")) {
+
+    new_graph <-
+      new_graph %>%
+      dplyr::bind_cols(extras_tbl)
+  }
+
   # If the input graph is not empty, combine graphs
   # using the `combine_graphs()` function
   if (!is_graph_empty(graph)) {
@@ -295,12 +340,13 @@ add_full_graph <- function(graph,
       add_action_to_log(
         graph_log = graph_log,
         version_id = nrow(graph_log) + 1,
-        function_used = "add_balanced_tree",
+        function_used = "add_full_graph",
         time_modified = time_function_start,
         duration = graph_function_duration(time_function_start),
         nodes = nrow(combined_graph$nodes_df),
         edges = nrow(combined_graph$edges_df))
 
+    combined_graph$global_attrs <- global_attrs
     combined_graph$graph_log <- graph_log
     combined_graph$graph_info <- graph_info
 
@@ -317,14 +363,22 @@ add_full_graph <- function(graph,
       add_action_to_log(
         graph_log = graph_log,
         version_id = nrow(graph_log) + 1,
-        function_used = "add_balanced_tree",
+        function_used = "add_full_graph",
         time_modified = time_function_start,
         duration = graph_function_duration(time_function_start),
         nodes = nrow(new_graph$nodes_df),
         edges = nrow(new_graph$edges_df))
 
+    new_graph$global_attrs <- global_attrs
     new_graph$graph_log <- graph_log
     new_graph$graph_info <- graph_info
+
+    # Perform graph actions, if any are available
+    if (nrow(graph$graph_actions) > 0) {
+      graph <-
+        graph %>%
+        trigger_graph_actions()
+    }
 
     # Write graph backup if the option is set
     if (new_graph$graph_info$write_backups) {

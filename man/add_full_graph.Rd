@@ -5,7 +5,7 @@
 \title{Add a fully connected graph}
 \usage{
 add_full_graph(graph, n, type = NULL, label = TRUE, rel = NULL,
-  edge_wt_matrix = NULL, keep_loops = FALSE)
+  edge_wt_matrix = NULL, keep_loops = FALSE, ...)
 }
 \arguments{
 \item{graph}{a graph object of class
@@ -37,6 +37,9 @@ column names will be used as node label values.}
 connected graph by removing loops (edges from and
 to the same node). The default value is
 \code{FALSE}.}
+
+\item{...}{optional node attributes supplied as
+vectors.}
 }
 \value{
 a graph object of class \code{dgr_graph}.
@@ -70,7 +73,7 @@ node_info(graph)
 # Using `keep_loops = FALSE` (the default)
 # will remove the loops
 create_graph() \%>\%
-  add_full_graph(3) \%>\%
+  add_full_graph(n = 3) \%>\%
   node_info()
 #>   id type label deg indeg outdeg loops
 #> 1  1 <NA>     1   4     2      2     0
@@ -88,14 +91,16 @@ graph <-
     rel = "connected_to")
 
 # Show the graph's node data frame (ndf)
-graph \%>\% get_node_df()
+graph \%>\%
+  get_node_df()
 #>   id      type label
 #> 1  1 connected   1st
 #> 2  2 connected   2nd
 #> 3  3 connected   3rd
 
 # Show the graph's edge data frame (edf)
-graph \%>\% get_edge_df()
+graph \%>\%
+  get_edge_df()
 #>   id from to          rel
 #> 1  1    1  2 connected_to
 #> 2  2    1  3 connected_to
@@ -116,7 +121,8 @@ edge_wt_matrix <-
   sample(9, FALSE) \%>\%
   round(2) \%>\%
   matrix(
-    nc = 3, nr = 3,
+    nc = 3,
+    nr = 3,
     dimnames = list(c("a", "b", "c")))
 
 # Create the fully-connected graph (without
@@ -132,14 +138,16 @@ graph <-
     keep_loops = FALSE)
 
 # Show the graph's node data frame (ndf)
-graph \%>\% get_node_df
+graph \%>\%
+  get_node_df()
 #>   id     type label
 #> 1  1 weighted     a
 #> 2  2 weighted     b
 #> 3  3 weighted     c
 
 # Show the graph's edge data frame (edf)
-graph \%>\% get_edge_df()
+graph \%>\%
+  get_edge_df()
 #>   id from to        rel weight
 #> 1  1    1  2 related_to   3.30
 #> 2  2    1  3 related_to   5.02
@@ -166,4 +174,3 @@ create_graph(directed = FALSE) \%>\%
 #> 2  2    1  3 related_to   5.02
 #> 3  3    2  3 related_to   6.49
 }
-

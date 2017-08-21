@@ -7,6 +7,7 @@
 #' \code{dgr_graph}.
 #' @param node_attr the node attribute from which to
 #' obtain values.
+#' @param name an optional name for the cached vector.
 #' @param mode a option to recast the returned vector
 #' of node attribute value as \code{numeric} or
 #' \code{character}.
@@ -15,37 +16,48 @@
 #' @return a graph object of class \code{dgr_graph}.
 #' @examples
 #' # Set a seed
-#' set.seed(25)
+#' set.seed(23)
 #'
 #' # Create a graph with 10 nodes and 9 edges
 #' graph <-
 #'   create_graph() %>%
-#'   add_n_nodes(10) %>%
+#'   add_n_nodes(n = 10) %>%
 #'   set_node_attrs(
-#'     "value", rnorm(node_count(.), 5, 2)) %>%
+#'     node_attr = value,
+#'     values = rnorm(node_count(.), 5, 2)) %>%
 #'   add_edges_w_string(
-#'     "1->2 1->3 2->4 2->5 3->6
-#'      3->7 4->8 4->9 5->10")
+#'     edges =
+#'       "1->2 1->3 2->4 2->5 3->6
+#'        3->7 4->8 4->9 5->10")
 #'
 #' # Cache all values from the node attribute `value`
 #' # as a numeric vector
 #' graph <-
 #'   graph %>%
-#'   cache_node_attrs("value", "numeric")
+#'   cache_node_attrs(
+#'     node_attr = value,
+#'     name = "node_value")
 #'
 #' # Get the mean from all values available in
 #' # the cache
-#' graph %>% get_cache() %>% mean()
-#' #> [1] 4.651246
+#' graph %>%
+#'   get_cache(name = "node_value") %>%
+#'   mean()
+#' #> [1] 5.766209
+#' @importFrom rlang enquo UQ
 #' @export cache_node_attrs
 
 cache_node_attrs <- function(graph,
                              node_attr,
+                             name = NULL,
                              mode = NULL,
                              nodes = NULL) {
 
   # Get the time of function start
   time_function_start <- Sys.time()
+
+  node_attr <- rlang::enquo(node_attr)
+  node_attr <- (rlang::UQ(node_attr) %>% paste())[2]
 
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
@@ -84,8 +96,19 @@ cache_node_attrs <- function(graph,
     }
   }
 
-  # Cache vector of node attributes in the graph
-  graph$cache <- nodes_attr_vector
+  # Cache vector of edge attributes in the
+  # graph's `cache` list object
+  if (!is.null(name)) {
+    graph$cache[[name]] <- nodes_attr_vector
+  } else {
+    if (length(graph$cache) == 0) {
+      graph$cache[[1]] <- nodes_attr_vector
+      names(graph$cache) <- 1
+    } else {
+      graph$cache[[(length(graph$cache) + 1)]] <-
+        nodes_attr_vector
+    }
+  }
 
   # Update the `graph_log` df with an action
   graph$graph_log <-
@@ -103,5 +126,5 @@ cache_node_attrs <- function(graph,
     save_graph_as_rds(graph = graph)
   }
 
-  return(graph)
+  graph
 }

@@ -5,11 +5,13 @@
 \title{Cache a count of nodes (available in a selection)
 in the graph}
 \usage{
-cache_node_count_ws(graph)
+cache_node_count_ws(graph, name = NULL)
 }
 \arguments{
 \item{graph}{a graph object of class
 \code{dgr_graph}.}
+
+\item{name}{an optional name for the cached vector.}
 }
 \value{
 a graph object of class \code{dgr_graph}.
@@ -23,7 +25,7 @@ later retrieval using \code{get_cache}.
 Selections of nodes can be performed using
 the following \code{select_...} functions:
 \code{select_nodes()},
-\code{select_last_node()},
+\code{select_last_nodes_created()},
 \code{select_nodes_by_degree()},
 \code{select_nodes_by_id()}, or
 \code{select_nodes_in_neighborhood()}.
@@ -38,16 +40,16 @@ the following traversal functions:
 # Create a graph with 5 nodes and 4 edges
 graph <-
   create_graph() \%>\%
-  add_path(5)
+  add_path(n = 5)
 
 # Cache a count of nodes after creating a selection
 graph <-
   graph \%>\%
-  select_nodes_by_id(2:5) \%>\%
-  cache_node_count_ws()
+  select_nodes_by_id(nodes = 2:5) \%>\%
+  cache_node_count_ws(name = "node_count")
 
 # Get the number of nodes stored in the cache
-graph \%>\% get_cache()
+graph \%>\%
+  get_cache(name = "node_count")
 #> [1] 4
 }
-

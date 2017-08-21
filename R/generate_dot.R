@@ -85,6 +85,22 @@ generate_dot <- function(graph) {
     }
   }
 
+  # If `equation` column in `nodes_df`, ensure the
+  # right amount of escaping is present
+  if ("equation" %in% colnames(nodes_df)) {
+    equation_col <- which(colnames(nodes_df) == "equation")
+
+    for (i in 1:nrow(nodes_df)) {
+      if (grepl("^\\$.*\\$$", nodes_df[i, equation_col])) {
+        nodes_df[i, equation_col] <-
+          str_replace_all(
+            nodes_df[i, equation_col], "\\\\", "\\\\\\\\")
+      } else {
+        nodes_df[i, equation_col] <- ""
+      }
+    }
+  }
+
   # If `display` column in `nodes_df`, modify label
   # column for this render
   if ("display" %in% colnames(nodes_df)) {
@@ -113,10 +129,10 @@ generate_dot <- function(graph) {
   node_attributes <-
     c("color", "distortion", "fillcolor",
       "fixedsize", "fontcolor", "fontname", "fontsize",
-      "group", "height", "label", "labelloc", "margin",
-      "orientation", "penwidth", "peripheries", "pos",
-      "shape", "sides", "skew", "style", "tooltip",
-      "width", "img", "icon")
+      "gradientangle", "group", "height", "label",
+      "labelloc", "margin", "orientation", "penwidth",
+      "peripheries", "pos", "shape", "sides", "skew",
+      "style", "tooltip", "width", "img", "icon")
 
   # Create vector of edge attributes
   edge_attributes <-
@@ -692,5 +708,5 @@ generate_dot <- function(graph) {
     dot_code <- gsub(" \\[\\] ", "", dot_code)
   }
 
-  return(dot_code)
+  dot_code
 }

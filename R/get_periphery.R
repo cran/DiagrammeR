@@ -7,15 +7,15 @@
 #' @return a vector of node IDs.
 #' @examples
 #' \dontrun{
-#' # Get the nodes that are in the graph periphery of
-#' # a randomly-created graph
-#' get_periphery(
-#'   create_random_graph(
-#'     15, 24,
-#'     fully_connected = TRUE,
-#'     set_seed = 20))
-#' #> [1] 13
+#' # Get the nodes that are in the graph periphery
+#' # of a randomly-created graph
+#' create_random_graph(
+#'     n = 15, m = 24,
+#'     set_seed = 23) %>%
+#'   get_periphery()
+#' #> [1] 3 6
 #' }
+#' @importFrom dplyr filter pull
 #' @export get_periphery
 
 get_periphery <- function(graph) {
@@ -25,17 +25,17 @@ get_periphery <- function(graph) {
     stop("The graph object is not valid.")
   }
 
+  # Create bindings for specific variables
+  id <- NULL
+
   # Get the eccentricity for each of the graph's nodes
   eccentricity <- get_eccentricity(graph)
 
-  # Return the node IDs for all nodes where the
+  # Get the node ID values for all nodes where the
   # eccentricity is equal to the graph diameter
   # (i.e., maximum eccentricity)
-  nodes <-
-    as.integer(names(
-      eccentricity[
-        which(eccentricity %in%
-                max(eccentricity))]))
-
-  return(nodes)
+  eccentricity %>%
+    dplyr::filter(eccentricity == get_max_eccentricity(graph)) %>%
+    dplyr::pull(id) %>%
+    as.integer()
 }

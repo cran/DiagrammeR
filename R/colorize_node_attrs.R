@@ -34,11 +34,11 @@
 #' # Create a graph with 8 nodes and 7 edges
 #' graph <-
 #'   create_graph() %>%
-#'   add_path(8) %>%
+#'   add_path(n = 8) %>%
 #'   set_node_attrs(
-#'     "weight",
-#'     c(8.2, 3.7, 6.3, 9.2,
-#'       1.6, 2.5, 7.2, 5.4))
+#'     node_attr = weight,
+#'     values = c(8.2, 3.7, 6.3, 9.2,
+#'                1.6, 2.5, 7.2, 5.4))
 #'
 #' # Find group membership values for all nodes
 #' # in the graph through the Walktrap community
@@ -47,10 +47,12 @@
 #' # with the `join_node_attrs()` function
 #' graph <-
 #'   graph %>%
-#'   join_node_attrs(get_cmty_walktrap(.))
+#'   join_node_attrs(df = get_cmty_walktrap(.))
 #'
 #' # Inspect the number of distinct communities
-#' get_node_attrs(graph, "walktrap_group") %>%
+#' get_node_attrs(
+#'   graph = graph,
+#'   node_attr = walktrap_group) %>%
 #'   unique() %>%
 #'   sort()
 #' #> [1] 1 2 3
@@ -64,30 +66,36 @@
 #' graph <-
 #'   graph %>%
 #'   colorize_node_attrs(
-#'     "walktrap_group", "fillcolor", alpha = 90) %>%
+#'     node_attr_from = walktrap_group,
+#'     node_attr_to = fillcolor,
+#'     palette = "Greens",
+#'     alpha = 90) %>%
 #'   colorize_node_attrs(
-#'     "walktrap_group", "color")
+#'     node_attr_from = walktrap_group,
+#'     node_attr_to = color,
+#'     palette = "viridis",
+#'     alpha = 80)
 #'
 #' # Show the graph's internal node data frame
 #' get_node_df(graph)
-#' #>   id type label weight walktrap_group fillcolor   color
-#' #> 1  1 <NA>     1    8.2              1 #FC8D5990 #FC8D59
-#' #> 2  2 <NA>     2    3.7              1 #FC8D5990 #FC8D59
-#' #> 3  3 <NA>     3    6.3              1 #FC8D5990 #FC8D59
-#' #> 4  4 <NA>     4    9.2              3 #99D59490 #99D594
-#' #> 5  5 <NA>     5    1.6              3 #99D59490 #99D594
-#' #> 6  6 <NA>     6    2.5              2 #FFFFBF90 #FFFFBF
-#' #> 7  7 <NA>     7    7.2              2 #FFFFBF90 #FFFFBF
-#' #> 8  8 <NA>     8    5.4              2 #FFFFBF90 #FFFFBF
+#' #>   id type label weight walktrap_group fillcolor     color
+#' #> 1  1 <NA>     1    8.2              1 #E5F5E090 #44015480
+#' #> 2  2 <NA>     2    3.7              1 #E5F5E090 #44015480
+#' #> 3  3 <NA>     3    6.3              1 #E5F5E090 #44015480
+#' #> 4  4 <NA>     4    9.2              3 #31A35490 #FDE72580
+#' #> 5  5 <NA>     5    1.6              3 #31A35490 #FDE72580
+#' #> 6  6 <NA>     6    2.5              2 #A1D99B90 #21908C80
+#' #> 7  7 <NA>     7    7.2              2 #A1D99B90 #21908C80
+#' #> 8  8 <NA>     8    5.4              2 #A1D99B90 #21908C80
 #'
 #' # Create a graph with 8 nodes and 7 edges
 #' graph <-
 #'   create_graph() %>%
-#'   add_path(8) %>%
+#'   add_path(n = 8) %>%
 #'   set_node_attrs(
-#'     "weight",
-#'     c(8.2, 3.7, 6.3, 9.2,
-#'       1.6, 2.5, 7.2, 5.4))
+#'     node_attr = weight,
+#'     values = c(8.2, 3.7, 6.3, 9.2,
+#'                1.6, 2.5, 7.2, 5.4))
 #'
 #' # We can bucketize values in `weight` using
 #' # `cut_points` and assign colors to each of the
@@ -96,7 +104,8 @@
 #' graph <-
 #'   graph %>%
 #'   colorize_node_attrs(
-#'     "weight", "fillcolor",
+#'     node_attr_from = weight,
+#'     node_attr_to = fillcolor,
 #'     cut_points = c(1, 3, 5, 7, 9))
 #'
 #' # Now there will be a `fillcolor` node attribute
@@ -112,7 +121,9 @@
 #' #> 6  6 <NA>     6    2.5   #D7191C
 #' #> 7  7 <NA>     7    7.2   #2B83BA
 #' #> 8  8 <NA>     8    5.4   #ABDDA4
-#' @import viridis RColorBrewer
+#' @import RColorBrewer
+#' @importFrom viridis viridis
+#' @importFrom rlang enquo UQ
 #' @export colorize_node_attrs
 
 colorize_node_attrs <- function(graph,
@@ -127,14 +138,16 @@ colorize_node_attrs <- function(graph,
   # Get the time of function start
   time_function_start <- Sys.time()
 
+  node_attr_from <- rlang::enquo(node_attr_from)
+  node_attr_from <- (rlang::UQ(node_attr_from) %>% paste())[2]
+
+  node_attr_to <- rlang::enquo(node_attr_to)
+  node_attr_to <- (rlang::UQ(node_attr_to) %>% paste())[2]
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
     stop("The graph object is not valid.")
   }
-
-  # Get the number of nodes ever created for
-  # this graph
-  nodes_created <- graph$last_node
 
   # Extract ndf from graph
   nodes_df <- graph$nodes_df
@@ -179,7 +192,7 @@ colorize_node_attrs <- function(graph,
     }
   }
 
-  # Reverse color palette if `reverse_palette = TRUE``
+  # Reverse color palette if `reverse_palette = TRUE`
   if (reverse_palette == TRUE) {
     color_palette <- rev(color_palette)
   }
@@ -255,8 +268,21 @@ colorize_node_attrs <- function(graph,
     }
   }
 
-  # Modify the graph
-  graph$nodes_df <- nodes_df
+  # Get the finalized column of values
+  nodes_attr_vector_colorized <- nodes_df[, ncol(nodes_df)]
+
+  node_attr_to_2 <- rlang::enquo(node_attr_to)
+
+  # Set the node attribute values for nodes specified
+  # in selection
+  graph <-
+    set_node_attrs(
+      x = graph,
+      node_attr = rlang::UQ(node_attr_to_2),
+      values = nodes_attr_vector_colorized)
+
+  # Remove last action from the `graph_log`
+  graph$graph_log <- graph$graph_log[1:(nrow(graph$graph_log) - 1), ]
 
   # Update the `graph_log` df with an action
   graph$graph_log <-
@@ -274,5 +300,5 @@ colorize_node_attrs <- function(graph,
     save_graph_as_rds(graph = graph)
   }
 
-  return(graph)
+  graph
 }

@@ -1,5 +1,5 @@
 #' Drop a node attribute column
-#' @description Within a graph's internal NDF, remove
+#' @description Within a graph's internal ndf, remove
 #' an existing node attribute.
 #' @param graph a graph object of class
 #' \code{dgr_graph}.
@@ -11,22 +11,24 @@
 #' # Create a random graph
 #' graph <-
 #'   create_random_graph(
-#'     5, 10, set_seed = 3)
+#'     n = 5, m = 10,
+#'     set_seed = 23)
 #'
 #' # Get the graph's internal ndf to show
 #' # which node attributes are available
 #' get_node_df(graph)
 #' #>   id type label value
-#' #> 1  1 <NA>     1   2.0
-#' #> 2  2 <NA>     2   8.5
-#' #> 3  3 <NA>     3   4.0
-#' #> 4  4 <NA>     4   3.5
-#' #> 5  5 <NA>     5   6.5
+#' #> 1  1 <NA>     1   6.0
+#' #> 2  2 <NA>     2   2.5
+#' #> 3  3 <NA>     3   3.5
+#' #> 4  4 <NA>     4   7.5
+#' #> 5  5 <NA>     5   8.5
 #'
 #' # Drop the `value` node attribute
 #' graph <-
 #'   graph %>%
-#'   drop_node_attrs("value")
+#'   drop_node_attrs(
+#'     node_attr = value)
 #'
 #' # Get the graph's internal ndf to show that
 #' # the node attribute `value` had been removed
@@ -37,6 +39,7 @@
 #' #> 3  3 <NA>     3
 #' #> 4  4 <NA>     4
 #' #> 5  5 <NA>     5
+#' @importFrom rlang enquo UQ
 #' @export drop_node_attrs
 
 drop_node_attrs <- function(graph,
@@ -44,6 +47,9 @@ drop_node_attrs <- function(graph,
 
   # Get the time of function start
   time_function_start <- Sys.time()
+
+  node_attr <- rlang::enquo(node_attr)
+  node_attr <- (rlang::UQ(node_attr) %>% paste())[2]
 
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
@@ -101,5 +107,5 @@ drop_node_attrs <- function(graph,
     save_graph_as_rds(graph = graph)
   }
 
-  return(graph)
+  graph
 }

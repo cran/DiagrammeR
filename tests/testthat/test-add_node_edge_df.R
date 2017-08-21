@@ -16,7 +16,9 @@ test_that("adding a node df to a graph is possible", {
   # Add the node data frame to the graph object to
   # create a graph with nodes
   graph_2 <-
-    add_node_df(graph = graph, node_df = nodes)
+    add_node_df(
+      graph = graph,
+      node_df = nodes)
 
   # Create another node data frame
   nodes_2 <-
@@ -29,25 +31,45 @@ test_that("adding a node df to a graph is possible", {
   # Add the second node data frame to the graph object
   # to add more nodes with attributes to the graph
   graph_3 <-
-    add_node_df(graph = graph_2, node_df = nodes_2)
+    add_node_df(
+      graph = graph_2,
+      node_df = nodes_2)
 
   # Expect that names in these graph objects match a
   # prescribed set of names
   expect_true(
-    all(names(graph_2) ==
-          c("graph_info", "nodes_df", "edges_df",
-            "global_attrs", "directed",
-            "last_node", "last_edge",
-            "node_selection", "edge_selection",
-            "graph_log")))
+    all(
+      names(graph_2) ==
+        c(
+          "graph_info",
+          "nodes_df",
+          "edges_df",
+          "global_attrs",
+          "directed",
+          "last_node",
+          "last_edge",
+          "node_selection",
+          "edge_selection",
+          "cache",
+          "graph_actions",
+          "graph_log")))
 
   expect_true(
-    all(names(graph_3) ==
-          c("graph_info", "nodes_df", "edges_df",
-            "global_attrs", "directed",
-            "last_node", "last_edge",
-            "node_selection", "edge_selection",
-            "graph_log")))
+    all(
+      names(graph_3) ==
+        c(
+          "graph_info",
+          "nodes_df",
+          "edges_df",
+          "global_attrs",
+          "directed",
+          "last_node",
+          "last_edge",
+          "node_selection",
+          "edge_selection",
+          "cache",
+          "graph_actions",
+          "graph_log")))
 
   # Expect graph objects of class `dgr_graph`
   expect_is(graph_2, "dgr_graph")
@@ -81,7 +103,10 @@ test_that("adding an edge df to a graph is possible", {
 
   # Add the node data frame to the graph object to create a
   # graph with nodes
-  graph_2 <- add_node_df(graph = graph, node_df = nodes)
+  graph_2 <-
+    add_node_df(
+      graph = graph,
+      node_df = nodes)
 
   # Create another node data frame
   nodes_2 <-
@@ -94,7 +119,9 @@ test_that("adding an edge df to a graph is possible", {
   # Add the second node data frame to the graph object to
   # add more nodes with attributes to the graph
   graph_3 <-
-    add_node_df(graph = graph_2, node_df = nodes_2)
+    add_node_df(
+      graph = graph_2,
+      node_df = nodes_2)
 
   # Create an edge data frame
   edges <-
@@ -111,27 +138,34 @@ test_that("adding an edge df to a graph is possible", {
 
   # Add the edge data frame to the graph
   graph_3 <-
-    add_edge_df(graph = graph_3, edge_df = edges)
+    add_edge_df(
+      graph = graph_3,
+      edge_df = edges)
 
   # Expect a graph object of class `dgr_graph`
-  expect_is(graph_3, "dgr_graph")
+  expect_is(
+    graph_3, "dgr_graph")
 
   # Expect that the `edges_df` component is a data frame
-  expect_is(graph_3$edges_df, "data.frame")
+  expect_is(
+    graph_3$edges_df, "data.frame")
 
   # Expect that the `edges_df` data frame has 3 rows
-  expect_true(nrow(graph_3$edges_df) == 3)
+  expect_true(
+    nrow(graph_3$edges_df) == 3)
 
   # Expect that the `edges_df` data frame has 4 columns
-  expect_true(ncol(graph_3$edges_df) == 4)
+  expect_true(
+    ncol(graph_3$edges_df) == 4)
 
   # Add another edge to a graph that already has some
   # edges defined
   graph_3 <-
     add_edge_df(
       graph = graph_3,
-      edge_df = create_edge_df(2, 4))
+      edge_df = create_edge_df(from = 2, to = 4))
 
   # Expect that the `edges_df` data frame has 4 rows
-  expect_true(nrow(graph_3$edges_df) == 4)
+  expect_true(
+    nrow(graph_3$edges_df) == 4)
 })

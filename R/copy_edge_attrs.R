@@ -16,41 +16,47 @@
 #' # Create a random graph
 #' graph <-
 #'   create_random_graph(
-#'   5, 8, set_seed = 3) %>%
-#'   set_edge_attrs("color", "green")
+#'   n = 5, m = 8,
+#'   set_seed = 23) %>%
+#'   set_edge_attrs(
+#'     edge_attr = color,
+#'     values = "green")
 #'
 #' # Get the graph's internal edf to show which
 #' # edge attributes are available
 #' get_edge_df(graph)
 #' #>   id from to  rel color
-#' #> 1  1    2  5 <NA> green
-#' #> 2  2    1  3 <NA> green
-#' #> 3  3    1  4 <NA> green
-#' #> 4  4    2  3 <NA> green
-#' #> 5  5    1  5 <NA> green
-#' #> 6  6    3  4 <NA> green
-#' #> 7  7    4  5 <NA> green
-#' #> 8  8    3  5 <NA> green
+#' #> 1  1    2  3 <NA> green
+#' #> 2  2    3  5 <NA> green
+#' #> 3  3    3  4 <NA> green
+#' #> 4  4    2  4 <NA> green
+#' #> 5  5    2  5 <NA> green
+#' #> 6  6    4  5 <NA> green
+#' #> 7  7    1  4 <NA> green
+#' #> 8  8    1  3 <NA> green
 #'
 #' # Make a copy the `color` edge attribute as
 #' # the `color_2` edge attribute
 #' graph <-
 #'   graph %>%
-#'   copy_edge_attrs("color", "color_2")
+#'   copy_edge_attrs(
+#'     edge_attr_from = color,
+#'     edge_attr_to = color_2)
 #'
 #' # Get the graph's internal edf to show that the
 #' # edge attribute had been copied
 #' get_edge_df(graph)
 #' #>   id from to  rel color color_2
-#' #> 1  1    2  5 <NA> green   green
-#' #> 2  2    1  3 <NA> green   green
-#' #> 3  3    1  4 <NA> green   green
-#' #> 4  4    2  3 <NA> green   green
-#' #> 5  5    1  5 <NA> green   green
-#' #> 6  6    3  4 <NA> green   green
-#' #> 7  7    4  5 <NA> green   green
-#' #> 8  8    3  5 <NA> green   green
+#' #> 1  1    2  3 <NA> green   green
+#' #> 2  2    3  5 <NA> green   green
+#' #> 3  3    3  4 <NA> green   green
+#' #> 4  4    2  4 <NA> green   green
+#' #> 5  5    2  5 <NA> green   green
+#' #> 6  6    4  5 <NA> green   green
+#' #> 7  7    1  4 <NA> green   green
+#' #> 8  8    1  3 <NA> green   green
 #' @importFrom dplyr bind_cols
+#' @importFrom rlang enquo UQ
 #' @export copy_edge_attrs
 
 copy_edge_attrs <- function(graph,
@@ -60,6 +66,12 @@ copy_edge_attrs <- function(graph,
   # Get the time of function start
   time_function_start <- Sys.time()
 
+  edge_attr_from <- rlang::enquo(edge_attr_from)
+  edge_attr_from <- (rlang::UQ(edge_attr_from) %>% paste())[2]
+
+  edge_attr_to <- rlang::enquo(edge_attr_to)
+  edge_attr_to <- (rlang::UQ(edge_attr_to) %>% paste())[2]
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
     stop("The graph object is not valid.")
@@ -68,7 +80,7 @@ copy_edge_attrs <- function(graph,
   # Stop function if `edge_attr_from` and
   # `edge_attr_to` are identical
   if (edge_attr_from == edge_attr_to) {
-    stop("You cannot use make a copy with the same name.")
+    stop("You cannot make a copy with the same name.")
   }
 
   # Stop function if `edge_attr_to` is `from` or `to`
@@ -96,8 +108,9 @@ copy_edge_attrs <- function(graph,
   edges <-
     dplyr::bind_cols(
       edges,
-      as.data.frame(edges[, col_num_copy_from],
-                    stringsAsFactors = FALSE))
+      as.data.frame(
+        edges[, col_num_copy_from],
+        stringsAsFactors = FALSE))
 
   # Set the column name for the copied attr
   colnames(edges)[ncol(edges)] <- edge_attr_to
@@ -121,5 +134,5 @@ copy_edge_attrs <- function(graph,
     save_graph_as_rds(graph = graph)
   }
 
-  return(graph)
+  graph
 }

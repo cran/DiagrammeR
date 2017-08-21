@@ -1,11 +1,10 @@
-#' Create a subgraph based on a selection of nodes
-#' or edges
+#' Create a subgraph using node/edge selection
 #' @description Create a subgraph based on a
 #' selection of nodes or edges stored in the graph
 #' object. Selections of nodes can be performed using
 #' the following \code{select_...} functions:
 #' \code{select_nodes()},
-#' \code{select_last_node()},
+#' \code{select_last_nodes_created()},
 #' \code{select_nodes_by_degree()},
 #' \code{select_nodes_by_id()}, or
 #' \code{select_nodes_in_neighborhood()}.
@@ -24,14 +23,15 @@
 #' ndf <-
 #'   create_node_df(
 #'     n = 6,
-#'     value = c(3.5, 2.6, 9.4,
-#'               2.7, 5.2, 2.1))
+#'     value =
+#'       c(3.5, 2.6, 9.4,
+#'         2.7, 5.2, 2.1))
 #'
 #' # Create an edge data frame (edf)
 #' edf <-
 #'   create_edge_df(
 #'     from = c(1, 2, 4, 5, 2, 6),
-#'     to = c(2, 4, 1, 3, 5, 5))
+#'       to = c(2, 4, 1, 3, 5, 5))
 #'
 #' # Create a graph
 #' graph <-
@@ -43,7 +43,8 @@
 #' # nodes `1`, `3`, and `5`
 #' graph <-
 #'   graph %>%
-#'   select_nodes("value > 3")
+#'   select_nodes(
+#'     conditions = value > 3)
 #'
 #' # Create a subgraph based on the selection
 #' subgraph <- create_subgraph_ws(graph)
@@ -123,6 +124,11 @@ create_subgraph_ws <- function(graph) {
     graph$edges_df <- edf
   }
 
+  # Scavenge any invalid, linked data frames
+  graph <-
+    graph %>%
+    remove_linked_dfs()
+
   # Update the `graph_log` df with an action
   graph$graph_log <-
     add_action_to_log(
@@ -134,10 +140,17 @@ create_subgraph_ws <- function(graph) {
       nodes = nrow(graph$nodes_df),
       edges = nrow(graph$edges_df))
 
+  # Perform graph actions, if any are available
+  if (nrow(graph$graph_actions) > 0) {
+    graph <-
+      graph %>%
+      trigger_graph_actions()
+  }
+
   # Write graph backup if the option is set
   if (graph$graph_info$write_backups) {
     save_graph_as_rds(graph = graph)
   }
 
-  return(graph)
+  graph
 }

@@ -28,7 +28,7 @@ relationship type.
 }
 \examples{
 # Set a seed
-set.seed(24)
+set.seed(23)
 
 # Create a node data frame (ndf)
 ndf <-
@@ -70,4 +70,3 @@ edge_count(graph, rel = "rel_a")
 edge_count(graph, rel = c("rel_a", "rel_b"))
 #> [1] 16
 }
-

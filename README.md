@@ -4,7 +4,7 @@
 ![](http://cranlogs.r-pkg.org/badges/grand-total/DiagrammeR?color=brightgreen)
 [![codecov.io](https://codecov.io/github/rich-iannone/DiagrammeR/coverage.svg?branch=master)](https://codecov.io/github/rich-iannone/DiagrammeR?branch=master) 
 
-With the **DiagrammeR** package you can create, modify, analyze, and visualize network graph diagrams. A collection of functions are available for working specifically with graph objects. The output can be viewed in the **RStudio** Viewer, incorporated in **RMarkdown**, integrated into **Shiny** web apps, converted into other graph formats, or exported as image, PDF, or SVG files.
+With the **DiagrammeR** package you can create, modify, analyze, and visualize network graph diagrams. The output can be incorporated into **RMarkdown** documents, integrated with **Shiny** web apps, converted to other graph formats, or exported as **PNG**, **PDF**, or **SVG** files.
 
 <img src="inst/img/simple_graph.png">
 
@@ -13,214 +13,153 @@ It's possible to make the above graph diagram using a combination of **Diagramme
 ```r
 library(DiagrammeR)
 
-create_random_graph(140, 100, set_seed = 23) %>%
-  join_node_attrs(get_w_connected_cmpts(.)) %>%
-  select_nodes_by_id(get_articulation_points(.)) %>%
-  set_node_attrs_ws("peripheries", 2) %>%
-  set_node_attrs_ws("width", 0.65) %>%
-  set_node_attrs_ws("height", 0.65) %>%
-  set_node_attrs_ws("penwidth", 3) %>%
-  clear_selection() %>%
-  add_global_graph_attrs(
-    attr =
-      c("color",  "penwidth", "width", "height"),
-    value =
-      c("gray80", "3",        "0.5",   "0.5"),
-    attr_type =
-      c("edge",   "edge",     "node",  "node")) %>%
+create_random_graph(
+  n = 140, m = 100,
+  directed = FALSE,
+  set_seed = 23) %>%
+  join_node_attrs(
+    df = get_s_connected_cmpts(.)) %>%
+  join_node_attrs(
+    df = get_degree_total(.)) %>%
   colorize_node_attrs(
-    node_attr_from = "wc_component",
-    node_attr_to = "fillcolor",
+    node_attr_from = sc_component,
+    node_attr_to = fillcolor,
     alpha = 80) %>%
-  set_node_attr_to_display() %>%
-  select_nodes_by_degree("deg >= 3") %>%
-  trav_both_edge() %>%
-  set_edge_attrs_ws("penwidth", 4) %>%
-  set_edge_attrs_ws("color", "gray60") %>%
+  rescale_node_attrs(
+    node_attr_from = total_degree,
+    to_lower_bound = 0.2,
+    to_upper_bound = 1.5,
+      node_attr_to = height) %>%
+  select_nodes_by_id(
+    nodes = get_articulation_points(.)) %>%
+  set_node_attrs_ws(
+    node_attr = peripheries,
+    value = 2) %>%
+  set_node_attrs_ws(
+    node_attr = penwidth,
+    value = 3) %>%
   clear_selection() %>%
+  set_node_attr_to_display(
+    attr = NULL) %>%
   render_graph()
 ```
 
-**DiagrammeR**'s graph functions allow you to create graph objects, modify those graphs, get information from the graphs, create a series of graphs, perform scaling of attribute values with data values, and many other useful things.
+**DiagrammeR**'s graph functions allow you to create graph objects, modify those graphs, get information from the graphs, create a series of graphs, and do many other useful things.
 
-This functionality makes it possible to generate a network graph with data available in tabular datasets. Two specialized data frames contain node data and attributes (node data frames) and edges with associated edge attributes (edge data frames). Because the attributes are always kept alongside the node and edge definitions (within the graph object itself), we can easily work with them and specify styling attributes to differentiate nodes and edges by size, color, shape, opacity, length, and more. Here are some of the available graph functions:
+This functionality makes it possible to generate a network graph with data available in tabular datasets. Two specialized data frames contain node data and attributes (node data frames) and edges with associated edge attributes (edge data frames). Because the attributes are always kept alongside the node and edge definitions (within the graph object itself), we can easily work with them and specify styling attributes to differentiate nodes and edges by size, color, shape, opacity, length, and more. 
 
-<img src="inst/img/graph_functions_1.png">
-<img src="inst/img/graph_functions_2.png">
-<img src="inst/img/graph_functions_3.png">
-<img src="inst/img/graph_functions_4.png">
-<img src="inst/img/graph_functions_5.png">
-<img src="inst/img/graph_functions_6.png">
-<img src="inst/img/graph_functions_7.png">
-<img src="inst/img/graph_functions_8.png">
-<img src="inst/img/graph_functions_9.png">
+## A Network Graph Example
 
-## Network Graph Example
+Let's create a property graph that pertains to contributors to three software projects. This graph has nodes representing people and projects. The attributes `name`, `age`, `join_date`,  `email`, `follower_count`, `following_count`, and `starred_count` are specific to the `person` nodes while the `project`, `start_date`, `stars`, and `language` attributes apply to the `project` nodes. The edges represent the relationships between the people and the project.
 
-Let's create a property graph by combining CSV data that pertains to contributors to three software projects. The CSV files (`contributors.csv`, `projects.csv`, and `projects_and_contributors.csv`) are available in the **DiagrammeR** package. Together they provide the properties `name`, `age`, `join_date`,  `email`, `follower_count`, `following_count`, and `starred_count` to the `person` nodes; `project`, `start_date`, `stars`, and `language` to the `project` nodes; and the `contributor_role` and `commits` properties to the edges.
+The example graph file `repository.dgr` is available in the `extdata/example_graphs_dgr/` directory in the **DiagrammeR** package (currently, only for the **Github** version). We can load it into memory by using the `open_graph()` function, with `system.file()` to provide the location of the file within the package.
 
 ```r
 library(DiagrammeR)
 
-# Create the main graph
+# Load in a the small repository graph
 graph <-
-  create_graph() %>%
-  set_graph_name("software_projects") %>%
-  add_nodes_from_table(
+  open_graph(
     system.file(
-      "extdata", "contributors.csv",
-      package = "DiagrammeR"),
-    set_type = "person",
-    label_col = "name") %>%
-  add_nodes_from_table(
-    system.file(
-      "extdata", "projects.csv",
-      package = "DiagrammeR"),
-    set_type = "project",
-    label_col = "project") %>%
-  add_edges_from_table(
-    system.file(
-      "extdata", "projects_and_contributors.csv",
-      package = "DiagrammeR"),
-    from_col = "contributor_name",
-    to_col = "project_name",
-    ndf_mapping = "label",
-    rel_col = "contributor_role")
+      "extdata/example_graphs_dgr/repository.dgr",
+      package = "DiagrammeR"))
 ```
 
 We can always view the property graph with the `render_graph()` function.
 
 ```r
-render_graph(graph, output = "visNetwork")
+render_graph(graph, layout = "kk")
 ```
 
 <img src="inst/img/graph_example_1.png">
 
 Now that the graph is set up, you can create queries with **magrittr** pipelines to get specific answers from the graph.
 
-Get the average age of all the contributors. Select all nodes of type `person` (not `project`). Each node of that type has non-`NA` `age` attribute, so, cache that attribute with `cache_node_attrs_ws()` (this function caches a vector of node attribute values in the graph). Get the cache straight away and get its mean (with `get_cache()` and then `mean()`).
-
-```r
-graph %>% 
-  select_nodes("type == 'person'") %>%
-  cache_node_attrs_ws("age", "numeric") %>%
-  get_cache() %>% 
-  mean()
-#> [1] 33.6
-```
-
-We can get the total number of commits to all projects. We know that all edges contain the numerical `commits` attribute, so, select all edges (`select_edges()` by itself selects all edges in the graph) and cache the `commits` values as a numeric vector with `cache_edge_attrs_ws()` (this is stored in the graph object itself). Immediately extract the cached vector with `get_cache()` and get its `sum()` (all commits to all projects).
-
-```r
-graph %>% 
-  select_edges() %>%
-  cache_edge_attrs_ws("commits", "numeric") %>%
-  get_cache() %>%
-  sum()
-#> [1] 5182
-```
-
-Single out the one known as Josh and get his total number of commits as a maintainer and as a contributor. Start by selecting the Josh node with `select_nodes("name == 'Josh'")`. In this graph, we know that all people have an edge to a project and that edge can be of the relationship (`rel`) type of `contributor` or `maintainer`. We can migrate our selection from nodes to outbound edges with `trav_out_edges()` (and we won't provide a condition, just all the outgoing edges from Josh will be selected). Now we have a selection of 2 edges. Get a vector of `commits` values as a stored, numeric vector with `cache_edge_attrs_ws()`. Immediately, extract it from the graph with `get_cache()` and get the `sum()`. This is the total number of commits.
-
-```r
-graph %>% 
-  select_nodes("name == 'Josh'") %>%
-  trav_out_edge() %>%
-  cache_edge_attrs_ws("commits", "numeric") %>%
-  get_cache() %>% 
-  sum()
-#> [1] 227
-```
-
-Get the total number of commits from Louisa, just from the maintainer role though. In this case we'll supply a condition in `trav_out_edge()`. This acts as a filter for the traversal, nullifying the selection to those edges where the condition is not met. Although there is only a single value in the cache, we'll still use `sum()` after `get_cache()` (a good practice because we may not know the vector length, especially in big graphs).
-
-```r
-graph %>% 
-  select_nodes("name == 'Louisa'") %>%
-  trav_out_edge("rel == 'maintainer'") %>%
-  cache_edge_attrs_ws("commits", "numeric") %>%
-  get_cache() %>% 
-  sum()
-#> [1] 236
-```
-
-How do we do something more complex, like, get the names of people in graph above age 32? First select all `person` nodes with `select_nodes("type == 'person'")`. Then, follow up with another `select_nodes()` call specifying `age > 32`, and, importantly using `set_op = "intersect"` (giving us the intersection of both selections). Now we have the selection of nodes we want; get all values of these nodes' `name` attribute as a cached character vector with the `cache_node_attrs_ws()` function. Get that cache and sort the names alphabetically with the **R** function `sort()`.
-
-```r
-graph %>% 
-  select_nodes("type == 'person'") %>%
-  select_nodes("age > 32", set_op = "intersect") %>%
-  cache_node_attrs_ws("name", "character") %>%
-  get_cache() %>%
-  sort()
-#> [1] "Jack"   "Jon"    "Kim"    "Roger"  "Sheryl"
-```
-
-Another way to express the same selection of nodes is to use the `mk_cond()` (i.e., 'make condition') helper function to compose the selection conditions. It uses sets of 3 elements for each condition: (1) the node or edge attribute name (character value), (2) the conditional operator (character value), and (3) the non-attribute operand. A linking `&` or `|` between groups is used to specify `AND`s or `OR`s. The `mk_cond()` helper is also useful for supplying variables to a condition for a number of `select_...()` and all `trav_...()` functions.
+Get the average age of all the contributors. Select all nodes of type `person` (not `project`). Each node of that type has non-`NA` `age` attribute, so, get that attribute as a vector with `get_node_attrs_ws()` and then calculate the mean with **R**'s `mean()` function.
 
 ```r
 graph %>% 
   select_nodes(
-    mk_cond(
-      "type", "==", "person",
-      "&",
-      "age",  ">",  32)) %>%
-  cache_node_attrs_ws("name", "character") %>%
-  get_cache() %>%
-  sort()
+    conditions = type == "person") %>%
+  get_node_attrs_ws(
+    node_attr = age) %>%
+  mean()
+#> [1] 33.6
+```
+
+We can get the total number of commits to all projects. We know that all edges contain the numerical `commits` attribute, so, select all edges (`select_edges()` by itself selects all edges in the graph). After that, get a numeric vector of `commits` values and then get its `sum()` (all commits to all projects).
+
+```r
+graph %>% 
+  select_edges() %>%
+  get_edge_attrs_ws(
+    edge_attr = commits) %>%
+  sum()
+#> [1] 5182
+```
+
+Single out the one known as Josh and get his total number of commits as a maintainer and as a contributor. Start by selecting the Josh node with `select_nodes(conditions = name == "Josh")`. In this graph, we know that all people have an edge to a project and that edge can be of the relationship (`rel`) type of `contributor` or `maintainer`. We can migrate our selection from nodes to outbound edges with `trav_out_edges()` (and we won't provide a condition, just all the outgoing edges from Josh will be selected). Now we have a selection of 2 edges. Get that vector of `commits` values with `get_edge_attrs_ws()` and then calculate the `sum()`. This is the total number of commits.
+
+```r
+graph %>% 
+  select_nodes(
+    conditions = name == "Josh") %>%
+  trav_out_edge() %>%
+  get_edge_attrs_ws(
+    edge_attr = commits) %>%
+  sum()
+#> [1] 227
+```
+
+Get the total number of commits from Louisa, just from the maintainer role though. In this case we'll supply a condition in `trav_out_edge()`. This acts as a filter for the traversal and this means that the selection will be applied to only those edges where the condition is met. Although there is only a single value, we'll still use `sum()` after `get_edge_attrs_ws()` (a good practice because we may not know the vector length, especially in big graphs).
+
+```r
+graph %>% 
+  select_nodes(
+    conditions = name == "Louisa") %>%
+  trav_out_edge(
+    conditions = rel == "maintainer") %>%
+  get_edge_attrs_ws(
+    edge_attr = commits) %>%
+  sum()
+#> [1] 236
+```
+
+How do we do something more complex, like, get the names of people in graph above age 32? First, select all `person` nodes with `select_nodes(conditions = type == "person")`. Then, follow up with another `select_nodes()` call specifying `age > 32`. Importantly, have `set_op = "intersect"` (giving us the intersection of both selections).
+
+Now that we have the starting selection of nodes we want, we need to get all values of these nodes' `name` attribute as a character vector. We do this with the `get_node_attrs_ws()` function. After getting that vector, sort the names alphabetically with the **R** function `sort()`. Because we get a named vector, we can use `unname()` to not show us the names of each vector component.
+
+```r
+graph %>% 
+  select_nodes(
+    conditions = type == "person") %>%
+  select_nodes(
+    conditions = age > 32,
+    set_op = "intersect") %>%
+  get_node_attrs_ws(
+    node_attr = name) %>%
+  sort() %>%
+  unname()
 #> [1] "Jack"   "Jon"    "Kim"    "Roger"  "Sheryl"
 ```
 
-That **supercalc** is progressing quite nicely. Let's get the total number of commits from all people to that most interesting project. Start by selecting that project's node and work backwards! Traverse to the edges leading to it with `trav_in_edge()`. Those edges are from committers and they all contain the `commits` attribute with numerical values. Cache those values, get the cache straight away, take the sum -> 1676 commits.
+That **supercalc** project is progressing quite nicely. Let's get the total number of commits from all people to that most interesting project. Start by selecting that project's node and work backwards. Traverse to the edges leading to it with `trav_in_edge()`. Those edges are from committers and they all contain the `commits` attribute with numerical values. Get a vector of `commits` and then get the sum (there are `1676` commits).
 ```r
 graph %>% 
-  select_nodes("project == 'supercalc'") %>%
+  select_nodes(
+    conditions = project == "supercalc") %>%
   trav_in_edge() %>%
-  cache_edge_attrs_ws("commits", "numeric") %>%
-  get_cache() %>% 
+  get_edge_attrs_ws(
+    edge_attr = commits) %>%
   sum()
 #> [1] 1676
 ```
 
-How would we find out who committed the most to the **supercalc** project? This is an extension of the previous problem and there are actually a few ways to do this. We start the same way (at the project node, using `select_nodes()`), then:
+Kim is now a contributor to the **stringbuildeR** project and has made 15 new commits to that project. We can modify the graph to reflect this.
 
-- traverse to the inward edges [`trav_in_edge()`]
-- cache the `commits` values found in these selected edges [`cache_edge_attrs_ws()`]
-- this is the complicated part but it's good: (1) use `select_edges()`; (2) compose the edge selection condition with the `mk_cond()` helper, where the edge has a `commits` value equal to the largest value in the cache; (3) use the `intersect` set operation to restrict the selection to those edges already selected by the `trav_in_edge()` traversal function
-- get a new cache of `commits` values (should only be a single value in this case)
-- we want the person responsible for these commits; traverse to that node from the edge selection [`trav_out_node()`]
-- cache the `name` values found in these selected nodes [`cache_node_attrs_ws()`]
-- get the cache [`get_cache()`]
+First, add an edge with `add_edge()`. Note that `add_edge()` usually relies on node IDs in `from` and `to` when creating the new edge. This is almost always inconvenient so we can instead use node labels (we know they are unique in this graph) to compose the edge, setting `use_labels = TRUE`.
 
-```r
-graph %>% 
-  select_nodes("project == 'supercalc'") %>%
-  trav_in_edge() %>%
-  cache_edge_attrs_ws("commits", "numeric") %>%
-  select_edges(mk_cond("commits", "==", get_cache(.) %>% max()), "intersect") %>%
-  cache_edge_attrs_ws("commits", "numeric") %>%
-  trav_out_node() %>%
-  cache_node_attrs_ws("name") %>%
-  get_cache()
-#> [1] "Sheryl"
-```
-
-What is the email address of the individual that contributed the least to the **randomizer** project? (We shall try to urge that person to do more.)
-
-```r
-graph %>% 
-  select_nodes("project == 'randomizer'") %>%
-  trav_in_edge() %>%
-  cache_edge_attrs_ws("commits", "numeric") %>%
-  trav_in_node() %>%
-  trav_in_edge(mk_cond("commits", "==", get_cache(.) %>% min())) %>%
-  trav_out_node() %>%
-  cache_node_attrs_ws("email") %>%
-  get_cache()
-#> [1] "the_will@graphymail.com"
-```
-
-Kim is now a contributor to the **stringbuildeR** project and has made 15 new commits to that project. We can modify the graph to reflect this. First, add an edge with `add_edge()`. Note that `add_edge()` usually relies on node IDs in `from` and `to` when creating the new edge. This is almost always inconvenient so we can instead use node labels (ensure they are unique!) to compose the edge, setting `use_labels = TRUE`. The `rel` value in `add_edge()` was set to `contributor` -- in a property graph we should try to always have values set for all node `type` and edge `rel` attributes. We will set another attribute for this edge (`commits`) by first selecting the edge (it was the last edge made: use `select_last_edge()`), then, use `set_edge_attrs_ws()` and provide the attribute/value pair. Finally, deselect all selections with `clear_selection()`. The graph is now changed, have a look.
+The `rel` value in `add_edge()` was set to `contributor` -- in a property graph we always have values set for all node `type` and edge `rel` attributes. We will set another attribute for this edge (`commits`) by first selecting the edge (it was the last edge made, so we can use `select_last_edges_created()`), then, use `set_edge_attrs_ws()` and provide the attribute/value pair. Finally, clear the active selections with `clear_selection()`. The graph is now changed, have a look.
 
 ```r
 graph <- 
@@ -228,28 +167,33 @@ graph <-
   add_edge(
     from = "Kim",
     to = "stringbuildeR",
-    rel = "contributor",
-    use_labels = TRUE) %>%
-  select_last_edge() %>%
-  set_edge_attrs_ws("commits", 15) %>%
+    rel = "contributor") %>%
+  select_last_edges_created() %>%
+  set_edge_attrs_ws(
+    edge_attr = commits,
+    value = 15) %>%
   clear_selection()
 
-render_graph(graph, output = "visNetwork")
+render_graph(graph, layout = "kk")
 ```
 
 <img src="inst/img/graph_example_2.png">
 
-Get all email addresses for contributors (but not maintainers) of the **randomizer** and **supercalc88** projects. Multiple `select_nodes()` calls in succession is an `OR` selection of nodes (`project` nodes selected can be `randomizer` or `supercalc`). With `trav_in_edge()` we just want the `contributer` edges/commits. Once on those edges, hop back unconditionally to the people from which the edges originate with `trav_out_node()`. Get the `email` values from those selected individuals as a sorted character vector. 
+Get all email addresses for contributors (but not maintainers) of the **randomizer** and **supercalc88** projects. With `trav_in_edge()` we just want the `contributer` edges/commits. Once on those edges, hop back unconditionally to the people from which the edges originate with `trav_out_node()`. Get the `email` values from those selected individuals as a sorted character vector. 
 
 ```r
 graph %>% 
-  select_nodes("project == 'randomizer'") %>%
-  select_nodes("project == 'supercalc'") %>%
-  trav_in_edge("rel == 'contributor'") %>%
+  select_nodes(
+    conditions = 
+      project == "randomizer" | 
+      project == "supercalc") %>%
+  trav_in_edge(
+    conditions = rel == "contributor") %>%
   trav_out_node() %>%
-  cache_node_attrs_ws("email", "character") %>%
-  get_cache() %>% 
-  sort()
+  get_node_attrs_ws(
+    node_attr = email) %>%
+  sort() %>%
+  unname()
 #> [1] "j_2000@ultramail.io"      "josh_ch@megamail.kn"     
 #> [3] "kim_3251323@ohhh.ai"      "lhe99@mailing-fun.com"   
 #> [5] "roger_that@whalemail.net" "the_simone@a-q-w-o.net"  
@@ -257,27 +201,30 @@ graph %>%
 ```
 
 Which people have committed to more than one project? This is a matter of node degree. We know that people have edges outward and projects and edges inward. Thus, anybody having an outdegree (number of edges outward) greater than `1` has committed to more than one project. Globally, select nodes with that condition using `select_nodes_by_degree("outdeg > 1")`. Once getting the `name` attribute values from that node selection, we can provide a sorted character vector of names.
+
 ```r
 graph %>%
-  select_nodes_by_degree("outdeg > 1") %>%
-  cache_node_attrs_ws("name") %>%
-  get_cache() %>% 
-  sort()
+  select_nodes_by_degree(
+    expressions = "outdeg > 1") %>%
+  get_node_attrs_ws(
+    node_attr = name) %>%
+  sort() %>%
+  unname()
 #> [1] "Josh"   "Kim"    "Louisa"
 ```
 
 ## Installation
 
-**DiagrammeR** is used in an **R** environment. If you don't have an **R** installation, it can be obtained from the [**Comprehensive R Archive Network (CRAN)**](https://cran.r-project.org/). It is recommended that [**RStudio**](http://www.rstudio.com/products/RStudio/) be used as the **R** IDE to take advantage of its rendering capabilities and the code-coloring support for **Graphviz** and **mermaid** diagrams.
+**DiagrammeR** is used in an **R** environment. If you don't have an **R** installation, it can be obtained from the [**Comprehensive R Archive Network (CRAN)**](https://cran.r-project.org/).
 
-You can install the development (v0.9.0) version of **DiagrammeR** from **GitHub** using the **devtools** package.
+You can install the development (v0.9.1) version of **DiagrammeR** from **GitHub** using the **devtools** package.
 
 ```r
-devtools::install_github('rich-iannone/DiagrammeR')
+devtools::install_github("rich-iannone/DiagrammeR")
 ```
 
-Or, get the v0.8.4 release from **CRAN**.
+Or, get it from **CRAN**.
 
 ```r
-install.packages('DiagrammeR')
+install.packages("DiagrammeR")
 ```

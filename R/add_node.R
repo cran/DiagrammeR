@@ -12,6 +12,8 @@
 #' from which edges will be directed to the new node.
 #' @param to an optional vector containing node IDs to
 #' which edges will be directed from the new node.
+#' @param ... one or more optional, single value vectors
+#' for supplying node attributes to the new node.
 #' @return a graph object of class \code{dgr_graph}.
 #' @examples
 #' # Create an empty graph and add 2 nodes by using
@@ -21,30 +23,39 @@
 #'   add_node() %>%
 #'   add_node()
 #'
-#' # Get a count of nodes in the graph
+#' # Get a count of all nodes
+#' # in the graph
 #' node_count(graph)
 #' #> [1] 2
 #'
-#' # The nodes added were given ID values `1` and `2`
+#' # The nodes added were given
+#' # ID values `1` and `2`
 #' get_node_ids(graph)
 #' #> [1] 1 2
 #'
 #' # Add a node with a `type` value defined
-#' graph <- add_node(graph, "person")
+#' graph <-
+#'   add_node(
+#'     graph = graph,
+#'     type = "person")
 #'
-#' # View the graph's internal node data frame (ndf)
+#' # View the graph's internal
+#' # node data frame (ndf)
 #' get_node_df(graph)
 #' #>   id   type label
 #' #> 1  1   <NA>  <NA>
 #' #> 2  2   <NA>  <NA>
 #' #> 3  3 person  <NA>
+#' @importFrom dplyr select bind_cols
+#' @importFrom tibble as_tibble
 #' @export add_node
 
 add_node <- function(graph,
                      type = NULL,
                      label = NULL,
                      from = NULL,
-                     to = NULL) {
+                     to = NULL,
+                     ...) {
 
   # Get the time of function start
   time_function_start <- Sys.time()
@@ -65,6 +76,15 @@ add_node <- function(graph,
     label <- as.character(NA)
   }
 
+  # Collect extra vectors of data as `extras`
+  extras <- list(...)
+
+  if (length(extras) > 0) {
+    if (nrow(tibble::as_tibble(extras)) == 1) {
+      extras_tbl <- tibble::as_tibble(extras)
+    }
+  }
+
   # Modify graph if neither `to` nor `from`
   # values provided
   if (is.null(from) & is.null(to)) {
@@ -74,6 +94,14 @@ add_node <- function(graph,
         n = 1,
         label = as.character(label),
         type = as.character(type))
+
+    # Add extra columns if available
+    if (exists("extras_tbl")) {
+
+      new_node <-
+        new_node %>%
+        dplyr::bind_cols(extras_tbl)
+    }
 
     new_node[1, 1] <- node
 
@@ -120,6 +148,14 @@ add_node <- function(graph,
           n = 1,
           label = as.character(label),
           type = as.character(type))
+
+      # Add extra columns if available
+      if (exists("extras_tbl")) {
+
+        new_node <-
+          new_node %>%
+          dplyr::bind_cols(extras_tbl)
+      }
 
       new_node[1, 1] <- node
 
@@ -176,6 +212,14 @@ add_node <- function(graph,
         n = 1,
         label = as.character(label),
         type = as.character(type))
+
+    # Add extra columns if available
+    if (exists("extras_tbl")) {
+
+      new_node <-
+        new_node %>%
+        dplyr::bind_cols(extras_tbl)
+    }
 
     new_node[1, 1] <- node
 
@@ -240,6 +284,14 @@ add_node <- function(graph,
           label = as.character(label),
           type = as.character(type))
 
+      # Add extra columns if available
+      if (exists("extras_tbl")) {
+
+        new_node <-
+          new_node %>%
+          dplyr::bind_cols(extras_tbl)
+      }
+
       new_node[1, 1] <- node
 
       # Combine the new nodes with those in the graph
@@ -272,6 +324,13 @@ add_node <- function(graph,
           duration = graph_function_duration(time_function_start),
           nodes = nrow(graph$nodes_df),
           edges = nrow(graph$edges_df))
+
+      # Perform graph actions, if any are available
+      if (nrow(graph$graph_actions) > 0) {
+        graph <-
+          graph %>%
+          trigger_graph_actions()
+      }
 
       # Write graph backup if the option is set
       if (graph$graph_info$write_backups) {

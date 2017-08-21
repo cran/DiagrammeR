@@ -17,11 +17,17 @@
 #' graph <-
 #'   create_graph() %>%
 #'   add_global_graph_attrs(
-#'     "overlap", "true", "graph") %>%
+#'     attr = "overlap",
+#'     value = "true",
+#'     attr_type = "graph") %>%
 #'   add_global_graph_attrs(
-#'     "penwidth", 3, "node") %>%
+#'     attr = "penwidth",
+#'     value = 3,
+#'     attr_type = "node") %>%
 #'   add_global_graph_attrs(
-#'     "penwidth", 3, "edge")
+#'     attr = "penwidth",
+#'     value = 3,
+#'     attr_type = "edge")
 #'
 #' # View the graph's global attributes
 #' get_global_graph_attrs(graph)
@@ -34,7 +40,9 @@
 #' # nodes using `delete_global_graph_attrs()`
 #' graph <-
 #'   graph %>%
-#'   delete_global_graph_attrs("penwidth", "node")
+#'   delete_global_graph_attrs(
+#'     attr = "penwidth",
+#'     attr_type = "node")
 #'
 #' # View the remaining set of global
 #' # attributes for the graph
@@ -81,13 +89,29 @@ delete_global_graph_attrs <- function(graph,
   # rows from the graph
   global_attrs_joined <-
     global_attrs_available %>%
-    dplyr::anti_join(global_attrs_to_remove,
-                     by = c("attr",
-                            "attr_type"))
+    dplyr::anti_join(
+      global_attrs_to_remove,
+      by = c("attr", "attr_type"))
 
   # Replace the graph's global attributes with
   # the revised set
   graph$global_attrs <- global_attrs_joined
 
-  return(graph)
+  # Update the `graph_log` df with an action
+  graph$graph_log <-
+    add_action_to_log(
+      graph_log = graph$graph_log,
+      version_id = nrow(graph$graph_log) + 1,
+      function_used = "delete_global_graph_attrs",
+      time_modified = time_function_start,
+      duration = graph_function_duration(time_function_start),
+      nodes = nrow(graph$nodes_df),
+      edges = nrow(graph$edges_df))
+
+  # Write graph backup if the option is set
+  if (graph$graph_info$write_backups) {
+    save_graph_as_rds(graph = graph)
+  }
+
+  graph
 }

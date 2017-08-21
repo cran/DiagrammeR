@@ -17,9 +17,12 @@
 #' @return a graph object of class \code{dgr_graph}.
 #' @examples
 #' # Create a new graph and set some global attributes
-#' graph <- create_graph() %>%
+#' graph <-
+#'   create_graph() %>%
 #'   set_global_graph_attrs(
-#'     "overlap", "true", "graph")
+#'     attr = "overlap",
+#'     value = "true",
+#'     attr_type = "graph")
 #'
 #' # Verify that the global attributes have been set
 #' get_global_graph_attrs(graph)
@@ -83,5 +86,5 @@ set_global_graph_attrs <- function(graph,
     save_graph_as_rds(graph = graph)
   }
 
-  return(graph)
+  graph
 }

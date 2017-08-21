@@ -24,14 +24,20 @@
 #' graph <-
 #'   create_graph() %>%
 #'   add_n_nodes(
-#'     2, type = "a",
+#'     n = 2,
+#'     type = "a",
 #'     label = c("asd", "iekd")) %>%
 #'   add_n_nodes(
-#'     3, type = "b",
+#'     n = 3,
+#'     type = "b",
 #'     label = c("idj", "edl", "ohd")) %>%
 #'   add_edges_w_string(
-#'     "1->2 1->3 2->4 2->5 3->5",
-#'     rel = c(NA, "A", "B", "C", "D"))
+#'     edges = "1->2 1->3 2->4 2->5 3->5",
+#'     rel = c(NA, "A", "B", "C", "D")) %>%
+#'   set_node_attrs(
+#'     node_attr = values,
+#'     values = c(2.3, 4.7, 9.4,
+#'                8.3, 6.3))
 #'
 #' # Create a data frame with node ID values
 #' # representing the graph edges (with `from`
@@ -44,16 +50,21 @@
 #'
 #' # Join the data frame to the graph's internal
 #' # edge data frame (edf)
-#' graph <- graph %>% join_edge_attrs(df)
+#' graph <-
+#'   graph %>%
+#'   join_edge_attrs(
+#'     df = df)
 #'
+#' # Show the graph's internal node data frame
 #' get_node_df(graph)
-#' #>   id type label
-#' #> 1  1    a   asd
-#' #> 2  2    a  iekd
-#' #> 3  3    b   idj
-#' #> 4  4    b   edl
-#' #> 5  5    b   ohd
+#' #>   id type label values
+#' #> 1  1    a   asd    2.3
+#' #> 2  2    a  iekd    4.7
+#' #> 3  3    b   idj    9.4
+#' #> 4  4    b   edl    8.3
+#' #> 5  5    b   ohd    6.3
 #'
+#' # Show the graph's internal edge data frame
 #' get_edge_df(graph)
 #' #>   id from to  rel values
 #' #> 1  1    1  2 <NA>   6.00
@@ -66,7 +77,7 @@
 #' # outbound edges with no conditions on the
 #' # nodes traversed to
 #' graph %>%
-#'   select_nodes_by_id(1) %>%
+#'   select_nodes_by_id(nodes = 1) %>%
 #'   trav_out_edge() %>%
 #'   get_selection()
 #' #> [1] 1 2
@@ -75,9 +86,9 @@
 #' # edges, filtering to those edges that have
 #' # NA values for the `rel` edge attribute
 #' graph %>%
-#'   select_nodes_by_id(1) %>%
+#'   select_nodes_by_id(nodes = 1) %>%
 #'   trav_out_edge(
-#'     conditions = "is.na(rel)") %>%
+#'     conditions = is.na(rel)) %>%
 #'   get_selection()
 #' #> [1] 1
 #'
@@ -86,9 +97,9 @@
 #' # numeric values greater than `5.0` for
 #' # the `rel` edge attribute
 #' graph %>%
-#'   select_nodes_by_id(3) %>%
+#'   select_nodes_by_id(nodes = 3) %>%
 #'   trav_out_edge(
-#'     conditions = "values > 5.0") %>%
+#'     conditions = values > 5.0) %>%
 #'   get_selection()
 #' #> [1] 5
 #'
@@ -97,9 +108,9 @@
 #' # have values equal to `A` for the `rel`
 #' # edge attribute
 #' graph %>%
-#'   select_nodes_by_id(1) %>%
+#'   select_nodes_by_id(nodes = 1) %>%
 #'   trav_out_edge(
-#'     conditions = "rel == 'A'") %>%
+#'     conditions = rel == "A") %>%
 #'   get_selection()
 #' #> [1] 2
 #'
@@ -108,34 +119,33 @@
 #' # have values in the set `B` and `C` for
 #' # the `rel` edge attribute
 #' graph %>%
-#'   select_nodes_by_id(2) %>%
+#'   select_nodes_by_id(nodes = 2) %>%
 #'   trav_out_edge(
-#'     conditions = "rel %in% c('B', 'C')") %>%
+#'     conditions = rel %in% c("B", "C")) %>%
 #'   get_selection()
 #' #> [1] 3 4
 #'
-#' # Traverse from node `2` to any outbound
-#' # edges, and use multiple conditions for the
-#' # traversal (using a vector in `conditions`
-#' # creates a set of `AND` conditions)
+#' # Traverse from node `2` to any
+#' # outbound edges, and use multiple
+#' # conditions for the traversal
 #' graph %>%
-#'   select_nodes_by_id(2) %>%
+#'   select_nodes_by_id(nodes = 2) %>%
 #'   trav_out_edge(
-#'     conditions = c(
-#'       "rel %in% c('B', 'C')",
-#'       "values >= 5.0")) %>%
+#'     conditions =
+#'       rel %in% c("B", "C") &
+#'       values >= 5.0) %>%
 #'   get_selection()
 #' #> [1] 4
 #'
-#' # Traverse from node `2` to any outbound
-#' # edges, and use multiple conditions with
-#' # a single-length vector (here, using a
-#' # `|` to create a set of `OR` conditions)
+#' # Traverse from node `2` to any
+#' # outbound edges, and use multiple
+#' # conditions
 #' graph %>%
-#'   select_nodes_by_id(2) %>%
+#'   select_nodes_by_id(nodes = 2) %>%
 #'   trav_out_edge(
-#'     conditions = c(
-#'       "rel %in% c('B', 'C') | values > 6.0")) %>%
+#'     conditions =
+#'       rel %in% c("B", "C") |
+#'       values > 6.0) %>%
 #'   get_selection()
 #' #> [1] 3 4
 #'
@@ -143,17 +153,48 @@
 #' # edges, and use a regular expression as
 #' # a filtering condition
 #' graph %>%
-#'   select_nodes_by_id(2) %>%
+#'   select_nodes_by_id(nodes = 2) %>%
 #'   trav_out_edge(
-#'     conditions = "grepl('B|C', rel)") %>%
+#'     conditions = grepl("B|C", rel)) %>%
 #'   get_selection()
 #' #> [1] 3 4
-#' @importFrom dplyr filter filter_ select select_ full_join rename everything
+#'
+#' # Perform a traversal from all nodes to
+#' # their outgoing edges and, while doing
+#' # so, copy the `label` node attribute
+#' # to any of the nodes' incoming edges
+#' graph <-
+#'   graph %>%
+#'   select_nodes() %>%
+#'   trav_out_edge(
+#'     copy_attrs_from = label)
+#'
+#' # Show the graph's internal edge
+#' # data frame after this change
+#' graph %>%
+#'   get_edge_df()
+#' #>   id from to  rel label values
+#' #> 1  1    1  2 <NA>   asd   6.00
+#' #> 2  1    2  3    A   asd   6.11
+#' #> 3  2    3  4    B  iekd   4.72
+#' #> 4  2    4  5    C  iekd   6.02
+#' #> 5  3    5  5    D   idj   5.05
+#' @importFrom dplyr filter select select_ full_join rename everything
+#' @importFrom rlang enquo UQ
 #' @export trav_out_edge
 
 trav_out_edge <- function(graph,
                           conditions = NULL,
                           copy_attrs_from = NULL) {
+
+  conditions <- rlang::enquo(conditions)
+
+  copy_attrs_from <- rlang::enquo(copy_attrs_from)
+  copy_attrs_from <- (rlang::UQ(copy_attrs_from) %>% paste())[2]
+
+  if (copy_attrs_from == "NULL") {
+    copy_attrs_from <- NULL
+  }
 
   # Get the time of function start
   time_function_start <- Sys.time()
@@ -209,13 +250,12 @@ trav_out_edge <- function(graph,
   # If traversal conditions are provided then
   # pass in those conditions and filter the
   # data frame of `valid_edges`
-  if (!is.null(conditions)) {
-    for (i in 1:length(conditions)) {
+  if (!((rlang::UQ(conditions) %>% paste())[2] == "NULL")) {
 
-      valid_edges <-
-        valid_edges %>%
-        dplyr::filter_(conditions[i])
-    }
+    valid_edges <-
+      filter(
+        .data = valid_edges,
+        rlang::UQ(conditions))
   }
 
   # If no rows returned, then there are no
@@ -236,9 +276,9 @@ trav_out_edge <- function(graph,
 
       edges <-
         ndf %>%
-        dplyr::filter(id == starting_nodes) %>%
+        dplyr::filter(id %in% starting_nodes) %>%
         dplyr::select_("id", copy_attrs_from) %>%
-        dplyr::full_join(edf, c("id" = "from")) %>%
+        dplyr::right_join(edf, c("id" = "from")) %>%
         dplyr::rename(from = id.y) %>%
         dplyr::select(id, from, to, rel, dplyr::everything())
     }
@@ -248,10 +288,11 @@ trav_out_edge <- function(graph,
 
       edges <-
         ndf %>%
-        dplyr::filter(id == starting_nodes) %>%
+        dplyr::filter(id %in% starting_nodes) %>%
         dplyr::select_("id", copy_attrs_from) %>%
-        dplyr::full_join(edf, c("id" = "from")) %>%
-        dplyr::rename(from = id.y)
+        dplyr::right_join(edf, c("id" = "from")) %>%
+        dplyr::rename(from = id) %>%
+        dplyr::rename(id = id.y)
 
       # Get column numbers that end with ".x" or ".y"
       split_var_x_col <-
@@ -312,5 +353,5 @@ trav_out_edge <- function(graph,
     save_graph_as_rds(graph = graph)
   }
 
-  return(graph)
+  graph
 }

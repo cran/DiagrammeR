@@ -8,24 +8,32 @@
 #' # Create a graph using several piped functions
 #' graph <-
 #'   create_graph() %>%
-#'   add_n_nodes(1, "a") %>%
-#'   select_last_node %>%
-#'   add_n_nodes_ws(5, "from", "b") %>%
-#'   select_nodes_by_id(1) %>%
+#'   add_n_nodes(
+#'     n = 1,
+#'     type = "a") %>%
+#'   select_last_nodes_created() %>%
+#'   add_n_nodes_ws(
+#'     n = 5,
+#'     direction = "from",
+#'     type = "b") %>%
+#'   select_nodes_by_id(nodes = 1) %>%
 #'   set_node_attrs_ws(
-#'     "value", 25.3) %>%
+#'     node_attr = value,
+#'     value = 25.3) %>%
 #'   clear_selection() %>%
-#'   select_nodes_by_id(2:4) %>%
+#'   select_nodes_by_id(nodes = 2:4) %>%
 #'   set_node_attrs_ws(
-#'     "color", "grey70") %>%
+#'     node_attr = color,
+#'     value = "grey70") %>%
 #'   invert_selection() %>%
 #'   set_node_attrs_ws(
-#'     "color", "grey80") %>%
-#'   clear_selection
+#'     node_attr = color,
+#'     value = "grey80") %>%
+#'   clear_selection()
 #'
 #' # Get the graph's internal node
 #' # data frame (ndf)
-#' graph %>% get_node_df()
+#' get_node_df(graph)
 #' #>   id type label value  color
 #' #> 1  1    a  <NA>  25.3 grey80
 #' #> 2  2    b  <NA>    NA grey70
@@ -42,9 +50,5 @@ get_node_df <- function(graph) {
     stop("The graph object is not valid.")
   }
 
-  if (is.null(graph$nodes_df)) {
-    return(NA)
-  } else {
-    return(graph$nodes_df)
-  }
+  graph$nodes_df
 }

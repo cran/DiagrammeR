@@ -1,5 +1,4 @@
-#' Determine whether a specified edge is present in an
-#' existing graph object
+#' Determine whether a specified edge is present
 #' @description From a graph object of class
 #' \code{dgr_graph}, determine whether a directed edge
 #' (defined by a pair of node IDs extant in the graph)
@@ -13,7 +12,7 @@
 #' @return a logical value.
 #' @examples
 #' # Set a seed
-#' set.seed(24)
+#' set.seed(23)
 #'
 #' # Create a node data frame (ndf)
 #' ndf <-
@@ -47,8 +46,8 @@
 #' #> FALSE
 #'
 #' # Verify that there is an edge between nodes
-#' # `18` and `26`
-#' edge_present(graph, from = 18, to = 26)
+#' # `9` and `5`
+#' edge_present(graph, from = 9, to = 5)
 #' #> TRUE
 #' @export edge_present
 
@@ -71,7 +70,7 @@ edge_present <- function(graph,
   # Stop function if either node is not a single value
   if (from_is_single_value == FALSE |
       to_is_single_value == FALSE) {
-    stop("Only single nodes for 'from' and 'to' should be specified.")
+    stop("Only single nodes for `from` and `to` should be specified.")
   }
 
   # Determine whether pair of nodes provided are in

@@ -37,10 +37,18 @@ selection that do not have position information
 # Create a simple graph with 4 nodes
 graph <-
   create_graph() \%>\%
-  add_node(type = "a", label = "one") \%>\%
-  add_node(type = "a", label = "two") \%>\%
-  add_node(type = "b", label = "three") \%>\%
-  add_node(type = "b", label = "four")
+  add_node(
+    type = "a",
+    label = "one") \%>\%
+  add_node(
+    type = "a",
+    label = "two") \%>\%
+  add_node(
+    type = "b",
+    label = "three") \%>\%
+  add_node(
+    type = "b",
+    label = "four")
 
 # Add position information to each of
 # the graph's nodes
@@ -82,7 +90,8 @@ get_node_df(graph)
 graph <-
   graph \%>\%
   clear_selection() \%>\%
-  select_nodes("type == 'b'") \%>\%
+  select_nodes(
+    conditions = type == "b") \%>\%
   nudge_node_positions_ws(
     dx = 0, dy = 2)
 
@@ -94,4 +103,3 @@ get_node_df(graph)
 #> 3  3    b three 8 5
 #> 4  4    b  four 9 6
 }
-

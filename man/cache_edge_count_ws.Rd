@@ -5,28 +5,16 @@
 \title{Cache a count of edges (available in a
 selection) in the graph}
 \usage{
-cache_edge_count_ws(graph)
+cache_edge_count_ws(graph, name = NULL)
 }
 \arguments{
 \item{graph}{a graph object of class
 \code{dgr_graph}.}
+
+\item{name}{an optional name for the cached vector.}
 }
 \value{
 a graph object of class \code{dgr_graph}.
-# Create a graph with 5 nodes and 4 edges
-graph <-
-  create_graph() %>%
-  add_path(5)
-
-# Cache a count of edges after creating a selection
-graph <-
-  graph %>%
-  select_edges_by_node_id(2) %>%
-  cache_edge_count_ws()
-
-# Get the number of edges stored in the cache
-graph %>% get_cache()
-#> [1] 4
 }
 \description{
 From a graph object of class
@@ -44,4 +32,20 @@ the following traversal functions:
 \code{trav_out_edge()}, \code{trav_in_edge()},
 or \code{trav_both_edge()}.
 }
+\examples{
+# Create a graph with 5 nodes and 4 edges
+graph <-
+  create_graph() \%>\%
+  add_path(n = 5)
 
+# Cache a count of edges after creating a selection
+graph <-
+  graph \%>\%
+  select_edges_by_node_id(nodes = 2) \%>\%
+  cache_edge_count_ws(name = "edge_count")
+
+# Get the number of edges stored in the cache
+graph \%>\%
+  get_cache(name = "edge_count")
+#> [1] 2
+}

@@ -1,5 +1,5 @@
 #' Create an edge data frame
-#' @description Combine several named vectors for edges
+#' @description Combine several vectors for edges
 #' and their attributes into a data frame, which can be
 #' combined with other similarly-generated data frames,
 #' or, added to a graph object.
@@ -11,7 +11,7 @@
 #' the \code{from} vector.
 #' @param rel an optional \code{rel} label for each
 #' edge.
-#' @param ... one or more named vectors for associated
+#' @param ... one or more vectors for associated edge
 #' attributes.
 #' @return an edge data frame (edf).
 #' @examples
@@ -31,8 +31,8 @@
 #' #> 3  3    3  1   a
 #'
 #' # Create an edf with additional edge
-#' # attributes (where their classes will be
-#' # inferred from the input vectors)
+#' # attributes (where their classes will
+#' # be inferred from the input vectors)
 #' edf <-
 #'   create_edge_df(
 #'     from = c(1, 2, 3),
@@ -154,5 +154,5 @@ create_edge_df <- function(from,
         stringsAsFactors = FALSE)
   }
 
-  return(edges_df)
+  edges_df
 }

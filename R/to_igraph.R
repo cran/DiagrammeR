@@ -8,7 +8,8 @@
 #' # Create a DiagrammeR graph object
 #' graph <-
 #'   create_random_graph(
-#'     36, 50, set_seed = 1)
+#'     n = 36, m = 50,
+#'     set_seed = 23)
 #'
 #' # Confirm that `graph` is a DiagrammeR graph
 #' # by getting the object's class
@@ -25,7 +26,7 @@
 #'
 #' # Get a summary of the igraph graph object
 #' summary(ig_graph)
-#' #> IGRAPH UN-B 36 50 --
+#' #> IGRAPH DN-B 36 50 --
 #' #> + attr: name (v/c), type (v/c), label
 #' #> | (v/c), value (v/c), rel (e/c)
 #' @importFrom igraph graph_from_data_frame
@@ -48,11 +49,8 @@ to_igraph <- function(graph) {
     graph$edges_df %>%
     dplyr::select_("-id")
 
-  igraph_graph <-
-    igraph::graph_from_data_frame(
-      d = edf,
-      directed = graph$directed,
-      vertices = ndf)
-
-  return(igraph_graph)
+  igraph::graph_from_data_frame(
+    d = edf,
+    directed = graph$directed,
+    vertices = ndf)
 }

@@ -12,19 +12,19 @@
 #' # Create three graphs
 #' graph_1 <-
 #'   create_graph() %>%
-#'   add_n_nodes(3) %>%
+#'   add_n_nodes(n = 3) %>%
 #'   add_edges_w_string(
-#'     "1->3 1->2 2->3")
+#'     edges = "1->3 1->2 2->3")
 #'
 #' graph_2 <-
 #'   graph_1 %>%
 #'   add_node() %>%
-#'   add_edge(4, 3)
+#'   add_edge(from = 4, to = 3)
 #'
 #' graph_3 <-
 #'   graph_2 %>%
 #'   add_node() %>%
-#'   add_edge(5, 2)
+#'   add_edge(from = 5, to = 2)
 #'
 #' # Create an empty graph series and add
 #' # the graphs
@@ -53,11 +53,11 @@ add_to_series <- function(graph,
   # Stop function if graph series type is not valid
   if (!(series_type %in%
         c("sequential", "temporal"))) {
-    stop("The graph series type is neither 'sequential' nor 'temporal'")
+    stop("The graph series type is neither of the `sequential` nor `temporal` types.")
   }
 
   # Add graph to series
   graph_series$graphs[[length(graph_series$graphs) + 1]] <- graph
 
-  return(graph_series)
+  graph_series
 }

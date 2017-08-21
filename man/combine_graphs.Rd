@@ -13,7 +13,7 @@ considered the graph from which global graph
 attributes will be inherited in the resulting graph.}
 
 \item{y}{a \code{DiagrammeR} graph object that is to
-be unioned with the graph suppled as \code{x}.}
+be unioned with the graph supplied as \code{x}.}
 }
 \value{
 a graph object of class \code{dgr_graph}.
@@ -31,11 +31,14 @@ graph_cycle <-
 # Create a random graph with 8 nodes, 15 edges
 graph_random <-
   create_random_graph(
-    8, 15, set_seed = 1)
+    n = 8, m = 15,
+    set_seed = 23)
 
 # Combine the two graphs in a union operation
 combined_graph <-
-  combine_graphs(graph_cycle, graph_random)
+  combine_graphs(
+    graph_cycle,
+    graph_random)
 
 # Get the number of nodes in the combined graph
 node_count(combined_graph)
@@ -47,4 +50,3 @@ node_count(combined_graph)
 get_node_ids(combined_graph)
 #> [1]  1  2  3  4  5  6  7  8  9 10 11 12 13 14
 }
-

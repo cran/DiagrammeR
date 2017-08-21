@@ -24,11 +24,12 @@
 #' # Create a random graph
 #' graph <-
 #'   create_random_graph(
-#'     4, 6, set_seed = 23) %>%
+#'     n = 4, m = 6,
+#'     set_seed = 23) %>%
 #'   set_edge_attrs(
-#'     "rel",
-#'     c("a", "b", "a",
-#'       "c", "b", "d"))
+#'     edge_attr = rel,
+#'     values = c("a", "b", "a",
+#'                "c", "b", "d"))
 #'
 #' # Get the graph's internal edf to show which
 #' # edge attributes are available
@@ -48,11 +49,11 @@
 #' graph <-
 #'   graph %>%
 #'   recode_edge_attrs(
-#'     "rel",
+#'     edge_attr_from = rel,
 #'     "a -> 1.0",
 #'     "b -> 1.5",
 #'     otherwise = 0.5,
-#'     edge_attr_to = "penwidth")
+#'     edge_attr_to = penwidth)
 #'
 #' # Get the graph's internal edf to show that the
 #' # node attribute values had been recoded and
@@ -66,6 +67,7 @@
 #' #> 5  5    1  3   b      1.5
 #' #> 6  6    1  2   d      0.5
 #' @importFrom stringr str_split
+#' @importFrom rlang enquo UQ
 #' @export recode_edge_attrs
 
 recode_edge_attrs <- function(graph,
@@ -76,6 +78,16 @@ recode_edge_attrs <- function(graph,
 
   # Get the time of function start
   time_function_start <- Sys.time()
+
+  edge_attr_from <- rlang::enquo(edge_attr_from)
+  edge_attr_from <- (rlang::UQ(edge_attr_from) %>% paste())[2]
+
+  edge_attr_to <- rlang::enquo(edge_attr_to)
+  edge_attr_to <- (rlang::UQ(edge_attr_to) %>% paste())[2]
+
+  if (edge_attr_to == "NULL") {
+    edge_attr_to <- NULL
+  }
 
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
@@ -205,5 +217,5 @@ recode_edge_attrs <- function(graph,
     save_graph_as_rds(graph = graph)
   }
 
-  return(graph)
+  graph
 }

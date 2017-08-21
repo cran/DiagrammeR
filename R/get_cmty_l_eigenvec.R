@@ -11,30 +11,46 @@
 #' # Create a random graph
 #' graph <-
 #'   create_random_graph(
-#'     10, 22, set_seed = 1)
+#'     n = 10, m = 22,
+#'     set_seed = 23)
 #'
-#' # Get the group membership values for all nodes
-#' # in the graph through calculation of the leading
-#' # non-negative eigenvector of the modularity matrix
-#' # of the graph
+#' # Get the group membership values for all
+#' # nodes in the graph through calculation of
+#' # the leading non-negative eigenvector of the
+#' # modularity matrix of the graph
 #' get_cmty_l_eigenvec(graph)
 #' #>    id l_eigenvec_group
 #' #> 1   1                1
-#' #> 2   2                1
-#' #> 3   3                1
-#' #> 4   4                2
+#' #> 2   2                2
+#' #> 3   3                2
+#' #> 4   4                1
 #' #> 5   5                1
-#' #> 6   6                2
+#' #> 6   6                1
 #' #> 7   7                2
-#' #> 8   8                2
+#' #> 8   8                1
 #' #> 9   9                2
 #' #> 10 10                1
 #'
-#' # Add the group membership values to the graph
-#' # as a node attribute
+#' # Add the group membership values to the
+#' # graph as a node attribute
 #' graph <-
 #'   graph %>%
-#'   join_node_attrs(get_cmty_l_eigenvec(.))
+#'   join_node_attrs(
+#'     df = get_cmty_l_eigenvec(.))
+#'
+#' # Display the graph's node data frame
+#' get_node_df(graph)
+#' #>    id type label value l_eigenvec_group
+#' #> 1   1 <NA>     1   6.0                1
+#' #> 2   2 <NA>     2   2.5                2
+#' #> 3   3 <NA>     3   3.5                2
+#' #> 4   4 <NA>     4   7.5                1
+#' #> 5   5 <NA>     5   8.5                1
+#' #> 6   6 <NA>     6   4.5                1
+#' #> 7   7 <NA>     7  10.0                2
+#' #> 8   8 <NA>     8  10.0                1
+#' #> 9   9 <NA>     9   8.5                2
+#' #> 10 10 <NA>    10  10.0                1
 #' @importFrom igraph cluster_leading_eigen membership
 #' @export get_cmty_l_eigenvec
 
@@ -57,11 +73,8 @@ get_cmty_l_eigenvec <- function(graph) {
     igraph::cluster_leading_eigen(ig_graph)
 
   # Create df with node memberships
-  cmty_l_eigenvec_df <-
-    data.frame(
-      id = as.integer(names(igraph::membership(cmty_l_eigenvec_obj))),
-      l_eigenvec_group = as.vector(igraph::membership(cmty_l_eigenvec_obj)),
-      stringsAsFactors = FALSE)
-
-  return(cmty_l_eigenvec_df)
+  data.frame(
+    id = igraph::membership(cmty_l_eigenvec_obj) %>% names() %>% as.integer(),
+    l_eigenvec_group = as.vector(igraph::membership(cmty_l_eigenvec_obj)),
+    stringsAsFactors = FALSE)
 }

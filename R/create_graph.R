@@ -5,13 +5,13 @@
 #' @param nodes_df an optional data frame containing,
 #' at minimum, a column (called \code{nodes}) which
 #' contains node IDs for the graph. Additional
-#' columns (named as Graphviz node attributes) can be
-#' included with values for the named node attribute.
+#' columns (node attributes) can be included with
+#' values for the named node attribute.
 #' @param edges_df an optional data frame containing,
 #' at minimum, two columns (called \code{from} and
 #' \code{to}) where node IDs are provided. Additional
-#' columns (named as Graphviz edge attributes) can be
-#' included with values for the named edge attribute.
+#' columns (edge attributes) can be included with
+#' values for the named edge attribute.
 #' @param directed with \code{TRUE} (the default) or
 #' \code{FALSE}, either directed or undirected edge
 #' operations will be generated, respectively.
@@ -171,18 +171,19 @@ create_graph <- function(nodes_df = NULL,
           attr = as.character(
             c("layout", "outputorder", "fontname", "fontsize",
               "shape", "fixedsize", "width", "style",
-              "fillcolor", "color", "fontcolor",
+              "fillcolor", "color", "fontcolor", "bgcolor",
               "len", "color", "arrowsize")
           ),
           value = as.character(
             c("neato", "edgesfirst", "Helvetica", "10",
               "circle", "true", "0.5", "filled",
-              "aliceblue", "gray70", "gray50",
+              "aliceblue", "gray70", "gray50", "white",
               "1.5", "gray40", "0.5")
           ),
           attr_type = as.character(
             c(rep("graph", 2),
               rep("node", 9),
+              "graph",
               rep("edge", 3))),
           stringsAsFactors = FALSE)
     } else {
@@ -236,6 +237,16 @@ create_graph <- function(nodes_df = NULL,
       to = as.integer(NA))[-1, ] %>%
     as.data.frame(stringsAsFactors = FALSE)
 
+  ## DF: `graph_actions`
+
+  # Create an empty `graph_actions` data frame
+  graph_actions <-
+    data.frame(
+      action_index = as.integer(NA),
+      action_name = as.character(NA),
+      expression = as.character(NA),
+      stringsAsFactors = FALSE)[-1, ]
+
   ## DF: `graph_log`
 
   # Create an empty `graph_log` data frame
@@ -248,6 +259,11 @@ create_graph <- function(nodes_df = NULL,
       nodes = as.integer(NA),
       edges = as.integer(NA),
       stringsAsFactors = FALSE)[-1, ]
+
+  ## list: `cache`
+
+  # Create an empty `cache` list object
+  cache <- list()
 
   ## Empty Graph
 
@@ -263,6 +279,8 @@ create_graph <- function(nodes_df = NULL,
          last_edge = 0,
          node_selection = nsdf,
          edge_selection = esdf,
+         cache = cache,
+         graph_actions = graph_actions,
          graph_log = graph_log)
 
   attr(graph, "class") <- "dgr_graph"

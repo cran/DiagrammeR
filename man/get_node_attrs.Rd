@@ -4,12 +4,11 @@
 \alias{get_node_attrs}
 \title{Get node attribute values}
 \usage{
-get_node_attrs(x, node_attr, nodes = NULL)
+get_node_attrs(graph, node_attr, nodes = NULL)
 }
 \arguments{
-\item{x}{either a graph object of class
-\code{dgr_graph} that is created using
-\code{create_graph}, or a node data frame.}
+\item{graph}{a graph object of class
+\code{dgr_graph}.}
 
 \item{node_attr}{the name of the attribute for which
 to get values.}
@@ -24,29 +23,34 @@ the attribute given by \code{node_attr} by node ID.
 }
 \description{
 From a graph object of class
-\code{dgr_graph} or a node data frame, get node
-attribute values for one or more nodes.
+\code{dgr_graph}, get node attribute values for
+one or more nodes.
 }
 \examples{
-# With the `create_random_graph()` function, get
-# a simple graph with a node attribute called
-# `value`
+# Create a random graph and
+# incorporate the node attribute
+# called `value`
 graph <-
   create_random_graph(
     n = 4, m = 4,
     set_seed = 23)
 
-# Get all of the values from the `value` node
-# attribute as a named vector
-graph \%>\% get_node_attrs("value")
+# Get all of the values from
+# the `value` node attribute
+# as a named vector
+graph \%>\%
+  get_node_attrs(
+    node_attr = value)
 #>   1   2   3   4
 #> 6.0 2.5 3.5 7.5
 
-# To only return node attribute values for specified
-# nodes, use the `nodes` argument
+# To only return node attribute
+# values for specified nodes,
+# use the `nodes` argument
 graph \%>\%
-  get_node_attrs("value", nodes = c(1, 3))
+  get_node_attrs(
+    node_attr = value,
+    nodes = c(1, 3))
 #>   1   3
 #> 6.0 3.5
 }
-

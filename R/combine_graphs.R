@@ -6,7 +6,7 @@
 #' considered the graph from which global graph
 #' attributes will be inherited in the resulting graph.
 #' @param y a \code{DiagrammeR} graph object that is to
-#' be unioned with the graph suppled as \code{x}.
+#' be unioned with the graph supplied as \code{x}.
 #' @return a graph object of class \code{dgr_graph}.
 #' @examples
 #' # Create a graph with a cycle with 6 nodes
@@ -17,11 +17,14 @@
 #' # Create a random graph with 8 nodes, 15 edges
 #' graph_random <-
 #'   create_random_graph(
-#'     8, 15, set_seed = 1)
+#'     n = 8, m = 15,
+#'     set_seed = 23)
 #'
 #' # Combine the two graphs in a union operation
 #' combined_graph <-
-#'   combine_graphs(graph_cycle, graph_random)
+#'   combine_graphs(
+#'     graph_cycle,
+#'     graph_random)
 #'
 #' # Get the number of nodes in the combined graph
 #' node_count(combined_graph)
@@ -173,5 +176,5 @@ combine_graphs <- function(x,
     save_graph_as_rds(graph = x)
   }
 
-  return(x)
+  x
 }

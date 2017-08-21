@@ -4,7 +4,7 @@
 \alias{add_node}
 \title{Add a node to an existing graph object}
 \usage{
-add_node(graph, type = NULL, label = NULL, from = NULL, to = NULL)
+add_node(graph, type = NULL, label = NULL, from = NULL, to = NULL, ...)
 }
 \arguments{
 \item{graph}{a graph object of class
@@ -21,6 +21,9 @@ from which edges will be directed to the new node.}
 
 \item{to}{an optional vector containing node IDs to
 which edges will be directed from the new node.}
+
+\item{...}{one or more optional, single value vectors
+for supplying node attributes to the new node.}
 }
 \value{
 a graph object of class \code{dgr_graph}.
@@ -38,22 +41,27 @@ graph <-
   add_node() \%>\%
   add_node()
 
-# Get a count of nodes in the graph
+# Get a count of all nodes
+# in the graph
 node_count(graph)
 #> [1] 2
 
-# The nodes added were given ID values `1` and `2`
+# The nodes added were given
+# ID values `1` and `2`
 get_node_ids(graph)
 #> [1] 1 2
 
 # Add a node with a `type` value defined
-graph <- add_node(graph, "person")
+graph <-
+  add_node(
+    graph = graph,
+    type = "person")
 
-# View the graph's internal node data frame (ndf)
+# View the graph's internal
+# node data frame (ndf)
 get_node_df(graph)
 #>   id   type label
 #> 1  1   <NA>  <NA>
 #> 2  2   <NA>  <NA>
 #> 3  3 person  <NA>
 }
-

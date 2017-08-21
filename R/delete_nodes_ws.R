@@ -6,7 +6,7 @@
 #' Selections of nodes can be performed using
 #' the following \code{select_...} functions:
 #' \code{select_nodes()},
-#' \code{select_last_node()},
+#' \code{select_last_nodes_created()},
 #' \code{select_nodes_by_degree()},
 #' \code{select_nodes_by_id()}, or
 #' \code{select_nodes_in_neighborhood()}.
@@ -23,14 +23,14 @@
 #' # Create a graph with 3 nodes
 #' graph <-
 #'   create_graph() %>%
-#'   add_n_nodes(3) %>%
+#'   add_n_nodes(n = 3) %>%
 #'   add_edges_w_string(
-#'     "1->3 1->2 2->3")
+#'     edges = "1->3 1->2 2->3")
 #'
 #' # Select node with ID `1`
 #' graph <-
 #'   graph %>%
-#'   select_nodes_by_id(1)
+#'   select_nodes_by_id(nodes = 1)
 #'
 #' # Delete node in selection (this
 #' # also deletes any attached edges)
@@ -83,7 +83,12 @@ delete_nodes_ws <- function(graph) {
 
   # Remove any `delete_node` records from the graph log
   graph$graph_log <-
-    graph$graph_log[-((nrow(graph$graph_log) - (i-1)):nrow(graph$graph_log)), ]
+    graph$graph_log[-((nrow(graph$graph_log) - (i - 1)):nrow(graph$graph_log)), ]
+
+  # Scavenge any invalid, linked data frames
+  graph <-
+    graph %>%
+    remove_linked_dfs()
 
   # Update the `graph_log` df with an action
   graph$graph_log <-
@@ -96,10 +101,17 @@ delete_nodes_ws <- function(graph) {
       nodes = nrow(graph$nodes_df),
       edges = nrow(graph$edges_df))
 
+  # Perform graph actions, if any are available
+  if (nrow(graph$graph_actions) > 0) {
+    graph <-
+      graph %>%
+      trigger_graph_actions()
+  }
+
   # Write graph backup if the option is set
   if (graph$graph_info$write_backups) {
     save_graph_as_rds(graph = graph)
   }
 
-  return(graph)
+  graph
 }

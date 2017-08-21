@@ -19,29 +19,32 @@
 #' \code{dgr_graph}.
 #' @param edge_attr the edge attribute from which to
 #' obtain values.
+#' @param name an optional name for the cached vector.
 #' @param mode a option to recast the returned vector
 #' of edge attribute value as \code{numeric} or
 #' \code{character}.
 #' @return a graph object of class \code{dgr_graph}.
-#' @examples
 #' # Set a seed
 #' set.seed(23)
 #'
 #' # Create a graph with 6 nodes and 5 edges
 #' graph <-
 #'   create_graph() %>%
-#'   add_path(6) %>%
+#'   add_path(n = 6) %>%
 #'   set_edge_attrs(
-#'     "value", rnorm(edge_count(.), 5, 2))
+#'     edge_attr = value,
+#'     values = rnorm(edge_count(.), 5, 2))
 #'
 #' # Select all edges where the edge attribute
 #' # `value` is less than 5
 #' graph <-
 #'   graph %>%
-#'   select_edges("value < 5.0")
+#'   select_edges(
+#'     conditions = value < 5.0)
 #'
 #' # Show the graph's edge data frame
-#' graph %>% get_edge_df
+#' graph %>%
+#'   get_edge_df()
 #' #>   id from to  rel    value
 #' #> 1  1    1  2 <NA> 5.090874
 #' #> 2  2    2  3 <NA> 8.151559
@@ -55,21 +58,28 @@
 #' # vector is numeric
 #' graph <-
 #'   graph %>%
-#'   cache_edge_attrs_ws("value", "numeric")
+#'   cache_edge_attrs_ws(
+#'     edge_attr = value,
+#'     name = "edge_value")
 #'
-#' # Get the cached vector and get its
-#' # difference from 5
-#' graph %>% get_cache() %>% {x <- .; 5 - x}
-#' #> [1] 2.0930707 0.5773773
+#' # Get the cached vector with `get_cache()`
+#' graph %>%
+#'   get_cache(name = "edge_value")
+#' #> [1] 2.906929 4.422623
 #' @importFrom dplyr filter select_ rename_ mutate
+#' @importFrom rlang enquo UQ
 #' @export cache_edge_attrs_ws
 
 cache_edge_attrs_ws <- function(graph,
                                 edge_attr,
+                                name = NULL,
                                 mode = NULL) {
 
   # Get the time of function start
   time_function_start <- Sys.time()
+
+  edge_attr <- rlang::enquo(edge_attr)
+  edge_attr <- (rlang::UQ(edge_attr) %>% paste())[2]
 
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
@@ -119,8 +129,19 @@ cache_edge_attrs_ws <- function(graph,
     }
   }
 
-  # Cache vector of edge attributes in the graph
-  graph$cache <- edges_cache[,1]
+  # Cache vector of edge attributes in the
+  # graph's `cache` list object
+  if (!is.null(name)) {
+    graph$cache[[name]] <- edges_cache[, 1]
+  } else {
+    if (length(graph$cache) == 0) {
+      graph$cache[[1]] <- edges_cache[, 1]
+      names(graph$cache) <- 1
+    } else {
+      graph$cache[[(length(graph$cache) + 1)]] <-
+        edges_cache[, 1]
+    }
+  }
 
   # Update the `graph_log` df with an action
   graph$graph_log <-
@@ -138,5 +159,5 @@ cache_edge_attrs_ws <- function(graph,
     save_graph_as_rds(graph = graph)
   }
 
-  return(graph)
+  graph
 }

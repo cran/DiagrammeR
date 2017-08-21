@@ -27,7 +27,7 @@ selection.
 Selections of nodes can be performed using
 the following \code{select_...} functions:
 \code{select_nodes()},
-\code{select_last_node()},
+\code{select_last_nodes_created()},
 \code{select_nodes_by_degree()},
 \code{select_nodes_by_id()}, or
 \code{select_nodes_in_neighborhood()}.
@@ -42,16 +42,19 @@ the following traversal functions:
 # Create a simple graph
 graph <-
   create_graph() \%>\%
-  add_path(6)
+  add_path(n = 6)
 
 # Select specific nodes from the graph and
 # apply the node attribute `color = blue` to
 # those selected nodes
 graph <-
   graph \%>\%
-  select_nodes_by_id(1:4) \%>\%
+  select_nodes_by_id(
+    nodes = 1:4) \%>\%
   trav_out() \%>\%
-  set_node_attrs_ws("color", "blue")
+  set_node_attrs_ws(
+    node_attr = color,
+    value = "blue")
 
 # Show the internal node data frame to verify
 # that the node attribute has been set for
@@ -65,4 +68,3 @@ get_node_df(graph)
 #> 5  5 <NA>     5  blue
 #> 6  6 <NA>     6  <NA>
 }
-

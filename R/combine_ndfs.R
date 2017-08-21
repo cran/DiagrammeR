@@ -24,7 +24,9 @@
 #' # Combined the node data frames using the
 #' # `combine_ndfs()` function
 #' node_df_combined <-
-#'   combine_ndfs(node_df_1, node_df_2)
+#'   combine_ndfs(
+#'     node_df_1,
+#'     node_df_2)
 #'
 #' # Inspect the combined node data frame
 #' node_df_combined
@@ -64,5 +66,5 @@ combine_ndfs <- function(...) {
   # values for new table based on input order
   ndf_new[, 1] <- as.integer(1:nrow(ndf_new))
 
-  return(ndf_new)
+  ndf_new
 }

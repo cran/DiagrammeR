@@ -10,7 +10,7 @@
 #' node ID values as \code{[node_ID_1]->[node_ID_2]}
 #' separated by a one or more space characters. For
 #' undirected graphs, \code{--} should replace
-#' \code{->}. Linebreaks in the vector won't cause an
+#' \code{->}. Line breaks in the vector won't cause an
 #' error.
 #' @param rel an optional vector specifying the
 #' relationship between the connected nodes.
@@ -34,7 +34,7 @@
 #' graph_node_id <-
 #'   graph %>%
 #'   add_edges_w_string(
-#'     "1->2 1->3 2->4 2->3")
+#'     edges = "1->2 1->3 2->4 2->3")
 #'
 #' # Show the graph's internal edge data frame
 #' get_edge_df(graph_node_id)
@@ -52,8 +52,9 @@
 #' graph_node_label <-
 #'   graph %>%
 #'   add_edges_w_string(
-#'     "one->two one->three
-#'      two->four two->three",
+#'     edges =
+#'       "one->two one->three
+#'        two->four two->three",
 #'     use_labels = TRUE)
 #'
 #' # Show the graph's internal edge data frame
@@ -83,6 +84,15 @@ add_edges_w_string <- function(graph,
   if (graph_contains_nodes(graph) == FALSE) {
     stop("The graph contains no nodes, so, edges cannot be added.")
   }
+
+  # Create binding for a variable
+  version_id <- NULL
+
+  # Get the value for the latest `version_id` for
+  # graph (in the `graph_log`)
+  current_graph_log_version_id <-
+    graph$graph_log$version_id %>%
+    max()
 
   # Remove linebreak characters from `edges`
   edges_cleaned <-
@@ -151,22 +161,39 @@ add_edges_w_string <- function(graph,
   }
 
   # Add the new edges to the graph
-  new_graph <- add_edge_df(graph, new_edges)
+  graph <- add_edge_df(graph, new_edges)
 
-  new_graph$graph_log <-
+  # Clear the graph's active selection
+  graph <-
+    graph %>%
+    clear_selection()
+
+  # Remove extra items from the `graph_log`
+  graph$graph_log <-
+    graph$graph_log %>%
+    dplyr::filter(version_id <= current_graph_log_version_id)
+
+  graph$graph_log <-
     add_action_to_log(
       graph_log = graph$graph_log,
       version_id = nrow(graph$graph_log) + 1,
       function_used = "add_edges_w_string",
       time_modified = time_function_start,
       duration = graph_function_duration(time_function_start),
-      nodes = nrow(new_graph$nodes_df),
-      edges = nrow(new_graph$edges_df))
+      nodes = nrow(graph$nodes_df),
+      edges = nrow(graph$edges_df))
 
-  # Write graph backup if the option is set
-  if (new_graph$graph_info$write_backups) {
-    save_graph_as_rds(graph = new_graph)
+  # Perform graph actions, if any are available
+  if (nrow(graph$graph_actions) > 0) {
+    graph <-
+      graph %>%
+      trigger_graph_actions()
   }
 
-  return(new_graph)
+  # Write graph backup if the option is set
+  if (graph$graph_info$write_backups) {
+    save_graph_as_rds(graph = graph)
+  }
+
+  graph
 }

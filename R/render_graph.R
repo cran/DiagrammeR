@@ -3,15 +3,14 @@
 #' render the graph in the RStudio Viewer.
 #' @param graph a graph object of class
 #' \code{dgr_graph}.
+#' @param layout a string specifying a layout type to
+#' use for node placement in this rendering. Possible
+#' layouts include: \code{nicely}, \code{circle},
+#' \code{tree}, \code{kk}, and \code{fr}.
 #' @param output a string specifying the output type;
 #' \code{graph} (the default) renders the graph using
-#' the \code{grViz} function, \code{vivagraph}
-#' renders the graph using the \code{vivagraph}
-#' function, and \code{visNetwork} renders the graph
-#' using the \code{visnetwork} function.
-#' @param layout a string specifying a layout type for
-#' a \code{vivagraph} rendering of the graph, either
-#' \code{forceDirected} or \code{constant}.
+#' the \code{grViz} function and \code{visNetwork}
+#' renders the graph using the \code{visnetwork} function.
 #' @param title an optional title for a graph when
 #' using \code{output = "graph"}.
 #' @param width an optional parameter for specifying
@@ -20,50 +19,50 @@
 #' the height of the resulting graphic in pixels.
 #' @examples
 #' \dontrun{
-#' # Set a seed
-#' set.seed(24)
+#' # Render a graph that's a balanced tree
+#' create_graph() %>%
+#'   add_balanced_tree(
+#'     k = 2, h = 3) %>%
+#'   render_graph()
 #'
-#' # Create a node data frame (ndf)
-#' ndf <-
-#'   create_node_df(
-#'     n = 26,
-#'     type = "basic",
-#'     shape = sample(c("circle", "square"),
-#'                    length(1:26),
-#'                    replace = TRUE),
-#'     fillcolor = sample(c("aqua", "orange",
-#'                          "pink", "lightgreen",
-#'                          "black", "yellow"),
-#'                        length(1:26),
-#'                        replace = TRUE))
+#' # Use the `tree` layout for better node
+#' # placement in this hierarchical graph
+#' create_graph() %>%
+#'   add_balanced_tree(
+#'     k = 2, h = 3) %>%
+#'   render_graph(layout = "tree")
 #'
-#' # Create an edge data frame (edf)
-#' edf <-
-#'   create_edge_df(
-#'     from = sample(1:26, replace = TRUE),
-#'     to = sample(1:26, replace = TRUE),
-#'     rel = "to_node")
+#' # Plot the same tree graph but don't
+#' # show the node ID values
+#' create_graph() %>%
+#'   add_balanced_tree(
+#'     k = 2, h = 3) %>%
+#'   set_node_attr_to_display() %>%
+#'   render_graph(layout = "tree")
 #'
-#' # Create a graph object using the ndf and edf
-#' graph <-
-#'   create_graph(
-#'     nodes_df = ndf,
-#'     edges_df = edf)
+#' # Create a circle graph with
+#' create_random_graph(
+#'   n = 55, m = 75,
+#'   set_seed = 23) %>%
+#' render_graph(layout = "circle")
 #'
-#' # Render the graph using Graphviz
-#' render_graph(graph)
-#'
-#' # Render the graph using VivaGraph
-#' render_graph(graph, output = "vivagraph")
-#'
-#' # Render the graph using visNetwork
-#' render_graph(graph, output = "visNetwork")
+#' # Render the graph using the `visNetwork`
+#' # output option
+#' create_graph() %>%
+#'   add_balanced_tree(
+#'     k = 2, h = 3) %>%
+#'   render_graph(
+#'     output = "visNetwork")
 #' }
+#' @importFrom dplyr select rename mutate filter coalesce left_join pull
+#' @importFrom igraph layout_in_circle layout_with_sugiyama layout_with_kk layout_with_fr layout_nicely
+#' @importFrom tibble as_tibble
+#' @importFrom purrr flatten_chr
 #' @export render_graph
 
 render_graph <- function(graph,
-                         output = NULL,
                          layout = NULL,
+                         output = NULL,
                          title = NULL,
                          width = NULL,
                          height = NULL) {
@@ -73,70 +72,181 @@ render_graph <- function(graph,
     stop("The graph object is not valid.")
   }
 
-  if (is.null(output) & !is.null(graph$graph_attrs)) {
-    if ("output = visNetwork" %in% graph$graph_attrs) {
-      output <- "visNetwork"
-    }
-    if ("output = vivagraph" %in% graph$graph_attrs) {
-      output <- "vivagraph"
-    }
-    if ("output = graph" %in% graph$graph_attrs) {
-      output <- "graph"
-    }
-    if ("output = Graphviz" %in% graph$graph_attrs) {
-      output <- "graph"
-    }
-  }
+  # Create bindings for specific variables
+  V1 <- V2 <- x <- y <- attr_type <- value_x <- NULL
+  value <- hex <- fillcolor <- new_fillcolor <- NULL
 
   if (is.null(output)) {
     output <- "graph"
   }
 
   if (output == "graph") {
-
     if (!is.null(title)) {
 
       graph <-
-        set_global_graph_attrs(
-          graph, "graph", "label", paste0("'", title, "'"))
+        add_global_graph_attrs(
+          graph, "label", title, "graph")
 
       graph <-
-        set_global_graph_attrs(
-          graph, "graph", "labelloc", "t")
+        add_global_graph_attrs(
+          graph, "labelloc", "t", "graph")
 
       graph <-
-        set_global_graph_attrs(
-          graph, "graph", "labeljust", "c")
+        add_global_graph_attrs(
+          graph, "labeljust", "c", "graph")
 
       graph <-
-        set_global_graph_attrs(
-          graph, "graph", "fontname", "Helvetica")
+        add_global_graph_attrs(
+          graph, "fontname", "Helvetica", "graph")
 
       graph <-
-        set_global_graph_attrs(
-          graph, "graph", "fontcolor", "gray30")
+        add_global_graph_attrs(
+          graph, "fontcolor", "gray30", "graph")
+    }
+
+    # If no fillcolor provided, use default; if no default available,
+    # use white
+    if (nrow(graph$nodes_df) > 0) {
+      if (!("fillcolor" %in% colnames(graph$nodes_df))) {
+        if ("fillcolor" %in% graph$global_attrs$attr) {
+
+          graph$nodes_df$fillcolor <-
+            graph$global_attrs %>%
+            dplyr::filter(attr == "fillcolor" & attr_type == "node") %>%
+            dplyr::select(value) %>%
+            purrr::flatten_chr()
+        } else {
+          graph$nodes_df$fillcolor <- "white"
+        }
       }
+    }
 
+    # If fillcolor is available and there are NA values,
+    # replace NAs with default color if available
+    if (nrow(graph$nodes_df) > 0) {
+      if ("fillcolor" %in% colnames(graph$nodes_df)) {
+        if ("fillcolor" %in% graph$global_attrs$attr) {
+
+            graph$nodes_df$fillcolor[which(is.na(graph$nodes_df$fillcolor))] <-
+              graph$global_attrs[which(graph$global_attrs$attr == "fillcolor"), 2]
+        }
+      }
+    }
+
+    # Translate X11 colors to hexadecimal colors
+    if ("fillcolor" %in% colnames(graph$nodes_df)) {
+
+      graph$nodes_df <-
+        graph$nodes_df %>%
+        dplyr::left_join(
+          x11_hex() %>%
+            tibble::as_tibble() %>%
+            dplyr::mutate(hex = toupper(hex)),
+          by = c("fillcolor" = "x11_name")) %>%
+        dplyr::mutate(new_fillcolor = dplyr::coalesce(hex, fillcolor)) %>%
+        dplyr::select(-fillcolor, -hex) %>%
+        dplyr::rename(fillcolor = new_fillcolor)
+    }
+
+    # Use adaptive font coloring for nodes that have a fill color
+    if (!("fontcolor" %in% colnames(graph$nodes_df)) &
+        "fillcolor" %in% colnames(graph$nodes_df)) {
+
+      graph$nodes_df$fontcolor <-
+        graph$nodes_df$fillcolor %>%
+        tibble::as_data_frame() %>%
+        dplyr::mutate(value_x = contrasting_text_color(background_color = value)) %>%
+        dplyr::pull(value_x)
+    }
+
+    if (!is.null(layout)) {
+      if (layout %in% c("circle", "tree", "kk", "fr", "nicely")) {
+
+        graph <-
+          graph %>%
+          add_global_graph_attrs(
+            attr = "layout",
+            value = "neato",
+            attr_type = "graph")
+
+        if ("x" %in% colnames(graph$nodes_df)) {
+          graph$nodes_df <-
+            graph$nodes_df %>%
+            dplyr::select(-x)
+        }
+
+        if ("y" %in% colnames(graph$nodes_df)) {
+          graph$nodes_df <-
+            graph$nodes_df %>%
+            dplyr::select(-y)
+        }
+
+        if (layout == "circle") {
+          coords <-
+            graph %>%
+            to_igraph() %>%
+            igraph::layout_in_circle() %>%
+            tibble::as_tibble() %>%
+            dplyr::rename(x = V1, y = V2) %>%
+            dplyr::mutate(x = x * (((node_count(graph) + (0.25 * node_count(graph)))) / node_count(graph))) %>%
+            dplyr::mutate(y = y * (((node_count(graph) + (0.25 * node_count(graph)))) / node_count(graph)))
+        }
+
+        if (layout == "tree") {
+          coords <-
+            (graph %>%
+               to_igraph() %>%
+               igraph::layout_with_sugiyama())[[2]] %>%
+            as_tibble() %>%
+            rename(x = V1, y = V2)
+        }
+
+        if (layout == "kk") {
+          coords <-
+            graph %>%
+            to_igraph() %>%
+            igraph::layout_with_kk() %>%
+            tibble::as_tibble() %>%
+            dplyr::rename(x = V1, y = V2)
+        }
+
+        if (layout == "fr") {
+          coords <-
+            graph %>%
+            to_igraph() %>%
+            igraph::layout_with_fr() %>%
+            tibble::as_tibble() %>%
+            dplyr::rename(x = V1, y = V2)
+        }
+
+        if (layout == "nicely") {
+          coords <-
+            graph %>%
+            to_igraph() %>%
+            igraph::layout_nicely() %>%
+            tibble::as_tibble() %>%
+            dplyr::rename(x = V1, y = V2)
+        }
+
+        # Bind (x, y) coordinates to the graph's
+        # internal NDF
+        graph$nodes_df <-
+          graph$nodes_df %>%
+          bind_cols(coords)
+      }
+    }
+
+    # Generate DOT code
     dot_code <- generate_dot(graph)
 
-    grViz(
-      diagram = dot_code,
-      engine = layout,
-      width = width,
-      height = height)
+    # Generate a `grViz` object
+    grVizObject <-
+      grViz(
+        diagram = dot_code,
+        width = width,
+        height = height)
 
-  } else if (output == "vivagraph") {
-
-    layout <-
-      ifelse(is.null(layout) &
-               node_count(graph) < 1000,
-             "forceDirected", "constant")
-
-    vivagraph(
-      graph = graph,
-      layout = layout,
-      height = NULL,
-      width = NULL)
+    grVizObject
 
   } else if (output == "visNetwork") {
     visnetwork(graph)

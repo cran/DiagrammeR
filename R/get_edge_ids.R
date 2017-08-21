@@ -41,7 +41,7 @@
 #' # `value` attribute greater than 3)
 #' get_edge_ids(
 #'   graph,
-#'   conditions = "value > 3")
+#'   conditions = value > 3)
 #' #> [1] 1 3
 #'
 #' # Get a vector of edge ID values using
@@ -49,22 +49,28 @@
 #' # `color` attribute of `pink`)
 #' get_edge_ids(
 #'   graph,
-#'   conditions = "color == 'pink'")
+#'   conditions = color == "pink")
 #' #> [1] 1
 #'
 #' # Use multiple conditions to return edges
 #' # with the desired attribute values
 #' get_edge_ids(
 #'   graph,
-#'   conditions = c("color == 'blue'",
-#'                  "value > 5"))
+#'   conditions =
+#'     color == "blue" &
+#'     value > 5)
 #' #> [1] 3
-#' @importFrom dplyr filter_
+#' @importFrom dplyr filter pull
+#' @importFrom rlang enquo UQ
 #' @export get_edge_ids
 
 get_edge_ids <- function(graph,
                          conditions = NULL) {
 
+  conditions <- rlang::enquo(conditions)
+
+  # Create binding for a specific variable
+  id <- NULL
 
   # If the graph contains no edges, return NA
   if (nrow(graph$edges_df) == 0) {
@@ -77,12 +83,12 @@ get_edge_ids <- function(graph,
   # If conditions are provided then
   # pass in those conditions and filter the
   # data frame of `edges_df`
-  if (!is.null(conditions)) {
-    for (i in 1:length(conditions)) {
-      edges_df <-
-        edges_df %>%
-        dplyr::filter_(conditions[i])
-    }
+  if (!((rlang::UQ(conditions) %>% paste())[2] == "NULL")) {
+
+    edges_df <-
+      filter(
+        .data = edges_df,
+        rlang::UQ(conditions))
   }
 
   # If no edges remain then return NA
@@ -90,5 +96,6 @@ get_edge_ids <- function(graph,
     return(NA)
   }
 
-  return(edges_df$id)
+  edges_df %>%
+    dplyr::pull(id)
 }

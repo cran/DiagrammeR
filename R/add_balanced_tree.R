@@ -1,4 +1,4 @@
-#' Add a balanced tree of nodes to the graph
+#' Add a balanced tree to the graph
 #' @description With a graph object of class
 #' \code{dgr_graph}, add a balanced tree to the graph.
 #' @param graph a graph object of class
@@ -22,17 +22,24 @@
 #' # different branching ratios
 #' graph <-
 #'   create_graph() %>%
-#'   add_balanced_tree(2, 2, "binary") %>%
-#'   add_balanced_tree(3, 2, "tertiary")
+#'   add_balanced_tree(
+#'     k = 2,
+#'     h = 2,
+#'     type = "binary") %>%
+#'   add_balanced_tree(
+#'     k = 3,
+#'     h = 2,
+#'     type = "tertiary")
 #'
 #' # Get some node information from this graph
-#' node_info(graph) %>% head(5)
-#' #>    id     type label deg indeg outdeg loops
-#' #> 1   1   binary     1   2     0      2     0
-#' #> 2   2   binary     2   3     1      2     0
-#' #> 3   3   binary     3   3     1      2     0
-#' #> 4   4   binary     4   1     1      0     0
-#' #> 5   5   binary     5   1     1      0     0
+#' node_info(graph) %>%
+#'   head(5)
+#' #>   id   type label deg indeg outdeg loops
+#' #> 1  1 binary     1   2     0      2     0
+#' #> 2  2 binary     2   3     1      2     0
+#' #> 3  3 binary     3   3     1      2     0
+#' #> 4  4 binary     4   1     1      0     0
+#' #> 5  5 binary     5   1     1      0     0
 #' @export add_balanced_tree
 
 add_balanced_tree <- function(graph,
@@ -52,12 +59,12 @@ add_balanced_tree <- function(graph,
 
   # Stop if k is too small
   if (k <= 1) {
-    stop("The value for k must be at least 2.")
+    stop("The value for `k` must be at least 2.")
   }
 
   # Stop if h is too small
   if (h <= 1) {
-    stop("The value for h must be at least 2.")
+    stop("The value for `h` must be at least 2.")
   }
 
   # Determine the number of nodes in the balanced tree
@@ -72,11 +79,18 @@ add_balanced_tree <- function(graph,
   # this graph
   edges_created <- graph$last_edge
 
+  # Get the graph's global attributes
+  global_attrs <- graph$global_attrs
+
   # Get the graph's log
   graph_log <- graph$graph_log
 
   # Get the graph's info
   graph_info <- graph$graph_info
+
+  # Get the graph's state of being directed
+  # or undirected
+  graph_directed <- graph$directed
 
   # Get the sequence of nodes required
   nodes <- seq(1, n_nodes_tree)
@@ -100,7 +114,11 @@ add_balanced_tree <- function(graph,
       rel = rel)
 
   # Create the tree graph
-  tree_graph <- create_graph(tree_nodes, tree_edges)
+  tree_graph <-
+    create_graph(
+      directed = graph_directed,
+      nodes_df = tree_nodes,
+      edges_df = tree_edges)
 
   # If the input graph is not empty, combine graphs
   # using the `combine_graphs()` function
@@ -126,6 +144,7 @@ add_balanced_tree <- function(graph,
         nodes = nrow(combined_graph$nodes_df),
         edges = nrow(combined_graph$edges_df))
 
+    combined_graph$global_attrs <- global_attrs
     combined_graph$graph_log <- graph_log
     combined_graph$graph_info <- graph_info
 
@@ -148,14 +167,22 @@ add_balanced_tree <- function(graph,
         nodes = nrow(tree_graph$nodes_df),
         edges = nrow(tree_graph$edges_df))
 
+    tree_graph$global_attrs <- global_attrs
     tree_graph$graph_log <- graph_log
     tree_graph$graph_info <- graph_info
+
+    # Perform graph actions, if any are available
+    if (nrow(graph$graph_actions) > 0) {
+      graph <-
+        graph %>%
+        trigger_graph_actions()
+    }
 
     # Write graph backup if the option is set
     if (tree_graph$graph_info$write_backups) {
       save_graph_as_rds(graph = tree_graph)
     }
 
-    return(tree_graph)
+    tree_graph
   }
 }

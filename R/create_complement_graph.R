@@ -12,10 +12,11 @@
 #' # Create a simple graph with a single cycle
 #' graph <-
 #'   create_graph() %>%
-#'   add_cycle(4)
+#'   add_cycle(n = 4)
 #'
 #' # Get the graph's edge data frame
-#' graph %>% get_edge_df()
+#' graph %>%
+#'   get_edge_df()
 #' #>   id from to  rel
 #' #> 1  1    1  2 <NA>
 #' #> 2  2    2  3 <NA>
@@ -25,8 +26,10 @@
 #' # Create the complement of the graph
 #' graph_c <- create_complement_graph(graph)
 #'
-#' # Get the new graph's edge data frame
-#' graph_c %>% get_edge_df()
+#' # Get the edge data frame for the
+#' # complement graph
+#' graph_c %>%
+#'   get_edge_df()
 #' #>   id from to  rel
 #' #> 1  1    1  4 <NA>
 #' #> 2  2    1  3 <NA>
@@ -72,6 +75,11 @@ create_complement_graph <- function(graph,
   # Manually update the graph's edge counter
   graph$last_edge <- nrow(edf_new) %>% as.integer()
 
+  # Scavenge any invalid, linked data frames
+  graph <-
+    graph %>%
+    remove_linked_dfs()
+
   # Update the `graph_log` df with an action
   graph$graph_log <-
     add_action_to_log(
@@ -83,10 +91,17 @@ create_complement_graph <- function(graph,
       nodes = nrow(graph$nodes_df),
       edges = nrow(graph$edges_df))
 
+  # Perform graph actions, if any are available
+  if (nrow(graph$graph_actions) > 0) {
+    graph <-
+      graph %>%
+      trigger_graph_actions()
+  }
+
   # Write graph backup if the option is set
   if (graph$graph_info$write_backups) {
     save_graph_as_rds(graph = graph)
   }
 
-  return(graph)
+  graph
 }

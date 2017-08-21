@@ -4,23 +4,22 @@
 \alias{render_graph}
 \title{Render the graph in various formats}
 \usage{
-render_graph(graph, output = NULL, layout = NULL, title = NULL,
+render_graph(graph, layout = NULL, output = NULL, title = NULL,
   width = NULL, height = NULL)
 }
 \arguments{
 \item{graph}{a graph object of class
 \code{dgr_graph}.}
 
+\item{layout}{a string specifying a layout type to
+use for node placement in this rendering. Possible
+layouts include: \code{nicely}, \code{circle},
+\code{tree}, \code{kk}, and \code{fr}.}
+
 \item{output}{a string specifying the output type;
 \code{graph} (the default) renders the graph using
-the \code{grViz} function, \code{vivagraph}
-renders the graph using the \code{vivagraph}
-function, and \code{visNetwork} renders the graph
-using the \code{visnetwork} function.}
-
-\item{layout}{a string specifying a layout type for
-a \code{vivagraph} rendering of the graph, either
-\code{forceDirected} or \code{constant}.}
+the \code{grViz} function and \code{visNetwork}
+renders the graph using the \code{visnetwork} function.}
 
 \item{title}{an optional title for a graph when
 using \code{output = "graph"}.}
@@ -37,44 +36,39 @@ render the graph in the RStudio Viewer.
 }
 \examples{
 \dontrun{
-# Set a seed
-set.seed(24)
+# Render a graph that's a balanced tree
+create_graph() \%>\%
+  add_balanced_tree(
+    k = 2, h = 3) \%>\%
+  render_graph()
 
-# Create a node data frame (ndf)
-ndf <-
-  create_node_df(
-    n = 26,
-    type = "basic",
-    shape = sample(c("circle", "square"),
-                   length(1:26),
-                   replace = TRUE),
-    fillcolor = sample(c("aqua", "orange",
-                         "pink", "lightgreen",
-                         "black", "yellow"),
-                       length(1:26),
-                       replace = TRUE))
+# Use the `tree` layout for better node
+# placement in this hierarchical graph
+create_graph() \%>\%
+  add_balanced_tree(
+    k = 2, h = 3) \%>\%
+  render_graph(layout = "tree")
 
-# Create an edge data frame (edf)
-edf <-
-  create_edge_df(
-    from = sample(1:26, replace = TRUE),
-    to = sample(1:26, replace = TRUE),
-    rel = "to_node")
+# Plot the same tree graph but don't
+# show the node ID values
+create_graph() \%>\%
+  add_balanced_tree(
+    k = 2, h = 3) \%>\%
+  set_node_attr_to_display() \%>\%
+  render_graph(layout = "tree")
 
-# Create a graph object using the ndf and edf
-graph <-
-  create_graph(
-    nodes_df = ndf,
-    edges_df = edf)
+# Create a circle graph with
+create_random_graph(
+  n = 55, m = 75,
+  set_seed = 23) \%>\%
+render_graph(layout = "circle")
 
-# Render the graph using Graphviz
-render_graph(graph)
-
-# Render the graph using VivaGraph
-render_graph(graph, output = "vivagraph")
-
-# Render the graph using visNetwork
-render_graph(graph, output = "visNetwork")
+# Render the graph using the `visNetwork`
+# output option
+create_graph() \%>\%
+  add_balanced_tree(
+    k = 2, h = 3) \%>\%
+  render_graph(
+    output = "visNetwork")
 }
 }
-

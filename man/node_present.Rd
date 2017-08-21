@@ -2,8 +2,7 @@
 % Please edit documentation in R/node_present.R
 \name{node_present}
 \alias{node_present}
-\title{Determine whether a specified node is present in an
-existing graph object}
+\title{Determine whether a specified node is present}
 \usage{
 node_present(graph, node)
 }
@@ -24,7 +23,7 @@ is present.
 }
 \examples{
 # Set a seed
-set.seed(24)
+set.seed(23)
 
 # Create a node data frame (ndf)
 ndf <-
@@ -66,4 +65,3 @@ all(sapply(1:26,
       function(x) node_present(graph, x)))
 #> TRUE
 }
-

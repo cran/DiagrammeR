@@ -10,27 +10,29 @@
 #' (the default) or a \code{temporal} type (which
 #' requires date-time strings and time zone codes
 #' to be supplied).
-#' @param series_scripts a vector of R scripts or paths
-#' to R scripts.
 #' @return a graph series object of type
 #' \code{dgr_graph_1D}.
 #' @examples
 #' # Create three graphs
 #' graph_1 <-
 #'   create_graph() %>%
-#'   add_n_nodes(3) %>%
+#'   add_n_nodes(n = 3) %>%
 #'   add_edges_w_string(
-#'     "1->3 1->2 2->3")
+#'     edges = "1->3 1->2 2->3")
 #'
 #' graph_2 <-
 #'   graph_1 %>%
 #'   add_node() %>%
-#'   add_edge(4, 3)
+#'   add_edge(
+#'     from = 4,
+#'     to = 3)
 #'
 #' graph_3 <-
 #'   graph_2 %>%
 #'   add_node() %>%
-#'   add_edge(5, 2)
+#'   add_edge(
+#'     from = 5,
+#'     to = 2)
 #'
 #' # Create an empty graph series and add
 #' # the graphs
@@ -47,8 +49,7 @@
 
 create_series <- function(graph = NULL,
                           series_name = NULL,
-                          series_type = "sequential",
-                          series_scripts = NULL) {
+                          series_type = "sequential") {
 
   # Validation: Graph object is valid
   if (!is.null(graph))  {
@@ -59,10 +60,10 @@ create_series <- function(graph = NULL,
 
   # Initialize an empty graph series object
   graph_series <-
-    list(graphs = NULL,
-         series_name = series_name,
-         series_type = series_type,
-         series_scripts = series_scripts)
+    list(
+      graphs = NULL,
+      series_name = series_name,
+      series_type = series_type)
 
   attr(graph_series, "class") <- "dgr_graph_1D"
 
@@ -73,5 +74,5 @@ create_series <- function(graph = NULL,
   # Add a graph to the initialized graph series
   graph_series$graphs[[length(graph_series$graphs) + 1]] <- graph
 
-  return(graph_series)
+  graph_series
 }

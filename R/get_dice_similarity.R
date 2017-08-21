@@ -1,10 +1,10 @@
 #' Get Dice similarity coefficient scores
-#' @description Get the Dice similiarity coefficient
+#' @description Get the Dice similarity coefficient
 #' scores for one or more nodes in a graph.
 #' @param graph a graph object of class
 #' \code{dgr_graph}.
 #' @param nodes an optional vector of node IDs to
-#' consider for Dice similarity scores. If notsupplied,
+#' consider for Dice similarity scores. If not supplied,
 #' then similarity scores will be provided for every
 #' pair of nodes in the graph.
 #' @param direction using \code{all} (the default), the
@@ -15,21 +15,22 @@
 #' @param round_to the maximum number of decimal places
 #' to retain for the Dice similarity coefficient
 #' scores. The default value is \code{3}.
-#' @return a matrix with Dice similiarity values
+#' @return a matrix with Dice similarity values
 #' for each pair of nodes considered.
 #' @examples
 #' # Create a random graph
 #' graph <-
 #'   create_random_graph(
-#'     10, 22, set_seed = 1)
+#'     n = 10, m = 22,
+#'     set_seed = 23)
 #'
 #' # Get the Dice similarity values for
 #' # nodes `5`, `6`, and `7`
-#' get_dice_similarity(graph, 5:7)
+#' get_dice_similarity(graph, nodes = 5:7)
 #' #>       5     6     7
-#' #> 5 1.000 0.444 0.667
-#' #> 6 0.444 1.000 0.444
-#' #> 7 0.667 0.444 1.000
+#' #> 5 1.000 0.500 0.444
+#' #> 6 0.500 1.000 0.545
+#' #> 7 0.444 0.545 1.000
 #' @importFrom igraph similarity V
 #' @export get_dice_similarity
 
@@ -104,7 +105,5 @@ get_dice_similarity <- function(graph,
   }
 
   # Round all values in matrix to set SD
-  d_sim_values <- round(d_sim_values, round_to)
-
-  return(d_sim_values)
+  round(d_sim_values, round_to)
 }

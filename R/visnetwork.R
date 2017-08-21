@@ -11,11 +11,9 @@
 #'     label = TRUE,
 #'     fillcolor = c("lightgrey", "red", "orange",
 #'                   "pink", "aqua", "yellow"),
-#'     shape = "circle",
-#'     value = c(2, 1, 0.5, 1, 1.8, 1),
-#'     type = c("1", "1", "1", "2", "2", "2"),
-#'     x = c(1, 2, 3, 4, 5, 6),
-#'     y = c(-2, -1, 0, 6, 4, 1))
+#'     shape = "dot",
+#'     size = c(20, 80, 40, 10, 30, 50),
+#'     type = c("1", "1", "1", "2", "2", "2"))
 #'
 #' # Create an edge data frame (edf)
 #' edf <-
@@ -112,8 +110,7 @@ visnetwork <- function(graph) {
     }
 
     vn_obj <- visPhysics(graph = vn_obj,
-                         solver = "forceAtlas2Based",
-                         forceAtlas2Based = list(gravitationalConstant = -10))
+                         solver = "barnesHut")
 
     vn_obj <- visPhysics(graph = vn_obj,
                          stabilization = list(enabled = TRUE,
@@ -192,5 +189,5 @@ visnetwork <- function(graph) {
     }
   }
 
-  return (vn_obj)
+  vn_obj
 }

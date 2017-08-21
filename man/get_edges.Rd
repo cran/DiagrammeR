@@ -88,14 +88,14 @@ get_edges(graph, return_type = "list")
 # attribute greater than 3)
 get_edges(
   graph,
-  conditions = "value > 3",
+  conditions = value > 3,
   return_type = "vector")
 #> [1] "1->4" "3->1"
 
 # Get a vector of edges using a match
 get_edges(
   graph,
-  conditions = "color == 'pink'",
+  conditions = color == "pink",
   return_type = "vector")
 #> [1] "1->4"
 
@@ -103,8 +103,9 @@ get_edges(
 # with the desired attribute values
 get_edges(
   graph,
-  conditions = c("color == 'blue'",
-                 "value > 3"),
+  conditions =
+    color == "blue" &
+    value > 3,
   return_type = "vector")
 #> [1] "3->1"
 
@@ -112,10 +113,10 @@ get_edges(
 # the labels of the connected nodes
 get_edges(
   graph,
-  conditions = c("color == 'blue'",
-                 "value > 3"),
+  conditions =
+    color == "blue" &
+    value > 3,
   return_type = "vector",
   return_values = "label")
 #> [1] "three->one"
 }
-

@@ -1,5 +1,4 @@
-#' Determine whether a specified node is present in an
-#' existing graph object
+#' Determine whether a specified node is present
 #' @description From a graph object of class
 #' \code{dgr_graph}, determine whether a specified node
 #' is present.
@@ -10,7 +9,7 @@
 #' @return a logical value.
 #' @examples
 #' # Set a seed
-#' set.seed(24)
+#' set.seed(23)
 #'
 #' # Create a node data frame (ndf)
 #' ndf <-
@@ -67,7 +66,7 @@ node_present <- function(graph,
 
   # Stop function if node not a single value
   if (node_is_single_value == FALSE) {
-    stop("Only a single node can be queried using 'node_present'")
+    stop("Only a single node can be queried using `node_present()`.")
   }
 
   # Determine whether the value corresponds to a

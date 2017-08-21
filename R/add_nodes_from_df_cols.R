@@ -25,10 +25,8 @@
 #' \code{FALSE}.
 #' @return a graph object of class \code{dgr_graph}.
 #' @examples
-#' # Create a simple graph
-#' graph <-
-#'   create_graph() %>%
-#'   add_path(2)
+#' # Create an empty graph
+#' graph <- create_graph()
 #'
 #' # Create a data frame from which several
 #' # columns have values designated as graph nodes
@@ -48,15 +46,16 @@
 #'     df = df,
 #'     columns = c("col_1", "col_2"))
 #'
-#' # Show the graph's node data frame
-#' graph %>% get_node_df()
+#' # Show the graph's node data frame; duplicate
+#' # labels are prevented with `keep_duplicates =
+#' # FALSE`)
+#' graph %>%
+#'   get_node_df()
 #' #>   id type label
-#' #> 1  1 <NA>     1
-#' #> 2  2 <NA>     2
-#' #> 3  3 <NA>     f
-#' #> 4  4 <NA>     p
-#' #> 5  5 <NA>     q
-#' #> 6  6 <NA>     x
+#' #> 1  1 <NA>     f
+#' #> 2  2 <NA>     p
+#' #> 3  3 <NA>     q
+#' #> 4  4 <NA>     x
 #'
 #' # Add new nodes from columns 3 and 4;
 #' # We can specify the columns by their
@@ -68,24 +67,23 @@
 #'     columns = 3:4)
 #'
 #' # Show the graph's node data frame; note
-#' # that a node didn't get made with
-#' # `label == "1"` since that was already
-#' # in the graph (this behavior can be
-#' # changed with `keep_duplicates = TRUE`)
-#' graph %>% get_node_df()
-#' #>    id type label
-#' #> 1   1 <NA>     1
-#' #> 2   2 <NA>     2
-#' #> 3   3 <NA>     f
-#' #> 4   4 <NA>     p
-#' #> 5   5 <NA>     q
-#' #> 6   6 <NA>     x
-#' #> 7   7 <NA>     5
-#' #> 8   8 <NA>     3
-#' #> 9   9 <NA>     a
-#' #> 10 10 <NA>     v
-#' #> 11 11 <NA>     h
-#' @importFrom dplyr bind_rows
+#' # that a nodes didn't get made with columns
+#' # that are not character class columns
+#' graph %>%
+#'   get_node_df()
+#' #>   id type label
+#' #> 1  1 <NA>     f
+#' #> 2  2 <NA>     p
+#' #> 3  3 <NA>     q
+#' #> 4  4 <NA>     x
+#' #> 5  5 <NA>     a
+#' #> 6  6 <NA>     v
+#' #> 7  7 <NA>     h
+#' @importFrom dplyr bind_rows distinct select select_if
+#' @importFrom stringr str_split
+#' @importFrom tidyr drop_na
+#' @importFrom tibble as_tibble
+#' @importFrom purrr flatten_chr
 #' @export add_nodes_from_df_cols
 
 add_nodes_from_df_cols <- function(graph,
@@ -109,7 +107,7 @@ add_nodes_from_df_cols <- function(graph,
     # Verify that the none of the values provided
     # are greater than the number of df columns
     if (max(columns) > ncol(df)) {
-      stop("One or more of the column numbers exceeds the number of columns in the `df`.")
+      stop("One or more of the column numbers exceeds the number of columns in `df`.")
     }
   }
 
@@ -124,21 +122,30 @@ add_nodes_from_df_cols <- function(graph,
     }
   }
 
-  # Isolate the relevant columns in the data frame
-  df <- df[, columns]
+  # Isolate the relevant columns in the data frame;
+  # Exclude any columns that are not character class
+  df <-
+    tibble::as_tibble(df) %>%
+    dplyr::select(columns) %>%
+    dplyr::select_if(is.character)
 
   # Create an empty `nodes` vector
   nodes <- vector(mode = "character")
 
-  if (inherits(df, "data.frame")) {
-
-    # Obtain a vector of values from each column
-    for (i in 1:ncol(df)) {
-      nodes <-
-        c(nodes, as.character(df[, i]))
-    }
-  } else {
-    nodes <- as.character(df)
+  # Obtain a vector of values from each column
+  # in the tibble object
+  for (i in 1:ncol(df)) {
+    nodes <-
+      c(nodes,
+        df[, i] %>%
+          purrr::flatten_chr() %>%
+          trimws() %>%
+          stringr::str_split(" ") %>%
+          purrr::flatten_chr() %>%
+          tibble::as_tibble() %>%
+          tidyr::drop_na() %>%
+          dplyr::distinct() %>%
+          purrr::flatten_chr())
   }
 
   # Get the unique set of nodes
@@ -194,10 +201,17 @@ add_nodes_from_df_cols <- function(graph,
       nodes = nrow(graph$nodes_df),
       edges = nrow(graph$edges_df))
 
+  # Perform graph actions, if any are available
+  if (nrow(graph$graph_actions) > 0) {
+    graph <-
+      graph %>%
+      trigger_graph_actions()
+  }
+
   # Write graph backup if the option is set
   if (graph$graph_info$write_backups) {
     save_graph_as_rds(graph = graph)
   }
 
-  return(graph)
+  graph
 }

@@ -11,10 +11,13 @@
 #' # Create a random graph
 #' graph <-
 #'   create_random_graph(
-#'     5, 6, set_seed = 23) %>%
-#'     set_edge_attrs("value", 3) %>%
-#'     mutate_edge_attrs(
-#'       "value", "2 * ~", "penwidth")
+#'     n = 5, m = 6,
+#'     set_seed = 23) %>%
+#'   set_edge_attrs(
+#'     edge_attr = value,
+#'     values = 3) %>%
+#'   mutate_edge_attrs(
+#'     penwidth = value * 2)
 #'
 #' # Get the graph's internal edf to show which
 #' # edge attributes are available
@@ -30,7 +33,8 @@
 #' # Drop the `value` edge attribute
 #' graph <-
 #'   graph %>%
-#'   drop_edge_attrs("value")
+#'   drop_edge_attrs(
+#'     edge_attr = value)
 #'
 #' # Get the graph's internal edf to show that
 #' # the edge attribute `value` had been removed
@@ -42,6 +46,7 @@
 #' #> 4  4    2  4 <NA>        6
 #' #> 5  5    2  5 <NA>        6
 #' #> 6  6    4  5 <NA>        6
+#' @importFrom rlang enquo UQ
 #' @export drop_edge_attrs
 
 drop_edge_attrs <- function(graph,
@@ -49,6 +54,9 @@ drop_edge_attrs <- function(graph,
 
   # Get the time of function start
   time_function_start <- Sys.time()
+
+  edge_attr <- rlang::enquo(edge_attr)
+  edge_attr <- (rlang::UQ(edge_attr) %>% paste())[2]
 
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
@@ -106,5 +114,5 @@ drop_edge_attrs <- function(graph,
     save_graph_as_rds(graph = graph)
   }
 
-  return(graph)
+  graph
 }

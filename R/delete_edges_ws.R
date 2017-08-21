@@ -19,15 +19,15 @@
 #' # Create a graph
 #' graph <-
 #'   create_graph() %>%
-#'   add_n_nodes(3) %>%
+#'   add_n_nodes(n = 3) %>%
 #'   add_edges_w_string(
-#'     "1->3 1->2 2->3")
+#'     edges = "1->3 1->2 2->3")
 #'
 #' # Select edges attached to node with ID `3`
 #' # (these are `1`->`3` and `2`->`3`)
 #' graph <-
 #'   graph %>%
-#'   select_edges_by_node_id(3)
+#'   select_edges_by_node_id(nodes = 3)
 #'
 #' # Delete edges in selection
 #' graph <-
@@ -85,7 +85,12 @@ delete_edges_ws <- function(graph) {
 
   # Remove any `delete_edge` records from the graph log
   graph$graph_log <-
-    graph$graph_log[-((nrow(graph$graph_log) - (i-1)):nrow(graph$graph_log)), ]
+    graph$graph_log[-((nrow(graph$graph_log) - (i - 1)):nrow(graph$graph_log)), ]
+
+  # Scavenge any invalid, linked data frames
+  graph <-
+    graph %>%
+    remove_linked_dfs()
 
   # Update the `graph_log` df with an action
   graph$graph_log <-
@@ -98,10 +103,17 @@ delete_edges_ws <- function(graph) {
       nodes = nrow(graph$nodes_df),
       edges = nrow(graph$edges_df))
 
+  # Perform graph actions, if any are available
+  if (nrow(graph$graph_actions) > 0) {
+    graph <-
+      graph %>%
+      trigger_graph_actions()
+  }
+
   # Write graph backup if the option is set
   if (graph$graph_info$write_backups) {
     save_graph_as_rds(graph = graph)
   }
 
-  return(graph)
+  graph
 }

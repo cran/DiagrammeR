@@ -5,7 +5,7 @@
 \title{Create a graph series object}
 \usage{
 create_series(graph = NULL, series_name = NULL,
-  series_type = "sequential", series_scripts = NULL)
+  series_type = "sequential")
 }
 \arguments{
 \item{graph}{a graph object to add to the new
@@ -18,9 +18,6 @@ the series.}
 (the default) or a \code{temporal} type (which
 requires date-time strings and time zone codes
 to be supplied).}
-
-\item{series_scripts}{a vector of R scripts or paths
-to R scripts.}
 }
 \value{
 a graph series object of type
@@ -35,19 +32,23 @@ temporal one-dimensional array.
 # Create three graphs
 graph_1 <-
   create_graph() \%>\%
-  add_n_nodes(3) \%>\%
+  add_n_nodes(n = 3) \%>\%
   add_edges_w_string(
-    "1->3 1->2 2->3")
+    edges = "1->3 1->2 2->3")
 
 graph_2 <-
   graph_1 \%>\%
   add_node() \%>\%
-  add_edge(4, 3)
+  add_edge(
+    from = 4,
+    to = 3)
 
 graph_3 <-
   graph_2 \%>\%
   add_node() \%>\%
-  add_edge(5, 2)
+  add_edge(
+    from = 5,
+    to = 2)
 
 # Create an empty graph series and add
 # the graphs
@@ -61,4 +62,3 @@ series <-
 graph_count(series)
 #> [1] 3
 }
-

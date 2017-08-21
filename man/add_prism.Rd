@@ -4,14 +4,14 @@
 \alias{add_prism}
 \title{Add a prism of nodes to the graph}
 \usage{
-add_prism(graph, n, type = NULL, label = TRUE, rel = NULL)
+add_prism(graph, n, type = NULL, label = TRUE, rel = NULL, ...)
 }
 \arguments{
 \item{graph}{a graph object of class
 \code{dgr_graph}.}
 
 \item{n}{the number of nodes describing the shape
-of the prism. For example, the triangonal prism has
+of the prism. For example, the triagonal prism has
 \code{n} equal to 3 and it is composed of 6 nodes
 and 9 edges. For any n-gonal prism, the graph will
 be generated with 2\code{n} nodes and 3\code{n}
@@ -29,6 +29,9 @@ nodes, or, a boolean value where setting to
 \item{rel}{an optional string for providing a
 relationship label to all new edges created in the
 node prism.}
+
+\item{...}{optional node attributes supplied as
+vectors.}
 }
 \value{
 a graph object of class \code{dgr_graph}.
@@ -41,8 +44,14 @@ With a graph object of class
 # Create a new graph and add 2 prisms
 graph <-
   create_graph() \%>\%
-  add_prism(3, "prism", "a") \%>\%
-  add_prism(3, "prism", "b")
+  add_prism(
+    n = 3,
+    type = "prism",
+    label = "a") \%>\%
+  add_prism(
+    n = 3,
+    type = "prism",
+    label = "b")
 
 # Get node information from this graph
 node_info(graph)
@@ -59,5 +68,48 @@ node_info(graph)
 #> 10 10 prism     b   3     2      1     0
 #> 11 11 prism     b   3     2      1     0
 #> 12 12 prism     b   3     2      1     0
-}
 
+# Attributes can be specified in extra
+# arguments and these are applied in order;
+# Usually these attributes are applied to
+# nodes (e.g., `type` is a node attribute)
+# but the `rel` attribute will apply to the
+# edges
+graph_w_attrs <-
+  create_graph() \%>\%
+  add_prism(
+    n = 3,
+    label = c("one", "two",
+              "three", "four",
+              "five", "six"),
+    type = c("a", "a",
+             "b", "b",
+             "c", "c"),
+    value = c(1.2, 8.4,
+              3.4, 5.2,
+              6.1, 2.6),
+    rel = "prism")
+
+# Get the graph's node data frame
+get_node_df(graph_w_attrs)
+#>   id type label value
+#> 1  1    a   one   1.2
+#> 2  2    a   two   8.4
+#> 3  3    b three   3.4
+#> 4  4    b  four   5.2
+#> 5  5    c  five   6.1
+#> 6  6    c   six   2.6
+
+# Get the graph's edge data frame
+get_edge_df(graph_w_attrs)
+#>   id from to   rel
+#> 1  1    1  2 prism
+#> 2  2    2  3 prism
+#> 3  3    3  1 prism
+#> 4  4    4  5 prism
+#> 5  5    5  6 prism
+#> 6  6    6  4 prism
+#> 7  7    1  4 prism
+#> 8  8    2  5 prism
+#> 9  9    3  6 prism
+}

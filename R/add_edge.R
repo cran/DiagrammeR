@@ -5,17 +5,26 @@
 #' @param graph a graph object of class
 #' \code{dgr_graph}.
 #' @param from the outgoing node from which the edge
-#' is connected.
+#' is connected. There is the option to use a node
+#' \code{label} value here (and this must
+#' correspondingly also be done for the \code{to}
+#' argument) for defining node connections. Note that
+#' this is only possible if all nodes have distinct
+#' \code{label} values set and none exist as an empty
+#' string.
 #' @param to the incoming nodes to which each edge
-#' is connected.
+#' is connected. There is the option to use a node
+#' \code{label} value here (and this must
+#' correspondingly also be done for the \code{from}
+#' argument) for defining node connections. Note that
+#' this is only possible if all nodes have distinct
+#' \code{label} values set and none exist as an empty
+#' string.
 #' @param rel an optional string specifying the
 #' relationship between the
 #' connected nodes.
-#' @param use_labels an option to use node \code{label}
-#' values in \code{from} and \code{to} for defining
-#' node connections. Note that this is only possible
-#' if all nodes have distinct \code{label} values set
-#' and none exist as an empty string.
+#' @param ... optional edge attributes supplied as
+#' vectors.
 #' @return a graph object of class \code{dgr_graph}.
 #' @examples
 #' # Create a graph with 4 nodes
@@ -44,38 +53,42 @@
 #' # Add another node and edge to the graph
 #' graph <-
 #'   graph %>%
-#'   add_edge(3, 2, "A")
+#'   add_edge(
+#'     from = 3,
+#'     to = 2,
+#'     rel = "A")
 #'
 #' # Verify that the edge has been created by
 #' # getting a count of graph edges
 #' edge_count(graph)
 #' #> [1] 2
 #'
-#' # Add edges by specifying node `label` values
-#' # and setting `use_labels = TRUE`; note
-#' # that all nodes must have unique `label`
-#' # values to use this option
+#' # Add edges by specifying node `label`
+#' # values; note that all nodes must have
+#' # unique `label` values to use this option
 #' graph <-
 #'   graph %>%
 #'   add_edge(
-#'     "three", "four", "L",
-#'     use_labels = TRUE) %>%
+#'     from = "three",
+#'     to = "four",
+#'     rel = "L") %>%
 #'   add_edge(
-#'     "four", "one", "L",
-#'     use_labels = TRUE)
+#'     from = "four",
+#'     to = "one",
+#'     rel = "L")
 #'
 #' # Use the `get_edges()` function to verify
 #' # that the edges were added
 #' get_edges(graph)
 #' #> [1] "1->2" "3->2" "3->4" "4->1"
-#' @importFrom dplyr bind_rows
+#' @importFrom dplyr bind_rows select filter
 #' @export add_edge
 
 add_edge <- function(graph,
                      from,
                      to,
                      rel = NULL,
-                     use_labels = FALSE) {
+                     ...) {
 
   # Get the time of function start
   time_function_start <- Sys.time()
@@ -94,13 +107,60 @@ add_edge <- function(graph,
     stop("Only one edge can be specified.")
   }
 
+  # Create bindings for specific variables
+  version_id <- label <- NULL
+
+  # Get the value for the latest `version_id` for
+  # graph (in the `graph_log`)
+  current_graph_log_version_id <-
+    graph$graph_log$version_id %>%
+    max()
+
   if (is.null(rel)) {
     rel <- as.character(NA)
   }
 
-  # If `use_label` is set to TRUE, treat values in
-  # list as labels; need to map to node ID values
-  if (use_labels) {
+  # Collect extra vectors of data as `extras`
+  extras <- list(...)
+
+  # Collect extra vectors of data as `extras_tbl`
+  if (length(extras) > 0) {
+    extras_tbl <- as_tibble(extras)
+  }
+
+  # If `from` and `to` values provided as character
+  # values, assume that these values refer to node
+  # `label` attr values
+  if (is.character(from) & is.character(to)) {
+
+    # Stop function if the label for `from` exists in the graph
+    if (!(from %in% graph$nodes_df$label)) {
+      stop("The value provided in `from` does not exist as a node `label` value.")
+    }
+
+    # Stop function if the label for `from` is distinct in the graph
+    if (graph$nodes_df %>%
+        dplyr::select(label) %>%
+        dplyr::filter(label == from) %>%
+        nrow() > 1) {
+      stop("The node `label` provided in `from` is not distinct in the graph.")
+    }
+
+    # Stop function if the label for `to` exists in the graph
+    if (!(to %in% graph$nodes_df$label)) {
+      stop("The value provided in `to` does not exist as a node `label` value.")
+    }
+
+    # Stop function if the label for `to` is distinct in the graph
+    if (graph$nodes_df %>%
+        dplyr::select(label) %>%
+        dplyr::filter(label == to) %>%
+        nrow() > 1) {
+      stop("The node `label` provided in `to` is not distinct in the graph.")
+    }
+
+    # Use the `translate_to_node_id()` helper function to map
+    # node `label` values to node `id` values
     from_to_node_id <-
       translate_to_node_id(
         graph = graph,
@@ -109,20 +169,6 @@ add_edge <- function(graph,
 
     from <- from_to_node_id$from
     to <- from_to_node_id$to
-  }
-
-  # If an edge between nodes is requested and that
-  # edge exists, stop function
-  if (all(
-    !is.na(get_edges(graph,
-                     return_type = "vector")))) {
-    if (any(
-      get_edges(
-        graph, return_type = "list")[[1]] == from &
-      get_edges(
-        graph, return_type = "list")[[2]] == to)) {
-      stop("This edge already exists.")
-    }
   }
 
   # Use `bind_rows()` to add an edge
@@ -143,8 +189,38 @@ add_edge <- function(graph,
     # edge data frame
     graph$edges_df <- combined_edges
 
+    if (exists("extras_tbl")) {
+
+      # If extra edge attributes available, add
+      # those to the new edge
+      graph <-
+        graph %>%
+        select_edges_by_edge_id(
+          graph$edges_df$id %>% max())
+
+      # Iteratively set edge attribute values for
+      # the new edge in the graph
+      for (i in 1:ncol(extras_tbl)) {
+        graph <-
+          graph %>%
+          set_edge_attrs_ws(
+            edge_attr = colnames(extras_tbl)[i],
+            value = extras_tbl[1, i][[1]])
+      }
+
+      # Clear the graph's active selection
+      graph <-
+        graph %>%
+        clear_selection()
+    }
+
     # Modify the `last_edge` vector
     graph$last_edge <- as.integer(graph$last_edge + 1)
+
+    # Remove extra items from the `graph_log`
+    graph$graph_log <-
+      graph$graph_log %>%
+      dplyr::filter(version_id <= current_graph_log_version_id)
 
     # Update the `graph_log` df with an action
     graph$graph_log <-
@@ -157,11 +233,18 @@ add_edge <- function(graph,
         nodes = nrow(graph$nodes_df),
         edges = nrow(graph$edges_df))
 
+    # Perform graph actions, if any are available
+    if (nrow(graph$graph_actions) > 0) {
+      graph <-
+        graph %>%
+        trigger_graph_actions()
+    }
+
     # Write graph backup if the option is set
     if (graph$graph_info$write_backups) {
       save_graph_as_rds(graph = graph)
     }
 
-    return(graph)
+    graph
   }
 }

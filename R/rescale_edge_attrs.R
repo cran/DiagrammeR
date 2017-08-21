@@ -26,19 +26,20 @@
 #' upper bound value for the rescaled values. If not
 #' set, the minimum value from the set will be used.
 #' @return a graph object of class \code{dgr_graph}.
-#' @import scales
-#' @importFrom grDevices colors
 #' @examples
 #' # Create a random graph
 #' graph <-
 #'   create_random_graph(
-#'     5, 7, set_seed = 23,
+#'     n = 5, m = 7,
+#'     set_seed = 23,
 #'     directed = TRUE) %>%
 #'   set_edge_attrs(
-#'     "weight", rnorm(edge_count(.), 5))
+#'     edge_attr = weight,
+#'     values = rnorm(edge_count(.), 5))
 #'
-#' # Get the graph's internal edf to show which
-#' # edge attributes are available
+#' # Get the graph's internal edf
+#' # to show which edge attributes
+#' # are available
 #' get_edge_df(graph)
 #' #>   id from to  rel   weight
 #' #> 1  1    2  3 <NA> 5.218288
@@ -49,14 +50,17 @@
 #' #> 6  6    4  5 <NA> 5.308137
 #' #> 7  7    1  4 <NA> 4.479822
 #'
-#' # Rescale the `weight` edge attribute, so that
-#' # its values are rescaled between 0 and 1
+#' # Rescale the `weight` edge
+#' # attribute, so that its values
+#' # are rescaled between 0 and 1
 #' graph <-
 #'   graph %>%
-#'   rescale_edge_attrs("weight")
+#'   rescale_edge_attrs(
+#'     edge_attr_from = weight)
 #'
-#' # Get the graph's internal edf to show that the
-#' # edge attribute values had been rescaled
+#' # Get the graph's internal edf
+#' # to show that the edge attribute
+#' # values had been rescaled
 #' get_edge_df(graph)
 #' #>   id from to  rel weight
 #' #> 1  1    2  3 <NA>  0.845
@@ -67,21 +71,31 @@
 #' #> 6  6    4  5 <NA>  0.898
 #' #> 7  7    1  4 <NA>  0.410
 #'
-#' # Scale the values in the `weight` edge attribute
-#' # to different shades of gray for the `color` edge
-#' # attribute and different numerical values for the
+#' # Scale the values in the `weight`
+#' # edge attribute to different
+#' # shades of gray for the `color`
+#' # edge attribute and different
+#' # numerical values for the
 #' # `penwidth` attribute
 #' graph <-
 #'   graph %>%
 #'   rescale_edge_attrs(
-#'     "weight", "gray80", "gray20", "color") %>%
+#'     edge_attr_from = weight,
+#'     to_lower_bound = "gray80",
+#'     to_upper_bound = "gray20",
+#'     edge_attr_to = color) %>%
 #'   rescale_edge_attrs(
-#'     "weight", 0.5, 3, "penwidth")
+#'     edge_attr_from = weight,
+#'     to_lower_bound = 0.5,
+#'     to_upper_bound = 3,
+#'     edge_attr_to = penwidth)
 #'
-#' # Get the graph's internal edf once more to show
-#' # that scaled grayscale colors are now available in
-#' # `color` and scaled numerical values are in the
-#' # `penwidth` edge attribute
+#' # Get the graph's internal edf
+#' # once more to show that scaled
+#' # grayscale colors are now available
+#' # in `color` and scaled numerical
+#' # values are in the `penwidth`
+#' # edge attribute
 #' get_edge_df(graph)
 #' #>   id from to  rel weight   color penwidth
 #' #> 1  1    2  3 <NA>  0.845 #484848    2.612
@@ -91,6 +105,9 @@
 #' #> 5  5    2  5 <NA>  0.000 #CCCCCC    0.500
 #' #> 6  6    4  5 <NA>  0.898 #414141    2.745
 #' #> 7  7    1  4 <NA>  0.410 #898989    1.525
+#' @importFrom rlang enquo UQ
+#' @importFrom scales rescale cscale seq_gradient_pal
+#' @importFrom grDevices colors
 #' @export rescale_edge_attrs
 
 rescale_edge_attrs <- function(graph,
@@ -103,6 +120,16 @@ rescale_edge_attrs <- function(graph,
 
   # Get the time of function start
   time_function_start <- Sys.time()
+
+  edge_attr_from <- rlang::enquo(edge_attr_from)
+  edge_attr_from <- (rlang::UQ(edge_attr_from) %>% paste())[2]
+
+  edge_attr_to <- rlang::enquo(edge_attr_to)
+  edge_attr_to <- (rlang::UQ(edge_attr_to) %>% paste())[2]
+
+  if (edge_attr_to == "NULL") {
+    edge_attr_to <- NULL
+  }
 
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
@@ -140,8 +167,12 @@ rescale_edge_attrs <- function(graph,
       (is.null(from_lower_bound) &
        is.null(from_upper_bound))) {
 
-    from <- range(vector_to_rescale,
-                  na.rm = TRUE, finite = TRUE)
+    from <-
+      range(
+        vector_to_rescale,
+        na.rm = TRUE,
+        finite = TRUE)
+
   } else {
     from <- c(from_lower_bound, from_upper_bound)
   }
@@ -153,7 +184,7 @@ rescale_edge_attrs <- function(graph,
 
     edges_attr_vector_rescaled <-
       round(
-        rescale(
+        scales::rescale(
           x = vector_to_rescale,
           to = c(to_lower_bound,
                  to_upper_bound),
@@ -162,14 +193,15 @@ rescale_edge_attrs <- function(graph,
   }
 
   # Get vector of rescaled, edge attribute color values
-  if ((to_lower_bound %in% colors()) &
-      (to_upper_bound %in% colors())) {
+  if ((to_lower_bound %in% grDevices::colors()) &
+      (to_upper_bound %in% grDevices::colors())) {
 
     edges_attr_vector_rescaled <-
-      cscale(
+      scales::cscale(
         x = vector_to_rescale,
-        palette = seq_gradient_pal(to_lower_bound,
-                                   to_upper_bound))
+        palette = scales::seq_gradient_pal(
+          to_lower_bound,
+          to_upper_bound))
   }
 
   # If a new edge attribute name was not provided,
@@ -179,13 +211,18 @@ rescale_edge_attrs <- function(graph,
     edge_attr_to <- edge_attr_from
   }
 
+  edge_attr_to_2 <- rlang::enquo(edge_attr_to)
+
   # Set the edge attribute values for edges specified
   # in selection
   graph <-
     set_edge_attrs(
       x = graph,
-      edge_attr = edge_attr_to,
+      edge_attr = rlang::UQ(edge_attr_to_2),
       values = edges_attr_vector_rescaled)
+
+  # Remove last action from the `graph_log`
+  graph$graph_log <- graph$graph_log[1:(nrow(graph$graph_log) - 1), ]
 
   # Update the `graph_log` df with an action
   graph$graph_log <-
@@ -203,5 +240,5 @@ rescale_edge_attrs <- function(graph,
     save_graph_as_rds(graph = graph)
   }
 
-  return(graph)
+  graph
 }

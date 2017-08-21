@@ -4,17 +4,38 @@
 \alias{import_graph}
 \title{Import a graph from various graph formats}
 \usage{
-import_graph(graph_file, file_type = NULL)
+import_graph(graph_file, file_type = NULL, edges_extra_attr_names = NULL,
+  edges_extra_attr_coltypes = NULL)
 }
 \arguments{
-\item{graph_file}{a connection to a graph file.}
+\item{graph_file}{a connection to a graph file.
+When provided as a path to a file, it will read the
+file from disk. Files starting with \code{http://},
+\code{https://}, \code{ftp://}, or \code{ftps://}
+will be automatically downloaded.}
 
 \item{file_type}{the type of file to be imported.
-Options are: \code{graphml} (GraphML), \code{gml}
-(GML), \code{sif} (SIF), \code{edges} (a .edges
-file), and \code{mtx} (MatrixMarket format). If not
-supplied, the function will infer the type by its
-file extension.}
+Options are: \code{gml} (GML), \code{sif} (SIF),
+\code{edges} (a .edges file), and \code{mtx}
+(MatrixMarket format). If not supplied, the type
+of graph file will be inferred by its file extension.}
+
+\item{edges_extra_attr_names}{for \code{edges} files,
+a vector of attribute names beyond the \code{from}
+and \code{to} data columns can be provided in the
+order they appear in the input data file.}
+
+\item{edges_extra_attr_coltypes}{for \code{edges}
+files, this is a string of column types for any
+attribute columns provided for
+\code{edges_extra_attr_names}. This string
+representation is where each character represents
+each of the extra columns of data and the mappings
+are: \code{c} -> character, \code{i} -> integer,
+\code{n} -> number, \code{d} -> double,
+\code{l} -> logical, \code{D} -> date, \code{T} ->
+date time, \code{t} -> time, \code{?} -> guess,
+or \code{_/-}, which skips the column.}
 }
 \value{
 a graph object of class \code{dgr_graph}.
@@ -25,47 +46,21 @@ different graph formats and create a graph object.
 }
 \examples{
 \dontrun{
-# Import a GraphML graph file
-graphml_graph <-
-  import_graph(
-    system.file("extdata", "power_grid.graphml",
-                package = "DiagrammeR"))
-
-# Get a count of the graph's nodes
-graphml_graph \%>\% node_count
-#> [1] 4941
-
-# Get a count of the graph's edges
-graphml_graph \%>\% edge_count
-#> [1] 6594
-
-# Import an SIF graph file
-sif_graph <-
-  import_graph(
-    system.file("extdata", "Human_Interactome.sif",
-                package = "DiagrammeR"))
-
-# Get a count of the graph's nodes
-sif_graph \%>\% node_count
-#> [1] 8347
-
-# Get a count of the graph's edges
-sif_graph \%>\% edge_count
-#> [1] 61263
-
 # Import a GML graph file
 gml_graph <-
   import_graph(
-    system.file("extdata", "karate.gml",
-                package = "DiagrammeR"))
+    system.file(
+      "extdata/karate.gml",
+      package = "DiagrammeR"))
 
 # Get a count of the graph's nodes
-gml_graph \%>\% node_count
+gml_graph \%>\%
+  node_count()
 #> [1] 34
 
 # Get a count of the graph's edges
-gml_graph \%>\% edge_count
+gml_graph \%>\%
+  edge_count()
 #> [1] 78
 }
 }
-

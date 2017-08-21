@@ -31,39 +31,43 @@ within the edf with a different attribute name.
 # Create a random graph
 graph <-
   create_random_graph(
-  5, 8, set_seed = 3) \%>\%
-  set_edge_attrs("color", "green")
+  n = 5, m = 8,
+  set_seed = 23) \%>\%
+  set_edge_attrs(
+    edge_attr = color,
+    values = "green")
 
 # Get the graph's internal edf to show which
 # edge attributes are available
 get_edge_df(graph)
 #>   id from to  rel color
-#> 1  1    2  5 <NA> green
-#> 2  2    1  3 <NA> green
-#> 3  3    1  4 <NA> green
-#> 4  4    2  3 <NA> green
-#> 5  5    1  5 <NA> green
-#> 6  6    3  4 <NA> green
-#> 7  7    4  5 <NA> green
-#> 8  8    3  5 <NA> green
+#> 1  1    2  3 <NA> green
+#> 2  2    3  5 <NA> green
+#> 3  3    3  4 <NA> green
+#> 4  4    2  4 <NA> green
+#> 5  5    2  5 <NA> green
+#> 6  6    4  5 <NA> green
+#> 7  7    1  4 <NA> green
+#> 8  8    1  3 <NA> green
 
 # Make a copy the `color` edge attribute as
 # the `color_2` edge attribute
 graph <-
   graph \%>\%
-  copy_edge_attrs("color", "color_2")
+  copy_edge_attrs(
+    edge_attr_from = color,
+    edge_attr_to = color_2)
 
 # Get the graph's internal edf to show that the
 # edge attribute had been copied
 get_edge_df(graph)
 #>   id from to  rel color color_2
-#> 1  1    2  5 <NA> green   green
-#> 2  2    1  3 <NA> green   green
-#> 3  3    1  4 <NA> green   green
-#> 4  4    2  3 <NA> green   green
-#> 5  5    1  5 <NA> green   green
-#> 6  6    3  4 <NA> green   green
-#> 7  7    4  5 <NA> green   green
-#> 8  8    3  5 <NA> green   green
+#> 1  1    2  3 <NA> green   green
+#> 2  2    3  5 <NA> green   green
+#> 3  3    3  4 <NA> green   green
+#> 4  4    2  4 <NA> green   green
+#> 5  5    2  5 <NA> green   green
+#> 6  6    4  5 <NA> green   green
+#> 7  7    1  4 <NA> green   green
+#> 8  8    1  3 <NA> green   green
 }
-

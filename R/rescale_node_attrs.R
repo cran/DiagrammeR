@@ -26,61 +26,76 @@
 #' upper bound value for the rescaled values. If not
 #' set, the minimum value from the set will be used.
 #' @return a graph object of class \code{dgr_graph}.
-#' @import scales
-#' @importFrom grDevices colors
 #' @examples
 #' # Create a random graph
 #' graph <-
 #'   create_random_graph(
-#'     5, 10, set_seed = 3,
+#'     n = 5, m = 10,
+#'     set_seed = 23,
 #'     directed = TRUE)
 #'
-#' # Get the graph's internal ndf to show which
-#' # node attributes are available
+#' # Get the graph's internal ndf
+#' # to show which node attributes
+#' # are available
 #' get_node_df(graph)
 #' #>   id type label value
-#' #> 1  1 <NA>     1   2.0
-#' #> 2  2 <NA>     2   8.5
-#' #> 3  3 <NA>     3   4.0
-#' #> 4  4 <NA>     4   3.5
-#' #> 5  5 <NA>     5   6.5
+#' #> 1  1 <NA>     1   6.0
+#' #> 2  2 <NA>     2   2.5
+#' #> 3  3 <NA>     3   3.5
+#' #> 4  4 <NA>     4   7.5
+#' #> 5  5 <NA>     5   8.5
 #'
-#' # Rescale the `value` node attribute, so that
-#' # its values are rescaled between 0 and 1
+#' # Rescale the `value` node
+#' # attribute, so that its values
+#' # are rescaled between 0 and 1
 #' graph <-
 #'   graph %>%
-#'   rescale_node_attrs("value")
+#'   rescale_node_attrs(
+#'     node_attr_from = value)
 #'
-#' # Get the graph's internal ndf to show that the
-#' # node attribute values had been rescaled
+#' # Get the graph's internal ndf
+#' # to show that the node attribute
+#' # values had been rescaled
 #' get_node_df(graph)
 #' #>   id type label value
-#' #> 1  1 <NA>     1 0.000
-#' #> 2  2 <NA>     2 1.000
-#' #> 3  3 <NA>     3 0.308
-#' #> 4  4 <NA>     4 0.231
-#' #> 5  5 <NA>     5 0.692
+#' #> 1  1 <NA>     1 0.583
+#' #> 2  2 <NA>     2 0.000
+#' #> 3  3 <NA>     3 0.167
+#' #> 4  4 <NA>     4 0.833
+#' #> 5  5 <NA>     5 1.000
 #'
-#' # Scale the values in the `value` node attribute
-#' # to different shades of gray for the `fillcolor`
+#' # Scale the values in the `value`
+#' # node attribute to different
+#' # shades of gray for the `fillcolor`
 #' # and `fontcolor` node attributes
 #' graph <-
 #'   graph %>%
 #'   rescale_node_attrs(
-#'     "value", "gray80", "gray20", "fillcolor") %>%
+#'     node_attr_from = value,
+#'     to_lower_bound = "gray80",
+#'     to_upper_bound = "gray20",
+#'     node_attr_to = fillcolor) %>%
 #'   rescale_node_attrs(
-#'     "value", "gray5", "gray95", "fontcolor")
+#'     node_attr_from = value,
+#'     to_lower_bound = "gray5",
+#'     to_upper_bound = "gray95",
+#'     node_attr_to = fontcolor)
 #'
-#' # Get the graph's internal ndf once more to show
-#' # that scaled grayscale colors are now available in
-#' # the `fillcolor` and `fontcolor` node attributes
+#' # Get the graph's internal ndf
+#' # once more to show that scaled
+#' # grayscale colors are now available
+#' # in the `fillcolor` and `fontcolor`
+#' # node attributes
 #' get_node_df(graph)
 #' #>   id type label value fillcolor fontcolor
-#' #> 1  1 <NA>     1 0.000   #CCCCCC   #0D0D0D
-#' #> 2  2 <NA>     2 1.000   #333333   #F2F2F2
-#' #> 3  3 <NA>     3 0.308   #999999   #4B4B4B
-#' #> 4  4 <NA>     4 0.231   #A6A6A6   #3B3B3B
-#' #> 5  5 <NA>     5 0.692   #5E5E5E   #A4A4A4
+#' #> 1  1 <NA>     1 0.583   #6E6E6E   #898989
+#' #> 2  2 <NA>     2 0.000   #CCCCCC   #0D0D0D
+#' #> 3  3 <NA>     3 0.167   #B0B0B0   #2E2E2E
+#' #> 4  4 <NA>     4 0.833   #4A4A4A   #C7C7C7
+#' #> 5  5 <NA>     5 1.000   #333333   #F2F2F2
+#' @importFrom scales rescale cscale seq_gradient_pal
+#' @importFrom grDevices colors
+#' @importFrom rlang enquo UQ
 #' @export rescale_node_attrs
 
 rescale_node_attrs <- function(graph,
@@ -93,6 +108,16 @@ rescale_node_attrs <- function(graph,
 
   # Get the time of function start
   time_function_start <- Sys.time()
+
+  node_attr_from <- rlang::enquo(node_attr_from)
+  node_attr_from <- (rlang::UQ(node_attr_from) %>% paste())[2]
+
+  node_attr_to <- rlang::enquo(node_attr_to)
+  node_attr_to <- (rlang::UQ(node_attr_to) %>% paste())[2]
+
+  if (node_attr_to == "NULL") {
+    node_attr_to <- NULL
+  }
 
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
@@ -130,8 +155,12 @@ rescale_node_attrs <- function(graph,
       (is.null(from_lower_bound) &
        is.null(from_upper_bound))) {
 
-    from <- range(vector_to_rescale,
-                  na.rm = TRUE, finite = TRUE)
+    from <-
+      range(
+        vector_to_rescale,
+        na.rm = TRUE,
+        finite = TRUE)
+
   } else {
     from <- c(from_lower_bound, from_upper_bound)
   }
@@ -143,7 +172,7 @@ rescale_node_attrs <- function(graph,
 
     nodes_attr_vector_rescaled <-
       round(
-        rescale(
+        scales::rescale(
           x = vector_to_rescale,
           to = c(to_lower_bound,
                  to_upper_bound),
@@ -152,14 +181,15 @@ rescale_node_attrs <- function(graph,
   }
 
   # Get vector of rescaled, node attribute color values
-  if ((to_lower_bound %in% colors()) &
-      (to_upper_bound %in% colors())) {
+  if ((to_lower_bound %in% grDevices::colors()) &
+      (to_upper_bound %in% grDevices::colors())) {
 
     nodes_attr_vector_rescaled <-
-      cscale(
+      scales::cscale(
         x = vector_to_rescale,
-        palette = seq_gradient_pal(to_lower_bound,
-                                   to_upper_bound))
+        palette = scales::seq_gradient_pal(
+          to_lower_bound,
+          to_upper_bound))
   }
 
   # If a new node attribute name was not provided,
@@ -169,13 +199,18 @@ rescale_node_attrs <- function(graph,
     node_attr_to <- node_attr_from
   }
 
+  node_attr_to_2 <- rlang::enquo(node_attr_to)
+
   # Set the node attribute values for nodes specified
   # in selection
   graph <-
     set_node_attrs(
       x = graph,
-      node_attr = node_attr_to,
+      node_attr = rlang::UQ(node_attr_to_2),
       values = nodes_attr_vector_rescaled)
+
+  # Remove last action from the `graph_log`
+  graph$graph_log <- graph$graph_log[1:(nrow(graph$graph_log) - 1), ]
 
   # Update the `graph_log` df with an action
   graph$graph_log <-
@@ -193,5 +228,5 @@ rescale_node_attrs <- function(graph,
     save_graph_as_rds(graph = graph)
   }
 
-  return(graph)
+  graph
 }

@@ -12,7 +12,7 @@
 #' # edges between each in a path
 #' graph <-
 #'   create_graph() %>%
-#'   add_path(5)
+#'   add_path(n = 5)
 #'
 #' # Delete node with ID `3`
 #' graph <- delete_node(graph, node = 3)
@@ -55,7 +55,7 @@ delete_node <- function(graph,
 
   # Stop function if node not a single value
   if (node_is_single_value == FALSE) {
-    stop("Only a single node can be deleted using 'delete_node'.")
+    stop("Only a single node can be deleted using `delete_node()`.")
   }
 
   # Stop function if node is not in the graph
@@ -88,6 +88,11 @@ delete_node <- function(graph,
   graph$nodes_df <- ndf
   graph$edges_df <- edf
 
+  # Scavenge any invalid, linked data frames
+  graph <-
+    graph %>%
+    remove_linked_dfs()
+
   # Update the `graph_log` df with an action
   graph$graph_log <-
     add_action_to_log(
@@ -99,10 +104,17 @@ delete_node <- function(graph,
       nodes = nrow(graph$nodes_df),
       edges = nrow(graph$edges_df))
 
+  # Perform graph actions, if any are available
+  if (nrow(graph$graph_actions) > 0) {
+    graph <-
+      graph %>%
+      trigger_graph_actions()
+  }
+
   # Write graph backup if the option is set
   if (graph$graph_info$write_backups) {
     save_graph_as_rds(graph = graph)
   }
 
-  return(graph)
+  graph
 }

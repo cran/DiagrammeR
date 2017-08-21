@@ -4,9 +4,9 @@
 #' \code{dgr_graph} with an active selection of
 #' edges move opposite to the edge direction to
 #' connected nodes, replacing the current edge selection
-#' with the selection with those nodes traversed to. An
-#' optional filter by node attribute can limit the set
-#' of nodes traversed to.
+#' with those nodes traversed to. An optional filter by
+#' node attribute can limit the set of nodes traversed
+#' to.
 #' @param graph a graph object of class
 #' \code{dgr_graph}.
 #' @param conditions an option to use filtering
@@ -33,13 +33,15 @@
 #' graph <-
 #'   create_graph() %>%
 #'   add_n_nodes(
-#'     2, type = "a",
+#'     n = 2,
+#'     type = "a",
 #'     label = c("asd", "iekd")) %>%
 #'   add_n_nodes(
-#'     3, type = "b",
+#'     n = 3,
+#'     type = "b",
 #'     label = c("idj", "edl", "ohd")) %>%
 #'   add_edges_w_string(
-#'     "1->2 1->3 2->4 2->5 3->5",
+#'     edges = "1->2 1->3 2->4 2->5 3->5",
 #'     rel = c(NA, "A", "B", "C", "D"))
 #'
 #' # Create a data frame with node ID values
@@ -48,7 +50,7 @@
 #' df_edges <-
 #'   data.frame(
 #'     from = c(1, 1, 2, 2, 3),
-#'     to = c(2, 3, 4, 5, 5),
+#'       to = c(2, 3, 4, 5, 5),
 #'     values = round(rnorm(5, 5), 2))
 #'
 #' # Create a data frame with node ID values
@@ -63,9 +65,10 @@
 #' # edge data frame (edf)
 #' graph <-
 #'   graph %>%
-#'   join_edge_attrs(df_edges) %>%
-#'   join_node_attrs(df_nodes)
+#'   join_edge_attrs(df = df_edges) %>%
+#'   join_node_attrs(df = df_nodes)
 #'
+#' # Show the graph's internal node data frame
 #' get_node_df(graph)
 #' #>   id type label values
 #' #> 1  1    a   asd   8.58
@@ -74,6 +77,7 @@
 #' #> 4  4    b   edl   6.71
 #' #> 5  5    b   ohd   7.48
 #'
+#' # Show the graph's internal edge data frame
 #' get_edge_df(graph)
 #' #>   id from to  rel values
 #' #> 1  1    1  2 <NA>   6.00
@@ -88,7 +92,9 @@
 #' # conditions are placed on the nodes
 #' # traversed to
 #' graph %>%
-#'   select_edges(from = 1, to = 3) %>%
+#'   select_edges(
+#'     from = 1,
+#'       to = 3) %>%
 #'   trav_out_node() %>%
 #'   get_selection()
 #' #> [1] 1
@@ -98,8 +104,12 @@
 #' # the direction of the edge; here, the
 #' # traversals lead to different nodes
 #' graph %>%
-#'   select_edges(from = 2, to = 5) %>%
-#'   select_edges(from = 3, to = 5) %>%
+#'   select_edges(
+#'     from = 2,
+#'       to = 5) %>%
+#'   select_edges(
+#'     from = 3,
+#'       to = 5) %>%
 #'   trav_out_node() %>%
 #'   get_selection()
 #' #> [1] 2 3
@@ -110,9 +120,11 @@
 #' # numeric values greater than `7.0` for
 #' # the `values` node attribute
 #' graph %>%
-#'   select_edges(from = 1, to = 3) %>%
+#'   select_edges(
+#'     from = 1,
+#'       to = 3) %>%
 #'   trav_out_node(
-#'     conditions = "values > 7.0") %>%
+#'     conditions = values > 7.0) %>%
 #'   get_selection()
 #' #> [1] 1
 #'
@@ -124,20 +136,24 @@
 #' # condition is not met so the original
 #' # selection of edge `1`->`3` remains)
 #' graph %>%
-#'   select_edges(from = 1, to = 3) %>%
+#'   select_edges(
+#'     from = 1,
+#'       to = 3) %>%
 #'   trav_out_node(
-#'     conditions = "values < 7.0") %>%
+#'     conditions = values < 7.0) %>%
 #'   get_selection()
 #' #> [1] 2
 #'
-#' # Traverse from the edge `1`->`2` to
-#' # the node `2` using multiple conditions
-#' # with a single-length vector (here, using
-#' # a `|` to create a set of `OR` conditions)
+#' # Traverse from the edge `1`->`2`
+#' # to node `2`, using multiple conditions
 #' graph %>%
-#'   select_edges(from = 1, to = 2) %>%
+#'   select_edges(
+#'     from = 1,
+#'       to = 2) %>%
 #'   trav_out_node(
-#'     conditions = "grepl('.*d$', label) | values < 6.0") %>%
+#'     conditions =
+#'       grepl(".*d$", label) |
+#'       values < 6.0) %>%
 #'   get_selection()
 #' #> [1] 1
 #'
@@ -148,27 +164,37 @@
 #'   create_graph() %>%
 #'   add_node() %>%
 #'   select_nodes() %>%
-#'   add_n_nodes_ws(2, "from") %>%
+#'   add_n_nodes_ws(
+#'     n = 2,
+#'     direction = "from") %>%
 #'   clear_selection() %>%
-#'   select_nodes_by_id(2) %>%
-#'   set_node_attrs_ws("value", 8) %>%
+#'   select_nodes_by_id(nodes = 2) %>%
+#'   set_node_attrs_ws(
+#'     node_attr = value,
+#'     value = 8) %>%
 #'   clear_selection() %>%
-#'   select_edges_by_edge_id(1) %>%
-#'   set_edge_attrs_ws("value", 5) %>%
+#'   select_edges_by_edge_id(edges = 1) %>%
+#'   set_edge_attrs_ws(
+#'     edge_attr = value,
+#'     value = 5) %>%
 #'   clear_selection() %>%
-#'   select_edges_by_edge_id(2) %>%
-#'   set_edge_attrs_ws("value", 5) %>%
+#'   select_edges_by_edge_id(edges = 2) %>%
+#'   set_edge_attrs_ws(
+#'     edge_attr = value,
+#'     value = 5) %>%
 #'   clear_selection() %>%
 #'   select_edges()
 #'
 #' # Show the graph's internal edge data frame
-#' graph %>% get_edge_df()
+#' graph %>%
+#'   get_edge_df()
 #' #>   id from to  rel value
 #' #> 1  1    1  2 <NA>     5
 #' #> 2  2    1  3 <NA>     5
 #'
 #' # Show the graph's internal node data frame
-#' graph %>% get_node_df()
+#' graph %>%
+#'   get_node_df()
 #' #>   id type label value
 #' #> 1  1 <NA>  <NA>    NA
 #' #> 2  2 <NA>  <NA>     8
@@ -182,24 +208,35 @@
 #' graph <-
 #'   graph %>%
 #'   trav_out_node(
-#'     copy_attrs_from = "value",
+#'     copy_attrs_from = value,
 #'     agg = "sum")
 #'
 #' # Show the graph's internal node data frame
 #' # after this change
-#' graph %>% get_node_df()
+#' graph %>%
+#'   get_node_df()
 #' #>   id type label value
 #' #> 1  1 <NA>  <NA>    10
 #' #> 2  2 <NA>  <NA>     8
 #' #> 3  3 <NA>  <NA>    NA
 #' @importFrom stats as.formula
-#' @importFrom dplyr filter filter_ distinct left_join right_join semi_join select select_ rename group_by summarize_ everything
+#' @importFrom dplyr filter distinct left_join right_join semi_join select select_ rename group_by summarize_ everything
+#' @importFrom rlang enquo UQ
 #' @export trav_out_node
 
 trav_out_node <- function(graph,
                           conditions = NULL,
                           copy_attrs_from = NULL,
                           agg = "sum") {
+
+  conditions <- rlang::enquo(conditions)
+
+  copy_attrs_from <- rlang::enquo(copy_attrs_from)
+  copy_attrs_from <- (rlang::UQ(copy_attrs_from) %>% paste())[2]
+
+  if (copy_attrs_from == "NULL") {
+    copy_attrs_from <- NULL
+  }
 
   # Get the time of function start
   time_function_start <- Sys.time()
@@ -247,12 +284,12 @@ trav_out_node <- function(graph,
   # If traversal conditions are provided then
   # pass in those conditions and filter the
   # data frame of `valid_nodes`
-  if (!is.null(conditions)) {
-    for (i in 1:length(conditions)) {
-      valid_nodes <-
-        valid_nodes %>%
-        dplyr::filter_(conditions[i])
-    }
+  if (!((rlang::UQ(conditions) %>% paste())[2] == "NULL")) {
+
+    valid_nodes <-
+      filter(
+        .data = valid_nodes,
+        rlang::UQ(conditions))
   }
 
   # If no rows returned, then there are no
@@ -342,5 +379,5 @@ trav_out_node <- function(graph,
     save_graph_as_rds(graph = graph)
   }
 
-  return(graph)
+  graph
 }

@@ -10,7 +10,7 @@
 #' \code{circo}, or \code{twopi}. For more information
 #' see \href{viz.js Usage}{https://github.com/mdaines/viz.js#usage}.
 #' @param allow_subst a boolean that enables/disables
-#' subsitution functionality.
+#' substitution functionality.
 #' @param options parameters supplied to the
 #' htmlwidgets framework.
 #' @param width an optional parameter for specifying
@@ -54,10 +54,10 @@ grViz <- function(diagram = "",
 
   # Forward options using x
   x <- list(
-    diagram = diagram
-    , config = list(
-      engine = engine
-      , options = options
+    diagram = diagram,
+    config = list(
+      engine = engine,
+      options = options
     )
   )
 
@@ -139,4 +139,46 @@ renderGrViz <- function(expr,
                     grVizOutput,
                     env,
                     quoted = TRUE)
+}
+
+#' Add MathJax-formatted equation text
+#' @param gv a \code{grViz} htmlwidget.
+#' @param include_mathjax \code{logical} to add mathjax JS.
+#' Change to \code{FALSE} if using with \code{RMarkdown} since
+#' MathJax will likely already be added.
+#' @return a \code{grViz} htmlwidget
+#' @importFrom htmltools browsable tags tagList htmlDependency
+#' @export
+
+add_mathjax <- function(gv = NULL,
+                        include_mathjax = TRUE) {
+
+  stopifnot(!is.null(gv), inherits(gv, "grViz"))
+
+  gv$dependencies <-
+    c(
+      gv$dependencies,
+      list(htmltools::htmlDependency(
+        name = "svg_mathjax2",
+        version = "0.1.0",
+        src = c(href="https://cdn.rawgit.com/timelyportfolio/svg_mathjax2/master/"),
+        script = "svg_mathjax2.js")))
+
+  if (include_mathjax){
+    htmltools::browsable(
+      htmltools::tagList(
+        gv,
+        htmltools::tags$script(src = "http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_SVG"),
+        htmlwidgets::onStaticRenderComplete(
+          "setTimeout(function(){new Svg_MathJax().install()}, 4000);"
+        )
+      ))
+  } else {
+    htmltools::browsable(htmltools::tagList(
+      gv,
+      htmlwidgets::onStaticRenderComplete(
+        "setTimeout(function(){new Svg_MathJax().install()}, 4000);"
+      )
+    ))
+  }
 }

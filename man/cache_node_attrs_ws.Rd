@@ -5,7 +5,7 @@
 \title{Cache node attributes (based on a selection of
 nodes) in the graph}
 \usage{
-cache_node_attrs_ws(graph, node_attr, mode = NULL)
+cache_node_attrs_ws(graph, node_attr, name = NULL, mode = NULL)
 }
 \arguments{
 \item{graph}{a graph object of class
@@ -13,6 +13,8 @@ cache_node_attrs_ws(graph, node_attr, mode = NULL)
 
 \item{node_attr}{the node attribute from which to
 obtain values.}
+
+\item{name}{an optional name for the cached vector.}
 
 \item{mode}{a option to recast the returned vector
 of node attribute value as \code{numeric} or
@@ -31,7 +33,7 @@ values in the graph for later retrieval using
 Selections of nodes can be performed using
 the following \code{select_...} functions:
 \code{select_nodes()},
-\code{select_last_node()},
+\code{select_last_nodes_created()},
 \code{select_nodes_by_degree()},
 \code{select_nodes_by_id()}, or
 \code{select_nodes_in_neighborhood()}.
@@ -49,18 +51,21 @@ set.seed(23)
 # Create a graph with 6 nodes and 5 edges
 graph <-
   create_graph() \%>\%
-  add_path(6) \%>\%
+  add_path(n = 6) \%>\%
   set_node_attrs(
-    "value", rnorm(node_count(.), 5, 2))
+    node_attr = value,
+    values = rnorm(node_count(.), 5, 2))
 
-# Select all nodes where the node attribute `value`
-# is less than 5
+# Select all nodes where the node
+# attribute `value` is less than 5
 graph <-
   graph \%>\%
-  select_nodes("value < 5.0")
+  select_nodes(
+    conditions = value < 5.0)
 
 # Show the graph's node data frame
-graph \%>\% get_node_df
+graph \%>\%
+  get_node_df()
 #>   id type label    value
 #> 1  1 <NA>     1 5.090874
 #> 2  2 <NA>     2 8.151559
@@ -70,15 +75,16 @@ graph \%>\% get_node_df
 #> 6  6 <NA>     6 5.963101
 
 # Cache available values from the node attribute
-# `value` from the nodes that are selected; ensure
-# that the cached vector is numeric
+# `value` from the nodes that are selected;
+# ensure that the cached vector is numeric
 graph <-
   graph \%>\%
-  cache_node_attrs_ws("value", "numeric")
+  cache_node_attrs_ws(
+    node_attr = value,
+    name = "node_value")
 
-# Get the cached vector and get its
-# difference from 5
-graph \%>\% get_cache() \%>\% {x <- .; 5 - x}
-#> [1] 2.0930707 0.5773773
+# Get the cached vector with `get_cache()`
+graph \%>\%
+  get_cache(name = "node_value")
+#> [1] 2.906929 4.422623
 }
-

@@ -16,7 +16,7 @@ the string object should be formatted as a series of
 node ID values as \code{[node_ID_1]->[node_ID_2]}
 separated by a one or more space characters. For
 undirected graphs, \code{--} should replace
-\code{->}. Linebreaks in the vector won't cause an
+\code{->}. Line breaks in the vector won't cause an
 error.}
 
 \item{rel}{an optional vector specifying the
@@ -50,7 +50,7 @@ graph <-
 graph_node_id <-
   graph \%>\%
   add_edges_w_string(
-    "1->2 1->3 2->4 2->3")
+    edges = "1->2 1->3 2->4 2->3")
 
 # Show the graph's internal edge data frame
 get_edge_df(graph_node_id)
@@ -68,8 +68,9 @@ get_edge_df(graph_node_id)
 graph_node_label <-
   graph \%>\%
   add_edges_w_string(
-    "one->two one->three
-     two->four two->three",
+    edges =
+      "one->two one->three
+       two->four two->three",
     use_labels = TRUE)
 
 # Show the graph's internal edge data frame
@@ -81,4 +82,3 @@ get_edge_df(graph_node_label)
 #> 3  3    2  4 <NA>
 #> 4  4    2  3 <NA>
 }
-

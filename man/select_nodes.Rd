@@ -21,7 +21,7 @@ or, as a \code{difference} on the previous
 selection, if it exists.}
 
 \item{nodes}{an optional vector of node IDs for
-filtering list of nodes present in the graph.}
+filtering the list of nodes present in the graph.}
 }
 \value{
 a graph object of class \code{dgr_graph}.
@@ -68,7 +68,7 @@ graph <-
   graph \%>\%
   clear_selection() \%>\%
   select_nodes(
-    conditions = "type == 'z'")
+    conditions = type == "z")
 
 # Verify that an node selection has been made, and
 # recall that the `3` and `4` nodes are of the
@@ -83,7 +83,7 @@ graph <-
   graph \%>\%
   clear_selection() \%>\%
   select_nodes(
-    conditions = "value > 3.0")
+    conditions = value > 3.0)
 
 # Verify that the correct node selection has been
 # made; in this case, nodes `1` and `3` have values
@@ -91,4 +91,3 @@ graph <-
 get_selection(graph)
 #> [1] 1 3
 }
-

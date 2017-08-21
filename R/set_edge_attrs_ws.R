@@ -22,26 +22,32 @@
 #' # Create a simple graph
 #' graph <-
 #'   create_graph() %>%
-#'   add_path(6)
+#'   add_path(n = 6)
 #'
-#' # Select specific edges from the graph and
-#' # apply the edge attribute `color = blue` to
+#' # Select specific edges from
+#' # the graph and apply the edge
+#' # attribute `color = blue` to
 #' # those selected edges
 #' graph <-
 #'   graph %>%
-#'   select_nodes_by_id(2:4) %>%
+#'   select_nodes_by_id(nodes = 2:4) %>%
 #'   trav_out_edge() %>%
-#'   set_edge_attrs_ws("color", "blue")
+#'   set_edge_attrs_ws(
+#'     edge_attr = color,
+#'     value = "blue")
 #'
-#' # Show the internal edge data frame to verify
-#' # that the edge attribute has been set for
-#' # specific edges
+#' # Show the internal edge data
+#' # frame to verify that the
+#' # edge attribute has been set
+#' # for specific edges
 #' get_edge_df(graph)
+#' #>   id from to  rel color
 #' #> 1  1    1  2 <NA>  <NA>
 #' #> 2  2    2  3 <NA>  blue
 #' #> 3  3    3  4 <NA>  blue
 #' #> 4  4    4  5 <NA>  blue
 #' #> 5  5    5  6 <NA>  <NA>
+#' @importFrom rlang enquo UQ
 #' @export set_edge_attrs_ws
 
 set_edge_attrs_ws <- function(graph,
@@ -50,6 +56,9 @@ set_edge_attrs_ws <- function(graph,
 
   # Get the time of function start
   time_function_start <- Sys.time()
+
+  edge_attr <- rlang::enquo(edge_attr)
+  edge_attr <- (rlang::UQ(edge_attr) %>% paste())[2]
 
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
@@ -66,20 +75,26 @@ set_edge_attrs_ws <- function(graph,
     stop("There is no selection of edges available.")
   }
 
-  # Get vectors of node ID values for the
-  # `from` and `to` nodes
-  from <- graph$edge_selection$from
-  to <- graph$edge_selection$to
+  # Get vectors of edge ID values for the
+  # edge selection
+  edge_ids <- graph$edge_selection$edge
 
-  # Call the `set_edge_attrs()` function
-  # and update the graph
-  graph <-
-    set_edge_attrs(
-      x = graph,
-      edge_attr = edge_attr,
-      values = value,
-      from = from,
-      to = to)
+  # Update the graph's internal edf
+  if (edge_attr %in% colnames(graph$edges_df)) {
+
+    graph$edges_df[
+      which(graph$edges_df[, 1] %in% edge_ids),
+      which(colnames(graph$edges_df) %in% edge_attr)] <- value
+
+  } else {
+    graph$edges_df <-
+      graph$edges_df %>%
+      dplyr::mutate(edge_attr__ = dplyr::case_when(
+        id %in% edge_ids ~ value))
+
+    colnames(graph$edges_df)[length(colnames(graph$edges_df))] <-
+      edge_attr
+  }
 
   # Update the `graph_log` df with an action
   graph$graph_log <-
@@ -97,5 +112,5 @@ set_edge_attrs_ws <- function(graph,
     save_graph_as_rds(graph = graph)
   }
 
-  return(graph)
+  graph
 }

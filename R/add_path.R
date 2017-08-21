@@ -14,14 +14,20 @@
 #' @param rel an optional string for providing a
 #' relationship label to all new edges created in the
 #' node path.
+#' @param ... optional node attributes supplied as
+#' vectors.
 #' @return a graph object of class \code{dgr_graph}.
 #' @examples
 #' # Create a new graph and add 2 paths of varying
 #' # lengths
 #' graph <-
 #'   create_graph() %>%
-#'   add_path(4, "four_path") %>%
-#'   add_path(5, "five_path")
+#'   add_path(
+#'     n = 4,
+#'     type = "four_path") %>%
+#'   add_path(
+#'     n = 5,
+#'     type = "five_path")
 #'
 #' # Get node information from this graph
 #' node_info(graph)
@@ -35,13 +41,57 @@
 #' #> 7  7 five_path     3   2     1      1     0
 #' #> 8  8 five_path     4   2     1      1     0
 #' #> 9  9 five_path     5   1     1      0     0
+#'
+#' # Attributes can be specified in extra
+#' # arguments and these are applied in order;
+#' # Usually these attributes are applied to
+#' # nodes (e.g., `type` is a node attribute)
+#' # but the `rel` attribute will apply to the
+#' # edges
+#' graph_w_attrs <-
+#'   create_graph() %>%
+#'   add_path(
+#'     n = 6,
+#'     label = c("one", "two",
+#'               "three", "four",
+#'               "five", "six"),
+#'     type = c("a", "a",
+#'              "b", "b",
+#'              "c", "c"),
+#'     value = c(1.2, 8.4,
+#'               3.4, 5.2,
+#'               6.1, 2.6),
+#'     rel = "path")
+#'
+#' # Get the graph's node data frame
+#' get_node_df(graph_w_attrs)
+#' #>   id type label value
+#' #> 1  1    a   one   1.2
+#' #> 2  2    a   two   8.4
+#' #> 3  3    b three   3.4
+#' #> 4  4    b  four   5.2
+#' #> 5  5    c  five   6.1
+#' #> 6  6    c   six   2.6
+#'
+#' # Get the graph's edge data frame
+#' get_edge_df(graph_w_attrs)
+#' #>   id from to  rel
+#' #> 1  1    1  2 path
+#' #> 2  2    2  3 path
+#' #> 3  3    3  4 path
+#' #> 4  4    4  5 path
+#' #> 5  5    5  6 path
+#' #> 6  6    6  1 path
+#' @importFrom dplyr select bind_cols
+#' @importFrom tibble as_tibble
 #' @export add_path
 
 add_path <- function(graph,
                      n,
                      type = NULL,
                      label = TRUE,
-                     rel = NULL) {
+                     rel = NULL,
+                     ...) {
 
   # Get the time of function start
   time_function_start <- Sys.time()
@@ -53,8 +103,11 @@ add_path <- function(graph,
 
   # Stop if n is too small
   if (n <= 1)  {
-    stop("The value for n must be at least 2.")
+    stop("The value for `n` must be at least 2.")
   }
+
+  # Create bindings for specific variables
+  id <- index__ <- NULL
 
   # Get the number of nodes ever created for
   # this graph
@@ -64,14 +117,44 @@ add_path <- function(graph,
   # this graph
   edges_created <- graph$last_edge
 
+  # Get the graph's global attributes
+  global_attrs <- graph$global_attrs
+
   # Get the graph's log
   graph_log <- graph$graph_log
 
   # Get the graph's info
   graph_info <- graph$graph_info
 
+  # Get the graph's state of being directed
+  # or undirected
+  graph_directed <- graph$directed
+
   # Get the sequence of nodes required
   nodes <- seq(1, n)
+
+  # Collect extra vectors of data as `extras`
+  extras <- list(...)
+
+  if (length(extras) > 0) {
+
+    extras_tbl <- tibble::as_tibble(extras)
+
+    if (nrow(extras_tbl) < n) {
+
+      extras$index__ <- 1:n
+
+      extras_tbl <-
+        tibble::as_tibble(extras) %>%
+        dplyr::select(-index__)
+    }
+
+    if ("id" %in% colnames(extras_tbl)) {
+      extras_tbl <-
+        extras_tbl %>%
+        dplyr::select(-id)
+    }
+  }
 
   # Create a node data frame for the path graph
   path_nodes <-
@@ -79,6 +162,14 @@ add_path <- function(graph,
       n = n,
       type = type,
       label = label)
+
+  # Add extra columns if available
+  if (exists("extras_tbl")) {
+
+    path_nodes <-
+      path_nodes %>%
+      dplyr::bind_cols(extras_tbl)
+  }
 
   # Create an edge data frame for the path graph
   path_edges <-
@@ -88,7 +179,11 @@ add_path <- function(graph,
       rel = rel)
 
   # Create the path graph
-  path_graph <- create_graph(path_nodes, path_edges)
+  path_graph <-
+    create_graph(
+      directed = graph_directed,
+      nodes_df = path_nodes,
+      edges_df = path_edges)
 
   # If the input graph is not empty, combine graphs
   # using the `combine_graphs()` function
@@ -107,14 +202,22 @@ add_path <- function(graph,
       add_action_to_log(
         graph_log = graph_log,
         version_id = nrow(graph_log) + 1,
-        function_used = "add_balanced_tree",
+        function_used = "add_path",
         time_modified = time_function_start,
         duration = graph_function_duration(time_function_start),
         nodes = nrow(combined_graph$nodes_df),
         edges = nrow(combined_graph$edges_df))
 
+    combined_graph$global_attrs <- global_attrs
     combined_graph$graph_log <- graph_log
     combined_graph$graph_info <- graph_info
+
+    # Perform graph actions, if any are available
+    if (nrow(combined_graph$graph_actions) > 0) {
+      combined_graph <-
+        combined_graph %>%
+        trigger_graph_actions()
+    }
 
     # Write graph backup if the option is set
     if (combined_graph$graph_info$write_backups) {
@@ -122,6 +225,7 @@ add_path <- function(graph,
     }
 
     return(combined_graph)
+
   } else {
 
     # Update the `graph_log` df with an action
@@ -135,8 +239,16 @@ add_path <- function(graph,
         nodes = nrow(path_graph$nodes_df),
         edges = nrow(path_graph$edges_df))
 
+    path_graph$global_attrs <- global_attrs
     path_graph$graph_log <- graph_log
     path_graph$graph_info <- graph_info
+
+    # Perform graph actions, if any are available
+    if (nrow(path_graph$graph_actions) > 0) {
+      path_graph <-
+        path_graph %>%
+        trigger_graph_actions()
+    }
 
     # Write graph backup if the option is set
     if (path_graph$graph_info$write_backups) {

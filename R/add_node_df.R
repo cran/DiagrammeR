@@ -22,7 +22,8 @@
 #'
 #' # Add the node data frame to the graph object to
 #' # create a graph with nodes
-#' graph <- add_node_df(graph, ndf)
+#' graph <-
+#'   add_node_df(graph, node_df = ndf)
 #'
 #' get_node_df(graph)
 #' #>   id  type label color value
@@ -41,7 +42,8 @@
 #'
 #' # Add the second node data frame to the graph object
 #' # to add more nodes with attributes to the graph
-#' graph <- add_node_df(graph, ndf_2)
+#' graph <-
+#'   add_node_df(graph, node_df = ndf_2)
 #'
 #' # View the graph's internal node data frame using
 #' # the `get_node_df()` function
@@ -100,10 +102,17 @@ add_node_df <- function(graph,
       nodes = nrow(graph$nodes_df),
       edges = nrow(graph$edges_df))
 
+  # Perform graph actions, if any are available
+  if (nrow(graph$graph_actions) > 0) {
+    graph <-
+      graph %>%
+      trigger_graph_actions()
+  }
+
   # Write graph backup if the option is set
   if (graph$graph_info$write_backups) {
     save_graph_as_rds(graph = graph)
   }
 
-  return(graph)
+  graph
 }

@@ -39,7 +39,7 @@ class \code{dgr_graph}. New graph edges will all
 move either from the nodes in the selection toward
 the newly created nodes (with the option
 \code{direction = "from"}), or to the selected nodes
-alredy in the graph (using \code{direction = "to"}).
+already in the graph (using \code{direction = "to"}).
 Optionally, set node \code{type} and edge \code{rel}
 values for all the new nodes and edges created,
 respectively.
@@ -47,7 +47,7 @@ respectively.
 Selections of nodes can be performed using
 the following \code{select_...} functions:
 \code{select_nodes()},
-\code{select_last_node()},
+\code{select_last_nodes_created()},
 \code{select_nodes_by_degree()},
 \code{select_nodes_by_id()}, or
 \code{select_nodes_in_neighborhood()}.
@@ -65,16 +65,19 @@ the following traversal functions:
 # new nodes
 graph <-
   create_graph() \%>\%
-  add_n_nodes(1) \%>\%
-  select_last_node() \%>\%
-  add_n_nodes_ws(5, "from")
+  add_n_nodes(n = 1) \%>\%
+  select_last_nodes_created() \%>\%
+  add_n_nodes_ws(
+    n = 5,
+    direction = "from")
 
 # Get the graph's nodes
-graph \%>\% get_node_ids()
+get_node_ids(graph)
 #> [1] 1 2 3 4 5 6
 
 # Get the graph's edges
-graph \%>\% get_edges()
+graph \%>\%
+  get_edges()
 #> "1->2" "1->3" "1->4" "1->5" "1->6"
 
 # Create an empty graph, add a node to it, select
@@ -83,16 +86,17 @@ graph \%>\% get_edges()
 # the new nodes
 graph <-
   create_graph() \%>\%
-  add_n_nodes(1) \%>\%
-  select_last_node \%>\%
-  add_n_nodes_ws(5, "to")
+  add_n_nodes(n = 1) \%>\%
+  select_last_nodes_created() \%>\%
+  add_n_nodes_ws(
+    n = 5,
+    direction = "to")
 
 # Get the graph's nodes
-graph \%>\% get_node_ids()
+get_node_ids(graph)
 #> [1] 1 2 3 4 5 6
 
 # Get the graph's edges
-graph \%>\% get_edges()
+get_edges(graph)
 #> "2->1" "3->1" "4->1" "5->1" "6->1"
 }
-

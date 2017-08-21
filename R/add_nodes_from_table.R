@@ -22,8 +22,9 @@
 #'
 #' # Specify a path to a CSV file
 #' path_to_csv <-
-#'   system.file("extdata", "currencies.csv",
-#'               package = "DiagrammeR")
+#'   system.file(
+#'     "extdata", "currencies.csv",
+#'     package = "DiagrammeR")
 #'
 #' # To add nodes from a CSV file, call the
 #' # `add_nodes_from_table()` function; new node ID
@@ -31,11 +32,15 @@
 #' # increasing values from 1
 #' graph_1 <-
 #'   create_graph() %>%
-#'   add_nodes_from_table(path_to_csv)
+#'   add_nodes_from_table(
+#'     table = path_to_csv)
 #'
 #' # View part of the graph's internal node data
 #' # frame (ndf) using `get_node_df()`
-#' graph_1 %>% get_node_df %>% .[, 1:5] %>% head
+#' graph_1 %>%
+#'   get_node_df() %>%
+#'   .[, 1:5] %>%
+#'   head()
 #' #>   id type label iso_4217_code curr_number
 #' #> 1  1 <NA>  <NA>           AED         784
 #' #> 2  2 <NA>  <NA>           AFN         971
@@ -52,12 +57,15 @@
 #' graph_2 <-
 #'   create_graph() %>%
 #'   add_nodes_from_table(
-#'     path_to_csv,
-#'     label_col = "iso_4217_code",
+#'     table = path_to_csv,
+#'     label_col = iso_4217_code,
 #'     set_type = "currency")
 #'
 #' # View part of the graph's internal ndf
-#' graph_2 %>% get_node_df() %>% .[, 1:5] %>% head()
+#' graph_2 %>%
+#'   get_node_df() %>%
+#'   .[, 1:5] %>%
+#'   head()
 #' #>   id     type label iso_4217_code curr_number
 #' #> 1  1 currency   AED           AED         784
 #' #> 2  2 currency   AFN           AFN         971
@@ -73,18 +81,21 @@
 #' graph_3 <-
 #'   create_graph() %>%
 #'   add_nodes_from_table(
-#'     path_to_csv,
-#'     label_col = "iso_4217_code",
+#'     table = path_to_csv,
+#'     label_col = iso_4217_code,
 #'     set_type = "currency",
 #'     drop_cols = c("exponent", "currency_name"))
 #'
 #' # Show the node attribute names for the graph
-#' graph_3 %>% get_node_df() %>% colnames()
+#' graph_3 %>%
+#'   get_node_df() %>%
+#'   colnames()
 #' #> [1] "id"  type"  "label"  "iso_4217_code"
 #' #> [5] "curr_number"
 #' }
 #' @importFrom utils read.csv
 #' @importFrom dplyr bind_cols mutate mutate_ select_
+#' @importFrom rlang enquo UQ
 #' @export add_nodes_from_table
 
 add_nodes_from_table <- function(graph,
@@ -96,6 +107,20 @@ add_nodes_from_table <- function(graph,
 
   # Get the time of function start
   time_function_start <- Sys.time()
+
+  label_col <- rlang::enquo(label_col)
+  label_col <- (rlang::UQ(label_col) %>% paste())[2]
+
+  type_col <- rlang::enquo(type_col)
+  type_col <- (rlang::UQ(type_col) %>% paste())[2]
+
+  if (label_col == "NULL") {
+    label_col <- NULL
+  }
+
+  if (type_col == "NULL") {
+    type_col <- NULL
+  }
 
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
@@ -180,10 +205,17 @@ add_nodes_from_table <- function(graph,
       nodes = nrow(graph$nodes_df),
       edges = nrow(graph$edges_df))
 
+  # Perform graph actions, if any are available
+  if (nrow(graph$graph_actions) > 0) {
+    graph <-
+      graph %>%
+      trigger_graph_actions()
+  }
+
   # Write graph backup if the option is set
   if (graph$graph_info$write_backups) {
     save_graph_as_rds(graph = graph)
   }
 
-  return(graph)
+  graph
 }

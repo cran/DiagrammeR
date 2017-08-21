@@ -4,7 +4,7 @@
 \alias{add_n_nodes}
 \title{Add one or several unconnected nodes to the graph}
 \usage{
-add_n_nodes(graph, n, type = NULL, label = NULL)
+add_n_nodes(graph, n, type = NULL, label = NULL, ...)
 }
 \arguments{
 \item{graph}{a graph object of class
@@ -17,6 +17,9 @@ provides group identifiers for the nodes to be added.}
 
 \item{label}{an optional character object that
 describes the nodes to be added.}
+
+\item{...}{optional node attributes supplied as
+vectors.}
 }
 \value{
 a graph object of class \code{dgr_graph}.
@@ -31,10 +34,10 @@ class \code{dgr_graph}. Optionally, set node
 # nodes will be assigned ID values from `1` to `5`
 graph <-
   create_graph() \%>\%
-  add_n_nodes(5)
+  add_n_nodes(n = 5)
 
 # Get the graph's nodes
-graph \%>\% get_node_ids()
+graph \%>\%
+  get_node_ids()
 #> [1] 1 2 3 4 5
 }
-

@@ -18,14 +18,14 @@ the \code{from} vector.}
 \item{rel}{an optional \code{rel} label for each
 edge.}
 
-\item{...}{one or more named vectors for associated
+\item{...}{one or more vectors for associated edge
 attributes.}
 }
 \value{
 an edge data frame (edf).
 }
 \description{
-Combine several named vectors for edges
+Combine several vectors for edges
 and their attributes into a data frame, which can be
 combined with other similarly-generated data frames,
 or, added to a graph object.
@@ -47,8 +47,8 @@ edf
 #> 3  3    3  1   a
 
 # Create an edf with additional edge
-# attributes (where their classes will be
-# inferred from the input vectors)
+# attributes (where their classes will
+# be inferred from the input vectors)
 edf <-
   create_edge_df(
     from = c(1, 2, 3),
@@ -65,4 +65,3 @@ edf
 #> 2  2    2  3   a    100 green     5
 #> 3  3    3  1   a    250 green     2
 }
-

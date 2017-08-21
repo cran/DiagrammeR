@@ -8,13 +8,17 @@
 #' # Create a graph with a directed tree
 #' graph <-
 #'   create_graph() %>%
-#'   add_balanced_tree(2, 2)
+#'   add_balanced_tree(
+#'     k = 2, h = 2)
 #'
 #' # Convert this graph from directed to undirected
-#' graph <- graph %>% set_graph_undirected()
+#' graph <-
+#'   graph %>%
+#'   set_graph_undirected()
 #'
 #' # Perform a check on whether graph is directed
-#' graph %>% is_graph_directed()
+#' graph %>%
+#'   is_graph_directed()
 #' #> [1] FALSE
 #' @export set_graph_undirected
 
@@ -52,5 +56,5 @@ set_graph_undirected <- function(graph) {
     save_graph_as_rds(graph = graph)
   }
 
-  return(graph)
+  graph
 }

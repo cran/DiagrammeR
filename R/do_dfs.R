@@ -1,4 +1,4 @@
-#' Perform the depth-first search (dfs) algorithm
+#' Use the depth-first search (dfs) algorithm
 #' @description With a chosen or random node
 #' serving as the starting point, perform a
 #' depth-first search of the whole graph and return
@@ -15,10 +15,10 @@
 #' provided, a random node from the graph will be
 #' chosen.
 #' @param direction using \code{all} (the default),
-#' the dfs will ignore edge direction while
-#' traversing through the graph. With \code{out},
-#' traversals between adjacent nodes will respect
-#' the edge direction.
+#' the bfs will ignore edge direction while
+#' traversing through the graph. With \code{out} and
+#' \code{in}, traversals between adjacent nodes will
+#' respect the edge direction.
 #' @return a vector containing node ID values for
 #' nodes visited during the depth-first search. The
 #' order of the node IDs corresponds to the order
@@ -27,20 +27,22 @@
 #' # Create a graph containing two balanced trees
 #' graph <-
 #'   create_graph() %>%
-#'   add_balanced_tree(2, 2) %>%
-#'   add_balanced_tree(3, 2)
+#'   add_balanced_tree(k = 2, h = 2) %>%
+#'   add_balanced_tree(k = 3, h = 2)
 #'
 #' # Perform a depth-first search of the graph,
 #' # beginning at the root node `1` (the default
 #' # `direction = "all"` doesn't take edge
 #' # direction into account)
-#' graph %>% do_dfs(1)
+#' graph %>%
+#'   do_dfs(node = 1)
 #' #> [1]  1  2  4  5  3  6  7  8  9 12 13 14 10
 #' #> [14] 15 16 17 11 18 19 20
 #'
 #' # If not specifying a starting node, the function
 #' # will begin the search from a random node
-#' graph %>% do_dfs()
+#' graph %>%
+#'   do_dfs()
 #' #> [1]  14  9  8 10 15 16 17 11 18 19 20 12 13
 #' #> [14]  1  2  4  5  3  6  7
 #'
@@ -48,13 +50,15 @@
 #' # taking into account edge direction; using
 #' # `direction = "in"` causes the dfs routine to
 #' # visit nodes along inward edges
-#' graph %>% do_dfs(1, "in")
+#' graph %>%
+#'   do_dfs(node = 1, direction = "in")
 #' #> [1]  1  2  3  4  5  6  7  8  9 10 11 12 13
 #' #> [14] 14 15 16 17 18 19 20
 #'
 #' # Using `direction = "out"` results in the dfs
 #' # moving along solely outward edges
-#' graph %>% do_dfs(1, "out")
+#' graph %>%
+#'   do_dfs(node = 1, direction = "out")
 #' #> [1]  1  2  4  5  3  6  7  8  9 12 13 14 10
 #' #> [14] 15 16 17 11 18 19 20
 #' @importFrom igraph dfs
@@ -107,7 +111,5 @@ do_dfs <- function(graph,
   }
 
   # Get the nodes visited during the dfs
-  dfs_nodes <- as.integer(as.numeric(dfs_result$order))
-
-  return(dfs_nodes)
+  as.integer(as.numeric(dfs_result$order))
 }

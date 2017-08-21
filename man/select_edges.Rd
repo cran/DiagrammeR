@@ -12,7 +12,7 @@ select_edges(graph, conditions = NULL, set_op = "union", from = NULL,
 \code{dgr_graph}.}
 
 \item{conditions}{an option to use filtering
-conditions for the retrieval of nodes.}
+conditions for the retrieval of edges.}
 
 \item{set_op}{the set operation to perform upon
 consecutive selections of graph nodes. This can
@@ -63,7 +63,8 @@ graph <-
 graph <-
   graph \%>\%
   select_edges(
-    from = 1, to = 4)
+    from = 1,
+    to = 4)
 
 # Verify that an edge selection has been made
 # using the `get_selection()` function
@@ -76,7 +77,7 @@ graph <-
   graph \%>\%
   clear_selection() \%>\%
   select_edges(
-    conditions = "rel == 'z'")
+    conditions = rel == "z")
 
 # Verify that an edge selection has been made, and
 # recall that the `2`->`3` edge uniquely has the
@@ -91,7 +92,7 @@ graph <-
   graph \%>\%
   clear_selection() \%>\%
   select_edges(
-    conditions = "value > 3.0")
+    conditions = value > 3.0)
 
 # Verify that the correct edge selection has been
 # made; in this case, edges `1`->`4` and
@@ -99,4 +100,3 @@ graph <-
 get_selection(graph)
 #> [1] 1 3
 }
-
