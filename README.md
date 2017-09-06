@@ -217,7 +217,7 @@ graph %>%
 
 **DiagrammeR** is used in an **R** environment. If you don't have an **R** installation, it can be obtained from the [**Comprehensive R Archive Network (CRAN)**](https://cran.r-project.org/).
 
-You can install the development (v0.9.1) version of **DiagrammeR** from **GitHub** using the **devtools** package.
+You can install the development version of **DiagrammeR** from **GitHub** using the **devtools** package.
 
 ```r
 devtools::install_github("rich-iannone/DiagrammeR")
@@ -228,3 +228,13 @@ Or, get it from **CRAN**.
 ```r
 install.packages("DiagrammeR")
 ```
+
+If you encounter a bug, have usage questions, or want to share ideas to make this package better, feel free to file an [issue](https://github.com/rich-iannone/DiagrammeR/issues).
+
+## Code of Conduct
+
+[Contributor Code of Conduct](https://github.com/rich-iannone/DiagrammeR/blob/master/CONDUCT.md). By participating in this project you agree to abide by its terms.
+
+## License
+
+MIT &copy; Richard Iannone
