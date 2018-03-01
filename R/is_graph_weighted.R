@@ -21,8 +21,8 @@
 #'
 #' # Determine whether the graph
 #' # is a weighted graph
-#' is_graph_weighted(graph)
-#' #> [1] TRUE
+#' graph %>%
+#'   is_graph_weighted()
 #'
 #' # Create graph where the edges do
 #' # not have a `weight` attribute
@@ -32,15 +32,21 @@
 #'
 #' # Determine whether this graph
 #' # is weighted
-#' is_graph_weighted(graph)
-#' #> [1] FALSE
+#' graph %>%
+#'   is_graph_weighted()
 #' @export is_graph_weighted
 
 is_graph_weighted <- function(graph) {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # If the graph is empty, it cannot be

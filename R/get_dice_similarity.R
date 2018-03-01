@@ -18,19 +18,22 @@
 #' @return a matrix with Dice similarity values
 #' for each pair of nodes considered.
 #' @examples
-#' # Create a random graph
+#' # Create a random graph using the
+#' # `add_gnm_graph()` function
 #' graph <-
-#'   create_random_graph(
-#'     n = 10, m = 22,
+#'   create_graph(
+#'     directed = FALSE) %>%
+#'   add_gnm_graph(
+#'     n = 10,
+#'     m = 15,
 #'     set_seed = 23)
 #'
-#' # Get the Dice similarity values for
-#' # nodes `5`, `6`, and `7`
-#' get_dice_similarity(graph, nodes = 5:7)
-#' #>       5     6     7
-#' #> 5 1.000 0.500 0.444
-#' #> 6 0.500 1.000 0.545
-#' #> 7 0.444 0.545 1.000
+#' # Get the Dice similarity
+#' # values for nodes `5`, `6`,
+#' # and `7`
+#' graph %>%
+#'   get_dice_similarity(
+#'     nodes = 5:7)
 #' @importFrom igraph similarity V
 #' @export get_dice_similarity
 
@@ -39,9 +42,15 @@ get_dice_similarity <- function(graph,
                                 direction = "all",
                                 round_to = 3) {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Convert the graph to an igraph object
@@ -56,7 +65,10 @@ get_dice_similarity <- function(graph,
     # Stop function if nodes provided not in
     # the graph
     if (!all(nodes %in% get_node_ids(graph))) {
-      stop("One or more nodes provided not in graph.")
+
+      emit_error(
+        fcn_name = fcn_name,
+        reasons = "One or more nodes provided not in graph")
     }
 
     # Get an igraph representation of node ID values

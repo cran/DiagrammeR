@@ -59,15 +59,11 @@
 #' # edge attribute with distinct
 #' # colors (from the RColorBrewer
 #' # Red-Yellow-Green palette)
-#' get_edge_df(graph)
-#' #>   id from to  rel weight   color
-#' #> 1  1    1  2 <NA>    3.7 #FDAE61
-#' #> 2  2    2  3 <NA>    6.3 #A6D96A
-#' #> 3  3    3  4 <NA>    9.2 #1A9641
-#' #> 4  4    4  5 <NA>    1.6 #D7191C
+#' graph %>%
+#'   get_edge_df()
 #' @import RColorBrewer
 #' @importFrom viridis viridis
-#' @importFrom rlang enquo UQ
+#' @importFrom rlang enquo UQ get_expr
 #' @export colorize_edge_attrs
 
 colorize_edge_attrs <- function(graph,
@@ -82,16 +78,24 @@ colorize_edge_attrs <- function(graph,
   # Get the time of function start
   time_function_start <- Sys.time()
 
-  edge_attr_from <- rlang::enquo(edge_attr_from)
-  edge_attr_from <- (rlang::UQ(edge_attr_from) %>% paste())[2]
-
-  edge_attr_to <- rlang::enquo(edge_attr_to)
-  edge_attr_to <- (rlang::UQ(edge_attr_to) %>% paste())[2]
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
 
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
+
+  # Get the requested `edge_attr_from`
+  edge_attr_from <-
+    rlang::enquo(edge_attr_from) %>% rlang::get_expr() %>% as.character()
+
+  # Get the requested `edge_attr_to`
+  edge_attr_to <-
+    rlang::enquo(edge_attr_to) %>% rlang::get_expr() %>% as.character()
 
   # Extract edf from graph
   edges_df <- graph$edges_df
@@ -122,7 +126,10 @@ colorize_edge_attrs <- function(graph,
     if (!(palette %in%
           c(row.names(RColorBrewer::brewer.pal.info),
             "viridis"))) {
-      stop("The color palette is not an RColorBrewer or viridis palette.")
+
+      emit_error(
+        fcn_name = fcn_name,
+        reasons = "The color palette is not an `RColorBrewer` or `viridis` palette")
     }
   }
 
@@ -222,7 +229,7 @@ colorize_edge_attrs <- function(graph,
   # in selection
   graph <-
     set_edge_attrs(
-      x = graph,
+      graph = graph,
       edge_attr = rlang::UQ(edge_attr_to_2),
       values = edges_attr_vector_colorized)
 
@@ -234,7 +241,7 @@ colorize_edge_attrs <- function(graph,
     add_action_to_log(
       graph_log = graph$graph_log,
       version_id = nrow(graph$graph_log) + 1,
-      function_used = "colorize_edge_attrs",
+      function_used = fcn_name,
       time_modified = time_function_start,
       duration = graph_function_duration(time_function_start),
       nodes = nrow(graph$nodes_df),

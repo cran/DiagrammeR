@@ -52,8 +52,8 @@
 #'
 #' # Verify that an edge selection has been made
 #' # using the `get_selection()` function
-#' get_selection(graph)
-#' #> [1] 1
+#' graph %>%
+#'   get_selection()
 #'
 #' # Select edges based on the relationship label
 #' # being `z`
@@ -66,8 +66,8 @@
 #' # Verify that an edge selection has been made, and
 #' # recall that the `2`->`3` edge uniquely has the
 #' # `z` relationship label
-#' get_selection(graph)
-#' #> [1] 2
+#' graph %>%
+#'   get_selection()
 #'
 #' # Select edges based on the edge value attribute
 #' # being greater than 3.0 (first clearing the current
@@ -81,10 +81,10 @@
 #' # Verify that the correct edge selection has been
 #' # made; in this case, edges `1`->`4` and
 #' # `3`->`1` have values for `value` > 3.0
-#' get_selection(graph)
-#' #> [1] 1 3
+#' graph %>%
+#'   get_selection()
 #' @importFrom dplyr filter select rename
-#' @importFrom rlang enquo UQ
+#' @importFrom rlang enquo UQ get_expr
 #' @export select_edges
 
 select_edges <- function(graph,
@@ -94,33 +94,49 @@ select_edges <- function(graph,
                          to = NULL,
                          edges = NULL) {
 
-  conditions <- rlang::enquo(conditions)
-
   # Get the time of function start
   time_function_start <- Sys.time()
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Validation: Graph contains nodes
   if (graph_contains_nodes(graph) == FALSE) {
-    stop("The graph contains no nodes, so, no selections can be made.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no nodes")
   }
 
   # Validation: Graph contains edges
   if (graph_contains_edges(graph) == FALSE) {
-    stop("The graph contains no edges, so, no selections can be made.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no edges")
   }
 
   # Stop function if `edges` refers to edge ID
   # values that are not in the graph
   if (!is.null(edges)) {
     if (!any(edges %in% graph$edges_df$id)) {
-      stop("The values provided in `edges` do not all correspond to edge ID values in the graph.")
+
+      emit_error(
+        fcn_name = fcn_name,
+        reasons = "The values provided in `edges` do not all correspond to edge ID values in the graph")
     }
   }
+
+  # Capture provided conditions
+  conditions <- rlang::enquo(conditions)
 
   # Create bindings for specific variables
   id <- NULL
@@ -128,13 +144,20 @@ select_edges <- function(graph,
   # Extract the graph's internal edf
   edges_df <- graph$edges_df
 
+  # Obtain the input graph's node and edge
+  # selection properties
+  n_e_select_properties_in <-
+    node_edge_selection_properties(graph = graph)
+
   # If conditions are provided then
   # pass in those conditions and filter the
   # data frame of `edges_df`
-  if (!((rlang::UQ(conditions) %>% paste())[2] == "NULL")) {
+  if (!is.null(
+    rlang::enquo(conditions) %>%
+    rlang::get_expr())) {
 
     edges_df <-
-      filter(
+      dplyr::filter(
         .data = edges_df,
         rlang::UQ(conditions))
   }
@@ -144,7 +167,10 @@ select_edges <- function(graph,
   # are present
   if (!is.null(from)) {
     if (any(!(from %in% edges_df$from))) {
-      stop("One of more of the nodes specified as `from` not part of an edge.")
+
+      emit_error(
+        fcn_name = fcn_name,
+        reasons = "One of more of the nodes specified as `from` not part of an edge")
     }
 
     from_val <- from
@@ -159,7 +185,10 @@ select_edges <- function(graph,
   # are present
   if (!is.null(to)) {
     if (any(!(to %in% edges_df$to))) {
-      stop("One of more of the nodes specified as `to` are not part of an edge.")
+
+      emit_error(
+        fcn_name = fcn_name,
+        reasons = "One of more of the nodes specified as `to` are not part of an edge")
     }
 
     to_val <- to
@@ -198,7 +227,7 @@ select_edges <- function(graph,
       intersect(edges_prev_selection, edges_selected)
   } else if (set_op == "difference") {
     edges_combined <-
-      setdiff(edges_prev_selection, edges_selected)
+      base::setdiff(edges_prev_selection, edges_selected)
   }
 
   # Filter `edges_df` to provide the correct esdf
@@ -215,12 +244,17 @@ select_edges <- function(graph,
   # Replace `graph$node_selection` with an empty df
   graph$node_selection <- create_empty_nsdf()
 
+  # Obtain the output graph's node and edge
+  # selection properties
+  n_e_select_properties_out <-
+    node_edge_selection_properties(graph = graph)
+
   # Update the `graph_log` df with an action
   graph$graph_log <-
     add_action_to_log(
       graph_log = graph$graph_log,
       version_id = nrow(graph$graph_log) + 1,
-      function_used = "select_edges",
+      function_used = fcn_name,
       time_modified = time_function_start,
       duration = graph_function_duration(time_function_start),
       nodes = nrow(graph$nodes_df),
@@ -230,6 +264,44 @@ select_edges <- function(graph,
   if (graph$graph_info$write_backups) {
     save_graph_as_rds(graph = graph)
   }
+
+  # Construct message body
+  if (!n_e_select_properties_in[["node_selection_available"]] &
+      !n_e_select_properties_in[["edge_selection_available"]]) {
+
+    msg_body <-
+      glue::glue(
+        "created a new selection of \\
+        {n_e_select_properties_out[['selection_count_str']]}")
+
+  } else if (n_e_select_properties_in[["node_selection_available"]] |
+             n_e_select_properties_in[["edge_selection_available"]]) {
+
+    if (n_e_select_properties_in[["edge_selection_available"]]) {
+      msg_body <-
+        glue::glue(
+          "modified an existing selection of \\
+           {n_e_select_properties_in[['selection_count_str']]}:
+           * {n_e_select_properties_out[['selection_count_str']]} \\
+           are now in the active selection
+           * used the `{set_op}` set operation")
+    }
+
+    if (n_e_select_properties_in[["node_selection_available"]]) {
+      msg_body <-
+        glue::glue(
+          "created a new selection of \\
+           {n_e_select_properties_out[['selection_count_str']]}:
+           * this replaces \\
+           {n_e_select_properties_in[['selection_count_str']]} \\
+           in the prior selection")
+    }
+  }
+
+  # Issue a message to the user
+  emit_message(
+    fcn_name = fcn_name,
+    message_body = msg_body)
 
   graph
 }

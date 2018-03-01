@@ -2,31 +2,34 @@
 % Please edit documentation in R/set_node_attrs.R
 \name{set_node_attrs}
 \alias{set_node_attrs}
-\title{Set node attributes}
+\title{Set node attribute values}
 \usage{
-set_node_attrs(x, node_attr, values, nodes = NULL)
+set_node_attrs(graph, node_attr, values, nodes = NULL)
 }
 \arguments{
-\item{x}{either a graph object of class
-\code{dgr_graph} or a node data frame.}
+\item{graph}{a graph object of
+class \code{dgr_graph}.}
 
-\item{node_attr}{the name of the attribute to set.}
+\item{node_attr}{the name of the
+attribute to set.}
 
-\item{values}{the values to be set for the chosen
-attribute for the chosen nodes.}
+\item{values}{the values to be
+set for the chosen attribute for
+the chosen nodes.}
 
-\item{nodes}{an optional vector of node IDs for
-filtering the list of nodes present in the graph.}
+\item{nodes}{an optional vector
+of node IDs for filtering the list
+of nodes present in the graph.}
 }
 \value{
-either a graph object of class
-\code{dgr_graph} or a node data frame, depending on
-what type of object was supplied to \code{x}.
+a graph object of class
+\code{dgr_graph}.
 }
 \description{
-From a graph object of class
-\code{dgr_graph} or a node data frame, set node
-attribute properties for one or more nodes.
+From a graph object of
+class \code{dgr_graph}, set node
+attribute values for one or more
+nodes.
 }
 \examples{
 # Create a node data frame (ndf)
@@ -53,50 +56,25 @@ graph <-
 # Set attribute `color = "green"` for
 # nodes `1` and `3` using the graph object
 graph <-
+  graph \%>\%
   set_node_attrs(
-    x = graph,
     node_attr = color,
     values = "green",
     nodes = c(1, 3))
 
 # View the graph's node data frame
-get_node_df(graph)
-#>   id  type label value color
-#> 1  1 basic     1   3.5 green
-#> 2  2 basic     2   2.6  <NA>
-#> 3  3 basic     3   9.4 green
-#> 4  4 basic     4   2.7  <NA>
-
-# Set attribute `color = "green"` for
-# nodes `1` and `3` using the node data frame
-nodes <-
-  set_node_attrs(
-    x = ndf,
-    node_attr = color,
-    values = "green",
-    nodes = c(1, 3))
-
-# Display the `nodes` ndf
-nodes
-#>   id  type label value color
-#> 1  1 basic     1   3.5 green
-#> 2  2 basic     2   2.6  <NA>
-#> 3  3 basic     3   9.4 green
-#> 4  4 basic     4   2.7  <NA>
+graph \%>\%
+  get_node_df()
 
 # Set attribute `color = "blue"` for
-# all nodes in the node data frame
-nodes <-
+# all nodes in the graph
+graph <-
+  graph \%>\%
   set_node_attrs(
-    x = ndf,
     node_attr = color,
     values = "blue")
 
-# Display the `nodes` ndf
-nodes
-#>   id  type label value color
-#> 1  1 basic     1   3.5  blue
-#> 2  2 basic     2   2.6  blue
-#> 3  3 basic     3   9.4  blue
-#> 4  4 basic     4   2.7  blue
+# Display the graph's ndf
+graph \%>\%
+  get_node_df()
 }

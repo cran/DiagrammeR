@@ -1,62 +1,56 @@
 #' Get community membership by modularity optimization
-#' @description Through the use of greedy optimization
-#' of a modularity score, obtain the group membership
-#' values for each of the nodes in the graph.
+#' @description Through the use of greedy
+#' optimization of a modularity score, obtain
+#' the group membership values for each of the
+#' nodes in the graph. Note that this method
+#' only works on graphs without multiple edges.
 #' @param graph a graph object of class
 #' \code{dgr_graph}.
 #' @return a data frame with group membership
 #' assignments for each of the nodes.
 #' @examples
-#' # Create a random graph
+#' # Create a graph with a
+#' # balanced tree
 #' graph <-
-#'   create_random_graph(
-#'     n = 10, m = 22,
-#'     set_seed = 23)
+#'   create_graph() %>%
+#'   add_balanced_tree(
+#'     k = 2,
+#'     h = 2)
 #'
-#' # Get the group membership values for all
-#' # nodes in the graph through the greedy
-#' # optimization of modularity algorithm
-#' get_cmty_fast_greedy(graph)
-#' #>    id f_g_group
-#' #> 1   1         1
-#' #> 2   2         2
-#' #> 3   3         2
-#' #> 4   4         1
-#' #> 5   5         1
-#' #> 6   6         1
-#' #> 7   7         2
-#' #> 8   8         1
-#' #> 9   9         2
-#' #> 10 10         1
+#' # Get the group membership
+#' # values for all nodes in
+#' # the graph through the greedy
+#' # optimization of modularity
+#' # algorithm
+#' graph %>%
+#'   get_cmty_fast_greedy()
 #'
-#' # Add the group membership values to the
-#' # graph as a node attribute
+#' # Add the group membership
+#' # values to the graph as a
+#' # node attribute
 #' graph <-
 #'   graph %>%
 #'   join_node_attrs(
 #'     df = get_cmty_fast_greedy(.))
 #'
-#' # Display the graph's node data frame
-#' get_node_df(graph)
-#' #>    id type label value f_g_group
-#' #> 1   1 <NA>     1   6.0         1
-#' #> 2   2 <NA>     2   2.5         2
-#' #> 3   3 <NA>     3   3.5         2
-#' #> 4   4 <NA>     4   7.5         1
-#' #> 5   5 <NA>     5   8.5         1
-#' #> 6   6 <NA>     6   4.5         1
-#' #> 7   7 <NA>     7  10.0         2
-#' #> 8   8 <NA>     8  10.0         1
-#' #> 9   9 <NA>     9   8.5         2
-#' #> 10 10 <NA>    10  10.0         1
+#' # Display the graph's
+#' # node data frame
+#' graph %>%
+#'   get_node_df()
 #' @importFrom igraph cluster_fast_greedy membership
 #' @export get_cmty_fast_greedy
 
 get_cmty_fast_greedy <- function(graph) {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # If graph is directed, transform to undirected

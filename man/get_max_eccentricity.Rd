@@ -28,8 +28,8 @@ graph <-
 
 # Determine the graph's maximum
 # eccentricity
-get_max_eccentricity(graph)
-#> [1] 4
+graph \%>\%
+  get_max_eccentricity()
 
 # Create a full graph and then
 # get the maximum eccentricity
@@ -37,5 +37,4 @@ get_max_eccentricity(graph)
 create_graph() \%>\%
   add_full_graph(n = 10) \%>\%
   get_max_eccentricity()
-#> [1] 1
 }

@@ -2,12 +2,10 @@ context("Adding nodes and/or edges to an existing graph object")
 
 test_that("adding a node to a graph is possible", {
 
-  # Create an empty graph
-  graph <- create_graph()
-
-  # Add two nodes to the graph
-  graph <- add_node(graph)
-  graph <- add_node(graph)
+  # Create a graph with two nodes
+  graph <-
+    create_graph() %>%
+    add_n_nodes(n = 2)
 
   # Expect that names in this graph object match a
   # prescribed set of names
@@ -65,21 +63,30 @@ test_that("adding a node to a graph is possible", {
 
   # Expect that there will be 3 nodes in the graph
   expect_equal(
-    node_count(graph_3), 3)
+    count_nodes(graph = graph_3), 3)
 
   # Expect that the "type" value will be present for
   # the node in the new graph
   expect_equal(
-    node_type(graph_3, node = 3),
+    get_node_attrs(
+      graph = graph_3,
+      node_attr = type,
+      node = 3) %>% unname(),
     "fresh")
 
   # Expect that the other nodes in the graph will
   # still have unassigned `type` values
   expect_true(
-    is.na(node_type(graph_3, node = 1)))
+    is.na(get_node_attrs(
+      graph = graph_3,
+      node_attr = type,
+      node = 1) %>% unname()))
 
   expect_true(
-    is.na(node_type(graph_3, node = 2)))
+    is.na(get_node_attrs(
+      graph = graph_3,
+      node_attr = type,
+      node = 2) %>% unname()))
 
   # Create an empty graph
   graph_unlabeled <- create_graph()
@@ -103,13 +110,13 @@ test_that("adding a node to a graph is possible", {
 
   # Expect that the new node is available in the graph
   expect_true(
-    node_present(
+    is_node_present(
       graph = graph_from,
       node = 4))
 
   # Expect that the edge from `3` to `4` is in the graph
   expect_true(
-    edge_present(
+    is_edge_present(
       graph = graph_from,
       from = 3,
       to = 4))
@@ -121,7 +128,10 @@ test_that("adding a node to a graph is possible", {
   # Expect that for node `4`, the `type` is not set
   # since the default value for `type` is NULL
   expect_true(
-    is.na(node_type(graph_from, node = 4)))
+    is.na(get_node_attrs(
+      graph = graph_from,
+      node_attr = type,
+      node = 4) %>% unname()))
 
   # Add a node to the graph that is joined to another
   graph_to <-
@@ -135,13 +145,13 @@ test_that("adding a node to a graph is possible", {
 
   # Expect that the new node is available in the graph
   expect_true(
-    node_present(
+    is_node_present(
       graph = graph_to,
       node = 4))
 
   # Expect that the edge from `4` to `3` is in the graph
   expect_true(
-    edge_present(
+    is_edge_present(
       graph = graph_to,
       from = 4,
       to = 3))
@@ -153,7 +163,10 @@ test_that("adding a node to a graph is possible", {
   # Expect that for node `4`, the `type` is not set
   # since the default value for `type` is NULL
   expect_true(
-    is.na(node_type(graph_to, node = 4)))
+    is.na(get_node_attrs(
+      graph = graph_to,
+      node_attr = type,
+      node = 4) %>% unname()))
 
   # Add a node to the graph that is joined from
   # another and to another
@@ -169,20 +182,20 @@ test_that("adding a node to a graph is possible", {
 
   # Expect that the new node is available in the graph
   expect_true(
-    node_present(
+    is_node_present(
       graph = graph_to_from,
       node = 4))
 
   # Expect that the edge from `1` to `4` is in the graph
   expect_true(
-    edge_present(
+    is_edge_present(
       graph = graph_to_from,
       from = 1,
       to = 4))
 
   # Expect that the edge from `4` to `2` is in the graph
   expect_true(
-    edge_present(
+    is_edge_present(
       graph = graph_to_from,
       from = 4,
       to = 2))
@@ -190,16 +203,15 @@ test_that("adding a node to a graph is possible", {
   # Expect that for node `4`, the `type` is not set
   # since the default value for `type` is NULL
   expect_true(
-    is.na(
-      node_type(
-        graph = graph_to_from,
-        node = 4)))
+    is.na(get_node_attrs(
+      graph = graph_to_from,
+      node_attr = type,
+      node = 4) %>% unname()))
 
-  # Create an empty graph
-  graph <- create_graph()
-
-  # Add a node
-  graph <- add_node(graph)
+  # Create a graph with one node
+  graph <-
+    create_graph() %>%
+    add_node()
 
   # Add another node, connecting with only a value
   # provided as `from` but where the referenced node
@@ -212,12 +224,10 @@ test_that("adding a node to a graph is possible", {
 
 test_that("adding an edge to a graph is possible", {
 
-  # Create an empty graph
-  graph <- create_graph()
-
-  # Add two nodes
-  graph <- add_node(graph)
-  graph <- add_node(graph)
+  # Create a graph with two nodes
+  graph <-
+    create_graph() %>%
+    add_n_nodes(n = 2)
 
   # Add an edge
   graph <-
@@ -306,7 +316,7 @@ test_that("adding an edge to a graph is possible", {
 
   # Expect that 2 edges are available in the graph
   expect_equal(
-    edge_count(graph_2), 2)
+    count_edges(graph = graph_2), 2)
 
   # Expect that the edges in the graph are:
   # `3->4` and `4->1`
@@ -317,18 +327,14 @@ test_that("adding an edge to a graph is possible", {
 
 test_that("adding several nodes to a graph at once is possible", {
 
-  # Create an empty graph
-  graph <- create_graph()
-
-  # Add 10 nodes to the empty graph
+  # Create a graph with 10 nodes
   graph <-
-    add_n_nodes(
-      graph = graph,
-      n = 10)
+    create_graph() %>%
+    add_n_nodes(n = 10)
 
   # Expect that 10 nodes were added to the empty graph
   expect_equal(
-    node_count(graph), 10)
+    count_nodes(graph = graph), 10)
 
   # Expect monotonically-increasing node ID values
   # from 1 to 10
@@ -357,7 +363,7 @@ test_that("adding several nodes to a graph at once is possible", {
 
   # Expect that 10 nodes were added to the empty graph
   expect_equal(
-    node_count(graph), 10)
+    count_nodes(graph = graph), 10)
 
   # Expect monotonically-increasing node ID values
   # from `1` to `10`
@@ -379,20 +385,14 @@ test_that("adding several nodes to a graph at once is possible", {
 
 test_that("adding several nodes to a graph at once (with extra attrs) is possible", {
 
-  # Create an empty graph
-  graph <- create_graph()
-
-  # Add 10 nodes to the empty graph
+  # Create a graph with 10 nodes
   graph <-
-    add_n_nodes(
-      graph = graph,
-      n = 10,
-      value = 1:10,
-      color = "steelblue")
+    create_graph() %>%
+    add_n_nodes(n = 10)
 
   # Expect that 10 nodes were added to the empty graph
   expect_equal(
-    node_count(graph), 10)
+    count_nodes(graph = graph), 10)
 
   # Expect monotonically-increasing node ID values
   # from 1 to 10
@@ -409,30 +409,14 @@ test_that("adding several nodes to a graph at once (with extra attrs) is possibl
   expect_equal(
     get_node_df(graph)[, 3],
     rep(as.character(NA), 10))
-
-  # Expect monotonically-increasing values for
-  # the `value` node attribute
-  expect_equal(
-    get_node_df(graph)[, 4],
-    c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10))
-
-  # Expect that the `color` node attr is set
-  # to `steelblue` for all nodes in the graph
-  expect_equal(
-    get_node_df(graph)[, 5],
-    rep("steelblue", 10))
 })
 
 test_that("adding several nodes from a selected node is possible", {
 
-  # Create an empty graph
-  graph <- create_graph()
-
-  # Add 10 nodes to the empty graph
+  # Create a graph with 10 nodes
   graph <-
-    add_n_nodes(
-      graph = graph,
-      n = 10)
+    create_graph() %>%
+    add_n_nodes(n = 10)
 
   # Select the node with ID of `5`
   graph <-
@@ -449,7 +433,7 @@ test_that("adding several nodes from a selected node is possible", {
 
   # Expect a total of 20 nodes in the graph
   expect_equal(
-    node_count(graph), 20)
+    count_nodes(graph = graph), 20)
 
   # Expect monotonically-increasing node ID
   # values from `1` to `20`
@@ -458,7 +442,7 @@ test_that("adding several nodes from a selected node is possible", {
 
   # Expect a total of 10 edges in the graph
   expect_equal(
-    edge_count(graph), 10)
+    count_edges(graph = graph), 10)
 
   # Expect that node IDs where edges are `from` belong
   # to the node with ID of `5`
@@ -514,14 +498,10 @@ test_that("adding several nodes from a selected node is possible", {
 
 test_that("adding several nodes to a selected node is possible", {
 
-  # Create an empty graph
-  graph <- create_graph()
-
-  # Add 10 nodes to the empty graph
+  # Create a graph with 10 nodes
   graph <-
-    add_n_nodes(
-      graph = graph,
-      n = 10)
+    create_graph() %>%
+    add_n_nodes(n = 10)
 
   # Select the node with ID of `5`
   graph <-
@@ -538,7 +518,7 @@ test_that("adding several nodes to a selected node is possible", {
 
   # Expect a total of 20 nodes in the graph
   expect_equal(
-    node_count(graph), 20)
+    count_nodes(graph = graph), 20)
 
   # Expect monotonically-increasing node ID values
   # from `1` to `20`
@@ -548,7 +528,7 @@ test_that("adding several nodes to a selected node is possible", {
 
   # Expect a total of 10 edges in the graph
   expect_equal(
-    edge_count(graph), 10)
+    count_edges(graph = graph), 10)
 
   # Expect that node IDs where edges are `to` belong
   # to the node with ID of `5`
@@ -603,14 +583,10 @@ test_that("adding several nodes to a selected node is possible", {
 
 test_that("adding several edges with a string is possible", {
 
-  # Create an empty graph
-  graph <- create_graph()
-
-  # Add 10 nodes to the empty graph
+  # Create a graph with 10 nodes
   graph <-
-    add_n_nodes(
-      graph = graph,
-      n = 10)
+    create_graph() %>%
+    add_n_nodes(n = 10)
 
   # Add edges via a string
   graph <-
@@ -620,7 +596,7 @@ test_that("adding several edges with a string is possible", {
 
   # Expect a total of 10 nodes in the graph
   expect_equal(
-    node_count(graph), 10)
+    count_nodes(graph = graph), 10)
 
   # Expect monotonically-increasing node ID values
   # from 1 to 10
@@ -629,7 +605,7 @@ test_that("adding several edges with a string is possible", {
 
   # Expect a total of 9 edges in the graph
   expect_equal(
-    edge_count(graph), 9)
+    count_edges(graph = graph), 9)
 
   # Expect that the edge relationship has not been set
   # for any of the edges
@@ -678,7 +654,8 @@ test_that("adding several edges with a string is possible", {
       rel = "connected_to")
 
   # Expect a total of 9 edges in the graph
-  expect_equal(edge_count(graph), 9)
+  expect_equal(
+    count_edges(graph = graph), 9)
 
   # Create a graph with 4 nodes and 4 distinct labels
   graph <-
@@ -700,7 +677,7 @@ test_that("adding several edges with a string is possible", {
 
   # Expect a total of 4 edges in the graph
   expect_equal(
-    edge_count(graph_node_label), 4)
+    count_edges(graph = graph_node_label), 4)
 
   # Expect certain edges to be in the graph
   expect_equal(
@@ -718,8 +695,7 @@ test_that("adding node clones is possible", {
     add_path(
       n = 3,
       label = c("d", "g", "r"),
-      type = c("a", "b", "c"),
-      value = c(10, 20, 30))
+      type = c("a", "b", "c"))
 
   # Create 3 clones of node `1`
   # and assign new node label
@@ -741,12 +717,6 @@ test_that("adding node clones is possible", {
   # as node `1`
   expect_equal(
     unique(ndf_1[c(1, 4:6), 2]), "a")
-
-  # Expect that the last three nodes
-  # will be have the same values for
-  # the `value` attribute as node `1`
-  expect_equal(
-    unique(ndf_1[c(1, 4:6), 4]), 10)
 
   # Expect that the new nodes will
   # have `label` values that were
@@ -775,17 +745,219 @@ test_that("adding node clones is possible", {
   expect_equal(
     unique(ndf_2[c(1, 4:6), 2]), "a")
 
-  # Expect that the last three nodes
-  # will be have the same values for
-  # the `value` attribute as node `1`
-  expect_equal(
-    unique(ndf_2[c(1, 4:6), 4]), 10)
-
   # Expect that the new nodes will
   # have NA `label` values
   expect_equal(
     ndf_2[4:6, 3],
     rep(as.character(NA), 3))
+})
+
+test_that("adding node clones with a selection is possible", {
+
+  # Create a graph with a path of
+  # nodes; supply `label`, `type`,
+  # and `value` node attributes,
+  # and select the created nodes
+  graph <-
+    create_graph() %>%
+    add_path(
+      n = 3,
+      label = c("d", "g", "r"),
+      type = c("a", "b", "c")) %>%
+    select_last_nodes_created()
+
+  # Create clones of all nodes
+  # in the selection
+  graph_1 <-
+    graph %>%
+    add_node_clones_ws()
+
+  # Expect 6 nodes in the graph
+  expect_equal(
+    count_nodes(graph_1), 6)
+
+  # Expect nodes with ID values
+  # from 1 to 6
+  expect_equal(
+    (graph_1 %>%
+       get_node_df)[, 1], 1:6)
+
+  # Expect cloned values for the
+  # `type` attribute for the
+  # last 3 nodes in the graph
+  expect_equal(
+    (graph_1 %>%
+       get_node_df())[4:6, 2],
+    c("a", "b", "c"))
+
+  # Expect NA values for the
+  # `label` attributes for the
+  # last 3 nodes in the graph
+  expect_true(
+    all(
+      is.na(
+        graph_1 %>%
+          get_node_df())[4:6, 3]))
+
+  # Create clones of all nodes
+  # in the selection but assign
+  # new node label values
+  graph_2 <-
+    graph %>%
+    add_node_clones_ws(
+      label = c("a", "b", "v"))
+
+  # Expect 6 nodes in the graph
+  expect_equal(
+    count_nodes(graph_2), 6)
+
+  # Expect nodes with ID values
+  # from 1 to 6
+  expect_equal(
+    (graph_2 %>%
+       get_node_df)[, 1], 1:6)
+
+  # Expect cloned values for the
+  # `type` attribute for the
+  # last 3 nodes in the graph
+  expect_equal(
+    (graph_2 %>%
+       get_node_df())[4:6, 2],
+    c("a", "b", "c"))
+
+  # Expect specific values for the
+  # `label` attributes for the
+  # last 3 nodes in the graph
+  expect_equal(
+    (graph_2 %>%
+       get_node_df())[4:6, 3],
+    c("a", "b", "v"))
+
+  # Create clones of all nodes
+  # in the selection and
+  # add edges from the orginal
+  # nodes to the cloned nodes
+  graph_3 <-
+    graph %>%
+    add_node_clones_ws(
+      add_edges = TRUE,
+      direction = "to")
+
+  # Expect 6 nodes in the graph
+  expect_equal(
+    count_nodes(graph_3), 6)
+
+  # Expect nodes with ID values
+  # from 1 to 6
+  expect_equal(
+    (graph_3 %>%
+       get_node_df)[, 1], 1:6)
+
+  # Expect cloned values for the
+  # `type` attribute for the
+  # last 3 nodes in the graph
+  expect_equal(
+    (graph_3 %>%
+       get_node_df())[4:6, 2],
+    c("a", "b", "c"))
+
+  # Expect NA values for the
+  # `label` attributes for the
+  # last 3 nodes in the graph
+  expect_true(
+    all(
+      is.na(
+        graph_3 %>%
+          get_node_df())[4:6, 3]))
+
+  # Expect 5 edges in the graph
+  expect_equal(
+    count_edges(graph = graph_3), 5)
+
+  # Expect edges with ID values
+  # from 1 to 5
+  expect_equal(
+    (graph_3 %>%
+       get_edge_df)[, 1], 1:5)
+
+  # Expect that specific edges have
+  # been created
+  expect_equal(
+    (graph_3 %>%
+       get_edges)[3:5],
+    c("1->4", "2->5", "3->6"))
+
+  # Expect NA values for the
+  # `rel` attributes for the
+  # last 3 edges in the graph
+  expect_true(
+    all(
+      is.na(
+        (graph_3 %>%
+          get_edge_df())[3:5, 4])))
+
+  # Create clones of all nodes
+  # in the selection and
+  # add edges to the orginal
+  # nodes from the cloned nodes
+  graph_4 <-
+    graph %>%
+    add_node_clones_ws(
+      add_edges = TRUE,
+      direction = "from")
+
+  # Expect 6 nodes in the graph
+  expect_equal(
+    count_nodes(graph_4), 6)
+
+  # Expect nodes with ID values
+  # from 1 to 6
+  expect_equal(
+    (graph_4 %>%
+       get_node_df)[, 1], 1:6)
+
+  # Expect cloned values for the
+  # `type` attribute for the
+  # last 3 nodes in the graph
+  expect_equal(
+    (graph_4 %>%
+       get_node_df())[4:6, 2],
+    c("a", "b", "c"))
+
+  # Expect NA values for the
+  # `label` attributes for the
+  # last 3 nodes in the graph
+  expect_true(
+    all(
+      is.na(
+        graph_4 %>%
+          get_node_df())[4:6, 3]))
+
+  # Expect 5 edges in the graph
+  expect_equal(
+    count_edges(graph = graph_4), 5)
+
+  # Expect edges with ID values
+  # from 1 to 5
+  expect_equal(
+    (graph_4 %>%
+       get_edge_df)[, 1], 1:5)
+
+  # Expect that specific edges have
+  # been created
+  expect_equal(
+    (graph_4 %>%
+       get_edges)[3:5],
+    c("4->1", "5->2", "6->3"))
+
+  # Expect NA values for the
+  # `rel` attributes for the
+  # last 3 edges in the graph
+  expect_true(
+    all(
+      is.na(
+        (graph_4 %>%
+           get_edge_df())[3:5, 4])))
 })
 
 test_that("adding edge clones is possible", {

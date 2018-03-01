@@ -7,55 +7,66 @@
 get_agg_degree_out(graph, agg, conditions = NULL)
 }
 \arguments{
-\item{graph}{a graph object of class
-\code{dgr_graph}.}
+\item{graph}{a graph object of
+class \code{dgr_graph}.}
 
-\item{agg}{the aggregation function to use for
-summarizing outdegree values from graph nodes. The
-following aggregation functions can be used:
-\code{sum}, \code{min}, \code{max}, \code{mean}, or
-\code{median}.}
+\item{agg}{the aggregation
+function to use for summarizing
+outdegree values from graph nodes.
+The following aggregation functions
+can be used: \code{sum}, \code{min},
+\code{max}, \code{mean}, or \code{median}.}
 
-\item{conditions}{an option to use filtering
-conditions for the nodes to consider.}
+\item{conditions}{an option to
+use filtering conditions for
+the nodes to consider.}
 }
 \value{
-a vector with an aggregate outdegree value.
+a vector with an aggregate
+outdegree value.
 }
 \description{
-Get a single, aggregate value from the
-outdegree values for all nodes in a graph, or, a subset
+Get a single,
+aggregate value from the
+outdegree values for all nodes
+in a graph, or, a subset
 of graph nodes.
 }
 \examples{
-# Create a random graph
-random_graph <-
-  create_random_graph(
-    n = 10, m = 22,
-    set_seed = 23)
+# Create a random graph using the
+# `add_gnm_graph()` function
+graph <-
+  create_graph() \%>\%
+  add_gnm_graph(
+    n = 20,
+    m = 35,
+    set_seed = 23) \%>\%
+  set_node_attrs(
+    node_attr = value,
+    values = rnorm(
+      n = count_nodes(.),
+      mean = 5,
+      sd = 1) \%>\% round(1))
 
 # Get the mean outdegree value from all
 # nodes in the graph
-get_agg_degree_out(
-  graph = random_graph,
-  agg = "mean")
-#> [1] 3.666667
+graph \%>\%
+  get_agg_degree_out(
+    agg = "mean")
 
 # Other aggregation functions can be used
 # (`min`, `max`, `median`, `sum`); let's
 # get the median in this example
-get_agg_degree_out(
-  graph = random_graph,
-  agg = "median")
-#> [1] 3
+graph \%>\%
+  get_agg_degree_out(
+    agg = "median")
 
 # The aggregation of outdegree can occur
 # for a subset of the graph nodes and this
 # is made possible by specifying `conditions`
 # for the nodes
-get_agg_degree_out(
-  graph = random_graph,
-  agg = "mean",
-  conditions = value < 5.0)
-#> [1] 3.666667
+graph \%>\%
+  get_agg_degree_out(
+    agg = "mean",
+    conditions = value < 5.0)
 }

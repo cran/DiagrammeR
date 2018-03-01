@@ -1,26 +1,35 @@
 #' Get node IDs associated with edges
-#' @description Obtain a vector, data frame, or list of
-#' node IDs from a graph object or an edge data frame.
-#' An optional filter by edge attribute can limit the
-#' set of edges returned.
-#' @param x either a graph object of class
-#' \code{dgr_graph} or an edge data frame.
-#' @param conditions an option to use filtering
-#' conditions for the retrieval of edges.
-#' @param return_type using \code{vector} (the
-#' default), a vector of character objects
-#' representing the edges is provided. With
-#' \code{list} a list object will be provided that
-#' contains vectors of outgoing and incoming node IDs
-#' associated with edges. With \code{df}, a data frame
-#' containing outgoing and incoming node IDs associated
-#' with edges.
-#' @param return_values using \code{id} (the default)
-#' results in node ID values returned in the edge
-#' definitions. With \code{label}, the node labels will
-#' instead be used to define edges.
-#' @return a list, data frame, or a vector object,
-#' depending on the value given to \code{return_type}.
+#' @description Obtain a vector,
+#' data frame, or list of node IDs
+#' associated with edges in a graph
+#' object. An optional filter by edge
+#' attribute can limit the set of
+#' edges returned.
+#' @param graph a graph object of
+#' class \code{dgr_graph}.
+#' @param conditions an option to
+#' use filtering conditions for the
+#' retrieval of edges.
+#' @param return_type using
+#' \code{vector} (the default), a
+#' vector of character objects
+#' representing the edges is provided.
+#' With \code{list} a list object will
+#' be provided that contains vectors
+#' of outgoing and incoming node IDs
+#' associated with edges. With
+#' \code{df}, a data frame containing
+#' outgoing and incoming node IDs
+#' associated with edges.
+#' @param return_values using
+#' \code{id} (the default) results in
+#' node ID values returned in the edge
+#' definitions. With \code{label}, the
+#' node labels will instead be used to
+#' define edges.
+#' @return a list, data frame, or a
+#' vector object, depending on the
+#' value given to \code{return_type}.
 #' @examples
 #' # Create a node data frame (ndf)
 #' ndf <-
@@ -47,103 +56,94 @@
 #'     edges_df = edf)
 #'
 #' # Get all edges within a graph, returned as a list
-#' get_edges(graph, return_type = "vector")
-#' #> [1] "1->4" "2->3" "3->1"
+#' graph %>%
+#'   get_edges(
+#'     return_type = "vector")
 #'
 #' # Get all edges within a graph, returned as a
 #' # data frame
-#' get_edges(graph, return_type = "df")
-#' #>   from to
-#' #> 1    1  4
-#' #> 2    2  3
-#' #> 3    3  1
+#' graph %>%
+#'   get_edges(
+#'     return_type = "df")
 #'
 #' # Get all edges returned as a list
-#' get_edges(graph, return_type = "list")
-#' #> [[1]]
-#' #> [1] 1 2 3
-#' #>
-#' #> [[2]]
-#' #> [1] 4 3 1
+#' graph %>%
+#'   get_edges(
+#'     return_type = "list")
 #'
-#' # Get a vector of edges using a numeric
-#' # comparison (i.e., all edges with a `value`
+#' # Get a vector of edges using
+#' # a numeric comparison (i.e.,
+#' # all edges with a `value`
 #' # attribute greater than 3)
-#' get_edges(
-#'   graph,
-#'   conditions = value > 3,
-#'   return_type = "vector")
-#' #> [1] "1->4" "3->1"
+#' graph %>%
+#'   get_edges(
+#'     conditions = value > 3,
+#'     return_type = "vector")
 #'
-#' # Get a vector of edges using a match
-#' get_edges(
-#'   graph,
-#'   conditions = color == "pink",
-#'   return_type = "vector")
-#' #> [1] "1->4"
+#' # Get a vector of edges using
+#' # a matching condition
+#' graph %>%
+#'   get_edges(
+#'     conditions = color == "pink",
+#'     return_type = "vector")
 #'
-#' # Use multiple conditions to return edges
-#' # with the desired attribute values
-#' get_edges(
-#'   graph,
-#'   conditions =
-#'     color == "blue" &
-#'     value > 3,
-#'   return_type = "vector")
-#' #> [1] "3->1"
+#' # Use multiple conditions to
+#' # return edges with the
+#' # desired attribute values
+#' graph %>%
+#'   get_edges(
+#'     conditions =
+#'       color == "blue" &
+#'       value > 3,
+#'     return_type = "vector")
 #'
-#' # Use `return_values = "label"` to return
-#' # the labels of the connected nodes
-#' get_edges(
-#'   graph,
-#'   conditions =
-#'     color == "blue" &
-#'     value > 3,
-#'   return_type = "vector",
-#'   return_values = "label")
-#' #> [1] "three->one"
+#' # Use `return_values = "label"`
+#' # to return the labels of the
+#' # connected nodes
+#' graph %>%
+#'   get_edges(
+#'     conditions =
+#'       color == "blue" &
+#'       value > 3,
+#'     return_type = "vector",
+#'     return_values = "label")
 #' @importFrom dplyr filter select_ left_join rename
-#' @importFrom rlang enquo UQ
+#' @importFrom rlang enquo UQ get_expr
 #' @export get_edges
 
-get_edges <- function(x,
+get_edges <- function(graph,
                       conditions = NULL,
                       return_type = "vector",
                       return_values = "id") {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
+  # Capture provided conditions
   conditions <- rlang::enquo(conditions)
 
   # Create bindings for specific variables
   label <- NULL
 
-  if (inherits(x, "dgr_graph")) {
-    edges_df <- x$edges_df
+  # Extract edge data frame from the graph
+  edges_df <- graph$edges_df
 
-    if (return_values == "label") {
-      edges_df <-
-        edges_df %>%
-        dplyr::left_join(x$nodes_df %>% select_("id", "label"), by = c("from" = "id")) %>%
-        dplyr::rename(from_label_ = label) %>%
-        dplyr::left_join(x$nodes_df %>% select_("id", "label"), by = c("to" = "id")) %>%
-        dplyr::rename(to_label_ = label)
-    }
+  if (return_values == "label") {
+    edges_df <-
+      edges_df %>%
+      dplyr::left_join(graph$nodes_df %>% select_("id", "label"), by = c("from" = "id")) %>%
+      dplyr::rename(from_label_ = label) %>%
+      dplyr::left_join(graph$nodes_df %>% select_("id", "label"), by = c("to" = "id")) %>%
+      dplyr::rename(to_label_ = label)
   }
 
-  if (inherits(x, "data.frame")) {
-    if (colnames(x)[1] == "id" &
-        colnames(x)[2] == "from" &
-        colnames(x)[3] == "to" &
-        colnames(x)[4] == "rel") {
-      edges_df <- x
-    } else {
-      stop("The supplied object is not an edge data frame.")
-    }
-  }
 
   # If conditions are provided then
   # pass in those conditions and filter the
   # data frame of `edges_df`
-  if (!((rlang::UQ(conditions) %>% paste())[2] == "NULL")) {
+  if (!is.null(
+    rlang::enquo(conditions) %>%
+    rlang::get_expr())) {
 
     edges_df <-
       filter(

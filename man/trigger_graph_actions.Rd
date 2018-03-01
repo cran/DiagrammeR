@@ -26,13 +26,14 @@ for the manual triggering of graph actions after
 setting them, for example.
 }
 \examples{
-# Create a random graph
+# Create a random graph using the
+# `add_gnm_graph()` function
 graph <-
-  create_random_graph(
-    n = 5, m = 10,
-    set_seed = 23) \%>\%
-  drop_node_attrs(
-    node_attr = value)
+  create_graph() \%>\%
+  add_gnm_graph(
+    n = 5,
+    m = 10,
+    set_seed = 23)
 
 # Add a graph action that sets a node
 # attr column with a function; this
@@ -78,14 +79,6 @@ graph <-
 # function
 graph \%>\%
   get_graph_actions()
-#> # A tibble: 3 x 3
-#>   action_index     action_name
-#>          <dbl>           <chr>
-#> 1            1    get_pagerank
-#> 2            2  pgrnk_to_width
-#> 3            3 pgrnk_fillcolor
-#> # ... with 1 more variables:
-#> #   expression <chr>
 
 # Manually trigger to invocation of
 # the graph actions using the
@@ -100,10 +93,4 @@ graph <-
 # `fillcolor` columns are present
 graph \%>\%
   get_node_df()
-#>   id type label   pagerank width fillcolor
-#> 1  1 <NA>     1 0.09912752 0.000   #D7191C
-#> 2  2 <NA>     2 0.12019212 0.069   #FDAE61
-#> 3  3 <NA>     3 0.15424655 0.179   #FFFFBF
-#> 4  4 <NA>     4 0.21980134 0.392   #ABDDA4
-#> 5  5 <NA>     5 0.40663247 1.000   #2B83BA
 }

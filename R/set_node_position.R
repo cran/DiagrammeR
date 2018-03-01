@@ -50,12 +50,8 @@
 #' # verify that the `x` and `y` node
 #' # attributes are available and set to
 #' # the values provided
-#' get_node_df(graph)
-#' #>   id type label x y
-#' #> 1  1 <NA>   one 1 1
-#' #> 2  2 <NA>   two 2 2
-#' #> 3  3 <NA> three 3 3
-#' #> 4  4 <NA>  four 4 4
+#' graph %>%
+#'   get_node_df()
 #'
 #' # The same function can modify the data
 #' # in the `x` and `y` attributes
@@ -75,12 +71,8 @@
 #'     x = 4, y = 1)
 #'
 #' # View the graph's node data frame
-#' get_node_df(graph)
-#' #>   id type label x y
-#' #> 1  1 <NA>   one 1 4
-#' #> 2  2 <NA>   two 3 3
-#' #> 3  3 <NA> three 3 2
-#' #> 4  4 <NA>  four 4 1
+#' graph %>%
+#'   get_node_df()
 #'
 #' # Position changes can also be made by
 #' # supplying a node `label` value (and setting
@@ -99,12 +91,8 @@
 #'     use_labels = TRUE)
 #'
 #' # View the graph's node data frame
-#' get_node_df(graph)
-#' #>   id type label x y
-#' #> 1  1 <NA>   one 1 1
-#' #> 2  2 <NA>   two 2 2
-#' #> 3  3 <NA> three 3 2
-#' #> 4  4 <NA>  four 4 1
+#' graph %>%
+#'   get_node_df()
 #' @importFrom dplyr case_when mutate coalesce
 #' @export set_node_position
 
@@ -117,14 +105,23 @@ set_node_position <- function(graph,
   # Get the time of function start
   time_function_start <- Sys.time()
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Validation: Graph contains nodes
   if (graph_contains_nodes(graph) == FALSE) {
-    stop("The graph contains no nodes, so, no node attributes can be set.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no nodes")
   }
 
   # Get the graph's node data frame
@@ -134,7 +131,10 @@ set_node_position <- function(graph,
   # exist in the graph
   if (use_labels == FALSE) {
     if (!(node %in% graph$nodes_df[, 1])) {
-      stop("The node ID provided doesn't exist in the graph.")
+
+      emit_error(
+        fcn_name = fcn_name,
+        reasons = "The node ID provided doesn't exist in the graph")
     }
   }
 
@@ -167,7 +167,10 @@ set_node_position <- function(graph,
     # Stop function if `label` doesn't contain
     # unique, non-NA values
     if (unique_labels_available == FALSE) {
-      stop("The `label` attribute in the graph's ndf must contain unique, non-NA values.")
+
+      emit_error(
+        fcn_name = fcn_name,
+        reasons = "The `label` attribute in the graph's ndf must contain unique, non-NA values")
     }
 
     # Use `case_when` statements to selectively perform
@@ -216,7 +219,7 @@ set_node_position <- function(graph,
     add_action_to_log(
       graph_log = graph$graph_log,
       version_id = nrow(graph$graph_log) + 1,
-      function_used = "set_node_position",
+      function_used = fcn_name,
       time_modified = time_function_start,
       duration = graph_function_duration(time_function_start),
       nodes = nrow(graph$nodes_df),

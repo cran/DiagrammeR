@@ -22,43 +22,60 @@
 #'   add_edge(
 #'     from =
 #'       get_node_ids(
-#'         x = .,
-#'         conditions = type == "cycle_1") %>%
+#'         graph = .,
+#'         conditions =
+#'           type == "cycle_1") %>%
 #'         sample(size = 1),
 #'     to =
 #'       get_node_ids(
-#'         x = .,
-#'         conditions = type == "cycle_2") %>%
+#'         graph = .,
+#'         conditions =
+#'           type == "cycle_2") %>%
 #'         sample(size = 1))
 #'
 #' # Get the strongly connected
 #' # components as a data frame of
 #' # nodes and their groupings
-#' get_s_connected_cmpts(graph)
-#' #>   id sc_component
-#' #> 1  1            1
-#' #> 2  2            1
-#' #> 3  3            1
-#' #> 4  4            2
-#' #> 5  5            2
-#' #> 6  6            2
-#' #> 7  7            2
+#' graph %>%
+#'   get_s_connected_cmpts()
 #' @importFrom igraph components
+#' @importFrom dplyr select
 #' @export get_s_connected_cmpts
 
 get_s_connected_cmpts <- function(graph) {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
-  # Convert the graph to an igraph object
-  ig_graph <- to_igraph(graph)
+  # Create bindings for specific variables
+  id <- from <- to <- type <- label <- rel <- NULL
 
-  # Get the component list
+  # Create a graph where only mandatory
+  # node and edge attributes are retained;
+  # transform to an igraph object
+  ig_graph <-
+    create_graph(
+      nodes_df = graph %>%
+        get_node_df() %>%
+        dplyr::select(id, type, label),
+      edges_df = graph %>%
+        get_edge_df() %>%
+        dplyr::select(id, from, to, rel),
+      directed = is_graph_directed(graph)) %>%
+    to_igraph()
+
+  # Get the component list from the graph
   components <-
-    igraph::components(ig_graph, mode = "strong")
+    ig_graph %>%
+    igraph::components(mode = "strong")
 
   # Create the output data frame
   data.frame(

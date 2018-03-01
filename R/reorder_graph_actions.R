@@ -15,10 +15,13 @@
 #' and the remaining actions will follow.
 #' @return a graph object of class \code{dgr_graph}.
 #' @examples
-#' # Create a random graph
+#' # Create a random graph using the
+#' # `add_gnm_graph()` function
 #' graph <-
-#'   create_random_graph(
-#'     n = 10, m = 22,
+#'   create_graph() %>%
+#'   add_gnm_graph(
+#'     n = 4,
+#'     m = 4,
 #'     set_seed = 23)
 #'
 #' # Add three graph actions to the
@@ -46,14 +49,6 @@
 #' # `get_graph_actions()`
 #' graph %>%
 #'   get_graph_actions()
-#' #> # A tibble: 3 x 3
-#' #>   action_index     action_name
-#' #>          <dbl>           <chr>
-#' #> 1            1  pgrnk_to_width
-#' #> 2            2    get_pagerank
-#' #> 3            3 pgrnk_fillcolor
-#' #> # ... with 1 more variables:
-#' #> #   expression <chr>
 #'
 #' # We note that the order isn't
 #' # correct and that the `get_pagerank`
@@ -73,14 +68,6 @@
 #' # we have the desired order of actions
 #' graph %>%
 #'   get_graph_actions()
-#' #> # A tibble: 3 x 3
-#' #>   action_index     action_name
-#' #>          <int>           <chr>
-#' #> 1            1    get_pagerank
-#' #> 2            2  pgrnk_to_width
-#' #> 3            3 pgrnk_fillcolor
-#' #> # ... with 1 more variables:
-#' #> #   expression <chr>
 #' @importFrom dplyr mutate row_number pull
 #' @export reorder_graph_actions
 
@@ -90,15 +77,24 @@ reorder_graph_actions <- function(graph,
   # Get the time of function start
   time_function_start <- Sys.time()
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Determine whether there any
   # available graph actions
   if (nrow(graph$graph_actions) == 0) {
-    stop("There are no graph actions to reorder.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "There are no graph actions to reorder")
   }
 
   # Create binding for a specific variable
@@ -115,7 +111,10 @@ reorder_graph_actions <- function(graph,
   # do not refer to an `action_index`
   # that does not exist
   if (!any(indices %in% available_indices)) {
-    stop("One or more provided indices do not exist in the graph.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "One or more provided indices do not exist in the graph")
   }
 
   remaining_indices <-
@@ -145,7 +144,7 @@ reorder_graph_actions <- function(graph,
     add_action_to_log(
       graph_log = graph$graph_log,
       version_id = nrow(graph$graph_log) + 1,
-      function_used = "reorder_graph_actions",
+      function_used = fcn_name,
       time_modified = time_function_start,
       duration = graph_function_duration(time_function_start),
       nodes = nrow(graph$nodes_df),

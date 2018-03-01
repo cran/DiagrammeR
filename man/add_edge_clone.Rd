@@ -7,25 +7,29 @@
 add_edge_clone(graph, edge, from, to)
 }
 \arguments{
-\item{graph}{a graph object of class
-\code{dgr_graph}.}
+\item{graph}{a graph object of
+class \code{dgr_graph}.}
 
-\item{edge}{an edge ID corresponding to the graph edge
+\item{edge}{an edge ID
+corresponding to the graph edge
 to be cloned.}
 
-\item{from}{the outgoing node from which the edge
-is connected.}
+\item{from}{the outgoing node
+from which the edge is connected.}
 
-\item{to}{the incoming nodes to which each edge
-is connected.}
+\item{to}{the incoming nodes to
+which each edge is connected.}
 }
 \value{
-a graph object of class \code{dgr_graph}.
+a graph object of
+class \code{dgr_graph}.
 }
 \description{
-Add a new edge to a graph object of
-class \code{dgr_graph} which is a clones of an edge
-already in the graph. All edge attributes are
+Add a new edge to
+a graph object of class
+\code{dgr_graph} which is a
+clone of an edge already in the
+graph. All edge attributes are
 preserved.
 }
 \examples{
@@ -49,8 +53,6 @@ graph <-
 # edge data frame
 graph \%>\%
   get_edge_df()
-#>   id from to rel     color
-#> 1  1    1  2   a steelblue
 
 # Create a new node (will have
 # node ID of `3`) and then
@@ -70,9 +72,6 @@ graph_2 <-
 # edge data frame
 graph_2 \%>\%
   get_edge_df()
-#>   id from to rel     color
-#> 1  1    1  2   a steelblue
-#> 2  2    3  1   a steelblue
 
 # The same change can be performed
 # with some helper functions in the
@@ -84,11 +83,9 @@ graph_3 <-
       edge = get_last_edges_created(.),
       from = get_last_nodes_created(.),
       to = 1)
+
 # Display the graph's internal
 # edge data frame
 graph_3 \%>\%
   get_edge_df()
-#>   id from to rel     color
-#> 1  1    1  2   a steelblue
-#> 2  2    3  1   a steelblue
 }

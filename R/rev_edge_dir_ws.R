@@ -6,35 +6,35 @@
 #' \code{dgr_graph}.
 #' @return a graph object of class \code{dgr_graph}.
 #' @examples
-#' # Create a graph with a directed tree
+#' # Create a graph with a
+#' # directed tree
 #' graph <-
 #'   create_graph() %>%
 #'   add_balanced_tree(
 #'     k = 2, h = 2)
 #'
 #' # Inspect the graph's edges
-#' get_edges(graph)
-#' #> [1] "1->2" "1->3" "2->4" "2->5"
-#' #> [5] "3->6" "3->7"
+#' graph %>%
+#'   get_edges()
 #'
-#' # Select all edges associated with
-#' # nodes `1` and `2`
+#' # Select all edges associated
+#' # with nodes `1` and `2`
 #' graph <-
+#'   graph %>%
 #'   select_edges_by_node_id(
-#'     graph = graph,
 #'     nodes = 1:2)
 #'
-#' # Reverse the edge directions of the edges
-#' # associated with nodes `1` and `2`
+#' # Reverse the edge directions
+#' # of the edges associated with
+#' # nodes `1` and `2`
 #' graph <-
 #'   graph %>%
 #'   rev_edge_dir_ws()
 #'
-#' # Inspect the graph's edges after their reversal
+#' # Inspect the graph's edges
+#' # after their reversal
 #' graph %>%
 #'   get_edges()
-#' #> [1] "2->1" "3->1" "4->2" "5->2"
-#' #> [5] "3->6" "3->7"
 #' @importFrom dplyr filter rename select everything bind_rows
 #' @export rev_edge_dir_ws
 
@@ -43,24 +43,39 @@ rev_edge_dir_ws <- function(graph) {
   # Get the time of function start
   time_function_start <- Sys.time()
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Validation: Graph contains edges
   if (graph_contains_edges(graph) == FALSE) {
-    stop("The graph contains no edges, so, no edges can be reversed.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no edges")
   }
 
   # Validation: Graph object has valid edge selection
   if (graph_contains_edge_selection(graph) == FALSE) {
-    stop("There is no selection of edges available.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no selection of edges")
   }
 
   # If graph is undirected, stop function
   if (graph$directed == FALSE) {
-    stop("The input graph must be a directed graph.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The input graph must be a directed graph")
   }
 
   # Create bindings for specific variables
@@ -75,7 +90,7 @@ rev_edge_dir_ws <- function(graph) {
   edges <- get_edge_df(graph)
 
   # Get edge ID values in edge selection
-  edge_ids <- get_selection(graph)
+  edge_ids <- suppressMessages(get_selection(graph))
 
   # Selectively modify the edge direction and create
   # a new edf
@@ -95,7 +110,7 @@ rev_edge_dir_ws <- function(graph) {
     add_action_to_log(
       graph_log = graph$graph_log,
       version_id = nrow(graph$graph_log) + 1,
-      function_used = "rev_edge_dir_ws",
+      function_used = fcn_name,
       time_modified = time_function_start,
       duration = graph_function_duration(time_function_start),
       nodes = nrow(graph$nodes_df),

@@ -24,10 +24,13 @@ Within a graph's internal edge data
 frame (edf), rename an existing edge attribute.
 }
 \examples{
-# Create a random graph
+# Create a random graph using the
+# `add_gnm_graph()` function
 graph <-
-  create_random_graph(
-    n = 5, m = 8,
+  create_graph() \%>\%
+  add_gnm_graph(
+    n = 5,
+    m = 8,
     set_seed = 23) \%>\%
   set_edge_attrs(
     edge_attr = color,
@@ -36,18 +39,10 @@ graph <-
 # Get the graph's internal edf
 # to show which edge attributes
 # are available
-get_edge_df(graph)
-#>   id from to  rel color
-#> 1  1    2  3 <NA> green
-#> 2  2    3  5 <NA> green
-#> 3  3    3  4 <NA> green
-#> 4  4    2  4 <NA> green
-#> 5  5    2  5 <NA> green
-#> 6  6    4  5 <NA> green
-#> 7  7    1  4 <NA> green
-#> 8  8    1  3 <NA> green
+graph \%>\%
+  get_edge_df()
 
-# Rename the `value` node
+# Rename the `color` node
 # attribute as `weight`
 graph <-
   graph \%>\%
@@ -58,14 +53,6 @@ graph <-
 # Get the graph's internal
 # edf to show that the edge
 # attribute had been renamed
-get_edge_df(graph)
-#>   id from to  rel labelfontcolor
-#> 1  1    2  3 <NA>          green
-#> 2  2    3  5 <NA>          green
-#> 3  3    3  4 <NA>          green
-#> 4  4    2  4 <NA>          green
-#> 5  5    2  5 <NA>          green
-#> 6  6    4  5 <NA>          green
-#> 7  7    1  4 <NA>          green
-#> 8  8    1  3 <NA>          green
+graph \%>\%
+  get_edge_df()
 }

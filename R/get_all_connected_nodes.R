@@ -1,62 +1,74 @@
 #' Get all nodes connected to a specified node
 #' @description With a single node serving as
 #' the starting point get all nodes connected (i.e.,
-#' reachable with a traversible path) to that node.
+#' reachable with a traversable path) to that node.
 #' @param graph a graph object of class
 #' \code{dgr_graph}.
 #' @param node a single-length vector containing a
 #' node ID value.
 #' @return a vector of node ID values.
 #' @examples
-#' # This graph, created using `create_random_graph()`
-#' # is almost fully connected but there is an
-#' # isolated node (`8`) with no edges
+#' # Create a random graph using the
+#' # `add_gnm_graph()` function; it
+#' # has an unconnected node (`6`)
 #' graph_1 <-
-#'   create_random_graph(
-#'     n = 30, m = 40,
+#'   create_graph() %>%
+#'   add_gnm_graph(
+#'     n = 20,
+#'     m = 32,
 #'     set_seed = 23)
 #'
-#' # There won't be any connected nodes to `8`
-#' # so when specifying this node with
-#' # `get_all_connected_nodes()` we get NA back
+#' # There won't be any connected
+#' # nodes to `6` so when specifying
+#' # this node with `get_all_connected_nodes()`
+#' # we get NA back
 #' graph_1 %>%
-#'   get_all_connected_nodes(node = 8)
-#' #> [1] NA
+#'   get_all_connected_nodes(
+#'     node = 6)
 #'
-#' # Any other node in `graph_1` will provide a vector
-#' # of all the nodes other than `8`
+#' # Any other node in `graph_1` will
+#' # provide a vector of all the nodes
+#' # other than `6`
 #' graph_1 %>%
-#'   get_all_connected_nodes(node = 1)
-#' #>  [1]  2  3  4  5  6  7  9 10 11 12 13 14 15 16 17
-#' #> [16] 18 19 20 21 22 23 24 25 26 27 28 29 30
+#'   get_all_connected_nodes(
+#'     node = 1)
 #'
-#' # The following graph has two clusters of nodes
-#' # (i.e., the graph has two connected components)
+#' # The following graph has two
+#' # clusters of nodes (i.e., the
+#' # graph has two connected components)
 #' graph_2 <-
 #'   create_graph() %>%
 #'   add_path(n = 6) %>%
 #'   add_path(n = 4)
 #'
-#' # In `graph_2`, node `1` is in the larger of the two
+#' # In `graph_2`, node `1` is in
+#' # the larger of the two
 #' # connected components
 #' graph_2 %>%
-#'   get_all_connected_nodes(node = 1)
-#' #> [1] 2 3 4 5 6
+#'   get_all_connected_nodes(
+#'     node = 1)
 #'
-#' # Also in `graph_2`, node `8` is in the smaller of
-#' # the two connected components
+#' # Also in `graph_2`, node `8`
+#' # is in the smaller of the two
+#' # connected components
 #' graph_2 %>%
-#'   get_all_connected_nodes(node = 8)
-#' #> [1]  7  9 10
+#'   get_all_connected_nodes(
+#'     node = 8)
 #' @importFrom dplyr filter
 #' @export get_all_connected_nodes
 
 get_all_connected_nodes <- function(graph,
                                     node) {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Create bindings for specific variables
@@ -64,7 +76,10 @@ get_all_connected_nodes <- function(graph,
 
   # Verify that the node ID provided is in the graph
   if (!(node %in% get_node_ids(graph))) {
-    stop("The node ID provided is not in the graph.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The node ID provided is not in the graph")
   }
 
   # Get a data frame of the weakly-connected

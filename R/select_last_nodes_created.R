@@ -33,12 +33,8 @@
 #'
 #' # Display the graph's internal node
 #' # data frame to verify the change
-#' get_node_df(graph)
-#' #>   id type label color
-#' #> 1  1    a   a_1  <NA>
-#' #> 2  2    a   a_2  <NA>
-#' #> 3  3    b   b_1   red
-#' #> 4  4    b   b_2   red
+#' graph %>%
+#'   get_node_df()
 #' @importFrom dplyr mutate filter select pull if_else
 #' @importFrom utils tail
 #' @export select_last_nodes_created
@@ -48,14 +44,23 @@ select_last_nodes_created <- function(graph) {
   # Get the time of function start
   time_function_start <- Sys.time()
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Validation: Graph contains nodes
   if (graph_contains_nodes(graph) == FALSE) {
-    stop("The graph contains no nodes, so, no nodes can be selected.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no nodes")
   }
 
   # Create bindings for specific variables
@@ -81,7 +86,11 @@ select_last_nodes_created <- function(graph) {
     if (graph_transform_steps %>%
         tail(1) %>%
         dplyr::pull(step_deleted_nodes) == 1) {
-      stop("The previous graph transformation function resulted in a removal of nodes.")
+
+      emit_error(
+        fcn_name = fcn_name,
+        reasons = "The previous graph transformation function resulted in a removal of nodes")
+
     } else {
       if (nrow(graph_transform_steps) > 1) {
         number_of_nodes_created <-
@@ -113,16 +122,17 @@ select_last_nodes_created <- function(graph) {
 
     # Apply the selection of nodes to the graph
     graph <-
-      select_nodes(
-        graph = graph,
-        nodes = node_id_values)
+      suppressMessages(
+        select_nodes(
+          graph = graph,
+          nodes = node_id_values))
 
     # Update the `graph_log` df with an action
     graph$graph_log <-
       graph$graph_log[-nrow(graph$graph_log),] %>%
       add_action_to_log(
         version_id = nrow(graph$graph_log) + 1,
-        function_used = "select_last_nodes_created",
+        function_used = fcn_name,
         time_modified = time_function_start,
         duration = graph_function_duration(time_function_start),
         nodes = nrow(graph$nodes_df),

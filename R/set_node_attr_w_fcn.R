@@ -30,11 +30,20 @@
 #' @return either a graph object of class
 #' \code{dgr_graph}.
 #' @examples
-#' # Create a random graph
+#' # Create a random graph using the
+#' # `add_gnm_graph()` function
 #' graph <-
-#'   create_random_graph(
-#'     n = 10, m = 22,
-#'     set_seed = 23)
+#'   create_graph() %>%
+#'   add_gnm_graph(
+#'     n = 10,
+#'     m = 22,
+#'     set_seed = 23) %>%
+#'   set_node_attrs(
+#'     node_attr = value,
+#'     values = rnorm(
+#'       n = count_nodes(.),
+#'       mean = 5,
+#'       sd = 1) %>% round(1))
 #'
 #' # Get the betweenness values for
 #' # each of the graph's nodes as a
@@ -48,17 +57,6 @@
 #' # node data frame
 #' graph_1 %>%
 #'   get_node_df()
-#' #>    id type label value betweenness__A
-#' #> 1   1 <NA>     1   6.0       5.904762
-#' #> 2   2 <NA>     2   2.5       4.904762
-#' #> 3   3 <NA>     3   3.5       1.785714
-#' #> 4   4 <NA>     4   7.5       0.000000
-#' #> 5   5 <NA>     5   8.5       5.738095
-#' #> 6   6 <NA>     6   4.5      20.523810
-#' #> 7   7 <NA>     7  10.0       3.333333
-#' #> 8   8 <NA>     8  10.0       0.000000
-#' #> 9   9 <NA>     9   8.5       3.738095
-#' #> 10 10 <NA>    10  10.0       4.071429
 #'
 #' # If a specified function takes argument
 #' # values, these can be supplied as well
@@ -73,17 +71,6 @@
 #' # node data frame
 #' graph_2 %>%
 #'   get_node_df()
-#' #>    id type label value alpha_centrality__A
-#' #> 1   1 <NA>     1   6.0                   2
-#' #> 2   2 <NA>     2   2.5                   2
-#' #> 3   3 <NA>     3   3.5                   6
-#' #> 4   4 <NA>     4   7.5                   2
-#' #> 5   5 <NA>     5   8.5                  14
-#' #> 6   6 <NA>     6   4.5                  50
-#' #> 7   7 <NA>     7  10.0                  22
-#' #> 8   8 <NA>     8  10.0                 106
-#' #> 9   9 <NA>     9   8.5                 162
-#' #> 10 10 <NA>    10  10.0                 462
 #'
 #' # The new column name can be provided
 #' graph_3 <-
@@ -96,17 +83,6 @@
 #' # node data frame
 #' graph_3 %>%
 #'   get_node_df()
-#' #>    id type label value   pagerank
-#' #> 1   1 <NA>     1   6.0 0.04608804
-#' #> 2   2 <NA>     2   2.5 0.04608804
-#' #> 3   3 <NA>     3   3.5 0.05392301
-#' #> 4   4 <NA>     4   7.5 0.04608804
-#' #> 5   5 <NA>     5   8.5 0.07677500
-#' #> 6   6 <NA>     6   4.5 0.11684759
-#' #> 7   7 <NA>     7  10.0 0.07899491
-#' #> 8   8 <NA>     8  10.0 0.08898857
-#' #> 9   9 <NA>     9   8.5 0.16945368
-#' #> 10 10 <NA>    10  10.0 0.27675311
 #'
 #' # If `graph_3` is modified by
 #' # adding a new node then the column
@@ -118,9 +94,7 @@
 #'   graph_3 %>%
 #'   add_node(
 #'     from = 1,
-#'     to = 3,
-#'     label = 11,
-#'     value = 5.5) %>%
+#'     to = 3) %>%
 #'   set_node_attr_w_fcn(
 #'     node_attr_fcn = "get_pagerank",
 #'     column_name = "pagerank")
@@ -129,18 +103,6 @@
 #' # node data frame
 #' graph_3 %>%
 #'   get_node_df()
-#' #>    id type label value   pagerank
-#' #> 1   1 <NA>     1   6.0 0.03943470
-#' #> 2   2 <NA>     2   2.5 0.03943470
-#' #> 3   3 <NA>     3   3.5 0.08535641
-#' #> 4   4 <NA>     4   7.5 0.03943470
-#' #> 5   5 <NA>     5   8.5 0.06401567
-#' #> 6   6 <NA>     6   4.5 0.10870274
-#' #> 7   7 <NA>     7  10.0 0.07702682
-#' #> 8   8 <NA>     8  10.0 0.07693771
-#' #> 9   9 <NA>     9   8.5 0.16659482
-#' #> 10 10 <NA>    10  10.0 0.25692313
-#' #> 11 11 <NA>    11   5.5 0.04613860
 #' @importFrom dplyr inner_join mutate
 #' @export set_node_attr_w_fcn
 
@@ -152,6 +114,17 @@ set_node_attr_w_fcn <- function(graph,
   # Get the time of function start
   time_function_start <- Sys.time()
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
+  # Validation: Graph object is valid
+  if (graph_object_valid(graph) == FALSE) {
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
+  }
+
   # Create bindings for specific variables
   id <- NULL
 
@@ -159,7 +132,10 @@ set_node_attr_w_fcn <- function(graph,
     value_per_node_functions() %>% names()
 
   if (!any(value_per_node_fcn_names %in% node_attr_fcn)) {
-    stop("The function name must be one that produces values for every graph node.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The function name must be one that produces values for every graph node")
   }
 
   # Collect extra vectors of arguments and values as `extras`
@@ -259,7 +235,7 @@ set_node_attr_w_fcn <- function(graph,
     add_action_to_log(
       graph_log = graph$graph_log,
       version_id = nrow(graph$graph_log) + 1,
-      function_used = "set_node_attr_w_fcn",
+      function_used = fcn_name,
       time_modified = time_function_start,
       duration = graph_function_duration(time_function_start),
       nodes = nrow(graph$nodes_df),

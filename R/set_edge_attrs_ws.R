@@ -40,14 +40,10 @@
 #' # frame to verify that the
 #' # edge attribute has been set
 #' # for specific edges
-#' get_edge_df(graph)
-#' #>   id from to  rel color
-#' #> 1  1    1  2 <NA>  <NA>
-#' #> 2  2    2  3 <NA>  blue
-#' #> 3  3    3  4 <NA>  blue
-#' #> 4  4    4  5 <NA>  blue
-#' #> 5  5    5  6 <NA>  <NA>
-#' @importFrom rlang enquo UQ
+#' graph %>%
+#'   get_edge_df()
+#' @importFrom rlang enquo get_expr
+#' @importFrom dplyr mutate case_when
 #' @export set_edge_attrs_ws
 
 set_edge_attrs_ws <- function(graph,
@@ -57,23 +53,36 @@ set_edge_attrs_ws <- function(graph,
   # Get the time of function start
   time_function_start <- Sys.time()
 
-  edge_attr <- rlang::enquo(edge_attr)
-  edge_attr <- (rlang::UQ(edge_attr) %>% paste())[2]
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
 
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Validation: Graph contains edges
   if (graph_contains_edges(graph) == FALSE) {
-    stop("The graph contains no edges, no edges attributes can be set.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no edges")
   }
 
   # Validation: Graph object has valid edge selection
   if (graph_contains_edge_selection(graph) == FALSE) {
-    stop("There is no selection of edges available.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no selection of edges")
   }
+
+  # Get the requested `edge_attr`
+  edge_attr <-
+    rlang::enquo(edge_attr) %>% rlang::get_expr() %>% as.character()
 
   # Get vectors of edge ID values for the
   # edge selection
@@ -101,7 +110,7 @@ set_edge_attrs_ws <- function(graph,
     add_action_to_log(
       graph_log = graph$graph_log,
       version_id = nrow(graph$graph_log) + 1,
-      function_used = "set_edge_attrs_ws",
+      function_used = fcn_name,
       time_modified = time_function_start,
       duration = graph_function_duration(time_function_start),
       nodes = nrow(graph$nodes_df),

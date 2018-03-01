@@ -32,14 +32,23 @@
 
 get_last_nodes_created <- function(graph) {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Validation: Graph contains nodes
   if (graph_contains_nodes(graph) == FALSE) {
-    stop("The graph contains no nodes, so, no nodes can be selected.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no nodes")
   }
 
   # Create bindings for specific variables
@@ -65,7 +74,11 @@ get_last_nodes_created <- function(graph) {
     if (graph_transform_steps %>%
         tail(1) %>%
         dplyr::pull(step_deleted_nodes) == 1) {
-      stop("The previous graph transformation function resulted in a removal of nodes.")
+
+      emit_error(
+        fcn_name = fcn_name,
+        reasons = "The previous graph transformation function resulted in a removal of nodes")
+
     } else {
       if (nrow(graph_transform_steps) > 1) {
         number_of_nodes_created <-

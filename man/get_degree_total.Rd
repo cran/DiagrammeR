@@ -26,45 +26,31 @@ Get the total degree values for all
 nodes in a graph.
 }
 \examples{
-# Create a random graph
+# Create a random graph using the
+# `add_gnm_graph()` function
 graph <-
-  create_random_graph(
-    n = 10, m = 22,
+  create_graph(
+    directed = FALSE) \%>\%
+  add_gnm_graph(
+    n = 10,
+    m = 15,
     set_seed = 23)
 
-# Get the total degree values for all nodes
-# in the graph
-get_degree_total(graph)
-#>    id total_degree
-#> 1   1            4
-#> 2   2            5
-#> 3   3            4
-#> 4   4            3
-#> 5   5            5
-#> 6   6            7
-#> 7   7            4
-#> 8   8            2
-#> 9   9            5
-#> 10 10            5
+# Get the total degree values
+# for all nodes in the graph
+graph \%>\%
+  get_degree_total()
 
-# Add the total degree values to the graph
-# as a node attribute
+# Add the total degree values
+# to the graph as a node
+# attribute
 graph <-
   graph \%>\%
   join_node_attrs(
     df = get_degree_total(.))
 
-# Display the graph's node data frame
-get_node_df(graph)
-#>    id type label value total_degree
-#> 1   1 <NA>     1   6.0            4
-#> 2   2 <NA>     2   2.5            5
-#> 3   3 <NA>     3   3.5            4
-#> 4   4 <NA>     4   7.5            3
-#> 5   5 <NA>     5   8.5            5
-#> 6   6 <NA>     6   4.5            7
-#> 7   7 <NA>     7  10.0            4
-#> 8   8 <NA>     8  10.0            2
-#> 9   9 <NA>     9   8.5            5
-#> 10 10 <NA>    10  10.0            5
+# Display the graph's
+# node data frame
+graph \%>\%
+  get_node_df()
 }

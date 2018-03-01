@@ -6,7 +6,7 @@
 #' nodes common to the selected edges.
 #' For instance, if an active selection
 #' has the edge \code{1->2} but there is
-#' also an (unselected) edge \code{2->1},
+#' also an (not selected) edge \code{2->1},
 #' then this function can either switch
 #' to the selection of \code{2->1}, or,
 #' incorporate both those edges into the
@@ -54,8 +54,8 @@
 #'       to = 3)
 #'
 #' # Get the inital edge selection
-#' get_selection(graph)
-#' #> [1] 1 3
+#' graph %>%
+#'   get_selection()
 #'
 #' # Traverse to the reverse edges
 #' # (edges `2`: `4`->`1` and
@@ -65,10 +65,9 @@
 #'   trav_reverse_edge()
 #'
 #' # Get the current selection of edges
-#' get_selection(graph)
-#' #> [1] 2 4
-#' @importFrom dplyr filter_ bind_rows select rename arrange
-#' @importFrom tibble as_tibble
+#' graph %>%
+#'   get_selection()
+#' @importFrom dplyr filter_ bind_rows select rename arrange as_tibble
 #' @export trav_reverse_edge
 
 trav_reverse_edge <- function(graph,
@@ -77,19 +76,31 @@ trav_reverse_edge <- function(graph,
   # Get the time of function start
   time_function_start <- Sys.time()
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Validation: Graph contains edges
   if (graph_contains_edges(graph) == FALSE) {
-    stop("The graph contains no edges, so, no selections can be made.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no edges")
   }
 
   # Validation: Graph object has valid edge selection
   if (graph_contains_edge_selection(graph) == FALSE) {
-    stop("There is no selection of edges available.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no selection of edges")
   }
 
   # Create bindings for specific variables
@@ -106,7 +117,7 @@ trav_reverse_edge <- function(graph,
   reverse_edges <-
     edf %>%
     {
-      reverse_edges <- tibble::as_tibble()
+      reverse_edges <- dplyr::as_tibble()
       for (i in 1:length(edges_to)) {
         reverse_edges <-
           edf %>%
@@ -127,7 +138,7 @@ trav_reverse_edge <- function(graph,
     edges <-
       edf %>%
       {
-        edges <- tibble::as_tibble()
+        edges <- dplyr::as_tibble()
         for (i in 1:length(edges_to)) {
           edges <-
             edf %>%
@@ -165,7 +176,7 @@ trav_reverse_edge <- function(graph,
     add_action_to_log(
       graph_log = graph$graph_log,
       version_id = nrow(graph$graph_log) + 1,
-      function_used = "trav_reverse_edge",
+      function_used = fcn_name,
       time_modified = time_function_start,
       duration = graph_function_duration(time_function_start),
       nodes = nrow(graph$nodes_df),

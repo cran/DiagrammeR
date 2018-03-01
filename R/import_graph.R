@@ -38,20 +38,18 @@
 #'
 #' # Get a count of the graph's nodes
 #' gml_graph %>%
-#'   node_count()
-#' #> [1] 34
+#'   count_nodes()
 #'
 #' # Get a count of the graph's edges
 #' gml_graph %>%
-#'   edge_count()
-#' #> [1] 78
+#'   count_edges()
 #' }
-#' @importFrom dplyr right_join select rename mutate everything bind_rows arrange distinct
+#' @importFrom dplyr right_join select rename mutate everything bind_rows
+#' @importFrom dplyr arrange distinct tibble as_tibble
 #' @importFrom downloader download
 #' @importFrom purrr flatten_int
 #' @importFrom stringr str_extract str_detect str_split str_count
-#' str_replace_all str_extract_all
-#' @importFrom tibble tibble as_tibble
+#' @importFrom stringr str_replace_all str_extract_all
 #' @importFrom readr read_delim
 #' @importFrom utils unzip
 #' @export import_graph
@@ -64,6 +62,9 @@ import_graph <- function(graph_file,
   # Get the time of function start
   time_function_start <- Sys.time()
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Assign NULL to several objects
   id <- to_label <- from_label <-  NULL
 
@@ -72,14 +73,20 @@ import_graph <- function(graph_file,
   if (!is.null(file_type)) {
     if (!(tolower(file_type) %in%
           c("gml", "sif", "edges", "mtx"))) {
-      stop("The file type as specified cannot be imported.")
+
+      emit_error(
+        fcn_name = fcn_name,
+        reasons = "The file type as specified cannot be imported")
     }
   }
 
   # Stop function if file doesn't exist
   if (grepl("(^http:|^https:|^ftp:|^ftp:)", graph_file) == FALSE) {
     if (file.exists(graph_file) == FALSE) {
-      stop("The file as specified doesn't exist.")
+
+      emit_error(
+        fcn_name = fcn_name,
+        reasons = "The file as specified doesn't exist")
     }
   }
 
@@ -122,7 +129,10 @@ import_graph <- function(graph_file,
     } else if (file_extension == "mtx") {
       file_type <- "mtx"
     } else {
-      stop("The file type is not known so it can't be imported.")
+
+      emit_error(
+        fcn_name = fcn_name,
+        reasons = "The file type is not known so it can't be imported")
     }
   }
 
@@ -172,14 +182,14 @@ import_graph <- function(graph_file,
     # Create a node data frame
     nodes <-
       dplyr::bind_rows(
-        tibble::tibble(
+        dplyr::tibble(
           id = edges %>%
-            tibble::as_tibble() %>%
+            dplyr::as_tibble() %>%
             dplyr::select(from) %>%
             purrr::flatten_int()),
-        tibble::tibble(
+        dplyr::tibble(
           id = edges %>%
-            tibble::as_tibble() %>%
+            dplyr::as_tibble() %>%
             dplyr::select(to) %>%
             purrr::flatten_int())) %>%
       dplyr::distinct() %>%
@@ -220,7 +230,7 @@ import_graph <- function(graph_file,
 
     # Create a node data frame
     nodes <-
-      tibble::tibble(
+      dplyr::tibble(
         id = as.integer(unique(
           unlist(
             strsplit(
@@ -330,7 +340,7 @@ import_graph <- function(graph_file,
 
     # Create all nodes for graph
     all_nodes <-
-      tibble::tibble(
+      dplyr::tibble(
         id = node_id,
         type = as.character(NA),
         label = as.character(NA)) %>%
@@ -409,7 +419,7 @@ import_graph <- function(graph_file,
 
     # Create an edge data frame
     edf <-
-      tibble::tibble(
+      dplyr::tibble(
         from_label = from,
         to_label = to,
         rel = rel) %>%

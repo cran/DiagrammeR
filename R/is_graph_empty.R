@@ -9,8 +9,8 @@
 #' graph <- create_graph()
 #'
 #' # Determine whether the graph is empty
-#' is_graph_empty(graph)
-#' #> [1] TRUE
+#' graph %>%
+#'   is_graph_empty()
 #'
 #' # Create a non-empty graph
 #' graph <-
@@ -18,15 +18,21 @@
 #'   add_n_nodes(n = 3)
 #'
 #' # Determine whether this graph is empty
-#' is_graph_empty(graph)
-#' #> [1] FALSE
+#' graph %>%
+#'   is_graph_empty()
 #' @export is_graph_empty
 
 is_graph_empty <- function(graph) {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Determine if graph is empty by checking the

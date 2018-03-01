@@ -20,8 +20,8 @@
 #'
 #' # Determine the graph's minimum
 #' # eccentricity
-#' get_min_eccentricity(graph)
-#' #> [1] 2
+#' graph %>%
+#'   get_min_eccentricity()
 #'
 #' # Create a full graph and then
 #' # get the minimum eccentricity
@@ -29,23 +29,31 @@
 #' create_graph() %>%
 #'   add_full_graph(n = 10) %>%
 #'   get_min_eccentricity()
-#' #> [1] 1
 #' @importFrom igraph radius
 #' @export get_min_eccentricity
 
 get_min_eccentricity <- function(graph,
                                  direction = "all") {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Ensure that values provided for the
   # `direction` argument are from the
   # valid options
   if (!(direction %in% c("all", "in", "out"))) {
-    stop("Valid options for `direction` are `all`, `in`, or `out`.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "Valid options for `direction` are `all`, `in`, or `out`.")
   }
 
   # If the graph is empty, then return NA

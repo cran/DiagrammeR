@@ -39,8 +39,8 @@
 #'   delete_nodes_ws()
 #'
 #' # Get a count of nodes in the graph
-#' node_count(graph)
-#' #> [1] 2
+#' graph %>%
+#'   count_nodes()
 #' @export delete_nodes_ws
 
 delete_nodes_ws <- function(graph) {
@@ -48,20 +48,38 @@ delete_nodes_ws <- function(graph) {
   # Get the time of function start
   time_function_start <- Sys.time()
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Validation: Graph contains nodes
   if (graph_contains_nodes(graph) == FALSE) {
-    stop("The graph contains no nodes, so, no nodes can be deleted.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no nodes, so, no node can be deleted")
   }
 
   # Validation: Graph object has valid node selection
   if (graph_contains_node_selection(graph) == FALSE) {
-    stop("There is no selection of nodes available.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "There is no selection of nodes available")
   }
+
+  # Get the number of nodes in the graph
+  nodes_graph_1 <- graph %>% count_nodes()
+
+  # Get the number of edges in the graph
+  edges_graph_1 <- graph %>% count_edges()
 
   # Get a vector of the nodes to be deleted
   nodes_to_delete <- graph$node_selection$node
@@ -90,16 +108,32 @@ delete_nodes_ws <- function(graph) {
     graph %>%
     remove_linked_dfs()
 
+  # Get the updated number of nodes in the graph
+  nodes_graph_2 <- graph %>% count_nodes()
+
+  # Get the number of nodes added to
+  # the graph
+  nodes_deleted <- nodes_graph_2 - nodes_graph_1
+
+  # Get the updated number of edges in the graph
+  edges_graph_2 <- graph %>% count_edges()
+
+  # Get the number of edges added to
+  # the graph
+  edges_deleted <- edges_graph_2 - edges_graph_1
+
   # Update the `graph_log` df with an action
   graph$graph_log <-
     add_action_to_log(
       graph_log = graph$graph_log,
       version_id = nrow(graph$graph_log) + 1,
-      function_used = "delete_nodes_ws",
+      function_used = fcn_name,
       time_modified = time_function_start,
       duration = graph_function_duration(time_function_start),
       nodes = nrow(graph$nodes_df),
-      edges = nrow(graph$edges_df))
+      edges = nrow(graph$edges_df),
+      d_n = nodes_deleted,
+      d_e = edges_deleted)
 
   # Perform graph actions, if any are available
   if (nrow(graph$graph_actions) > 0) {

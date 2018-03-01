@@ -11,10 +11,13 @@
 #' the action.
 #' @return a graph object of class \code{dgr_graph}.
 #' @examples
-#' # Create a random graph
+#' # Create a random graph using the
+#' # `add_gnm_graph()` function
 #' graph <-
-#'   create_random_graph(
-#'     n = 10, m = 22,
+#'   create_graph() %>%
+#'   add_gnm_graph(
+#'     n = 10,
+#'     m = 22,
 #'     set_seed = 23)
 #'
 #' # Add a graph action that sets a node
@@ -39,12 +42,6 @@
 #' # `get_graph_actions()` function
 #' graph %>%
 #'   get_graph_actions()
-#' #> # A tibble: 1 x 3
-#' #>   action_index action_name
-#' #>          <dbl>       <chr>
-#' #> 1            1   get_btwns
-#' #> # ... with 1 more variables:
-#' #> #   expression <chr>
 #' @importFrom dplyr bind_rows
 #' @export add_graph_action
 
@@ -56,9 +53,15 @@ add_graph_action <- function(graph,
   # Get the time of function start
   time_function_start <- Sys.time()
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Collect any function arguments into the
@@ -132,7 +135,7 @@ add_graph_action <- function(graph,
     add_action_to_log(
       graph_log = graph$graph_log,
       version_id = nrow(graph$graph_log) + 1,
-      function_used = "add_graph_action",
+      function_used = fcn_name,
       time_modified = time_function_start,
       duration = graph_function_duration(time_function_start),
       nodes = nrow(graph$nodes_df),

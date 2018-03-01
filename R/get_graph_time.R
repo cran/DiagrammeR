@@ -3,10 +3,13 @@
 #' object of class \code{dgr_graph}.
 #' @param graph a graph object of class
 #' \code{dgr_graph}.
-#' @return a graph object of class \code{dgr_graph}.
+#' @return a single-length
+#' \code{POSIXct} vector with the
+#' assigned graph time.
 #' @examples
-#' # Create an empty graph and set the graph's time;
-#' # if nothing is supplied for the `tz` argument,
+#' # Create an empty graph and
+#' # set the graph's time; if nothing
+#' # is supplied for the `tz` argument,
 #' # `GMT` is used as the time zone
 #' graph <-
 #'   create_graph() %>%
@@ -17,14 +20,19 @@
 #' # object using `get_graph_time()`
 #' graph %>%
 #'   get_graph_time()
-#' #> [1] "2015-10-25 15:23:00 GMT"
 #' @export get_graph_time
 
 get_graph_time <- function(graph) {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   graph$graph_info$graph_time

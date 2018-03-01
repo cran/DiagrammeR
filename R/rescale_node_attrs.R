@@ -27,23 +27,26 @@
 #' set, the minimum value from the set will be used.
 #' @return a graph object of class \code{dgr_graph}.
 #' @examples
-#' # Create a random graph
+#' # Create a random graph using the
+#' # `add_gnm_graph()` function
 #' graph <-
-#'   create_random_graph(
-#'     n = 5, m = 10,
-#'     set_seed = 23,
-#'     directed = TRUE)
+#'   create_graph() %>%
+#'   add_gnm_graph(
+#'     n = 5,
+#'     m = 10,
+#'     set_seed = 23) %>%
+#'   set_node_attrs(
+#'     node_attr = value,
+#'     values = rnorm(
+#'       n = count_nodes(.),
+#'       mean = 5,
+#'       sd = 1) %>% round(1))
 #'
 #' # Get the graph's internal ndf
 #' # to show which node attributes
 #' # are available
-#' get_node_df(graph)
-#' #>   id type label value
-#' #> 1  1 <NA>     1   6.0
-#' #> 2  2 <NA>     2   2.5
-#' #> 3  3 <NA>     3   3.5
-#' #> 4  4 <NA>     4   7.5
-#' #> 5  5 <NA>     5   8.5
+#' graph %>%
+#'   get_node_df()
 #'
 #' # Rescale the `value` node
 #' # attribute, so that its values
@@ -51,18 +54,15 @@
 #' graph <-
 #'   graph %>%
 #'   rescale_node_attrs(
-#'     node_attr_from = value)
+#'     node_attr_from = value,
+#'     to_lower_bound = 0,
+#'     to_upper_bound = 1)
 #'
 #' # Get the graph's internal ndf
 #' # to show that the node attribute
 #' # values had been rescaled
-#' get_node_df(graph)
-#' #>   id type label value
-#' #> 1  1 <NA>     1 0.583
-#' #> 2  2 <NA>     2 0.000
-#' #> 3  3 <NA>     3 0.167
-#' #> 4  4 <NA>     4 0.833
-#' #> 5  5 <NA>     5 1.000
+#' graph %>%
+#'   get_node_df()
 #'
 #' # Scale the values in the `value`
 #' # node attribute to different
@@ -86,16 +86,11 @@
 #' # grayscale colors are now available
 #' # in the `fillcolor` and `fontcolor`
 #' # node attributes
-#' get_node_df(graph)
-#' #>   id type label value fillcolor fontcolor
-#' #> 1  1 <NA>     1 0.583   #6E6E6E   #898989
-#' #> 2  2 <NA>     2 0.000   #CCCCCC   #0D0D0D
-#' #> 3  3 <NA>     3 0.167   #B0B0B0   #2E2E2E
-#' #> 4  4 <NA>     4 0.833   #4A4A4A   #C7C7C7
-#' #> 5  5 <NA>     5 1.000   #333333   #F2F2F2
+#' graph %>%
+#'   get_node_df()
 #' @importFrom scales rescale cscale seq_gradient_pal
 #' @importFrom grDevices colors
-#' @importFrom rlang enquo UQ
+#' @importFrom rlang enquo UQ get_expr
 #' @export rescale_node_attrs
 
 rescale_node_attrs <- function(graph,
@@ -109,24 +104,35 @@ rescale_node_attrs <- function(graph,
   # Get the time of function start
   time_function_start <- Sys.time()
 
-  node_attr_from <- rlang::enquo(node_attr_from)
-  node_attr_from <- (rlang::UQ(node_attr_from) %>% paste())[2]
-
-  node_attr_to <- rlang::enquo(node_attr_to)
-  node_attr_to <- (rlang::UQ(node_attr_to) %>% paste())[2]
-
-  if (node_attr_to == "NULL") {
-    node_attr_to <- NULL
-  }
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
 
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Validation: Graph contains nodes
   if (graph_contains_nodes(graph) == FALSE) {
-    stop("The graph contains no nodes, so, no node attributes can be rescaled.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no nodes")
+  }
+
+  # Get the requested `node_attr_from`
+  node_attr_from <-
+    rlang::enquo(node_attr_from) %>% rlang::get_expr() %>% as.character()
+
+  # Get the requested `node_attr_to`
+  node_attr_to <-
+    rlang::enquo(node_attr_to) %>% rlang::get_expr() %>% as.character()
+
+  if (length(node_attr_to) == 0) {
+    node_attr_to <- NULL
   }
 
   # Extract the graph's ndf
@@ -138,7 +144,10 @@ rescale_node_attrs <- function(graph,
   # Stop function if `node_attr_from` is not one
   # of the graph's node attributes
   if (!any(column_names_graph %in% node_attr_from)) {
-    stop("The node attribute to rescale is not in the ndf.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The node attribute to rescale is not in the ndf")
   }
 
   # Get the column number for the node attr to rescale
@@ -205,7 +214,7 @@ rescale_node_attrs <- function(graph,
   # in selection
   graph <-
     set_node_attrs(
-      x = graph,
+      graph = graph,
       node_attr = rlang::UQ(node_attr_to_2),
       values = nodes_attr_vector_rescaled)
 
@@ -217,7 +226,7 @@ rescale_node_attrs <- function(graph,
     add_action_to_log(
       graph_log = graph$graph_log,
       version_id = nrow(graph$graph_log) + 1,
-      function_used = "rescale_node_attrs",
+      function_used = fcn_name,
       time_modified = time_function_start,
       duration = graph_function_duration(time_function_start),
       nodes = nrow(graph$nodes_df),

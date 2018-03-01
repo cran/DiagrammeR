@@ -18,28 +18,29 @@ Convert a DiagrammeR graph to
 an igraph graph object.
 }
 \examples{
-# Create a DiagrammeR graph object
+# Create a random graph using the
+# `add_gnm_graph()` function
 graph <-
-  create_random_graph(
-    n = 36, m = 50,
+  create_graph() \%>\%
+  add_gnm_graph(
+    n = 36,
+    m = 50,
     set_seed = 23)
 
-# Confirm that `graph` is a DiagrammeR graph
-# by getting the object's class
+# Confirm that `graph` is a
+# DiagrammeR graph by getting
+# the object's class
 class(graph)
-#> [1] "dgr_graph"
 
-# Convert the DiagrammeR graph to an igraph object
+# Convert the DiagrammeR graph
+# to an igraph object
 ig_graph <- to_igraph(graph)
 
-# Get the class of the converted graph, just
-# to be certain
+# Get the class of the converted
+# graph, just to be certain
 class(ig_graph)
-#> [1] "igraph"
 
-# Get a summary of the igraph graph object
+# Get a summary of the igraph
+# graph object
 summary(ig_graph)
-#> IGRAPH DN-B 36 50 --
-#> + attr: name (v/c), type (v/c), label
-#> | (v/c), value (v/c), rel (e/c)
 }

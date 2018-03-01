@@ -6,8 +6,9 @@
 #' @param graph a graph object of class
 #' \code{dgr_graph}.
 #' @return a logical value.
-#' # Create a graph with 2 nodes (with `type`
-#' # values) and a single edge (with a `rel`)
+#' # Create a graph with 2 nodes
+#' # (with `type` values) and a
+#' # single edge (with a `rel`)
 #' simple_property_graph <-
 #'   create_graph() %>%
 #'   add_node(
@@ -21,35 +22,37 @@
 #'     to = "second",
 #'     rel = "rel_1")
 #'
-#' # This is a property graph but confirm
-#' # that this is TRUE by using the
+#' # This is indeed a property graph
+#' # but to confirm this, use the
 #' # `is_property_graph()` function
 #' is_property_graph(simple_property_graph)
-#' #> [1] TRUE
 #'
-#' # If a `type` attribute is removed, then
-#' # this graph will no longer be a property
-#' # graph
+#' # If a `type` attribute is
+#' # removed, then this graph will
+#' # no longer be a property graph
 #' simple_property_graph %>%
-#'   node_type(
-#'     node = get_node_ids(
-#'       .,
-#'       "label == 'first'"),
-#'     "delete") %>%
-#' is_property_graph()
-#' #> [1] FALSE
+#'   set_node_attrs(
+#'     node_attr = type,
+#'     values = NA,
+#'     nodes = 1) %>%
+#'   is_property_graph()
 #'
 #' # An empty graph will return FALSE
 #' create_graph() %>%
 #'   is_property_graph()
-#' #> [1] FALSE
 #' @export is_property_graph
 
 is_property_graph <- function(graph) {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   if (is_graph_empty(graph)) {

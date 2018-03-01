@@ -14,23 +14,27 @@
 #' @examples
 #' # Create a DiagrammeR graph object
 #' dgr_graph_orig <-
-#'   create_random_graph(
-#'     n = 36, m = 50,
-#'     set_seed = 23,
-#'     directed = TRUE)
+#'   create_graph() %>%
+#'   add_gnm_graph(
+#'     n = 36,
+#'     m = 50,
+#'     set_seed = 23)
 #'
-#' # Convert the DiagrammeR graph to an
-#' # igraph object
-#' ig_graph <- to_igraph(dgr_graph_orig)
+#' # Convert the DiagrammeR
+#' # graph to an igraph object
+#' ig_graph <-
+#'   dgr_graph_orig %>%
+#'   to_igraph()
 #'
-#' # Convert the igraph graph back to a
-#' # DiagrammeR graph
-#' dgr_graph_new <- from_igraph(ig_graph)
+#' # Convert the igraph graph
+#' # back to a DiagrammeR graph
+#' dgr_graph_new <-
+#'   ig_graph %>%
+#'   from_igraph()
 #'
 #' # Get some graph information
-#' graph_info(dgr_graph_new)[, 1:6]
-#' #>             name  n  e   dens mn_deg mx_deg
-#' #> 1 graph_eUrgZI3e 36 50 0.0571      1      6
+#' (dgr_graph_new %>%
+#'   get_graph_info())[, 1:6]
 #' @importFrom igraph V E vertex_attr_names edge_attr_names vertex_attr edge_attr is_directed ends
 #' @importFrom dplyr arrange
 #' @export from_igraph
@@ -39,8 +43,8 @@ from_igraph <- function(igraph,
                         graph_name = NULL,
                         write_backups = FALSE) {
 
-  # Get the time of function start
-  time_function_start <- Sys.time()
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
 
   # Create bindings for specific variables
   id <- NULL
@@ -91,7 +95,7 @@ from_igraph <- function(igraph,
 
   # Determine if there are any extra node attrs
   extra_node_attrs <-
-    setdiff(node_attrs, c("name", "type", "label"))
+    base::setdiff(node_attrs, c("name", "type", "label"))
 
   # If there are extra node attrs, add to the ndf
   if (length(extra_node_attrs) > 0) {
@@ -110,9 +114,10 @@ from_igraph <- function(igraph,
     }
   }
 
-  # Generate a 2 column edf with `to` and `from` values
+  # Generate a 3 column edf with `id`, `to`, and `from` values
   edges_df <-
     data.frame(
+      id = as.integer(igraph::E(igraph)),
       from = as.integer(igraph::ends(igraph, igraph::E(igraph))[, 1]),
       to = as.integer(igraph::ends(igraph, igraph::E(igraph))[, 2]),
       stringsAsFactors = FALSE)
@@ -135,7 +140,7 @@ from_igraph <- function(igraph,
   }
 
   # Determine if there are any extra edge attrs
-  extra_edge_attrs <- setdiff(edge_attrs, "rel")
+  extra_edge_attrs <- base::setdiff(edge_attrs, "rel")
 
   # If there are extra edge attrs, add to the edf
   if (length(extra_edge_attrs) > 0) {

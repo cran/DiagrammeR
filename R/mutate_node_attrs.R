@@ -26,11 +26,8 @@
 #' # Get the graph's internal ndf
 #' # to show which node attributes
 #' # are available
-#' get_node_df(graph)
-#' #>   id type label width
-#' #> 1  1 <NA>     1   1.4
-#' #> 2  2 <NA>     2   0.3
-#' #> 3  3 <NA>     3   1.1
+#' graph %>%
+#'   get_node_df()
 #'
 #' # Mutate the `width` node
 #' # attribute, dividing each
@@ -44,11 +41,8 @@
 #' # ndf to show that the node
 #' # attribute `width` had its
 #' # values changed
-#' get_node_df(graph)
-#' #>   id type label width
-#' #> 1  1 <NA>     1  0.70
-#' #> 2  2 <NA>     2  0.15
-#' #> 3  3 <NA>     3  0.55
+#' graph %>%
+#'   get_node_df()
 #'
 #' # Create a new node attribute,
 #' # called `length`, that is the
@@ -64,11 +58,8 @@
 #' # Get the graph's internal ndf
 #' # to show that the node attribute
 #' # values had been mutated
-#' get_node_df(graph)
-#' #>   id type label width length
-#' #> 1  1 <NA>     1  0.70   1.64
-#' #> 2  2 <NA>     2  0.15   0.10
-#' #> 3  3 <NA>     3  0.55   1.40
+#' graph %>%
+#'   get_node_df()
 #'
 #' # Create a new node attribute
 #' # called `area`, which is the
@@ -83,11 +74,8 @@
 #' # to show that the node attribute
 #' # values had been multiplied
 #' # together (with new attr `area`)
-#' get_node_df(graph)
-#' #>   id type label width length  area
-#' #> 1  1 <NA>     1  0.70   1.64 1.148
-#' #> 2  2 <NA>     2  0.15   0.10 0.015
-#' #> 3  3 <NA>     3  0.55   1.40 0.770
+#' graph %>%
+#'   get_node_df()
 #' @importFrom dplyr mutate_
 #' @importFrom rlang exprs
 #' @export mutate_node_attrs
@@ -98,14 +86,23 @@ mutate_node_attrs <- function(graph,
   # Get the time of function start
   time_function_start <- Sys.time()
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Validation: Graph contains nodes
   if (graph_contains_nodes(graph) == FALSE) {
-    stop("The graph contains no nodes, so, no node attributes can undergo mutation.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no nodes")
   }
 
   # Collect expressions
@@ -118,7 +115,10 @@ mutate_node_attrs <- function(graph,
   # expressions mutate columns that
   # should not be changed
   if ("id" %in% names(exprs)) {
-    stop("The variable `id` cannot undergo mutation.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The variable `id` cannot undergo mutation")
   }
 
   for (i in 1:length(exprs)) {
@@ -137,7 +137,7 @@ mutate_node_attrs <- function(graph,
     add_action_to_log(
       graph_log = graph$graph_log,
       version_id = nrow(graph$graph_log) + 1,
-      function_used = "mutate_node_attrs",
+      function_used = fcn_name,
       time_modified = time_function_start,
       duration = graph_function_duration(time_function_start),
       nodes = nrow(graph$nodes_df),

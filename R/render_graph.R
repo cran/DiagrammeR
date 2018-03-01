@@ -19,44 +19,50 @@
 #' the height of the resulting graphic in pixels.
 #' @examples
 #' \dontrun{
-#' # Render a graph that's a balanced tree
+#' # Render a graph that's a
+#' # balanced tree
 #' create_graph() %>%
 #'   add_balanced_tree(
 #'     k = 2, h = 3) %>%
 #'   render_graph()
 #'
-#' # Use the `tree` layout for better node
-#' # placement in this hierarchical graph
+#' # Use the `tree` layout for
+#' # better node placement in this
+#' # hierarchical graph
 #' create_graph() %>%
 #'   add_balanced_tree(
 #'     k = 2, h = 3) %>%
 #'   render_graph(layout = "tree")
 #'
-#' # Plot the same tree graph but don't
-#' # show the node ID values
+#' # Plot the same tree graph but
+#' # don't show the node ID values
 #' create_graph() %>%
 #'   add_balanced_tree(
 #'     k = 2, h = 3) %>%
 #'   set_node_attr_to_display() %>%
 #'   render_graph(layout = "tree")
 #'
-#' # Create a circle graph with
-#' create_random_graph(
-#'   n = 55, m = 75,
-#'   set_seed = 23) %>%
-#' render_graph(layout = "circle")
+#' # Create a circle graph
+#' create_graph() %>%
+#'   add_gnm_graph(
+#'     n = 55,
+#'     m = 75,
+#'     set_seed = 23) %>%
+#'   render_graph(
+#'     layout = "circle")
 #'
-#' # Render the graph using the `visNetwork`
-#' # output option
+#' # Render the graph using the
+#' # `visNetwork` output option
 #' create_graph() %>%
 #'   add_balanced_tree(
 #'     k = 2, h = 3) %>%
 #'   render_graph(
 #'     output = "visNetwork")
 #' }
-#' @importFrom dplyr select rename mutate filter coalesce left_join pull
-#' @importFrom igraph layout_in_circle layout_with_sugiyama layout_with_kk layout_with_fr layout_nicely
-#' @importFrom tibble as_tibble
+#' @importFrom dplyr select rename mutate filter coalesce left_join
+#' @importFrom dplyr pull bind_cols as_tibble
+#' @importFrom igraph layout_in_circle layout_with_sugiyama
+#' @importFrom igraph layout_with_kk layout_with_fr layout_nicely
 #' @importFrom purrr flatten_chr
 #' @export render_graph
 
@@ -67,9 +73,15 @@ render_graph <- function(graph,
                          width = NULL,
                          height = NULL) {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Create bindings for specific variables
@@ -140,7 +152,7 @@ render_graph <- function(graph,
         graph$nodes_df %>%
         dplyr::left_join(
           x11_hex() %>%
-            tibble::as_tibble() %>%
+            dplyr::as_tibble() %>%
             dplyr::mutate(hex = toupper(hex)),
           by = c("fillcolor" = "x11_name")) %>%
         dplyr::mutate(new_fillcolor = dplyr::coalesce(hex, fillcolor)) %>%
@@ -154,7 +166,7 @@ render_graph <- function(graph,
 
       graph$nodes_df$fontcolor <-
         graph$nodes_df$fillcolor %>%
-        tibble::as_data_frame() %>%
+        dplyr::as_data_frame() %>%
         dplyr::mutate(value_x = contrasting_text_color(background_color = value)) %>%
         dplyr::pull(value_x)
     }
@@ -186,10 +198,10 @@ render_graph <- function(graph,
             graph %>%
             to_igraph() %>%
             igraph::layout_in_circle() %>%
-            tibble::as_tibble() %>%
+            dplyr::as_tibble() %>%
             dplyr::rename(x = V1, y = V2) %>%
-            dplyr::mutate(x = x * (((node_count(graph) + (0.25 * node_count(graph)))) / node_count(graph))) %>%
-            dplyr::mutate(y = y * (((node_count(graph) + (0.25 * node_count(graph)))) / node_count(graph)))
+            dplyr::mutate(x = x * (((count_nodes(graph) + (0.25 * count_nodes(graph)))) / count_nodes(graph))) %>%
+            dplyr::mutate(y = y * (((count_nodes(graph) + (0.25 * count_nodes(graph)))) / count_nodes(graph)))
         }
 
         if (layout == "tree") {
@@ -197,8 +209,8 @@ render_graph <- function(graph,
             (graph %>%
                to_igraph() %>%
                igraph::layout_with_sugiyama())[[2]] %>%
-            as_tibble() %>%
-            rename(x = V1, y = V2)
+            dplyr::as_tibble() %>%
+            dplyr::rename(x = V1, y = V2)
         }
 
         if (layout == "kk") {
@@ -206,7 +218,7 @@ render_graph <- function(graph,
             graph %>%
             to_igraph() %>%
             igraph::layout_with_kk() %>%
-            tibble::as_tibble() %>%
+            dplyr::as_tibble() %>%
             dplyr::rename(x = V1, y = V2)
         }
 
@@ -215,7 +227,7 @@ render_graph <- function(graph,
             graph %>%
             to_igraph() %>%
             igraph::layout_with_fr() %>%
-            tibble::as_tibble() %>%
+            dplyr::as_tibble() %>%
             dplyr::rename(x = V1, y = V2)
         }
 
@@ -224,7 +236,7 @@ render_graph <- function(graph,
             graph %>%
             to_igraph() %>%
             igraph::layout_nicely() %>%
-            tibble::as_tibble() %>%
+            dplyr::as_tibble() %>%
             dplyr::rename(x = V1, y = V2)
         }
 
@@ -232,7 +244,7 @@ render_graph <- function(graph,
         # internal NDF
         graph$nodes_df <-
           graph$nodes_df %>%
-          bind_cols(coords)
+          dplyr::bind_cols(coords)
       }
     }
 

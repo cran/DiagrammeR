@@ -34,7 +34,8 @@
 #'   matrix(nc = 10)
 #'
 #' # Create a graph from the adjacency matrix
-#' graph <- from_adj_matrix(adj_matrix)
+#' graph <-
+#'   from_adj_matrix(adj_matrix)
 #' @importFrom igraph graph_from_adjacency_matrix
 #' @export from_adj_matrix
 
@@ -48,14 +49,23 @@ from_adj_matrix <- function(x,
   # Get the time of function start
   time_function_start <- Sys.time()
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Stop function if x is not a matrix object
   if (!inherits(x, "matrix")) {
-    stop("The input for this function must be a matrix object.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The input for this function must be a matrix object")
   }
 
   # Stop function if the matrix is not a square matrix
   if (ncol(x) != nrow(x)) {
-    stop("The input matrix must be a square matrix.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The input matrix must be a square matrix")
   }
 
   # If FALSE provided for `weighted`, change value to

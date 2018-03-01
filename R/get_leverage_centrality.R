@@ -14,57 +14,47 @@
 #' @return a data frame with leverage centrality
 #' values for each of the nodes.
 #' @examples
-#' # Create a random graph
+#' # Create a random graph using the
+#' # `add_gnm_graph()` function
 #' graph <-
-#'   create_random_graph(
-#'     n = 10, m = 22,
+#'   create_graph(
+#'     directed = FALSE) %>%
+#'   add_gnm_graph(
+#'     n = 10,
+#'     m = 15,
 #'     set_seed = 23)
 #'
-#' # Get leverage centrality values for
-#' # all nodes in the graph
-#' get_leverage_centrality(graph)
-#' #>    id leverage_centrality
-#' #> 1   1         -0.16498316
-#' #> 2   2         -0.05555556
-#' #> 3   3         -0.16498316
-#' #> 4   4         -0.30000000
-#' #> 5   5         -0.05555556
-#' #> 6   6          0.11111111
-#' #> 7   7         -0.16498316
-#' #> 8   8         -0.47089947
-#' #> 9   9         -0.05555556
-#' #> 10 10         -0.05555556
+#' # Get leverage centrality values
+#' # for all nodes in the graph
+#' graph %>%
+#'   get_leverage_centrality()
 #'
-#' # Add the leverage centrality values
-#' # to the graph as a node attribute
+#' # Add the leverage centrality
+#' # values to the graph as a
+#' # node attribute
 #' graph <-
 #'   graph %>%
 #'   join_node_attrs(
-#'     df = get_leverage_centrality(.)) %>%
-#'   drop_node_attrs(node_attr = value)
+#'     df = get_leverage_centrality(.))
 #'
 #' # Display the graph's node data frame
-#' get_node_df(graph)
-#' #>    id type label leverage_centrality
-#' #> 1   1 <NA>     1         -0.16498316
-#' #> 2   2 <NA>     2         -0.05555556
-#' #> 3   3 <NA>     3         -0.16498316
-#' #> 4   4 <NA>     4         -0.30000000
-#' #> 5   5 <NA>     5         -0.05555556
-#' #> 6   6 <NA>     6          0.11111111
-#' #> 7   7 <NA>     7         -0.16498316
-#' #> 8   8 <NA>     8         -0.47089947
-#' #> 9   9 <NA>     9         -0.05555556
-#' #> 10 10 <NA>    10         -0.05555556
+#' graph %>%
+#'   get_node_df()
 #' @importFrom igraph degree neighbors
 #' @importFrom purrr map
 #' @export get_leverage_centrality
 
 get_leverage_centrality <- function(graph) {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Convert the graph to an igraph object
@@ -90,6 +80,6 @@ get_leverage_centrality <- function(graph) {
     id = degree_vals %>%
       names() %>%
       as.integer(),
-    leverage_centrality = leverage_centrality_values,
+    leverage_centrality = leverage_centrality_values %>% round(4),
     stringsAsFactors = FALSE)
 }

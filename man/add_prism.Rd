@@ -4,7 +4,8 @@
 \alias{add_prism}
 \title{Add a prism of nodes to the graph}
 \usage{
-add_prism(graph, n, type = NULL, label = TRUE, rel = NULL, ...)
+add_prism(graph, n, type = NULL, label = TRUE, rel = NULL,
+  node_aes = NULL, edge_aes = NULL, node_data = NULL, edge_data = NULL)
 }
 \arguments{
 \item{graph}{a graph object of class
@@ -30,8 +31,33 @@ nodes, or, a boolean value where setting to
 relationship label to all new edges created in the
 node prism.}
 
-\item{...}{optional node attributes supplied as
-vectors.}
+\item{node_aes}{an optional list of named vectors
+comprising node aesthetic attributes. The helper
+function \code{node_aes()} is strongly recommended
+for use here as it contains arguments for each
+of the accepted node aesthetic attributes (e.g.,
+\code{shape}, \code{style}, \code{color},
+\code{fillcolor}).}
+
+\item{edge_aes}{an optional list of named vectors
+comprising edge aesthetic attributes. The helper
+function \code{edge_aes()} is strongly recommended
+for use here as it contains arguments for each
+of the accepted edge aesthetic attributes (e.g.,
+\code{shape}, \code{style}, \code{penwidth},
+\code{color}).}
+
+\item{node_data}{an optional list of named vectors
+comprising node data attributes. The helper
+function \code{node_data()} is strongly recommended
+for use here as it helps bind data specifically
+to the created nodes.}
+
+\item{edge_data}{an optional list of named vectors
+comprising edge data attributes. The helper
+function \code{edge_data()} is strongly recommended
+for use here as it helps bind data specifically
+to the created edges.}
 }
 \value{
 a graph object of class \code{dgr_graph}.
@@ -41,7 +67,8 @@ With a graph object of class
 \code{dgr_graph}, add a node prism to the graph.
 }
 \examples{
-# Create a new graph and add 2 prisms
+# Create a new graph and
+# add 2 prisms
 graph <-
   create_graph() \%>\%
   add_prism(
@@ -54,62 +81,51 @@ graph <-
     label = "b")
 
 # Get node information from this graph
-node_info(graph)
-#>    id  type label deg indeg outdeg loops
-#> 1   1 prism     a   3     1      2     0
-#> 2   2 prism     a   3     1      2     0
-#> 3   3 prism     a   3     1      2     0
-#> 4   4 prism     a   3     2      1     0
-#> 5   5 prism     a   3     2      1     0
-#> 6   6 prism     a   3     2      1     0
-#> 7   7 prism     b   3     1      2     0
-#> 8   8 prism     b   3     1      2     0
-#> 9   9 prism     b   3     1      2     0
-#> 10 10 prism     b   3     2      1     0
-#> 11 11 prism     b   3     2      1     0
-#> 12 12 prism     b   3     2      1     0
+graph \%>\%
+  get_node_info()
 
-# Attributes can be specified in extra
-# arguments and these are applied in order;
-# Usually these attributes are applied to
-# nodes (e.g., `type` is a node attribute)
-# but the `rel` attribute will apply to the
-# edges
+# Node and edge aesthetic and data
+# attributes can be specified in
+# the `node_aes`, `edge_aes`,
+# `node_data`, and `edge_data`
+# arguments
+
+set.seed(23)
+
 graph_w_attrs <-
   create_graph() \%>\%
   add_prism(
     n = 3,
-    label = c("one", "two",
-              "three", "four",
-              "five", "six"),
-    type = c("a", "a",
-             "b", "b",
-             "c", "c"),
-    value = c(1.2, 8.4,
-              3.4, 5.2,
-              6.1, 2.6),
-    rel = "prism")
+    label = c(
+      "one", "two",
+      "three", "four",
+      "five", "six"),
+    type = c(
+      "a", "a",
+      "b", "b",
+      "c", "c"),
+    rel = "A",
+    node_aes = node_aes(
+      fillcolor = "steelblue"),
+    edge_aes = edge_aes(
+      color = "red",
+      penwidth = 1.2),
+    node_data = node_data(
+      value = c(
+        1.6, 2.8, 3.4,
+        3.2, 5.3, 6.2)),
+    edge_data = edge_data(
+      value =
+        rnorm(
+          n = 9,
+          mean = 5.0,
+          sd = 1.0)))
 
 # Get the graph's node data frame
-get_node_df(graph_w_attrs)
-#>   id type label value
-#> 1  1    a   one   1.2
-#> 2  2    a   two   8.4
-#> 3  3    b three   3.4
-#> 4  4    b  four   5.2
-#> 5  5    c  five   6.1
-#> 6  6    c   six   2.6
+graph_w_attrs \%>\%
+  get_node_df()
 
 # Get the graph's edge data frame
-get_edge_df(graph_w_attrs)
-#>   id from to   rel
-#> 1  1    1  2 prism
-#> 2  2    2  3 prism
-#> 3  3    3  1 prism
-#> 4  4    4  5 prism
-#> 5  5    5  6 prism
-#> 6  6    6  4 prism
-#> 7  7    1  4 prism
-#> 8  8    2  5 prism
-#> 9  9    3  6 prism
+graph_w_attrs \%>\%
+  get_edge_df()
 }

@@ -11,12 +11,14 @@ count_asymmetric_node_pairs(graph)
 \code{dgr_graph}.}
 }
 \value{
-a single numeric value representing the
-number of asymmetrically-connected node pairs.
+a single numeric value
+representing the number of
+asymmetrically-connected node pairs.
 }
 \description{
-Get the number of asymmetrically-
-connected node pairs. This works for directed graphs.
+Get the number of
+asymmetrically-connected node pairs.
+This works for directed graphs.
 }
 \examples{
 # Create a cycle graph
@@ -26,8 +28,8 @@ graph <-
 
 # Get a count of asymmetrically-
 # connected node pairs
-count_asymmetric_node_pairs(graph)
-#> [1] 5
+graph \%>\%
+  count_asymmetric_node_pairs()
 
 # Create a full graph and then
 # count the asymmetrically-
@@ -35,5 +37,4 @@ count_asymmetric_node_pairs(graph)
 create_graph() \%>\%
   add_full_graph(n = 10) \%>\%
   count_asymmetric_node_pairs()
-#> [1] 0
 }

@@ -13,13 +13,14 @@
 #' \code{dgr_graph}.
 #' @return a graph object of class \code{dgr_graph}.
 #' @examples
-#' # Create a random graph
+#' # Create a random graph using the
+#' # `add_gnm_graph()` function
 #' graph <-
-#'   create_random_graph(
-#'     n = 5, m = 10,
-#'     set_seed = 23) %>%
-#'   drop_node_attrs(
-#'     node_attr = value)
+#'   create_graph() %>%
+#'   add_gnm_graph(
+#'     n = 5,
+#'     m = 10,
+#'     set_seed = 23)
 #'
 #' # Add a graph action that sets a node
 #' # attr column with a function; this
@@ -65,14 +66,6 @@
 #' # function
 #' graph %>%
 #'   get_graph_actions()
-#' #> # A tibble: 3 x 3
-#' #>   action_index     action_name
-#' #>          <dbl>           <chr>
-#' #> 1            1    get_pagerank
-#' #> 2            2  pgrnk_to_width
-#' #> 3            3 pgrnk_fillcolor
-#' #> # ... with 1 more variables:
-#' #> #   expression <chr>
 #'
 #' # Manually trigger to invocation of
 #' # the graph actions using the
@@ -87,12 +80,6 @@
 #' # `fillcolor` columns are present
 #' graph %>%
 #'   get_node_df()
-#' #>   id type label   pagerank width fillcolor
-#' #> 1  1 <NA>     1 0.09912752 0.000   #D7191C
-#' #> 2  2 <NA>     2 0.12019212 0.069   #FDAE61
-#' #> 3  3 <NA>     3 0.15424655 0.179   #FFFFBF
-#' #> 4  4 <NA>     4 0.21980134 0.392   #ABDDA4
-#' #> 5  5 <NA>     5 0.40663247 1.000   #2B83BA
 #' @importFrom dplyr filter pull
 #' @export trigger_graph_actions
 
@@ -101,16 +88,24 @@ trigger_graph_actions <- function(graph) {
   # Get the time of function start
   time_function_start <- Sys.time()
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Create bindings for specific variables
   action_index <- action_name <- NULL
 
   if (nrow(graph$graph_actions) == 0) {
+
     message("There are currently no graph actions.")
+
   } else {
 
     # Collect text expressions in a vector
@@ -166,7 +161,7 @@ trigger_graph_actions <- function(graph) {
       add_action_to_log(
         graph_log = graph$graph_log,
         version_id = nrow(graph$graph_log) + 1,
-        function_used = "trigger_graph_actions",
+        function_used = fcn_name,
         time_modified = time_function_start,
         duration = graph_function_duration(time_function_start),
         nodes = nrow(graph$nodes_df),

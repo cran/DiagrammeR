@@ -3,69 +3,66 @@
 #' eccentricity values.
 #' @param graph a graph object of class
 #' \code{dgr_graph}.
-#' @return a data frame containing eccentricity values
-#' by node ID value.
+#' @param mode the mode with which the shortest
+#' paths to or from the given vertices should
+#' be calculated for directed graphs. If
+#' \code{out} (the default) then the shortest
+#' paths from the node, if \code{in} then only
+#' shortest paths to each node are considered.
+#' If \code{all} is used, then the corresponding
+#' undirected graph will be used and edge
+#' directions will be ignored. For undirected
+#' graphs, this argument is ignored.
+#' @return a data frame containing eccentricity
+#' values by node ID value.
 #' @examples
-#' \dontrun{
-#' # Create a random graph
+#' # Create a random graph using the
+#' # `add_gnm_graph()` function
 #' graph <-
-#'   create_random_graph(
-#'     n = 10, m = 22,
+#'   create_graph(
+#'     directed = FALSE) %>%
+#'   add_gnm_graph(
+#'     n = 10,
+#'     m = 15,
 #'     set_seed = 23)
 #'
-#' # Get the eccentricity values for all
-#' # nodes in the graph
+#' # Get the eccentricity values for
+#' # all nodes in the graph
 #' graph %>%
 #'   get_eccentricity()
-#' #>    id eccentricity
-#' #> 1   1            4
-#' #> 2   2            4
-#' #> 3   3            3
-#' #> 4   4            4
-#' #> 5   5            3
-#' #> 6   6            2
-#' #> 7   7            2
-#' #> 8   8            0
-#' #> 9   9            1
-#' #> 10 10            0
-#' }
+#' @importFrom igraph eccentricity
 #' @export get_eccentricity
 
-get_eccentricity <- function(graph) {
+get_eccentricity <- function(graph,
+                             mode = "out") {
+
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
 
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Validation: Graph contains nodes
   if (graph_contains_nodes(graph) == FALSE) {
-    stop("The graph contains no nodes, so, eccentricity values cannot be determined.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no nodes")
   }
 
-  node_ids <- get_node_ids(graph)
+  # Convert the graph to an igraph object
+  ig_graph <- to_igraph(graph)
 
-  for (i in 1:length(node_ids)) {
-
-    if (i == 1) {
-      eccentricity <- vector(mode = 'integer')
-    }
-
-    longest_path <-
-      max(
-        lengths(
-          get_paths(
-            graph,
-            from = get_node_ids(graph)[i],
-            longest_path = TRUE))) - 1
-
-    eccentricity <-
-      c(eccentricity, longest_path)
-
-    if (i == length(node_ids)) {
-      names(eccentricity) <- node_ids
-    }
-  }
+  # Get the eccentricity with the given mode
+  eccentricity <-
+    igraph::eccentricity(
+      graph = ig_graph,
+      mode = mode)
 
   # Create a data frame with node ID values
   # and eccentrity values

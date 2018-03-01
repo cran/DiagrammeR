@@ -51,21 +51,21 @@ graph <-
 
 # Add an edge
 graph <-
+  graph \%>\%
   add_edge(
-    graph = graph,
     from = 1,
     to = 2)
 
 # Delete the edge
 graph <-
+  graph \%>\%
   delete_edge(
-    graph = graph,
     from = 1,
     to = 2)
 
 # Get the count of edges in the graph
-edge_count(graph)
-#> [1] 0
+graph \%>\%
+  count_edges()
 
 # Create an undirected graph with
 # 2 nodes and an edge
@@ -83,23 +83,14 @@ graph_undirected \%>\%
   delete_edge(
     from = 2,
     to = 1) \%>\%
-  edge_count()
-#> [1] 0
-
-graph_undirected \%>\%
-  delete_edge(
-    from = 1,
-    to = 2) \%>\%
-  edge_count()
-#> [1] 0
+  count_edges()
 
 # The undirected graph has a single
 # edge with ID `1`; it can be
 # deleted by specifying `id`
 graph_undirected \%>\%
   delete_edge(id = 1) \%>\%
-  edge_count()
-#> [1] 0
+  count_edges()
 
 # Create a directed graph with 2
 # labeled nodes and an edge
@@ -120,6 +111,5 @@ graph_labeled_nodes \%>\%
   delete_edge(
     from = "one",
     to = "two") \%>\%
-  edge_count()
-#> [1] 0
+  count_edges()
 }

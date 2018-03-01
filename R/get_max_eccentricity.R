@@ -15,8 +15,8 @@
 #'
 #' # Determine the graph's maximum
 #' # eccentricity
-#' get_max_eccentricity(graph)
-#' #> [1] 4
+#' graph %>%
+#'   get_max_eccentricity()
 #'
 #' # Create a full graph and then
 #' # get the maximum eccentricity
@@ -24,15 +24,20 @@
 #' create_graph() %>%
 #'   add_full_graph(n = 10) %>%
 #'   get_max_eccentricity()
-#' #> [1] 1
 #' @importFrom igraph diameter
 #' @export get_max_eccentricity
 
 get_max_eccentricity <- function(graph) {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # If the graph is empty, then return NA

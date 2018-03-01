@@ -10,16 +10,17 @@ get_cache(graph, name = NULL)
 \item{graph}{a graph object of class
 \code{dgr_graph}.}
 
-\item{name}{the name of the object to extract from
-the cache. If none supplied, the most recent object
-added to the cache will be returned.}
+\item{name}{the name of the object to
+extract from the cache. If none supplied,
+the most recent object added to the cache
+will be returned.}
 }
 \value{
 a vector.
 }
 \description{
-Get the vector cached in a graph object
-of class \code{dgr_graph}.
+Get the vector cached in a
+graph object of class \code{dgr_graph}.
 }
 \examples{
 # Set a seed
@@ -30,8 +31,11 @@ graph <-
   create_graph() \%>\%
   add_n_nodes(n = 5) \%>\%
   set_node_attrs(
-    node_attr = "value",
-    values = rnorm(node_count(.), 8, 2)) \%>\%
+    node_attr = value,
+    values = rnorm(
+      n = count_nodes(.),
+      mean = 8,
+      sd = 2)) \%>\%
   add_edges_w_string(
     edges = "1->2 1->3 2->4 2->5 3->2")
 
@@ -39,13 +43,13 @@ graph <-
 # as a numeric vector
 graph <-
   graph \%>\%
-  cache_node_attrs(
-    node_attr = "value",
-    mode = "numeric")
+  set_cache(
+    name = "value",
+    to_cache = get_node_attrs(
+      graph = .,
+      node_attr = value))
 
 # Return the cached vector
 graph \%>\%
   get_cache()
-#> [1] 9.993210 10.214981  7.443827
-#> [4] 10.038411  8.090874
 }

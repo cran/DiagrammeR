@@ -4,42 +4,44 @@
 \alias{get_eccentricity}
 \title{Get node eccentricities}
 \usage{
-get_eccentricity(graph)
+get_eccentricity(graph, mode = "out")
 }
 \arguments{
 \item{graph}{a graph object of class
 \code{dgr_graph}.}
+
+\item{mode}{the mode with which the shortest
+paths to or from the given vertices should
+be calculated for directed graphs. If
+\code{out} (the default) then the shortest
+paths from the node, if \code{in} then only
+shortest paths to each node are considered.
+If \code{all} is used, then the corresponding
+undirected graph will be used and edge
+directions will be ignored. For undirected
+graphs, this argument is ignored.}
 }
 \value{
-a data frame containing eccentricity values
-by node ID value.
+a data frame containing eccentricity
+values by node ID value.
 }
 \description{
 Get a data frame with node
 eccentricity values.
 }
 \examples{
-\dontrun{
-# Create a random graph
+# Create a random graph using the
+# `add_gnm_graph()` function
 graph <-
-  create_random_graph(
-    n = 10, m = 22,
+  create_graph(
+    directed = FALSE) \%>\%
+  add_gnm_graph(
+    n = 10,
+    m = 15,
     set_seed = 23)
 
-# Get the eccentricity values for all
-# nodes in the graph
+# Get the eccentricity values for
+# all nodes in the graph
 graph \%>\%
   get_eccentricity()
-#>    id eccentricity
-#> 1   1            4
-#> 2   2            4
-#> 3   3            3
-#> 4   4            4
-#> 5   5            3
-#> 6   6            2
-#> 7   7            2
-#> 8   8            0
-#> 9   9            1
-#> 10 10            0
-}
 }

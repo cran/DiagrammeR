@@ -46,8 +46,8 @@
 #' # Bind the data frame as a node attribute
 #' # of node `1`
 #' graph <-
+#'   graph %>%
 #'   set_df_as_node_attr(
-#'     graph = graph,
 #'     node = 1,
 #'     df = df)
 #'
@@ -62,12 +62,11 @@
 #' # Bind the data frame as a node attribute
 #' # of node `2`
 #' graph <-
+#'   graph %>%
 #'   set_df_as_node_attr(
-#'     graph = graph,
 #'     node = 2,
 #'     df = df_2)
-#' @importFrom dplyr filter everything mutate select bind_rows
-#' @importFrom tibble tibble as_tibble
+#' @importFrom dplyr filter everything mutate select bind_rows as_tibble
 #' @importFrom purrr flatten_chr
 #' @export set_df_as_node_attr
 
@@ -78,25 +77,40 @@ set_df_as_node_attr <- function(graph,
   # Get the time of function start
   time_function_start <- Sys.time()
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Validation: Graph contains nodes
   if (graph_contains_nodes(graph) == FALSE) {
-    stop("The graph contains no nodes, so, a df cannot be added.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no nodes")
   }
 
   # Value given for node must only be a single value
   if (length(node) > 1) {
-    stop("Only one node can be specified.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "Only one node can be specified")
   }
 
   # Value given for node must correspond to a node ID
   # in the graph
   if (!(node %in% graph$nodes_df$id)) {
-    stop("The value given for `node` does not correspond to a node ID.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The value given for `node` does not correspond to a node ID")
   }
 
   # Create bindings for specific variables
@@ -124,7 +138,7 @@ set_df_as_node_attr <- function(graph,
       node_edge__ = "node",
       id__ = node) %>%
     dplyr::select(df_id__, node_edge__, id__, everything()) %>%
-    tibble::as_tibble()
+    dplyr::as_tibble()
 
   # If there is an existing data frame attributed
   # to the node, remove it
@@ -149,7 +163,7 @@ set_df_as_node_attr <- function(graph,
   # `set_node_attrs()` function
   graph <-
     set_node_attrs(
-      x = graph,
+      graph = graph,
       node_attr = "df_id",
       values = df_id,
       nodes = node)
@@ -159,7 +173,7 @@ set_df_as_node_attr <- function(graph,
     graph$graph_log[-nrow(graph$graph_log),] %>%
     add_action_to_log(
       version_id = nrow(graph$graph_log) + 1,
-      function_used = "set_df_as_node_attr",
+      function_used = fcn_name,
       time_modified = time_function_start,
       duration = graph_function_duration(time_function_start),
       nodes = nrow(graph$nodes_df),

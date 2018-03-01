@@ -54,9 +54,16 @@ export_csv <- function(graph,
                        output_path = getwd(),
                        colnames_type = NULL) {
 
+
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   nodes_df <- get_node_df(graph)
@@ -92,13 +99,15 @@ export_csv <- function(graph,
   }
 
   # Write the CSV files to the output directory
-  utils::write.csv(nodes_df,
-                   file = paste0(output_path,
-                                 "/", ndf_name),
-                   row.names = FALSE, quote = FALSE)
+  utils::write.csv(
+    nodes_df,
+    file = paste0(output_path,
+                  "/", ndf_name),
+    row.names = FALSE, quote = FALSE)
 
-  utils::write.csv(edges_df,
-                   file = paste0(output_path,
-                                 "/", edf_name),
-                   row.names = FALSE, quote = FALSE)
+  utils::write.csv(
+    edges_df,
+    file = paste0(output_path,
+                  "/", edf_name),
+    row.names = FALSE, quote = FALSE)
 }

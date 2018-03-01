@@ -1,8 +1,8 @@
 #' Delete one or more graph actions stored
 #' within a graph object
-#' @description Delete one or more graph actions
-#' stored within a graph object of class
-#' \code{dgr_graph}).
+#' @description Delete one or more graph
+#' actions stored within a graph object
+#' of class \code{dgr_graph}).
 #' @param graph a graph object of class
 #' \code{dgr_graph}.
 #' @param actions either a vector of integer
@@ -10,12 +10,16 @@
 #' (based on \code{action_index} values), or,
 #' a character vector corresponding to
 #' \code{action_name} values.
-#' @return a graph object of class \code{dgr_graph}.
+#' @return a graph object of class
+#' \code{dgr_graph}.
 #' @examples
-#' # Create a random graph
+#' # Create a random graph using the
+#' # `add_gnm_graph()` function
 #' graph <-
-#'   create_random_graph(
-#'     n = 10, m = 22,
+#'   create_graph() %>%
+#'   add_gnm_graph(
+#'     n = 5,
+#'     m = 8,
 #'     set_seed = 23)
 #'
 #' # Add three graph actions to the
@@ -43,14 +47,6 @@
 #' # function
 #' graph %>%
 #'   get_graph_actions()
-#' #> # A tibble: 3 x 3
-#' #>   action_index        action_name
-#' #>          <dbl>              <chr>
-#' #> 1            1       get_pagerank
-#' #> 2            2  pagerank_to_width
-#' #> 3            3 pagerank_fillcolor
-#' #> # ... with 1 more variables:
-#' #> #   expression <chr>
 #'
 #' # Delete the second and third graph
 #' # actions using `delete_graph_actions()`
@@ -64,12 +60,6 @@
 #' # the `get_graph_actions()` function
 #' graph %>%
 #'   get_graph_actions()
-#' #> # A tibble: 1 x 3
-#' #>   action_index  action_name
-#' #>          <int>        <chr>
-#' #> 1            1 get_pagerank
-#' #> # ... with 1 more variables:
-#' #> #   expression <chr>
 #' @importFrom dplyr pull filter mutate row_number
 #' @export delete_graph_actions
 
@@ -79,15 +69,24 @@ delete_graph_actions <- function(graph,
   # Get the time of function start
   time_function_start <- Sys.time()
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Determine whether there any
   # available graph actions
   if (nrow(graph$graph_actions) == 0) {
-    stop("There are no graph actions to delete.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "There are no graph actions to delete")
   }
 
   # Create bindings for specific variables
@@ -101,7 +100,10 @@ delete_graph_actions <- function(graph,
       dplyr::pull(action_name)
 
     if (!any(actions %in% graph_action_names)) {
-      stop("One or more provided `actions` do not exist in the graph.")
+
+      emit_error(
+        fcn_name = fcn_name,
+        reasons = "One or more provided `actions` do not exist in the graph")
     }
 
     # Get a revised data frame with graph actions
@@ -120,7 +122,10 @@ delete_graph_actions <- function(graph,
       dplyr::pull(action_index)
 
     if (!any(actions %in% graph_action_indices)) {
-      stop("One or more provided `actions` do not exist in the graph.")
+
+      emit_error(
+        fcn_name = fcn_name,
+        reasons = "One or more provided `actions` do not exist in the graph")
     }
 
     # Get a revised data frame with graph actions
@@ -140,7 +145,7 @@ delete_graph_actions <- function(graph,
     add_action_to_log(
       graph_log = graph$graph_log,
       version_id = nrow(graph$graph_log) + 1,
-      function_used = "delete_graph_actions",
+      function_used = fcn_name,
       time_modified = time_function_start,
       duration = graph_function_duration(time_function_start),
       nodes = nrow(graph$nodes_df),

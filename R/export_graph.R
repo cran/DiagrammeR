@@ -22,44 +22,37 @@
 #' \code{ps}.
 #' @examples
 #' \dontrun{
-#' library(DiagrammeRsvg)
-#'
-#' # Create a node data frame (ndf)
-#' ndf <-
-#'   create_node_df(
-#'     n = 4,
-#'     type = c("a", "a", "z", "z"),
-#'     label = TRUE,
-#'     value = c(3.5, 2.6, 9.4, 2.7))
-#'
-#' # Create an edge data frame (edf)
-#' edf <-
-#'   create_edge_df(
-#'     from = c(1, 2, 3),
-#'     to = c(4, 3, 1),
-#'     rel = c("rel_a", "rel_z", "rel_a"))
-#'
-#' # Create a graph with the ndf and edf
+#' # Create a simple graph
 #' graph <-
-#'   create_graph(
-#'     nodes_df = ndf,
-#'     edges_df = edf)
+#'   create_graph() %>%
+#'     add_path(
+#'       n = 5,
+#'       edge_aes = edge_aes(
+#'         arrowhead = c(
+#'           "normal", "vee",
+#'           "tee", "dot"),
+#'         color = c(
+#'         "red", "blue",
+#'         "orange", "purple")))
 #'
-#' # Create a PDF file for the graph (`graph.pdf`)
+#' # Create a PDF file for
+#' # the graph (`graph.pdf`)
 #' graph %>%
 #'   export_graph(
 #'     file_name = "graph.pdf",
 #'     title = "Simple Graph")
 #'
-#' # Create a PNG file for the graph (`mypng`)
+#' # Create a PNG file for
+#' # the graph (`mypng.png`)
 #' graph %>%
 #'   export_graph(
-#'     file_name = "mypng",
+#'     file_name = "mypng.png",
 #'     file_type = "PNG")
 #' }
 #' @importFrom rgexf write.gexf
 #' @importFrom utils installed.packages
-#' @importFrom igraph V E ecount ends vertex_attr_names edge_attr_names graph_attr_names vertex_attr edge_attr graph_attr
+#' @importFrom igraph V E ecount ends vertex_attr_names edge_attr_names
+#' @importFrom igraph graph_attr_names vertex_attr edge_attr graph_attr
 #' @export export_graph
 
 export_graph <- function(graph,
@@ -69,9 +62,15 @@ export_graph <- function(graph,
                          width = NULL,
                          height = NULL) {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # If no `file_name` or `file_type` provided, default to
@@ -103,7 +102,13 @@ export_graph <- function(graph,
     # Stop function if `DiagrammeRsvg` package is not available
     if (!("DiagrammeRsvg" %in%
           rownames(utils::installed.packages()))) {
-      stop("To use this function to produce an image file, please install the `DiagrammeRsvg` package using `devtools::install_github('rich-iannone/DiagrammeRsvg')")
+
+      emit_error(
+        fcn_name = fcn_name,
+        reasons = c(
+          "Cannot currently use this function to produce a PNG file",
+          "please install the `DiagrammeRsvg` package and retry",
+          "pkg installed using `devtools::install_github('rich-iannone/DiagrammeRsvg')"))
     }
 
     if (!is.null(title)) {
@@ -146,7 +151,13 @@ export_graph <- function(graph,
     # Stop function if `DiagrammeRsvg` package is not available
     if (!("DiagrammeRsvg" %in%
           rownames(utils::installed.packages()))) {
-      stop("To use this function to produce an image file, please install the `DiagrammeRsvg` package using `devtools::install_github('rich-iannone/DiagrammeRsvg')")
+
+      emit_error(
+        fcn_name = fcn_name,
+        reasons = c(
+          "Cannot currently use this function to produce a PDF file",
+          "please install the `DiagrammeRsvg` package and retry",
+          "pkg installed using `devtools::install_github('rich-iannone/DiagrammeRsvg')"))
     }
 
     if (!is.null(title)) {
@@ -189,7 +200,13 @@ export_graph <- function(graph,
     # Stop function if `DiagrammeRsvg` package is not available
     if (!("DiagrammeRsvg" %in%
           rownames(utils::installed.packages()))) {
-      stop("To use this function to produce an image file, please install the `DiagrammeRsvg` package using `devtools::install_github('rich-iannone/DiagrammeRsvg')")
+
+      emit_error(
+        fcn_name = fcn_name,
+        reasons = c(
+          "Cannot currently use this function to produce an SVG file",
+          "please install the `DiagrammeRsvg` package and retry",
+          "pkg installed using `devtools::install_github('rich-iannone/DiagrammeRsvg')"))
     }
 
     if (!is.null(title)) {
@@ -232,7 +249,13 @@ export_graph <- function(graph,
     # Stop function if `DiagrammeRsvg` package is not available
     if (!("DiagrammeRsvg" %in%
           rownames(utils::installed.packages()))) {
-      stop("To use this function to produce an image file, please install the `DiagrammeRsvg` package using `devtools::install_github('rich-iannone/DiagrammeRsvg')")
+
+      emit_error(
+        fcn_name = fcn_name,
+        reasons = c(
+          "Cannot currently use this function to produce a PS file",
+          "please install the `DiagrammeRsvg` package and retry",
+          "pkg installed using `devtools::install_github('rich-iannone/DiagrammeRsvg')"))
     }
 
     if (!is.null(title)) {
@@ -300,7 +323,7 @@ export_graph <- function(graph,
 
     # Get node attribute names
     node_attr_names <-
-      setdiff(igraph::vertex_attr_names(g), "label")
+      base::setdiff(igraph::vertex_attr_names(g), "label")
 
     # Get node attributes
     node_attr <-
@@ -313,7 +336,7 @@ export_graph <- function(graph,
 
     # Combine all edge attributes into a matrix
     edge_attr_names <-
-      setdiff(igraph::edge_attr_names(g), "weight")
+      base::setdiff(igraph::edge_attr_names(g), "weight")
 
     # Get edge attributes
     edge_attr <-

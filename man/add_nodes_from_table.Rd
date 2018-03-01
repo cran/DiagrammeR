@@ -21,11 +21,19 @@ in the table as \code{label} attribute values.}
 in the table as \code{type} attribute values.}
 
 \item{set_type}{an optional string to apply a
-\code{type} attribute to all nodes created from the
-table records.}
+\code{type} attribute to all nodes created from data
+in the external table.}
 
-\item{drop_cols}{an optional character vector for
-dropping columns from the incoming data.}
+\item{drop_cols}{an optional column selection
+statement for dropping columns from the external
+table before inclusion as attributes in the graph's
+internal node data frame. Several columns can be
+dropped by name using the syntax
+\code{col_1 & col_2 & ...}. Columns can also be
+dropped using a numeric column range with \code{:}
+(e.g., \code{5:8}), or, by using the \code{:}
+between column names to specify the range (e.g.,
+\code{col_5_name:col_8_name}).}
 }
 \value{
 a graph object of class \code{dgr_graph}.
@@ -36,80 +44,65 @@ existing graph object from data in a CSV file or a
 data frame.
 }
 \examples{
-\dontrun{
-library(dplyr)
-
-# Specify a path to a CSV file
-path_to_csv <-
-  system.file(
-    "extdata", "currencies.csv",
-    package = "DiagrammeR")
-
-# To add nodes from a CSV file, call the
-# `add_nodes_from_table()` function; new node ID
-# values will be created as a monotonically-
-# increasing values from 1
+# To add nodes from the dataset called
+# `currencies` (available as a dataset
+# in the package), call the
+# `add_nodes_from_table()` function
+# after creating an empty graph; new
+# node ID values will be created as
+# monotonically-increasing values
 graph_1 <-
   create_graph() \%>\%
   add_nodes_from_table(
-    table = path_to_csv)
+    table = currencies)
 
-# View part of the graph's internal node data
-# frame (ndf) using `get_node_df()`
+# View part of the graph's internal
+# node data frame (ndf)
 graph_1 \%>\%
   get_node_df() \%>\%
   .[, 1:5] \%>\%
   head()
-#>   id type label iso_4217_code curr_number
-#> 1  1 <NA>  <NA>           AED         784
-#> 2  2 <NA>  <NA>           AFN         971
-#> 3  3 <NA>  <NA>           ALL           8
-#> 4  4 <NA>  <NA>           AMD          51
-#> 5  5 <NA>  <NA>           ANG         532
-#> 6  6 <NA>  <NA>           AOA         973
 
-# If you would like to assign any of the table's
-# columns as `type` or `label` attributes, this can
-# be done with the `type_col` and `label_col`
-# arguments; to set a static `type` attribute for
-# all of the table records, use `set_type`
+# If you would like to assign
+# any of the table's columns as
+# `type` or `label` attributes,
+# this can be done with the `type_col`
+# and `label_col` arguments; to set
+# a static `type` attribute for all
+# of the table records, use `set_type`
 graph_2 <-
   create_graph() \%>\%
   add_nodes_from_table(
-    table = path_to_csv,
+    table = currencies,
     label_col = iso_4217_code,
-    set_type = "currency")
+    set_type = currency)
 
 # View part of the graph's internal ndf
 graph_2 \%>\%
   get_node_df() \%>\%
   .[, 1:5] \%>\%
   head()
-#>   id     type label iso_4217_code curr_number
-#> 1  1 currency   AED           AED         784
-#> 2  2 currency   AFN           AFN         971
-#> 3  3 currency   ALL           ALL           8
-#> 4  4 currency   AMD           AMD          51
-#> 5  5 currency   ANG           ANG         532
-#> 6  6 currency   AOA           AOA         973
 
-# Suppose you would like to not include certain
-# columns from the table in the resulting graph; you
-# can use the `drop_cols` argument to choose which
-# columns to not include as attributes in the graph
+# Suppose we would like to not
+# include certain columns from the
+# external table in the resulting
+# graph; we can use the `drop_cols`
+# argument to choose which columns
+# to not include as attributes
 graph_3 <-
   create_graph() \%>\%
   add_nodes_from_table(
-    table = path_to_csv,
+    table = currencies,
     label_col = iso_4217_code,
-    set_type = "currency",
-    drop_cols = c("exponent", "currency_name"))
+    set_type = currency,
+    drop_cols = exponent & currency_name)
 
-# Show the node attribute names for the graph
+# Show the node attribute names
+# for the graph; note that the
+# `exponent` and `currency_name`
+# columns are not attributes in the
+# graph's internal node data frame
 graph_3 \%>\%
   get_node_df() \%>\%
   colnames()
-#> [1] "id"  type"  "label"  "iso_4217_code"
-#> [5] "curr_number"
-}
 }

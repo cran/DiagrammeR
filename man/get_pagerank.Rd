@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_pagerank.R
 \name{get_pagerank}
 \alias{get_pagerank}
-\title{Get the PageRank values for nodes in the graph}
+\title{Get the PageRank values for all nodes}
 \usage{
 get_pagerank(graph, directed = TRUE, damping = 0.85)
 }
@@ -10,43 +10,36 @@ get_pagerank(graph, directed = TRUE, damping = 0.85)
 \item{graph}{a graph object of class
 \code{dgr_graph}.}
 
-\item{directed}{if \code{TRUE} (the default)
-then directed paths will be considered for
-directed graphs. This is ignored for undirected
-graphs.}
+\item{directed}{if \code{TRUE} (the
+default) then directed paths will
+be considered for directed graphs.
+This is ignored for undirected graphs.}
 
-\item{damping}{the damping factor. The default
-value is set to \code{0.85}.}
+\item{damping}{the damping factor.
+The default value is set to \code{0.85}.}
 }
 \value{
-a data frame with PageRank values for
-each of the nodes.
+a data frame with PageRank
+values for each of the nodes.
 }
 \description{
-Get the PageRank values for
-all nodes in the graph.
+Get the PageRank
+values for all nodes in the graph.
 }
 \examples{
-# Create a random graph
+# Create a random graph using the
+# `add_gnm_graph()` function
 graph <-
-  create_random_graph(
-    n = 10, m = 22,
+  create_graph() \%>\%
+  add_gnm_graph(
+    n = 10,
+    m = 15,
     set_seed = 23)
 
-# Get the alpha centrality scores for nodes
-# in the graph
-get_pagerank(graph)
-#>    id   pagerank
-#> 1   1 0.04608804
-#> 2   2 0.04608804
-#> 3   3 0.05392301
-#> 4   4 0.04608804
-#> 5   5 0.07677500
-#> 6   6 0.11684759
-#> 7   7 0.07899491
-#> 8   8 0.08898857
-#> 9   9 0.16945368
-#> 10 10 0.27675311
+# Get the PageRank scores
+# for all nodes in the graph
+graph \%>\%
+  get_pagerank()
 
 # Colorize nodes according to their
 # PageRank scores

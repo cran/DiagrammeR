@@ -29,10 +29,13 @@ encountered will trigger a warning message and
 result in no change to the input graph.
 }
 \examples{
-# Create a random graph
+# Create a random graph using the
+# `add_gnm_graph()` function
 graph <-
-  create_random_graph(
-    n = 10, m = 22,
+  create_graph() \%>\%
+  add_gnm_graph(
+    n = 4,
+    m = 4,
     set_seed = 23)
 
 # Add three graph actions to the
@@ -60,14 +63,6 @@ graph <-
 # `get_graph_actions()`
 graph \%>\%
   get_graph_actions()
-#> # A tibble: 3 x 3
-#>   action_index     action_name
-#>          <dbl>           <chr>
-#> 1            1  pgrnk_to_width
-#> 2            2    get_pagerank
-#> 3            3 pgrnk_fillcolor
-#> # ... with 1 more variables:
-#> #   expression <chr>
 
 # We note that the order isn't
 # correct and that the `get_pagerank`
@@ -87,12 +82,4 @@ graph <-
 # we have the desired order of actions
 graph \%>\%
   get_graph_actions()
-#> # A tibble: 3 x 3
-#>   action_index     action_name
-#>          <int>           <chr>
-#> 1            1    get_pagerank
-#> 2            2  pgrnk_to_width
-#> 3            3 pgrnk_fillcolor
-#> # ... with 1 more variables:
-#> #   expression <chr>
 }

@@ -1,66 +1,79 @@
-#' Select nodes in the graph based on their degree
-#' values
-#' @description Using a graph object of class
-#' \code{dgr_graph}, create a selection of nodes
-#' that have certain degree values.
+#' Select nodes in the graph based on
+#' their degree values
+#' @description Using a graph object of
+#' class \code{dgr_graph}, create a
+#' selection of nodes that have certain
+#' degree values.
 #' @param graph a graph object of class
 #' \code{dgr_graph}.
-#' @param expressions one or more expressions for
-#' filtering of nodes by degree values. Use a
-#' combination of a degree type (\code{deg} for
-#' total degree, \code{indeg} for in-degree, and
-#' \code{outdeg} for out-degree) with a comparison
-#' operator and values for comparison (e.g., use
-#' \code{"deg >= 2"} to select nodes with a degree
-#' greater than or equal to 2).
-#' @param set_op the set operation to perform upon
-#' consecutive selections of graph nodes. This can
-#' either be as a \code{union} (the default), as an
-#' intersection of selections with \code{intersect},
-#' or, as a \code{difference} on the previous
+#' @param expressions one or more
+#' expressions for filtering nodes by
+#' degree values. Use a combination of
+#' degree type (\code{deg} for total
+#' degree, \code{indeg} for in-degree,
+#' and \code{outdeg} for out-degree)
+#' with a comparison operator and
+#' values for comparison (e.g., use
+#' \code{"deg >= 2"} to select nodes
+#' with a degree greater than or equal
+#' to 2).
+#' @param set_op the set operation to
+#' perform upon consecutive selections
+#' of graph nodes. This can either be
+#' as a \code{union} (the default), as
+#' an intersection of selections with
+#' \code{intersect}, or, as a
+#' \code{difference} on the previous
 #' selection, if it exists.
-#' @return a graph object of class \code{dgr_graph}.
+#' @return a graph object of class
+#' \code{dgr_graph}.
 #' @examples
-#' # Create a random graph with a high amount
-#' # of connectedness
+#' # Create a random graph using
+#' # the `add_gnm_graph()` function
 #' graph <-
-#'   create_random_graph(
+#'   create_graph() %>%
+#'   add_gnm_graph(
 #'     n = 35, m = 125,
 #'     set_seed = 23)
 #'
-#' # Report which nodes have a total degree (in-degree
-#' # + out-degree) of exactly 9
+#' # Report which nodes have a
+#' # total degree (in-degree +
+#' # out-degree) of exactly 9
 #' graph %>%
 #'   select_nodes_by_degree(
 #'     expressions = "deg == 9") %>%
 #'   get_selection()
-#' #> [1]  2  9 10 14 17 19 31 33
 #'
-#' # Report which nodes have a total degree greater
-#' # than or equal to 9
+#' # Report which nodes have a
+#' # total degree greater than or
+#' # equal to 9
 #' graph %>%
 #'   select_nodes_by_degree(
 #'     expressions = "deg >= 9") %>%
 #'   get_selection()
-#' #> [1]  2  6  9 10 14 17 19 22 25 29 31 33
 #'
-#' # Combine two calls of `select_nodes_by_degree()`
-#' # to get those nodes with total degree less than
-#' # 3 and total degree greater than 10 (by default,
-#' # those `select...()` functions `union` the sets
-#' # of nodes selected)
+#' # Combine two calls of
+#' # `select_nodes_by_degree()` to
+#' # get those nodes with total
+#' # degree less than 3 and total
+#' # degree greater than 10 (by
+#' # default, those `select...()`
+#' # functions will `union` the
+#' # sets of nodes selected)
 #' graph %>%
 #'   select_nodes_by_degree(
 #'     expressions = "deg < 3") %>%
 #'   select_nodes_by_degree(
 #'     expressions = "deg > 10") %>%
 #'   get_selection()
-#' #> [1]  6 16 22
 #'
-#' # Combine two calls of `select_nodes_by_degree()`
-#' # to get those nodes with total degree greater than
-#' # or equal to 3 and less than or equal to 10 (the
-#' # key here is to `intersect` the sets of nodes
+#' # Combine two calls of
+#' # `select_nodes_by_degree()` to
+#' # get those nodes with total
+#' # degree greater than or equal
+#' # to 3 and less than or equal
+#' # to 10 (the key here is to
+#' # `intersect` the sets of nodes
 #' # selected in the second call)
 #' graph %>%
 #'   select_nodes_by_degree(
@@ -69,25 +82,23 @@
 #'     expressions = "deg <= 10",
 #'     set_op = "intersect") %>%
 #'   get_selection()
-#' #>  [1]  1  2  3  4  5  7  8  9 10 11 12 13 14
-#' #> [14] 15 17 18 19 20 21 23 24 25 26 27 28 29
-#' #> [28] 30 31 32 33 34 35
 #'
-#' # Select all nodes with an in-degree greater than 5,
-#' # then, apply a node attribute to those selected nodes
-#' # (coloring the selected nodes red)
+#' # Select all nodes with an
+#' # in-degree greater than 5, then,
+#' # apply a node attribute to those
+#' # selected nodes (coloring the
+#' # selected nodes red)
 #' graph_2 <-
 #'   graph %>%
 #'   select_nodes_by_degree(
 #'     expressions = "indeg > 5") %>%
 #'   set_node_attrs_ws(
-#'     node_attr = "color",
+#'     node_attr = color,
 #'     value = "red")
 #'
 #' # Get the selection of nodes
 #' graph_2 %>%
 #'   get_selection()
-#' #> [1] 14 22 23 25 27 29 31 33 34
 #' @importFrom dplyr select filter_
 #' @export select_nodes_by_degree
 
@@ -98,22 +109,36 @@ select_nodes_by_degree <- function(graph,
   # Get the time of function start
   time_function_start <- Sys.time()
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Validation: Graph contains nodes
   if (graph_contains_nodes(graph) == FALSE) {
-    stop("The graph contains no nodes, so, no selections can be made.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no nodes")
   }
+
+  # Obtain the input graph's node and edge
+  # selection properties
+  n_e_select_properties_in <-
+    node_edge_selection_properties(graph = graph)
 
   # Create bindings for specific variables
   id <- deg <- indeg <- outdeg <- NULL
 
   # Get a data frame with node ID and degree types
   node_degree <-
-    node_info(graph) %>%
+    get_node_info(graph) %>%
     dplyr::select(id, deg, indeg, outdeg)
 
   for (i in 1:length(expressions)) {
@@ -145,7 +170,7 @@ select_nodes_by_degree <- function(graph,
       intersect(nodes_prev_selection, nodes_selected)
   } else if (set_op == "difference") {
     nodes_combined <-
-      setdiff(nodes_prev_selection, nodes_selected)
+      base::setdiff(nodes_prev_selection, nodes_selected)
   }
 
   # Add the node ID values to the active selection
@@ -158,12 +183,17 @@ select_nodes_by_degree <- function(graph,
   # Replace `graph$edge_selection` with an empty df
   graph$edge_selection <- create_empty_esdf()
 
+  # Obtain the output graph's node and edge
+  # selection properties
+  n_e_select_properties_out <-
+    node_edge_selection_properties(graph = graph)
+
   # Update the `graph_log` df with an action
   graph$graph_log <-
     add_action_to_log(
       graph_log = graph$graph_log,
       version_id = nrow(graph$graph_log) + 1,
-      function_used = "select_nodes_by_degree",
+      function_used = fcn_name,
       time_modified = time_function_start,
       duration = graph_function_duration(time_function_start),
       nodes = nrow(graph$nodes_df),
@@ -173,6 +203,44 @@ select_nodes_by_degree <- function(graph,
   if (graph$graph_info$write_backups) {
     save_graph_as_rds(graph = graph)
   }
+
+  # Construct message body
+  if (!n_e_select_properties_in[["node_selection_available"]] &
+      !n_e_select_properties_in[["edge_selection_available"]]) {
+
+    msg_body <-
+      glue::glue(
+        "created a new selection of \\
+        {n_e_select_properties_out[['selection_count_str']]}")
+
+  } else if (n_e_select_properties_in[["node_selection_available"]] |
+             n_e_select_properties_in[["edge_selection_available"]]) {
+
+    if (n_e_select_properties_in[["edge_selection_available"]]) {
+      msg_body <-
+        glue::glue(
+          "modified an existing selection of\\
+           {n_e_select_properties_in[['selection_count_str']]}:
+           * {n_e_select_properties_out[['selection_count_str']]}\\
+           are now in the active selection
+           * used the `{set_op}` set operation")
+    }
+
+    if (n_e_select_properties_in[["node_selection_available"]]) {
+      msg_body <-
+        glue::glue(
+          "created a new selection of\\
+           {n_e_select_properties_out[['selection_count_str']]}:
+           * this replaces\\
+           {n_e_select_properties_in[['selection_count_str']]}\\
+           in the prior selection")
+    }
+  }
+
+  # Issue a message to the user
+  emit_message(
+    fcn_name = fcn_name,
+    message_body = msg_body)
 
   graph
 }

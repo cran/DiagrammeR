@@ -23,8 +23,18 @@
 #' @param rel an optional string specifying the
 #' relationship between the
 #' connected nodes.
-#' @param ... optional edge attributes supplied as
-#' vectors.
+#' @param edge_aes an optional list of named vectors
+#' comprising edge aesthetic attributes. The helper
+#' function \code{edge_aes()} is strongly recommended
+#' for use here as it contains arguments for each
+#' of the accepted edge aesthetic attributes (e.g.,
+#' \code{shape}, \code{style}, \code{penwidth},
+#' \code{color}).
+#' @param edge_data an optional list of named vectors
+#' comprising edge data attributes. The helper
+#' function \code{edge_data()} is strongly recommended
+#' for use here as it helps bind data specifically
+#' to the created edges.
 #' @return a graph object of class \code{dgr_graph}.
 #' @examples
 #' # Create a graph with 4 nodes
@@ -35,7 +45,8 @@
 #'   add_node(label = "three") %>%
 #'   add_node(label = "four")
 #'
-#' # Add an edge between those nodes and attach a
+#' # Add an edge between those
+#' # nodes and attach a
 #' # relationship to the edge
 #' graph <-
 #'  add_edge(
@@ -44,13 +55,14 @@
 #'    to = 2,
 #'    rel = "A")
 #'
-#' # Use the `edge_info()` function to verify that
+#' # Use the `get_edge_info()`
+#' # function to verify that
 #' # the edge has been created
-#' edge_info(graph)
-#' #>   id from to rel
-#' #> 1  1    1  2   A
+#' graph %>%
+#'   get_edge_info()
 #'
-#' # Add another node and edge to the graph
+#' # Add another node and
+#' # edge to the graph
 #' graph <-
 #'   graph %>%
 #'   add_edge(
@@ -58,14 +70,17 @@
 #'     to = 2,
 #'     rel = "A")
 #'
-#' # Verify that the edge has been created by
-#' # getting a count of graph edges
-#' edge_count(graph)
-#' #> [1] 2
+#' # Verify that the edge
+#' # has been created by
+#' # counting graph edges
+#' graph %>%
+#'   count_edges()
 #'
-#' # Add edges by specifying node `label`
-#' # values; note that all nodes must have
-#' # unique `label` values to use this option
+#' # Add edges by specifying
+#' # node `label` values; note
+#' # that all nodes must have
+#' # unique `label` values to
+#' # use this option
 #' graph <-
 #'   graph %>%
 #'   add_edge(
@@ -77,38 +92,74 @@
 #'     to = "one",
 #'     rel = "L")
 #'
-#' # Use the `get_edges()` function to verify
+#' # Use `get_edges()` to verify
 #' # that the edges were added
-#' get_edges(graph)
-#' #> [1] "1->2" "3->2" "3->4" "4->1"
-#' @importFrom dplyr bind_rows select filter
+#' graph %>%
+#'   get_edges()
+#'
+#' # Add edge aesthetic and data
+#' # attributes during edge creation
+#' graph_2 <-
+#'   create_graph() %>%
+#'   add_n_nodes(n = 2) %>%
+#'   add_edge(
+#'     from = 1,
+#'     to = 2,
+#'     rel = "M",
+#'     edge_aes = edge_aes(
+#'       penwidth = 1.5,
+#'       color = "blue"),
+#'     edge_data = edge_data(
+#'       value = 4.3))
+#'
+#' # Use the `get_edges()` function
+#' # to verify that the attribute
+#' # values were bound to the
+#' # newly created edge
+#' graph_2 %>%
+#'   get_edge_df()
+#' @importFrom dplyr bind_rows select filter as_tibble
+#' @importFrom rlang UQ
 #' @export add_edge
 
 add_edge <- function(graph,
                      from,
                      to,
                      rel = NULL,
-                     ...) {
+                     edge_aes = NULL,
+                     edge_data = NULL) {
 
   # Get the time of function start
   time_function_start <- Sys.time()
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Validation: Graph contains nodes
   if (graph_contains_nodes(graph) == FALSE) {
-    stop("The graph contains no nodes, so, an edge cannot be added.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no nodes, so, an edge cannot be added")
   }
 
   if (length(from) > 1 | length(to) > 1) {
-    stop("Only one edge can be specified.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "Only one edge can be specified in `from` or `to`")
   }
 
   # Create bindings for specific variables
-  version_id <- label <- NULL
+  version_id <- label <- index__ <- id <-  NULL
 
   # Get the value for the latest `version_id` for
   # graph (in the `graph_log`)
@@ -120,12 +171,46 @@ add_edge <- function(graph,
     rel <- as.character(NA)
   }
 
-  # Collect extra vectors of data as `extras`
-  extras <- list(...)
+  # Collect edge aesthetic attributes
+  if (!is.null(edge_aes)) {
 
-  # Collect extra vectors of data as `extras_tbl`
-  if (length(extras) > 0) {
-    extras_tbl <- as_tibble(extras)
+    edge_aes_tbl <- dplyr::as_tibble(edge_aes)
+
+    if (nrow(edge_aes_tbl) == 1) {
+
+      edge_aes$index__ <- 1
+
+      edge_aes_tbl <-
+        dplyr::as_tibble(edge_aes) %>%
+        dplyr::select(-index__)
+    }
+
+    if ("id" %in% colnames(edge_aes_tbl)) {
+      edge_aes_tbl <-
+        edge_aes_tbl %>%
+        dplyr::select(-id)
+    }
+  }
+
+  # Collect edge data attributes
+  if (!is.null(edge_data)) {
+
+    edge_data_tbl <- dplyr::as_tibble(edge_data)
+
+    if (nrow(edge_data_tbl) == 1) {
+
+      edge_data$index__ <- 1
+
+      edge_data_tbl <-
+        dplyr::as_tibble(edge_data) %>%
+        dplyr::select(-index__)
+    }
+
+    if ("id" %in% colnames(edge_data_tbl)) {
+      edge_data_tbl <-
+        edge_data_tbl %>%
+        dplyr::select(-id)
+    }
   }
 
   # If `from` and `to` values provided as character
@@ -133,30 +218,46 @@ add_edge <- function(graph,
   # `label` attr values
   if (is.character(from) & is.character(to)) {
 
-    # Stop function if the label for `from` exists in the graph
+    # Stop function if the label for
+    # `from` does not exist in the graph
     if (!(from %in% graph$nodes_df$label)) {
-      stop("The value provided in `from` does not exist as a node `label` value.")
+
+      emit_error(
+        fcn_name = fcn_name,
+        reasons = "The value provided in `from` does not exist as a node `label` value")
     }
 
-    # Stop function if the label for `from` is distinct in the graph
+    # Stop function if the label for
+    # `from` is not distinct in the graph
     if (graph$nodes_df %>%
         dplyr::select(label) %>%
         dplyr::filter(label == from) %>%
         nrow() > 1) {
-      stop("The node `label` provided in `from` is not distinct in the graph.")
+
+      emit_error(
+        fcn_name = fcn_name,
+        reasons = "The node `label` provided in `from` is not distinct in the graph")
     }
 
-    # Stop function if the label for `to` exists in the graph
+    # Stop function if the label for
+    # `to` does not exist in the graph
     if (!(to %in% graph$nodes_df$label)) {
-      stop("The value provided in `to` does not exist as a node `label` value.")
+
+      emit_error(
+        fcn_name = fcn_name,
+        reasons = "The value provided in `to` does not exist as a node `label` value")
     }
 
-    # Stop function if the label for `to` is distinct in the graph
+    # Stop function if the label for
+    # `to` is not distinct in the graph
     if (graph$nodes_df %>%
         dplyr::select(label) %>%
         dplyr::filter(label == to) %>%
         nrow() > 1) {
-      stop("The node `label` provided in `to` is not distinct in the graph.")
+
+      emit_error(
+        fcn_name = fcn_name,
+        reasons = "The node `label` provided in `to` is not distinct in the graph")
     }
 
     # Use the `translate_to_node_id()` helper function to map
@@ -189,29 +290,60 @@ add_edge <- function(graph,
     # edge data frame
     graph$edges_df <- combined_edges
 
-    if (exists("extras_tbl")) {
+    if (exists("edge_aes_tbl")) {
 
       # If extra edge attributes available, add
       # those to the new edge
       graph <-
-        graph %>%
-        select_edges_by_edge_id(
-          graph$edges_df$id %>% max())
+        suppressMessages(
+          graph %>%
+            select_edges_by_edge_id(
+              edges = graph$edges_df$id %>% max())
+        )
 
       # Iteratively set edge attribute values for
       # the new edge in the graph
-      for (i in 1:ncol(extras_tbl)) {
+      for (i in 1:ncol(edge_aes_tbl)) {
         graph <-
           graph %>%
           set_edge_attrs_ws(
-            edge_attr = colnames(extras_tbl)[i],
-            value = extras_tbl[1, i][[1]])
+            edge_attr = rlang::UQ(colnames(edge_aes_tbl)[i]),
+            value = edge_aes_tbl[1, i][[1]])
       }
 
       # Clear the graph's active selection
       graph <-
-        graph %>%
-        clear_selection()
+        suppressMessages(
+          graph %>%
+            clear_selection())
+    }
+
+    if (exists("edge_data_tbl")) {
+
+      # If extra edge attributes available, add
+      # those to the new edge
+      graph <-
+        suppressMessages(
+          graph %>%
+            select_edges_by_edge_id(
+              edges = graph$edges_df$id %>% max())
+        )
+
+      # Iteratively set edge attribute values for
+      # the new edge in the graph
+      for (i in 1:ncol(edge_data_tbl)) {
+        graph <-
+          graph %>%
+          set_edge_attrs_ws(
+            edge_attr = rlang::UQ(colnames(edge_data_tbl)[i]),
+            value = edge_data_tbl[1, i][[1]])
+      }
+
+      # Clear the graph's active selection
+      graph <-
+        suppressMessages(
+          graph %>%
+            clear_selection())
     }
 
     # Modify the `last_edge` vector
@@ -227,11 +359,12 @@ add_edge <- function(graph,
       add_action_to_log(
         graph_log = graph$graph_log,
         version_id = nrow(graph$graph_log) + 1,
-        function_used = "add_edge",
+        function_used = fcn_name,
         time_modified = time_function_start,
         duration = graph_function_duration(time_function_start),
         nodes = nrow(graph$nodes_df),
-        edges = nrow(graph$edges_df))
+        edges = nrow(graph$edges_df),
+        d_e = 1)
 
     # Perform graph actions, if any are available
     if (nrow(graph$graph_actions) > 0) {

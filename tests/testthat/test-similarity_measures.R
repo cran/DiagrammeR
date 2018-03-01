@@ -2,11 +2,13 @@ context("Similarity measures for whole graphs")
 
 test_that("the dice similarity algorithm is functional", {
 
-  # Create a random, directed graph with 10 nodes and 15 edges
+  # Create a random graph
   graph <-
-    create_random_graph(
-      n = 10, m = 22,
-      set_seed = 1)
+    create_graph() %>%
+    add_gnm_graph(
+      n = 10,
+      m = 22,
+      set_seed = 23)
 
   # Get the Dice similarity values for
   # nodes `5`, `6`, and `7`; all directions
@@ -130,10 +132,10 @@ test_that("the dice similarity algorithm is functional", {
   # Expect the same number of matrix columns
   # and rows as there are nodes
   expect_equal(
-    ncol(dice_all_all), node_count(graph))
+    ncol(dice_all_all), count_nodes(graph = graph))
 
   expect_equal(
-    nrow(dice_all_all), node_count(graph))
+    nrow(dice_all_all), count_nodes(graph = graph))
 
   # Expect an error if one or more node IDs
   # provided are not in the graph
@@ -146,11 +148,22 @@ test_that("the dice similarity algorithm is functional", {
 
 test_that("the Jaccard similarity algorithm is functional", {
 
-  # Create a random, directed graph with 10 nodes and 15 edges
+  # Create a random graph
   graph <-
-    create_random_graph(
-      n = 10, m = 22,
-      set_seed = 1)
+    create_graph() %>%
+    add_gnm_graph(
+      n = 10,
+      m = 22,
+      set_seed = 23)
+
+  # Expect an error when using a value
+  # for `direction` that is not one of
+  # three accepted values
+  expect_error(
+    get_jaccard_similarity(
+      graph = graph,
+      nodes = 5:7,
+      direction = "away"))
 
   # Get the Jaccard similarity values for
   # nodes `5`, `6`, and `7`; all directions
@@ -274,10 +287,10 @@ test_that("the Jaccard similarity algorithm is functional", {
   # Expect the same number of matrix columns
   # and rows as there are nodes
   expect_equal(
-    ncol(jaccard_all_all), node_count(graph))
+    ncol(jaccard_all_all), count_nodes(graph = graph))
 
   expect_equal(
-    nrow(jaccard_all_all), node_count(graph))
+    nrow(jaccard_all_all), count_nodes(graph = graph))
 
   # Expect an error if one or more node IDs
   # provided are not in the graph

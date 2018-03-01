@@ -18,31 +18,33 @@
 #' the function yields an error.
 #' @examples
 #' \dontrun{
-#' # Create a randomized property graph with 1000
-#' # nodes and 1350 edges
+#' # Create a randomized property
+#' # graph with 1000 nodes and 1350 edges
 #' property_graph <-
-#'   create_random_graph(
-#'     n = 1000, m = 1350,
+#'   create_graph() %>%
+#'   add_gnm_graph(
+#'     n = 1000,
+#'     m = 1350,
 #'     set_seed = 23) %>%
 #'   select_nodes_by_degree(
 #'     expressions = "deg >= 3") %>%
 #'   set_node_attrs_ws(
-#'     node_attr = "type",
+#'     node_attr = type,
 #'     value = "a") %>%
 #'   clear_selection() %>%
 #'   select_nodes_by_degree(
 #'     expressions = "deg < 3") %>%
 #'   set_node_attrs_ws(
-#'     node_attr = "type",
+#'     node_attr = type,
 #'     value = "b") %>%
 #'   clear_selection() %>%
 #'   select_nodes_by_degree(
 #'     expressions = "deg == 0") %>%
 #'   set_node_attrs_ws(
-#'     node_attr = "type",
+#'     node_attr = type,
 #'     value = "c") %>%
 #'   set_node_attr_to_display(
-#'     attr = "type") %>%
+#'     attr = type) %>%
 #'   select_edges_by_node_id(
 #'     nodes =
 #'       get_node_ids(.) %>%
@@ -50,16 +52,16 @@
 #'         size = 0.15 * length(.) %>%
 #'           floor())) %>%
 #'   set_edge_attrs_ws(
-#'     edge_attr = "rel",
+#'     edge_attr = rel,
 #'     value = "r_1") %>%
 #'   invert_selection() %>%
 #'   set_edge_attrs_ws(
-#'     edge_attr = "rel",
+#'     edge_attr = rel,
 #'     value = "r_2") %>%
 #'   clear_selection() %>%
 #'   copy_edge_attrs(
-#'     edge_attr_from = "rel",
-#'     edge_attr_to = "label") %>%
+#'     edge_attr_from = rel,
+#'     edge_attr_to = label) %>%
 #'   add_global_graph_attrs(
 #'     attr = "fontname",
 #'     value = "Helvetica",
@@ -73,7 +75,8 @@
 #'     value = 10,
 #'     attr_type = "edge")
 #'
-#' # Display this graph's metagraph, or, underlying
+#' # Display this graph's
+#' # metagraph, or, the underlying
 #' # graph model for a property graph
 #' display_metagraph(property_graph)
 #' }
@@ -82,14 +85,23 @@
 
 display_metagraph <- function(graph) {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Validation: Graph object is a property graph
   if (is_property_graph(graph) == FALSE) {
-    stop("The graph object is not a property graph.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not a property graph")
   }
 
   # Create bindings for specific variables
@@ -126,10 +138,10 @@ display_metagraph <- function(graph) {
       columns = "type") %>%
     add_edges_from_table(
       unique_edge_list,
-      ndf_mapping = "label",
-      from_col = "from_type",
-      to_col = "to_type",
-      rel_col = "rel")
+      from_to_map = label,
+      from_col = from_type,
+      to_col = to_type,
+      rel_col = rel)
 
   # Copy the `label` values to the `type` attribute
   metagraph$nodes_df <-
@@ -140,22 +152,38 @@ display_metagraph <- function(graph) {
   metagraph <-
     metagraph %>%
     colorize_node_attrs(
-      "type", "fillcolor") %>%
-    copy_edge_attrs("rel", "label") %>%
+      node_attr_from = "type",
+      node_attr_to = "fillcolor") %>%
+    copy_edge_attrs(
+      edge_attr_from = "rel",
+      edge_attr_to = "label") %>%
     add_global_graph_attrs(
-      "fontname", "Helvetica", "edge") %>%
+      attr = "fontname",
+      value = "Helvetica",
+      attr_type = "edge") %>%
     add_global_graph_attrs(
-      "fontcolor", "gray50", "edge") %>%
+      attr = "fontcolor",
+      value = "gray50",
+      attr_type = "edge") %>%
     add_global_graph_attrs(
-      "fontsize", 10, "edge") %>%
+      attr = "fontsize",
+      value = 10,
+      attr_type = "edge") %>%
     colorize_edge_attrs(
-      "rel", "color") %>%
+      edge_attr_from = "rel",
+      edge_attr_to = "color") %>%
     add_global_graph_attrs(
-      "fontsize", 6, "edge") %>%
+      attr = "fontsize",
+      value = 6,
+      attr_type = "edge") %>%
     add_global_graph_attrs(
-      "len", 3.5, "edge") %>%
+      attr = "len",
+      value = 3.5,
+      attr_type = "edge") %>%
     add_global_graph_attrs(
-      "layout", "dot", "graph")
+      attr = "layout",
+      value = "dot",
+      attr_type = "graph")
 
   # Render the `metagraph` object
   metagraph %>% render_graph()

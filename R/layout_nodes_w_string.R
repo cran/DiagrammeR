@@ -88,18 +88,10 @@
 #' # Show the graph's node data frame
 #' # to confirm that `x` and `y` values
 #' # were added to each of the nodes
-#' get_node_df(graph)
-#' #>   id type label x y
-#' #> 1  1    a     a 0 8
-#' #> 2  2    a     b 0 6
-#' #> 3  3    b     c 5 4
-#' #> 4  4    b     d 4 4
-#' #> 5  5    b     e 3 4
-#' #> 6  6    c     f 8 0
-#' #> 7  7    c     g 8 2
+#' graph %>%
+#'   get_node_df()
 #' @importFrom stringr str_split
-#' @importFrom tibble tibble
-#' @importFrom dplyr bind_rows bind_cols filter_ arrange_ left_join
+#' @importFrom dplyr bind_rows bind_cols filter_ arrange_ left_join tibble
 #' @export layout_nodes_w_string
 
 layout_nodes_w_string <- function(graph,
@@ -113,9 +105,15 @@ layout_nodes_w_string <- function(graph,
   # Get the time of function start
   time_function_start <- Sys.time()
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Get the graph's internal node data frame
@@ -146,7 +144,10 @@ layout_nodes_w_string <- function(graph,
 
   # Stop function if not all rows are of equal length
   if (mean(layout_row_length) != layout_row_length[1]) {
-    stop("Each row must have the same length.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "Each row must have the same length")
   }
 
   layout_column_number <- layout_row_length <- layout_row_length[1]
@@ -157,14 +158,14 @@ layout_nodes_w_string <- function(graph,
   x_pts <- seq(0, width, width/(layout_column_number - 1)) + ll[1]
   y_pts <- rev(seq(0, height, height/(layout_row_number - 1))) + ll[2]
 
-  # Create tibble called `ndf_parts`
-  ndf_parts <- tibble::tibble()
+  # Create a tibble called `ndf_parts`
+  ndf_parts <- dplyr::tibble()
 
   for (k in 1:node_group_count) {
 
     # Create table with position and node ID
     position_table <-
-      tibble::tibble(
+      dplyr::tibble(
         x = as.numeric(NA),
         y = as.numeric(NA))
 
@@ -185,7 +186,7 @@ layout_nodes_w_string <- function(graph,
         if (unlist(stringr::str_split(layout[i], ""))[j] == k) {
 
           item_table <-
-            tibble::tibble(
+            dplyr::tibble(
               x = x_pts[j],
               y = y_pts[i])
 
@@ -245,7 +246,7 @@ layout_nodes_w_string <- function(graph,
     add_action_to_log(
       graph_log = graph$graph_log,
       version_id = nrow(graph$graph_log) + 1,
-      function_used = "layout_nodes_w_string",
+      function_used = fcn_name,
       time_modified = time_function_start,
       duration = graph_function_duration(time_function_start),
       nodes = nrow(graph$nodes_df),

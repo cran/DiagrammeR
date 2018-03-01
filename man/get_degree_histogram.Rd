@@ -25,21 +25,19 @@ degree frequency. The bin width is set to 1 and
 zero-value degrees are omitted from the output.
 }
 \examples{
-# Create a random, directed graph with 18 nodes
-# and 22 edges
+# Create a random graph using the
+# `add_gnm_graph()` function
 graph <-
-  create_random_graph(
-    n = 18, m = 22,
+  create_graph(
+    directed = FALSE) \%>\%
+  add_gnm_graph(
+    n = 10,
+    m = 15,
     set_seed = 23)
 
-# Get degree histogram data for the
-# `random_graph` (reporting on total degree)
+# Get degree histogram data for
+# the graph (reporting total degree)
 graph \%>\%
-  get_degree_histogram(mode = "total")
-#>   degree total_degree_hist
-#> 1      0                 1
-#> 2      1                 4
-#> 3      2                 4
-#> 4      3                 4
-#> 5      4                 5
+  get_degree_histogram(
+    mode = "total")
 }

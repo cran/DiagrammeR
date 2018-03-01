@@ -1,71 +1,91 @@
 #' Get an aggregate value from the outdegree of nodes
-#' @description Get a single, aggregate value from the
-#' outdegree values for all nodes in a graph, or, a subset
+#' @description Get a single,
+#' aggregate value from the
+#' outdegree values for all nodes
+#' in a graph, or, a subset
 #' of graph nodes.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param agg the aggregation function to use for
-#' summarizing outdegree values from graph nodes. The
-#' following aggregation functions can be used:
-#' \code{sum}, \code{min}, \code{max}, \code{mean}, or
-#' \code{median}.
-#' @param conditions an option to use filtering
-#' conditions for the nodes to consider.
-#' @return a vector with an aggregate outdegree value.
+#' @param graph a graph object of
+#' class \code{dgr_graph}.
+#' @param agg the aggregation
+#' function to use for summarizing
+#' outdegree values from graph nodes.
+#' The following aggregation functions
+#' can be used: \code{sum}, \code{min},
+#' \code{max}, \code{mean}, or \code{median}.
+#' @param conditions an option to
+#' use filtering conditions for
+#' the nodes to consider.
+#' @return a vector with an aggregate
+#' outdegree value.
 #' @examples
-#' # Create a random graph
-#' random_graph <-
-#'   create_random_graph(
-#'     n = 10, m = 22,
-#'     set_seed = 23)
+#' # Create a random graph using the
+#' # `add_gnm_graph()` function
+#' graph <-
+#'   create_graph() %>%
+#'   add_gnm_graph(
+#'     n = 20,
+#'     m = 35,
+#'     set_seed = 23) %>%
+#'   set_node_attrs(
+#'     node_attr = value,
+#'     values = rnorm(
+#'       n = count_nodes(.),
+#'       mean = 5,
+#'       sd = 1) %>% round(1))
 #'
 #' # Get the mean outdegree value from all
 #' # nodes in the graph
-#' get_agg_degree_out(
-#'   graph = random_graph,
-#'   agg = "mean")
-#' #> [1] 3.666667
+#' graph %>%
+#'   get_agg_degree_out(
+#'     agg = "mean")
 #'
 #' # Other aggregation functions can be used
 #' # (`min`, `max`, `median`, `sum`); let's
 #' # get the median in this example
-#' get_agg_degree_out(
-#'   graph = random_graph,
-#'   agg = "median")
-#' #> [1] 3
+#' graph %>%
+#'   get_agg_degree_out(
+#'     agg = "median")
 #'
 #' # The aggregation of outdegree can occur
 #' # for a subset of the graph nodes and this
 #' # is made possible by specifying `conditions`
 #' # for the nodes
-#' get_agg_degree_out(
-#'   graph = random_graph,
-#'   agg = "mean",
-#'   conditions = value < 5.0)
-#' #> [1] 3.666667
+#' graph %>%
+#'   get_agg_degree_out(
+#'     agg = "mean",
+#'     conditions = value < 5.0)
 #' @importFrom dplyr group_by summarize_ select filter ungroup pull
 #' @importFrom stats as.formula
 #' @importFrom purrr flatten_dbl
-#' @importFrom rlang enquo UQ
+#' @importFrom rlang enquo UQ get_expr
 #' @export get_agg_degree_out
 
 get_agg_degree_out <- function(graph,
                                agg,
                                conditions = NULL) {
 
-  conditions <- rlang::enquo(conditions)
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
 
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
+
+  # Capture provided conditions
+  conditions <- rlang::enquo(conditions)
 
   # Create binding for variable
   id <- NULL
 
   # If filtering conditions are provided then
   # pass in those conditions and filter the ndf
-  if (!((rlang::UQ(conditions) %>% paste())[2] == "NULL")) {
+  if (!is.null(
+    rlang::enquo(conditions) %>%
+    rlang::get_expr())) {
 
     # Extract the node data frame from the graph
     ndf <- get_node_df(graph)
@@ -95,7 +115,12 @@ get_agg_degree_out <- function(graph,
   # Verify that the value provided for `agg`
   # is one of the accepted aggregation types
   if (!(agg %in% c("sum", "min", "max", "mean", "median"))) {
-    stop("The aggregation method must be either `min`, `max`, `mean`, `median`, or `sum`.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = c(
+        "The specified aggregation method is not valid",
+        "allowed choices are: `min`, `max`, `mean`, `median`, or `sum`"))
   }
 
   # Get the aggregate value of total degree based

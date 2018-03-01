@@ -14,49 +14,38 @@
 #'
 #' # Create a node data frame (ndf)
 #' ndf <-
-#'   create_node_df(
-#'     n = 4,
-#'     type = "basic",
-#'     color = c("red", "green", "grey", "blue"),
-#'     value = c(3.5, 2.6, 9.4, 2.7))
+#'   create_node_df(n = 2)
 #'
-#' # Add the node data frame to the graph object to
-#' # create a graph with nodes
+#' # Add the node data frame to
+#' # the graph object to create
+#' # a graph with nodes
 #' graph <-
-#'   add_node_df(graph, node_df = ndf)
+#'   graph %>%
+#'   add_node_df(
+#'     node_df = ndf)
 #'
-#' get_node_df(graph)
-#' #>   id  type label color value
-#' #> 1  1 basic  <NA>   red   3.5
-#' #> 2  2 basic  <NA> green   2.6
-#' #> 3  3 basic  <NA>  grey   9.4
-#' #> 4  4 basic  <NA>  blue   2.7
+#' # Inspect the graph's ndf
+#' graph %>%
+#'   get_node_df()
 #'
-#' # Create another node data frame
+#' # Create another ndf
 #' ndf_2 <-
-#'   create_node_df(
-#'     n = 4,
-#'     type = "basic",
-#'     color = c("white", "brown", "aqua", "pink"),
-#'     value = c(1.6, 6.4, 0.8, 4.2))
+#'   create_node_df(n = 3)
 #'
-#' # Add the second node data frame to the graph object
-#' # to add more nodes with attributes to the graph
+#' # Add the second node data
+#' # frame to the graph object
+#' # to add more nodes with
+#' # attributes to the graph
 #' graph <-
-#'   add_node_df(graph, node_df = ndf_2)
+#'   graph %>%
+#'   add_node_df(
+#'     node_df = ndf_2)
 #'
-#' # View the graph's internal node data frame using
-#' # the `get_node_df()` function
-#' get_node_df(graph)
-#' #>   id  type label color value
-#' #> 1  1 basic  <NA>   red   3.5
-#' #> 2  2 basic  <NA> green   2.6
-#' #> 3  3 basic  <NA>  grey   9.4
-#' #> 4  4 basic  <NA>  blue   2.7
-#' #> 5  5 basic  <NA> white   1.6
-#' #> 6  6 basic  <NA> brown   6.4
-#' #> 7  7 basic  <NA>  aqua   0.8
-#' #> 8  8 basic  <NA>  pink   4.2
+#' # View the graph's internal
+#' # node data frame using the
+#' # `get_node_df()` function
+#' graph %>%
+#'   get_node_df()
 #' @importFrom dplyr bind_rows
 #' @export add_node_df
 
@@ -66,14 +55,23 @@ add_node_df <- function(graph,
   # Get the time of function start
   time_function_start <- Sys.time()
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Get the number of nodes ever created for
   # this graph
   nodes_created <- graph$last_node
+
+  # Get the number of nodes in the graph
+  nodes_graph_1 <- graph %>% count_nodes()
 
   # Combine the incoming node data frame with the
   # existing node definitions in the graph object
@@ -91,16 +89,24 @@ add_node_df <- function(graph,
   graph$last_node <-
     nodes_created + nrow(node_df)
 
+  # Get the updated number of nodes in the graph
+  nodes_graph_2 <- graph %>% count_nodes()
+
+  # Get the number of nodes added to
+  # the graph
+  nodes_added <- nodes_graph_2 - nodes_graph_1
+
   # Update the `graph_log` df with an action
   graph$graph_log <-
     add_action_to_log(
       graph_log = graph$graph_log,
       version_id = nrow(graph$graph_log) + 1,
-      function_used = "add_node_df",
+      function_used = fcn_name,
       time_modified = time_function_start,
       duration = graph_function_duration(time_function_start),
       nodes = nrow(graph$nodes_df),
-      edges = nrow(graph$edges_df))
+      edges = nrow(graph$edges_df),
+      d_n = nodes_added)
 
   # Perform graph actions, if any are available
   if (nrow(graph$graph_actions) > 0) {

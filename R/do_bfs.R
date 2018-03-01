@@ -24,43 +24,50 @@
 #' order of the node IDs corresponds to the order
 #' visited.
 #' @examples
-#' # Create a graph containing two balanced trees
+#' # Create a graph containing
+#' # two balanced trees
 #' graph <-
 #'   create_graph() %>%
-#'   add_balanced_tree(k = 2, h = 2) %>%
-#'   add_balanced_tree(k = 3, h = 2)
+#'   add_balanced_tree(
+#'     k = 2, h = 2) %>%
+#'   add_balanced_tree(
+#'     k = 3, h = 2)
 #'
-#' # Perform a breadth-first search of the graph,
-#' # beginning at the root node `1` (the default
-#' # `direction = "all"` doesn't take edge
-#' # direction into account)
+#' # Perform a breadth-first
+#' # search of the graph,
+#' # beginning at the root node
+#' # `1` (the default
+#' # `direction = "all"` doesn't
+#' # take edge direction into
+#' # account)
 #' graph %>%
 #'   do_bfs(node = 1)
-#' #> [1]  1  2  3  4  5  6  7  8  9 10 11 12 13
-#' #> [14] 14 15 16 17 18 19 20
 #'
-#' # If not specifying a starting node, the function
-#' # will begin the search from a random node
+#' # If not specifying a
+#' # starting node, the function
+#' # will begin the search from
+#' # a random node
 #' graph %>%
 #'   do_bfs()
-#' #> [1]  6  3  1  7  2  4  5  8  9 10 11 12 13
-#' #> [14] 14 15 16 17 18 19 20
 #'
-#' # It's also possible to perform bfs while
-#' # taking into account edge direction; using
-#' # `direction = "in"` causes the bfs routine to
+#' # It's also possible to
+#' # perform bfs while taking
+#' # into account edge direction;
+#' # using `direction = "in"`
+#' # causes the bfs routine to
 #' # visit nodes along inward edges
 #' graph %>%
-#'   do_bfs(node = 1, direction = "in")
-#' #> [1]  1  2  3  4  5  6  7  8  9 10 11 12 13
-#' #> [14] 14 15 16 17 18 19 20
+#'   do_bfs(
+#'     node = 1,
+#'     direction = "in")
 #'
-#' # Using `direction = "out"` results in the bfs
-#' # moving along solely outward edges
+#' # Using `direction = "out"`
+#' # results in the bfs moving
+#' # along solely outward edges
 #' graph %>%
-#'   do_bfs(node = 1, direction = "out")
-#' #> [1]  1  2  3  4  5  6  7  8  9 10 11 12 13
-#' #> [14] 14 15 16 17 18 19 20
+#'   do_bfs(
+#'     node = 1,
+#'     direction = "out")
 #' @importFrom igraph bfs
 #' @export do_bfs
 
@@ -68,14 +75,23 @@ do_bfs <- function(graph,
                    node = NULL,
                    direction = "all") {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Validation: Graph contains nodes
   if (graph_contains_nodes(graph) == FALSE) {
-    stop("The graph contains no nodes.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no nodes")
   }
 
   # If no node provided, choose a random node
@@ -89,25 +105,34 @@ do_bfs <- function(graph,
   # Perform the breadth-first search algorithm in
   # the direction requested
   if (direction == "all") {
+
     bfs_result <-
       igraph::bfs(
         graph = ig_graph,
         root = node,
         neimode = "all")
+
   } else if (direction == "out") {
+
     bfs_result <-
       igraph::bfs(
         graph = ig_graph,
         root = node,
         neimode = "out")
+
   } else if (direction == "in") {
+
     bfs_result <-
       igraph::bfs(
         graph = ig_graph,
         root = node,
         neimode = "in")
+
   } else if (!(direction %in% c("all", "out", "in"))) {
-    stop("The value for `direction` must be either `all`, `out`, or `in`.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The value for `direction` must be either `all`, `out`, or `in`")
   }
 
   # Get the nodes visited during the bfs

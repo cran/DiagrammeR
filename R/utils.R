@@ -40,7 +40,7 @@ graph_object_valid <- function(graph) {
 # Function to check whether a graph contains any nodes
 graph_contains_nodes <- function(graph) {
 
-  if (node_count(graph) == 0) {
+  if (nrow(graph$nodes_df) == 0) {
     return(FALSE)
   } else {
     return(TRUE)
@@ -50,25 +50,15 @@ graph_contains_nodes <- function(graph) {
 # Function to check whether a graph contains any edges
 graph_contains_edges <- function(graph) {
 
-  if (edge_count(graph) == 0) {
+  if (nrow(graph$edges_df) == 0) {
     return(FALSE)
   } else {
     return(TRUE)
   }
 }
 
-# Function to check whether a graph contains a valid edge selection
-graph_contains_edge_selection <- function(graph) {
-
-  # Check if graph contains an edge selection
-  if (nrow(graph$edge_selection) > 0) {
-    return(TRUE)
-  } else {
-    return(FALSE)
-  }
-}
-
-# Function to check whether a graph contains a valid node selection
+# Function to check whether a graph
+# contains a valid node selection
 graph_contains_node_selection <- function(graph) {
 
   # Check if graph contains a node selection
@@ -79,10 +69,70 @@ graph_contains_node_selection <- function(graph) {
   }
 }
 
+# Function to check whether a graph
+# contains a valid edge selection
+graph_contains_edge_selection <- function(graph) {
+
+  # Check if graph contains an edge selection
+  if (nrow(graph$edge_selection) > 0) {
+    return(TRUE)
+  } else {
+    return(FALSE)
+  }
+}
+
+# Function to return of list of
+# node/edge selection properties
+node_edge_selection_properties <- function(graph) {
+
+  # Determine if there is an existing
+  # selection of nodes
+  node_selection_available <-
+    ifelse(
+      graph_contains_node_selection(graph = graph), TRUE, FALSE)
+
+  # Determine if there is an existing
+  # selection of edges
+  edge_selection_available <-
+    ifelse(
+      graph_contains_edge_selection(graph = graph), TRUE, FALSE)
+
+  # Get the existing node/edge count
+  if (node_selection_available | edge_selection_available) {
+
+    selection_type <-
+      ifelse(node_selection_available, "node", "edge")
+
+    if (selection_type == "node") {
+      selection_count <- nrow(graph$node_selection)
+      selection_count_str <-
+        paste0(selection_count, " node", ifelse(selection_count > 1, "s", ""))
+
+    } else {
+
+      selection_count <- nrow(graph$edge_selection)
+      selection_count_str <-
+        paste0(selection_count, " edge", ifelse(selection_count > 1, "s", ""))
+    }
+
+  } else {
+
+    selection_type <- as.character(NA)
+    selection_count <- 0
+    selection_count_str <- "no nodes or edges"
+  }
+
+  list(
+    node_selection_available = node_selection_available,
+    edge_selection_available = edge_selection_available,
+    selection_type = selection_type,
+    selection_count = selection_count,
+    selection_count_str = selection_count_str)
+}
+
 # Function to replace the `node_selection` df with
 # different node ID values
-#' @importFrom tibble tibble as_tibble
-#' @importFrom dplyr bind_rows
+#' @importFrom dplyr tibble as_tibble bind_rows
 replace_graph_node_selection <- function(graph,
                                          replacement) {
 
@@ -92,7 +142,7 @@ replace_graph_node_selection <- function(graph,
   # Remove objects in `graph$node_selection`
   node_selection <-
     node_selection %>%
-    tibble::as_tibble()
+    dplyr::as_tibble()
 
   node_selection <-
     node_selection[-seq(1, nrow(node_selection)), 1] %>%
@@ -101,14 +151,13 @@ replace_graph_node_selection <- function(graph,
   # Add replacement to `graph$node_selection`
   node_selection %>%
     dplyr::bind_rows(
-      tibble::tibble(
+      dplyr::tibble(
         node = as.integer(replacement)))
 }
 
 # Function to replace the `edge_selection` df with
 # different node ID values
-#' @importFrom tibble tibble as_tibble
-#' @importFrom dplyr bind_rows
+#' @importFrom dplyr tibble as_tibble bind_rows
 replace_graph_edge_selection <- function(graph,
                                          edge_id,
                                          from_node,
@@ -120,7 +169,7 @@ replace_graph_edge_selection <- function(graph,
   # Remove objects in `graph$edge_selection`
   edge_selection <-
     edge_selection %>%
-    tibble::as_tibble()
+    dplyr::as_tibble()
 
   edge_selection <-
     edge_selection[-seq(1, nrow(edge_selection)), 1] %>%
@@ -129,7 +178,7 @@ replace_graph_edge_selection <- function(graph,
   # Add replacement to `graph$edge_selection`
   edge_selection %>%
     dplyr::bind_rows(
-      tibble::tibble(
+      dplyr::tibble(
         edge = as.integer(edge_id),
         from = as.integer(from_node),
         to = as.integer(to_node)))
@@ -138,7 +187,7 @@ replace_graph_edge_selection <- function(graph,
 create_empty_nsdf <- function() {
 
   # Create empty `nsdf`
-  tibble::tibble(
+  dplyr::tibble(
     node = as.integer(NA))[-1, ] %>%
     as.data.frame(stringsAsFactors = FALSE)
 }
@@ -146,7 +195,7 @@ create_empty_nsdf <- function() {
 create_empty_esdf <- function() {
 
   # Create empty `esdf`
-  tibble::tibble(
+  dplyr::tibble(
     edge = as.integer(NA),
     from = as.integer(NA),
     to = as.integer(NA))[-1, ] %>%
@@ -167,11 +216,15 @@ is_attr_unique_and_non_na <- function(graph,
   } else if (which_graph_df == "edf") {
     df <- graph$edges_df
   } else {
-    stop("The `which_graph_df` argument must be either `ndf` or `edf`.")
+    stop(
+      "The `which_graph_df` argument must be either `ndf` or `edf`.",
+      call. = FALSE)
   }
 
   if (!(attr %in% colnames(df))) {
-    stop("The `attr` provided is not available.")
+    stop(
+      "The `attr` provided is not available.",
+      call. = FALSE)
   }
 
   # Are all values not NA?
@@ -202,13 +255,19 @@ translate_to_node_id <- function(graph, from, to) {
 
   # Check that node labels are unique
   if (length(unique(graph$nodes_df$label)) !=
-      node_count(graph)) {
-    stop("You cannot use labels to form edges because they are not distinct")
+      count_nodes(graph)) {
+
+    stop(
+      "You cannot use labels to define edges because they are not distinct.",
+      call. = FALSE)
   }
 
   # No node labels can be empty
   if (any(graph$nodes_df$label == "")) {
-    stop("You cannot use labels to form edges if there are empty strings for labels")
+
+    stop(
+      "You cannot use labels to define edges since there are empty strings for labels.",
+      call. = FALSE)
   }
 
   # Create the `from_id` and `to_id` vectors
@@ -269,11 +328,16 @@ add_action_to_log <- function(graph_log,
                               time_modified,
                               duration,
                               nodes,
-                              edges) {
+                              edges,
+                              d_n = 0,
+                              d_e = 0) {
 
   # Ensure that `time_modified` inherits from POSIXct
   if (inherits(time_modified, "POSIXct") == FALSE) {
-    stop("The `time_modified` value must inherit from POSIXct.")
+
+    stop(
+      "The `time_modified` value must inherit from POSIXct.",
+      call. = FALSE)
   }
 
   # Create a log line
@@ -285,6 +349,8 @@ add_action_to_log <- function(graph_log,
       duration = as.numeric(duration),
       nodes = as.integer(nodes),
       edges = as.integer(edges),
+      d_n = as.integer(d_n),
+      d_e = as.integer(d_e),
       stringsAsFactors = FALSE)
 
   # Append the log line to `graph_log`
@@ -323,6 +389,85 @@ save_graph_as_rds <- function(graph) {
 }
 
 ###
+# Selection helper functions
+###
+
+# Function to extract column names from a
+# column selection statement
+#' @importFrom stringr str_detect str_split str_extract
+get_col_selection <- function(col_selection_stmt) {
+
+  if (all(stringr::str_detect(
+    string = col_selection_stmt,
+    pattern = "^([a-zA-Z_\\.][a-zA-Z0-9_\\.]*?|`.*?`)$")) & length(col_selection_stmt) == 1) {
+
+    selection_type <- "single_column_name"
+
+    # Get the column names
+    column_selection <- col_selection_stmt
+
+  } else if (all(stringr::str_detect(
+    string = col_selection_stmt,
+    pattern = "(.* & ).*")) & length(col_selection_stmt) == 1) {
+
+    selection_type <- "column_names"
+
+    # Get the column names
+    column_selection <-
+      stringr::str_split(
+        string = col_selection_stmt,
+        pattern = " & ") %>%
+      unlist()
+
+  } else if (any(stringr::str_detect(
+    string = col_selection_stmt,
+    pattern = "^[0-9]*?:[0-9]*?$"))) {
+
+    selection_type <- "column_index_range"
+
+    # Get the column indices
+    column_selection <-
+      seq(
+        from = (stringr::str_split(
+          string = col_selection_stmt,
+          pattern = ":") %>%
+            unlist())[1] %>%
+          as.numeric(),
+        to = (stringr::str_split(
+          string = col_selection_stmt,
+          pattern = ":") %>%
+            unlist())[2] %>%
+          as.numeric())
+
+  } else if (any(
+    stringr::str_detect(
+      string = col_selection_stmt,
+      pattern = "^([a-zA-Z_\\.][a-zA-Z0-9_\\.]*?|`.*?`):([a-zA-Z_\\.][a-zA-Z0-9_\\.]*?|`.*?`)$"))
+  ) {
+
+    selection_type <- "column_range"
+
+    # Get the first and last column names
+    column_selection <-
+      c(
+        (stringr::str_split(
+          string = col_selection_stmt,
+          pattern = ":") %>%
+           unlist())[1],
+        (stringr::str_split(
+          string = col_selection_stmt,
+          pattern = ":") %>%
+           unlist())[2])
+  } else {
+    return(list())
+  }
+
+  list(
+    selection_type = selection_type,
+    column_selection = column_selection)
+}
+
+###
 # Aesthetic attribute functions
 ###
 
@@ -356,19 +501,139 @@ contrasting_text_color <- function(background_color) {
 }
 
 ###
+# Functions that help build info messages
+###
+
+# Function that constructs a consistent
+# message string and passes it to `message()`
+#' @importFrom glue glue
+emit_message <- function(fcn_name,
+                         message_body) {
+
+  glue::glue("`{fcn_name}()` INFO: {message_body}") %>%
+    as.character() %>%
+    message()
+}
+
+# Function that constructs a consistent
+# warning string and passes it to `warning()`
+#' @importFrom glue glue
+emit_warning <- function(fcn_name,
+                         message_body) {
+
+  glue::glue("`{fcn_name}()` WARNING: {message_body}") %>%
+    as.character() %>%
+    warning()
+}
+
+# Function that constructs a consistent
+# message string and passes it to `stop()`
+#' @importFrom glue glue
+emit_error <- function(fcn_name,
+                       reasons) {
+
+  header_text <-
+      ifelse(length(reasons) > 1, "REASONS:\n", "REASON:\n")
+
+  if (length(reasons <= 5)) {
+
+    message_body <-
+      paste(paste0("* ", reasons), collapse = "\n")
+
+  } else {
+
+    excess_errors <- length(reasons) - 5
+
+    message_body <-
+      paste(paste0("* ", reasons[1:5]), collapse = "\n")
+
+    error_pl_str <-
+      ifelse(excess_errors == 1, "error", "errors")
+
+    excess_errors_str <-
+      glue::glue(
+        "* ... and {excess_errors} more {error_pl_str}") %>%
+      as.character()
+  }
+
+  glue::glue("`{fcn_name}()` {header_text}{message_body}") %>%
+    as.character() %>%
+    stop(call. = FALSE)
+}
+
+# Function that gets the calling function
+# as a formatted character string
+#' @importFrom stringr str_replace_all
+get_calling_fcn <- function() {
+
+  calling_fcn <- deparse(sys.call(-1))
+
+  stringr::str_replace_all(
+    calling_fcn,
+    pattern = "([a-z0-9_]*)(.*)",
+    replacement = "\\1")
+}
+
+###
 # Functions that produce useful vectors
 ###
+
+
+# Function that yields a vector of
+# Graphviz graph attribute names
+gv_graph_attributes <- function() {
+
+  c("layout", "bgcolor", "rankdir",
+    "overlap", "outputorder", "fixedsize",
+    "mindist", "nodesep", "ranksep",
+    "stylesheet")
+}
+
+# Function that yields a vector of
+# Graphviz node attribute names
+gv_node_attributes <- function() {
+
+  c("shape", "style", "penwidth", "color", "fillcolor",
+    "fontname", "fontsize", "fontcolor",
+    "height", "width", "group",
+    "tooltip", "xlabel", "URL",
+    "distortion", "sides", "skew", "peripheries",
+    "gradientangle", "label", "fixedsize",
+    "labelloc", "margin", "orientation", "pos")
+}
+
+# Function that yields a vector of
+# Graphviz edge attribute names
+gv_edge_attributes <- function() {
+
+  c("style", "penwidth", "color", "arrowsize",
+    "arrowhead", "arrowtail",
+    "fontname", "fontsize", "fontcolor",
+    "len", "tooltip", "URL",
+    "label", "labelfontname", "labelfontsize",
+    "labelfontcolor", "labeltooltip", "labelURL",
+    "edgetooltip", "edgeURL",
+    "headtooltip", "headURL",
+    "headclip", "headlabel", "headport",
+    "tailtooltip", "tailURL",
+    "tailclip",  "taillabel", "tailport",
+    "dir", "decorate")
+}
 
 # Function that yields vector of node
 # creation function names
 node_creation_functions <- function() {
 
   c("add_node", "add_n_nodes", "add_n_node_clones",
-    "add_n_nodes_ws", "add_node_df",
-    "add_nodes_from_df_cols",
+    "add_node_clones_ws", "add_n_nodes_ws",
+    "add_node_df", "add_nodes_from_df_cols",
     "add_nodes_from_table", "add_full_graph",
     "add_balanced_tree", "add_cycle",
-    "add_path", "add_prism", "add_star")
+    "add_path", "add_prism", "add_star",
+    "add_grid_2d", "add_grid_3d", "add_gnm_graph",
+    "add_gnp_graph", "add_pa_graph",
+    "add_smallworld_graph", "add_growing_graph",
+    "add_islands_graph")
 }
 
 # Function that yields vector of node
@@ -388,7 +653,11 @@ edge_creation_functions <- function() {
     "add_reverse_edges_ws",
     "add_edges_from_table", "add_full_graph",
     "add_balanced_tree", "add_cycle",
-    "add_path", "add_prism", "add_star")
+    "add_path", "add_prism", "add_star",
+    "add_grid_2d", "add_grid_3d", "add_gnm_graph",
+    "add_gnp_graph", "add_pa_graph",
+    "add_smallworld_graph", "add_growing_graph",
+    "fully_connect_nodes_ws")
 }
 
 # Function that yields vector of edge
@@ -397,7 +666,8 @@ edge_deletion_functions <- function() {
 
   c("delete_edge", "delete_edges_ws",
     "create_subgraph_ws", "create_complement_graph",
-    "delete_node", "delete_nodes_ws")
+    "delete_node", "delete_nodes_ws", "delete_loop_edges_ws",
+    "fully_disconnect_nodes_ws")
 }
 
 # Function that yields vector of graph
@@ -409,8 +679,8 @@ graph_init_functions <- function() {
     "import_graph")
 }
 
-# Function that to create a list of data frames
-# for functions that get node properties using
+# Function for creating a list of data frames
+# of functions that get node properties using
 # whole-graph methods
 value_per_node_functions <- function() {
 
@@ -597,7 +867,7 @@ remove_linked_dfs <- function(graph) {
       dplyr::select(df_id__) %>%
       dplyr::distinct() %>%
       dplyr::pull(df_id__) %>%
-      setdiff(ndf_df_ids)
+      base::setdiff(ndf_df_ids)
 
     # If any stored data frames are associated
     # with edges that no longer exist, remove them
@@ -621,7 +891,7 @@ remove_linked_dfs <- function(graph) {
       dplyr::select(df_id__) %>%
       dplyr::distinct() %>%
       dplyr::pull(df_id__) %>%
-      setdiff(edf_df_ids)
+      base::setdiff(edf_df_ids)
 
 
     # If any stored data frames are associated

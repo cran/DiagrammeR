@@ -15,23 +15,28 @@
 #'   add_cycle(n = 5)
 #'
 #' # Determine the graph's girth
-#' get_girth(graph)
-#' #> [1] 5
+#' graph %>%
+#'   get_girth()
 #'
 #' # Create a full graph and then
 #' # get the girth for that
 #' create_graph() %>%
 #'   add_full_graph(n = 10) %>%
 #'   get_girth()
-#' #> [1] 3
 #' @importFrom igraph girth
 #' @export get_girth
 
 get_girth <- function(graph) {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # If the graph is empty, then return NA

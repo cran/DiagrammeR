@@ -8,57 +8,50 @@
 #' @return a data frame with group membership
 #' assignments for each of the nodes.
 #' @examples
-#' # Create a random graph
+#' # Create a random graph using the
+#' # `add_gnm_graph()` function
 #' graph <-
-#'   create_random_graph(
-#'     n = 10, m = 22,
+#'   create_graph(
+#'     directed = FALSE) %>%
+#'   add_gnm_graph(
+#'     n = 10,
+#'     m = 15,
 #'     set_seed = 23)
 #'
-#' # Get the group membership values for
-#' # all nodes in the graph through the
-#' # multi-level optimization of modularity
+#' # Get the group membership values
+#' # for all nodes in the graph
+#' # through the multi-level
+#' # optimization of modularity
 #' # algorithm
-#' get_cmty_louvain(graph)
-#' #>    id louvain_group
-#' #> 1   1             2
-#' #> 2   2             1
-#' #> 3   3             1
-#' #> 4   4             2
-#' #> 5   5             2
-#' #> 6   6             2
-#' #> 7   7             1
-#' #> 8   8             2
-#' #> 9   9             1
-#' #> 10 10             2
+#' graph %>%
+#'   get_cmty_louvain()
 #'
-#' # Add the group membership values to the
-#' # graph as a node attribute
+#' # Add the group membership
+#' # values to the graph as a
+#' # node attribute
 #' graph <-
 #'   graph %>%
 #'   join_node_attrs(
 #'     df = get_cmty_louvain(.))
 #'
-#' # Display the graph's node data frame
-#' get_node_df(graph)
-#' #>    id type label value louvain_group
-#' #> 1   1 <NA>     1   6.0             2
-#' #> 2   2 <NA>     2   2.5             1
-#' #> 3   3 <NA>     3   3.5             1
-#' #> 4   4 <NA>     4   7.5             2
-#' #> 5   5 <NA>     5   8.5             2
-#' #> 6   6 <NA>     6   4.5             2
-#' #> 7   7 <NA>     7  10.0             1
-#' #> 8   8 <NA>     8  10.0             2
-#' #> 9   9 <NA>     9   8.5             1
-#' #> 10 10 <NA>    10  10.0             2
+#' # Display the graph's
+#' # node data frame
+#' graph %>%
+#'   get_node_df()
 #' @importFrom igraph cluster_louvain membership
 #' @export get_cmty_louvain
 
 get_cmty_louvain <- function(graph) {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # If graph is directed, transform to undirected

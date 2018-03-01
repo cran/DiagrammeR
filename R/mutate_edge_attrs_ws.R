@@ -29,11 +29,8 @@
 #' # Get the graph's internal edf
 #' # to show which edge attributes
 #' # are available
-#' get_edge_df(graph)
-#' #>   id from to  rel width
-#' #> 1  1    1  2 <NA>   3.4
-#' #> 2  2    2  3 <NA>   2.3
-#' #> 3  3    3  4 <NA>   7.2
+#' graph %>%
+#'   get_edge_df()
 #'
 #' # Mutate the `width` edge
 #' # attribute for the edges
@@ -50,11 +47,8 @@
 #' # edf to show that the edge
 #' # attribute `width` had its
 #' # values changed
-#' get_edge_df(graph)
-#' #>   id from to  rel width
-#' #> 1  1    1  2 <NA>   1.7
-#' #> 2  2    2  3 <NA>   2.3
-#' #> 3  3    3  4 <NA>   7.2
+#' graph %>%
+#'   get_edge_df()
 #'
 #' # Create a new edge attribute,
 #' # called `length`, that is the
@@ -75,11 +69,8 @@
 #' # for edges `2` and `3` (since
 #' # edge `1` is excluded, an NA
 #' # value is applied)
-#' get_edge_df(graph)
-#' #>   id from to  rel width length
-#' #> 1  1    1  2 <NA>   1.7     NA
-#' #> 2  2    2  3 <NA>   2.3   2.83
-#' #> 3  3    3  4 <NA>   7.2   3.97
+#' graph %>%
+#'   get_edge_df()
 #'
 #' # Create a new edge attribute
 #' # called `area`, which is the
@@ -95,11 +86,8 @@
 #' # values had been multiplied
 #' # together (with new attr `area`)
 #' # for nodes `2` and `3`
-#' get_edge_df(graph)
-#' #>   id from to  rel width length   area
-#' #> 1  1    1  2 <NA>   1.7     NA     NA
-#' #> 2  2    2  3 <NA>   2.3   2.83  6.509
-#' #> 3  3    3  4 <NA>   7.2   3.97 28.584
+#' graph %>%
+#'   get_edge_df()
 #'
 #' # We can invert the selection
 #' # and mutate edge `1` several
@@ -119,11 +107,8 @@
 #' # non-NA values for its edge
 #' # attributes without changing
 #' # those of the other edges
-#' get_edge_df(graph)
-#' #>   id from to  rel width length   area
-#' #> 1  1    1  2 <NA>   1.7   5.53  9.401
-#' #> 2  2    2  3 <NA>   2.3   2.83  6.509
-#' #> 3  3    3  4 <NA>   7.2   3.97 28.584
+#' graph %>%
+#'   get_edge_df()
 #' @importFrom dplyr mutate_
 #' @importFrom rlang exprs
 #' @export mutate_edge_attrs_ws
@@ -134,19 +119,31 @@ mutate_edge_attrs_ws <- function(graph,
   # Get the time of function start
   time_function_start <- Sys.time()
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Validation: Graph contains edges
   if (graph_contains_edges(graph) == FALSE) {
-    stop("The graph contains no edges, so, no edge attributes can undergo mutation.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no edges")
   }
 
   # Validation: Graph object has valid edge selection
   if (graph_contains_edge_selection(graph) == FALSE) {
-    stop("There is no selection of edges available.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no selection of edges")
   }
 
   # Collect expressions
@@ -161,13 +158,18 @@ mutate_edge_attrs_ws <- function(graph,
   if ("id" %in% names(exprs) |
       "from" %in% names(exprs) |
       "to" %in% names(exprs)) {
-    stop("The variables `id`, `from`, or `to` cannot undergo mutation.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The variables `id`, `from`, or `to` cannot undergo mutation")
   }
 
   # Determine which edges are not
   # in the active selection
   unselected_edges <-
-    base::setdiff(get_edge_ids(graph), get_selection(graph))
+    base::setdiff(
+      get_edge_ids(graph),
+      suppressMessages(get_selection(graph)))
 
   for (i in 1:length(exprs)) {
 
@@ -222,7 +224,7 @@ mutate_edge_attrs_ws <- function(graph,
     add_action_to_log(
       graph_log = graph$graph_log,
       version_id = nrow(graph$graph_log) + 1,
-      function_used = "mutate_edge_attrs_ws",
+      function_used = fcn_name,
       time_modified = time_function_start,
       duration = graph_function_duration(time_function_start),
       nodes = nrow(graph$nodes_df),

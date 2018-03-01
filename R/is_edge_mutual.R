@@ -23,50 +23,57 @@
 #' # edge data frame
 #' graph %>%
 #'   get_edge_df()
-#' #>   id from to  rel
-#' #> 1  1    1  2 <NA>
-#' #> 2  2    2  3 <NA>
-#' #> 3  3    3  4 <NA>
-#' #> 4  4    4  3 <NA>
-#' #> 5  5    2  1 <NA>
 #'
 #' # Determine if edge `1` has
 #' # a mutual edge
 #' graph %>%
 #'   is_edge_mutual(edge = 1)
-#' #> [1] TRUE
 #'
 #' # Determine if edge `2` has
 #' # a mutual edge
 #' graph %>%
 #'   is_edge_mutual(edge = 2)
-#' #> [1] FALSE
 #' @importFrom dplyr filter pull
 #' @export is_edge_mutual
 
 is_edge_mutual <- function(graph,
                            edge) {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Validation: Graph contains edges
   if (graph_contains_edges(graph) == FALSE) {
-    stop("The graph contains no edges, so, no edges can be selected.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no edges")
   }
 
   # Stop function if more than one value
   # provided for `edge`
   if (length(edge) > 1) {
-    stop("Only a single should be provided for `edge`.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "Only a single edge ID should be provided for `edge`")
   }
 
   # Stop function if the value provided
   # in `edge` is not numeric
   if (!is.numeric(edge)) {
-    stop("The value provided for `edge` should be numeric.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The value provided for `edge` should be numeric")
   }
 
   # Create binding for a specific variable
@@ -78,7 +85,10 @@ is_edge_mutual <- function(graph,
   # Stop function if the edge ID provided
   # is not a valid edge ID
   if (!(edge %in% edf$id)) {
-    stop("The provided edge ID is not present in the graph.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The provided edge ID is not present in the graph")
   }
 
   # Obtain the edge definition

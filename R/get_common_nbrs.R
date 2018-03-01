@@ -16,22 +16,28 @@
 #' # for nodes `1` and `2` (there are no
 #' # common neighbors amongst them)
 #' graph %>%
-#'   get_common_nbrs(nodes = c(1, 2))
-#' #> [1] NA
+#'   get_common_nbrs(
+#'     nodes = c(1, 2))
 #'
 #' # Find all common neighbor nodes for
 #' # nodes `1` and `3`
 #' graph %>%
-#'   get_common_nbrs(nodes = c(1, 3))
-#' #> [1] 2
+#'   get_common_nbrs(
+#'     nodes = c(1, 3))
 #' @export get_common_nbrs
 
 get_common_nbrs <- function(graph,
                             nodes) {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Get predecessors and successors for all nodes

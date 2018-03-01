@@ -5,52 +5,103 @@
 \title{Add a fully connected graph}
 \usage{
 add_full_graph(graph, n, type = NULL, label = TRUE, rel = NULL,
-  edge_wt_matrix = NULL, keep_loops = FALSE, ...)
+  edge_wt_matrix = NULL, keep_loops = FALSE, node_aes = NULL,
+  edge_aes = NULL, node_data = NULL, edge_data = NULL)
 }
 \arguments{
-\item{graph}{a graph object of class
-\code{dgr_graph}.}
+\item{graph}{a graph object of
+class \code{dgr_graph}.}
 
-\item{n}{the number of nodes comprising the fully
+\item{n}{the number of nodes
+comprising the fully connected
+graph.}
+
+\item{type}{an optional string
+that describes the entity type
+for the nodes to be added.}
+
+\item{label}{either a vector
+object of length \code{n} that
+provides optional labels for the
+new nodes, or, a boolean value
+where setting to \code{TRUE}
+ascribes node IDs to the label
+and \code{FALSE} or \code{NULL}
+yields a blank label.}
+
+\item{rel}{an optional string
+for providing a relationship label
+to all new edges created in the
 connected graph.}
 
-\item{type}{an optional string that describes the
-entity type for the nodes to be added.}
+\item{edge_wt_matrix}{an
+optional matrix of \code{n} by
+\code{n} dimensions containing
+values to apply as edge weights.
+If the matrix has row names or
+column names and
+\code{label = TRUE}, those row or
+column names will be used as node
+label values.}
 
-\item{label}{either a vector object of length
-\code{n} that provides optional labels for the new
-nodes, or, a boolean value where setting to
-\code{TRUE} ascribes node IDs to the label and
-\code{FALSE} or \code{NULL} yields a blank label.}
+\item{keep_loops}{an option to
+simplify the fully connected
+graph by removing loops (edges
+from and to the same node). The
+default value is \code{FALSE}.}
 
-\item{rel}{an optional string for providing a
-relationship label to all new edges created in the
-connected graph.}
+\item{node_aes}{an optional list
+of named vectors comprising node
+aesthetic attributes. The helper
+function \code{node_aes()} is
+strongly recommended for use here
+as it contains arguments for each
+of the accepted node aesthetic
+attributes (e.g., \code{shape},
+\code{style}, \code{color},
+\code{fillcolor}).}
 
-\item{edge_wt_matrix}{an optional matrix of \code{n}
-by \code{n} dimensions containing values to apply
-as edge weights. If the matrix has row names or
-column names and \code{label = TRUE}, those row or
-column names will be used as node label values.}
+\item{edge_aes}{an optional list
+of named vectors comprising edge
+aesthetic attributes. The helper
+function \code{edge_aes()} is
+strongly recommended for use here
+as it contains arguments for each
+of the accepted edge aesthetic
+attributes (e.g., \code{shape},
+\code{style}, \code{penwidth},
+\code{color}).}
 
-\item{keep_loops}{an option to simplify the fully
-connected graph by removing loops (edges from and
-to the same node). The default value is
-\code{FALSE}.}
+\item{node_data}{an optional list
+of named vectors comprising node
+data attributes. The helper
+function \code{node_data()} is
+strongly recommended for use here
+as it helps bind data specifically
+to the created nodes.}
 
-\item{...}{optional node attributes supplied as
-vectors.}
+\item{edge_data}{an optional list
+of named vectors comprising edge
+data attributes. The helper function
+\code{edge_data()} is strongly
+recommended for use here as it helps
+bind data specifically to the
+created edges.}
 }
 \value{
-a graph object of class \code{dgr_graph}.
+a graph object of class
+\code{dgr_graph}.
 }
 \description{
-With a graph object of class
-\code{dgr_graph}, add a fully connected graph either
-with or without loops. If the graph object set as
-directed, the added graph will have edges to and from
-each pair of nodes. In the undirected case, a single
-edge will link each pair of nodes.
+With a graph object
+of class \code{dgr_graph}, add a
+fully connected graph either with
+or without loops. If the graph
+object set as directed, the added
+graph will have edges to and from
+each pair of nodes. In the
+undirected case, a single edge
+will link each pair of nodes.
 }
 \examples{
 # Create a new graph object
@@ -68,22 +119,15 @@ graph <-
 
 # Get node information
 # from this graph
-node_info(graph)
-#>   id type label deg indeg outdeg loops
-#> 1  1 <NA>     1   6     3      3     1
-#> 2  2 <NA>     2   6     3      3     1
-#> 3  3 <NA>     3   6     3      3     1
+graph \%>\%
+  get_node_info()
 
 # Using `keep_loops = FALSE`
 # (the default) will remove
 # the loops
 create_graph() \%>\%
   add_full_graph(n = 3) \%>\%
-  node_info()
-#>   id type label deg indeg outdeg loops
-#> 1  1 <NA>     1   4     2      2     0
-#> 2  2 <NA>     2   4     2      2     0
-#> 3  3 <NA>     3   4     2      2     0
+  get_node_info()
 
 # Values can be set for
 # the node `label`, node
@@ -100,22 +144,11 @@ graph <-
 # data frame (ndf)
 graph \%>\%
   get_node_df()
-#>   id      type label
-#> 1  1 connected   1st
-#> 2  2 connected   2nd
-#> 3  3 connected   3rd
 
 # Show the graph's edge
 # data frame (edf)
 graph \%>\%
   get_edge_df()
-#>   id from to          rel
-#> 1  1    1  2 connected_to
-#> 2  2    1  3 connected_to
-#> 3  3    2  1 connected_to
-#> 4  4    2  3 connected_to
-#> 5  5    3  1 connected_to
-#> 6  6    3  2 connected_to
 
 # Create a fully-connected and
 # directed graph with 3 nodes,
@@ -150,22 +183,11 @@ graph <-
 # data frame (ndf)
 graph \%>\%
   get_node_df()
-#>   id     type label
-#> 1  1 weighted     a
-#> 2  2 weighted     b
-#> 3  3 weighted     c
 
 # Show the graph's edge
 # data frame (edf)
 graph \%>\%
   get_edge_df()
-#>   id from to        rel weight
-#> 1  1    1  2 related_to   3.30
-#> 2  2    1  3 related_to   5.02
-#> 3  3    2  1 related_to   4.13
-#> 4  4    2  3 related_to   6.49
-#> 5  5    3  1 related_to   6.03
-#> 6  6    3  2 related_to   5.55
 
 # An undirected graph can
 # also use a matrix with
@@ -181,8 +203,4 @@ create_graph(directed = FALSE) \%>\%
     edge_wt_matrix = edge_wt_matrix,
     keep_loops = FALSE) \%>\%
   get_edge_df()
-#>   id from to        rel weight
-#> 1  1    1  2 related_to   3.30
-#> 2  2    1  3 related_to   5.02
-#> 3  3    2  3 related_to   6.49
 }

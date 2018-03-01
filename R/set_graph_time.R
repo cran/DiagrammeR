@@ -6,7 +6,6 @@
 #' @param time the date-time to set for the graph.
 #' @param tz the timezone to set for the graph.
 #' @examples
-#' \dontrun{
 #' # Create an empty graph
 #' graph <- create_graph()
 #'
@@ -20,7 +19,9 @@
 #' # Provide the new graph with a timestamp that is
 #' # the current time; the time zone is inferred from
 #' # the user's locale
-#' graph_2 <- set_graph_time(graph)
+#' graph_2 <-
+#'   graph %>%
+#'   set_graph_time()
 #'
 #' # The time zone can be updated when a timestamp
 #' # is present
@@ -28,7 +29,6 @@
 #'   graph_2 %>%
 #'   set_graph_time(
 #'     tz = "America/Los_Angeles")
-#' }
 #' @return a graph object of class \code{dgr_graph}.
 #' @export set_graph_time
 
@@ -39,9 +39,15 @@ set_graph_time <- function(graph,
   # Get the time of function start
   time_function_start <- Sys.time()
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   if (is.null(time) & is.null(tz)) {
@@ -60,7 +66,10 @@ set_graph_time <- function(graph,
 
   if (!is.null(tz)) {
     if (!(tz %in% OlsonNames())) {
-      stop("The time zone provided must be available in `OlsonNames()`.")
+
+      emit_error(
+        fcn_name = fcn_name,
+        reasons = "The time zone provided must be available in `OlsonNames()`")
     }
   }
 
@@ -77,7 +86,7 @@ set_graph_time <- function(graph,
     add_action_to_log(
       graph_log = graph$graph_log,
       version_id = nrow(graph$graph_log) + 1,
-      function_used = "set_graph_time",
+      function_used = fcn_name,
       time_modified = time_function_start,
       duration = graph_function_duration(time_function_start),
       nodes = nrow(graph$nodes_df),

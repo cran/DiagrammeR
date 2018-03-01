@@ -14,23 +14,28 @@
 #'   add_cycle(n = 5)
 #'
 #' # Determine the mean distance
-#' get_mean_distance(graph)
-#' #> [1] 2.5
+#' graph %>%
+#'   get_mean_distance()
 #'
 #' # Create a full graph and then
 #' # get the mean distance value
 #' create_graph() %>%
 #'   add_full_graph(n = 10) %>%
 #'   get_mean_distance()
-#' #> [1] 1
 #' @importFrom igraph mean_distance
 #' @export get_mean_distance
 
 get_mean_distance <- function(graph) {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # If the graph is empty, then return NA

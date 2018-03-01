@@ -5,19 +5,25 @@
 #' \code{dgr_graph}.
 #' @return a character vector of length 1 containing
 #' Graphviz DOT code.
-#' @importFrom dplyr filter mutate
+#' @importFrom dplyr filter mutate pull
 #' @importFrom stringr str_replace str_replace_all
 #' @export generate_dot
 
 generate_dot <- function(graph) {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Create bindings for specific variables
-  attr_type <- attr <- value <- NULL
+  attr_type <- attr <- value <- string <- NULL
 
   # Extract objects from the graph objecct
   nodes_df <- graph$nodes_df
@@ -31,7 +37,9 @@ generate_dot <- function(graph) {
       dplyr::filter(attr_type == "graph") %>%
       dplyr::mutate(string = paste0(attr, " = '", value, "'"))
 
-    graph_attrs <- graph_attrs[[4]]
+    graph_attrs <-
+      graph_attrs %>%
+      dplyr::pull(string)
 
   } else {
     graph_attrs <- NA
@@ -43,7 +51,23 @@ generate_dot <- function(graph) {
       dplyr::filter(attr_type == "node") %>%
       dplyr::mutate(string = paste0(attr, " = '", value, "'"))
 
-    node_attrs <- node_attrs[[4]]
+    node_attrs <-
+      node_attrs %>%
+      dplyr::pull(string)
+
+    # Fill in NA attribute values with global preset values
+    for (i in 1:nrow(global_attrs %>% dplyr::filter(attr_type == "node"))) {
+
+      node_attr_to_set <- (global_attrs %>% dplyr::filter(attr_type == "node"))[i, 1]
+
+      if (node_attr_to_set %in% colnames(nodes_df)) {
+
+        col_num <- which(colnames(nodes_df) == node_attr_to_set)
+
+        nodes_df[which(is.na(nodes_df[, col_num])), col_num] <-
+          (global_attrs %>% dplyr::filter(attr_type == "node"))[i, 2]
+      }
+    }
 
   } else {
     node_attrs <- NA
@@ -55,7 +79,23 @@ generate_dot <- function(graph) {
       dplyr::filter(attr_type == "edge") %>%
       dplyr::mutate(string = paste0(attr, " = '", value, "'"))
 
-    edge_attrs <- edge_attrs[[4]]
+    edge_attrs <-
+      edge_attrs %>%
+      dplyr::pull(string)
+
+    # Fill in NA attribute values with global preset values
+    for (i in 1:nrow(global_attrs %>% dplyr::filter(attr_type == "edge"))) {
+
+      edge_attr_to_set <- (global_attrs %>% dplyr::filter(attr_type == "edge"))[i, 1]
+
+      if (edge_attr_to_set %in% colnames(edges_df)) {
+
+        col_num <- which(colnames(edges_df) == edge_attr_to_set)
+
+        edges_df[which(is.na(edges_df[, col_num])), col_num] <-
+          (global_attrs %>% dplyr::filter(attr_type == "edge"))[i, 2]
+      }
+    }
 
   } else {
     edge_attrs <- NA
@@ -109,47 +149,56 @@ generate_dot <- function(graph) {
     label_col <- which(colnames(nodes_df) == "label")
 
     for (i in 1:nrow(nodes_df)) {
+
       if (nodes_df[i, display_col] != "") {
+
         nodes_df[i, label_col] <-
           nodes_df[
             i, which(colnames(nodes_df) == nodes_df[i, display_col])]
+
       } else {
         nodes_df[i, label_col] <- ""
       }
     }
   }
 
+  # If `display` column in `edges_df`, modify label
+  # column for this render
+  if ("display" %in% colnames(edges_df)) {
+
+    display_col <- which(colnames(edges_df) == "display")
+
+    if (!("label" %in% colnames(edges_df))) {
+
+      edges_df <-
+        edges_df %>%
+        mutate(label = as.character(NA))
+    }
+
+    label_col <- which(colnames(edges_df) == "label")
+
+    for (i in 1:nrow(edges_df)) {
+      if (!is.na(edges_df[i, display_col]) ) {
+        if (edges_df[i, display_col] != "") {
+
+        edges_df[i, label_col] <-
+          edges_df[
+            i, which(colnames(edges_df) == edges_df[i, display_col])]
+        }
+      } else {
+        edges_df[i, label_col] <- ""
+      }
+    }
+  }
+
   # Create vector of graph attributes
-  graph_attributes <-
-    c("bgcolor", "layout", "overlap", "fixedsize",
-      "mindist", "nodesep", "outputorder", "ranksep",
-      "rankdir", "stylesheet")
+  graph_attributes <- gv_graph_attributes()
 
   # Create vector of node attributes
-  node_attributes <-
-    c("color", "distortion", "fillcolor",
-      "fixedsize", "fontcolor", "fontname", "fontsize",
-      "gradientangle", "group", "height", "label",
-      "labelloc", "margin", "orientation", "penwidth",
-      "peripheries", "pos", "shape", "sides", "skew",
-      "style", "tooltip", "width", "img", "icon")
+  node_attributes <- gv_node_attributes()
 
   # Create vector of edge attributes
-  edge_attributes <-
-    c("arrowhead", "arrowsize", "arrowtail", "color",
-      "constraint", "decorate", "dir", "edgeURL",
-      "edgehref", "edgetarget", "edgetooltip",
-      "fontcolor", "fontname", "fontsize", "headclip",
-      "headhref", "headlabel", "headport", "headtarget",
-      "headtooltip", "headURL", "href", "id", "label",
-      "labelangle", "labeldistance", "labelfloat",
-      "labelfontcolor", "labelfontname", "labelfontsize",
-      "labelhref", "labelURL", "labeltarget",
-      "labeltooltip", "layer", "lhead", "ltail", "minlen",
-      "penwidth", "samehead", "sametail", "style",
-      "tailclip", "tailhref", "taillabel", "tailport",
-      "tailtarget", "tailtooltip", "tailURL", "target",
-      "tooltip", "weight")
+  edge_attributes <- gv_edge_attributes()
 
   if (nrow(nodes_df) == 0 &
       nrow(edges_df) == 0) {
@@ -168,92 +217,44 @@ generate_dot <- function(graph) {
 
     # Create the default attributes statement
     # for graph attributes
-    if (length(graph_attrs) != 1) {
-      if (!(any(is.na(graph_attrs)))) {
-        graph_attr_stmt <-
-          paste0("graph [",
-                 paste(graph_attrs,
-                       collapse = ",\n       "),
-                 "]\n")
-      }
+    if (!(any(is.na(graph_attrs)))) {
+      graph_attr_stmt <-
+        paste0("graph [",
+               paste(graph_attrs,
+                     collapse = ",\n       "),
+               "]\n")
+    } else {
+      graph_attr_stmt <- ""
     }
 
     # Create the default attributes statement
     # for node attributes
-    if (length(node_attrs) != 1) {
-      if (!(any(is.na(node_attrs)))) {
-        node_attr_stmt <-
-          paste0("node [", paste(node_attrs,
-                                 collapse = ",\n     "),
-                 "]\n")
-      }
+    if (!(any(is.na(node_attrs)))) {
+      node_attr_stmt <-
+        paste0("node [", paste(node_attrs,
+                               collapse = ",\n      "),
+               "]\n")
+    } else {
+      node_attr_stmt <- ""
     }
 
     # Create the default attributes statement
     # for edge attributes
-    if (length(edge_attrs) != 1) {
-      if (!(any(is.na(edge_attrs)))) {
-        edge_attr_stmt <-
-          paste0("edge [", paste(edge_attrs,
-                                 collapse = ",\n     "),
-                 "]\n")
-      }
+    if (!(any(is.na(edge_attrs)))) {
+      edge_attr_stmt <-
+        paste0("edge [", paste(edge_attrs,
+                               collapse = ",\n     "),
+               "]\n")
+    } else {
+      edge_attr_stmt <- ""
     }
 
     # Combine default attributes into a single block
-    if (exists("graph_attr_stmt") &
-        exists("node_attr_stmt") &
-        exists("edge_attr_stmt")) {
-      combined_attr_stmts <-
-        paste(graph_attr_stmt,
-              node_attr_stmt,
-              edge_attr_stmt, sep = "\n")
-    }
-
-    if (!exists("graph_attr_stmt") &
-        exists("node_attr_stmt") &
-        exists("edge_attr_stmt")) {
-      combined_attr_stmts <-
-        paste(node_attr_stmt,
-              edge_attr_stmt, sep = "\n")
-    }
-
-    if (exists("graph_attr_stmt") &
-        !exists("node_attr_stmt") &
-        exists("edge_attr_stmt")) {
-      combined_attr_stmts <-
-        paste(graph_attr_stmt,
-              edge_attr_stmt, sep = "\n")
-    }
-
-    if (exists("graph_attr_stmt") &
-        exists("node_attr_stmt") &
-        !exists("edge_attr_stmt")) {
-      combined_attr_stmts <-
-        paste(graph_attr_stmt,
-              node_attr_stmt, sep = "\n")
-    }
-
-    if (exists("graph_attr_stmt") &
-        !exists("node_attr_stmt") &
-        !exists("edge_attr_stmt")) {
-      combined_attr_stmts <-
-        paste0(graph_attr_stmt, "\n")
-    }
-
-    if (!exists("graph_attr_stmt") &
-        exists("node_attr_stmt") &
-        !exists("edge_attr_stmt")) {
-      combined_attr_stmts <-
-        paste0(node_attr_stmt, "\n")
-    }
-
-    if (!exists("graph_attr_stmt") &
-        !exists("node_attr_stmt") &
-        exists("edge_attr_stmt")) {
-      combined_attr_stmts <-
-        paste0(edge_attr_stmt, "\n")
-    }
+    combined_attr_stmts <-
+      paste(
+        graph_attr_stmt,
+        node_attr_stmt,
+        edge_attr_stmt, sep = "\n")
 
     #
     # Create the DOT node block

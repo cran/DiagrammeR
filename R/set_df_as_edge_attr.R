@@ -47,12 +47,11 @@
 #' # Bind the data frame as an edge attribute
 #' # to the edge with ID `1`
 #' graph <-
+#'   graph %>%
 #'   set_df_as_edge_attr(
-#'     graph = graph,
 #'     edge = 1,
 #'     df = df)
-#' @importFrom dplyr filter everything mutate select bind_rows
-#' @importFrom tibble tibble as_tibble
+#' @importFrom dplyr filter everything mutate select bind_rows as_tibble
 #' @importFrom purrr flatten_chr
 #' @export set_df_as_edge_attr
 
@@ -63,25 +62,40 @@ set_df_as_edge_attr <- function(graph,
   # Get the time of function start
   time_function_start <- Sys.time()
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Validation: Graph contains edges
   if (graph_contains_edges(graph) == FALSE) {
-    stop("The graph contains no edges, so, a df cannot be added.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no edges")
   }
 
   # Value given for edge must only be a single value
   if (length(edge) > 1) {
-    stop("Only one edge can be specified.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "Only one edge can be specified")
   }
 
   # Values given for edge must correspond to an edge ID
   # in the graph
   if (!(edge %in% graph$edges_df$id)) {
-    stop("The value given for `edge` does not correspond to an edge ID.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The value given for `edge` does not correspond to an edge ID")
   }
 
   # Create bindings for specific variables
@@ -109,7 +123,7 @@ set_df_as_edge_attr <- function(graph,
       node_edge__ = "edge",
       id__ = edge) %>%
     dplyr::select(df_id__, node_edge__, id__, everything()) %>%
-    tibble::as_tibble()
+    dplyr::as_tibble()
 
   # If there is an existing data frame attributed
   # to the edge, remove it
@@ -135,7 +149,7 @@ set_df_as_edge_attr <- function(graph,
   # `set_edge_attrs()` function
   graph <-
     set_edge_attrs(
-      x = graph,
+      graph = graph,
       edge_attr = "df_id",
       values = df_id,
       from = graph$edges_df[which(graph$edges_df[, 1] == edge), 2],
@@ -146,7 +160,7 @@ set_df_as_edge_attr <- function(graph,
     graph$graph_log[-nrow(graph$graph_log),] %>%
     add_action_to_log(
       version_id = nrow(graph$graph_log) + 1,
-      function_used = "set_df_as_edge_attr",
+      function_used = fcn_name,
       time_modified = time_function_start,
       duration = graph_function_duration(time_function_start),
       nodes = nrow(graph$nodes_df),

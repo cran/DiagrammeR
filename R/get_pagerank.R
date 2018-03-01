@@ -1,37 +1,30 @@
-#' Get the PageRank values for nodes in the graph
-#' @description Get the PageRank values for
-#' all nodes in the graph.
+#' Get the PageRank values for all nodes
+#' @description Get the PageRank
+#' values for all nodes in the graph.
 #' @param graph a graph object of class
 #' \code{dgr_graph}.
-#' @param directed if \code{TRUE} (the default)
-#' then directed paths will be considered for
-#' directed graphs. This is ignored for undirected
-#' graphs.
-#' @param damping the damping factor. The default
-#' value is set to \code{0.85}.
-#' @return a data frame with PageRank values for
-#' each of the nodes.
+#' @param directed if \code{TRUE} (the
+#' default) then directed paths will
+#' be considered for directed graphs.
+#' This is ignored for undirected graphs.
+#' @param damping the damping factor.
+#' The default value is set to \code{0.85}.
+#' @return a data frame with PageRank
+#' values for each of the nodes.
 #' @examples
-#' # Create a random graph
+#' # Create a random graph using the
+#' # `add_gnm_graph()` function
 #' graph <-
-#'   create_random_graph(
-#'     n = 10, m = 22,
+#'   create_graph() %>%
+#'   add_gnm_graph(
+#'     n = 10,
+#'     m = 15,
 #'     set_seed = 23)
 #'
-#' # Get the alpha centrality scores for nodes
-#' # in the graph
-#' get_pagerank(graph)
-#' #>    id   pagerank
-#' #> 1   1 0.04608804
-#' #> 2   2 0.04608804
-#' #> 3   3 0.05392301
-#' #> 4   4 0.04608804
-#' #> 5   5 0.07677500
-#' #> 6   6 0.11684759
-#' #> 7   7 0.07899491
-#' #> 8   8 0.08898857
-#' #> 9   9 0.16945368
-#' #> 10 10 0.27675311
+#' # Get the PageRank scores
+#' # for all nodes in the graph
+#' graph %>%
+#'   get_pagerank()
 #'
 #' # Colorize nodes according to their
 #' # PageRank scores
@@ -50,9 +43,15 @@ get_pagerank <- function(graph,
                          directed = TRUE,
                          damping = 0.85) {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Convert the graph to an igraph object
@@ -71,6 +70,6 @@ get_pagerank <- function(graph,
     id = pagerank_values %>%
       names() %>%
       as.integer(),
-    pagerank = pagerank_values,
+    pagerank = pagerank_values %>% round(4),
     stringsAsFactors = FALSE)
 }

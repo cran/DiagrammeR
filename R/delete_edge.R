@@ -35,21 +35,21 @@
 #'
 #' # Add an edge
 #' graph <-
+#'   graph %>%
 #'   add_edge(
-#'     graph = graph,
 #'     from = 1,
 #'     to = 2)
 #'
 #' # Delete the edge
 #' graph <-
+#'   graph %>%
 #'   delete_edge(
-#'     graph = graph,
 #'     from = 1,
 #'     to = 2)
 #'
 #' # Get the count of edges in the graph
-#' edge_count(graph)
-#' #> [1] 0
+#' graph %>%
+#'   count_edges()
 #'
 #' # Create an undirected graph with
 #' # 2 nodes and an edge
@@ -67,23 +67,14 @@
 #'   delete_edge(
 #'     from = 2,
 #'     to = 1) %>%
-#'   edge_count()
-#' #> [1] 0
-#'
-#' graph_undirected %>%
-#'   delete_edge(
-#'     from = 1,
-#'     to = 2) %>%
-#'   edge_count()
-#' #> [1] 0
+#'   count_edges()
 #'
 #' # The undirected graph has a single
 #' # edge with ID `1`; it can be
 #' # deleted by specifying `id`
 #' graph_undirected %>%
 #'   delete_edge(id = 1) %>%
-#'   edge_count()
-#' #> [1] 0
+#'   count_edges()
 #'
 #' # Create a directed graph with 2
 #' # labeled nodes and an edge
@@ -104,8 +95,7 @@
 #'   delete_edge(
 #'     from = "one",
 #'     to = "two") %>%
-#'   edge_count()
-#' #> [1] 0
+#'   count_edges()
 #' @importFrom dplyr filter select
 #' @export delete_edge
 
@@ -117,19 +107,31 @@ delete_edge <- function(graph,
   # Get the time of function start
   time_function_start <- Sys.time()
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Validation: Graph contains nodes
   if (graph_contains_nodes(graph) == FALSE) {
-    stop("The graph contains no nodes, so, no selections can be made.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no nodes, so, there cannot be edges to delete")
   }
 
   # Validation: Graph contains edges
   if (graph_contains_edges(graph) == FALSE) {
-    stop("The graph contains no edges, so, no selections can be made.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no edges")
   }
 
   # Create bindings for specific variables
@@ -142,7 +144,10 @@ delete_edge <- function(graph,
     # Stop function if the edge ID value supplied is
     # not in the graph's edf
     if (!(id %in% graph$edges_df$id)) {
-      stop("The edge specified is not present in the graph.")
+
+      emit_error(
+        fcn_name = fcn_name,
+        reasons = "The edge specified is not present in the graph")
     }
 
     # Get the node ID values for the edge ID
@@ -162,7 +167,10 @@ delete_edge <- function(graph,
     # Stop function if either node is not a single value
     if (from_is_single_value == FALSE |
         to_is_single_value == FALSE) {
-      stop("Single-length vectors for `from` and `to` should be specified.")
+
+      emit_error(
+        fcn_name = fcn_name,
+        reasons = "Single-length vectors for `from` and `to` should be specified")
     }
 
     # If `from` and `to` values provided as character
@@ -172,7 +180,10 @@ delete_edge <- function(graph,
 
       # Stop function if the label for `from` exists in the graph
       if (!(from %in% graph$nodes_df$label)) {
-        stop("The value provided in `from` does not exist as a node `label` value.")
+
+        emit_error(
+          fcn_name = fcn_name,
+          reasons = "The value provided in `from` does not exist as a node `label` value")
       }
 
       # Stop function if the label for `from` is not distinct in the graph
@@ -180,12 +191,18 @@ delete_edge <- function(graph,
           dplyr::select(label) %>%
           dplyr::filter(label == from) %>%
           nrow() > 1) {
-        stop("The node `label` provided in `from` is not distinct in the graph.")
+
+        emit_error(
+          fcn_name = fcn_name,
+          reasons = "The node `label` provided in `from` is not distinct in the graph")
       }
 
       # Stop function if the label for `to` exists in the graph
       if (!(to %in% graph$nodes_df$label)) {
-        stop("The value provided in `to` does not exist as a node `label` value.")
+
+        emit_error(
+          fcn_name = fcn_name,
+          reasons = "The value provided in `to` does not exist as a node `label` value")
       }
 
       # Stop function if the label for `to` is not distinct in the graph
@@ -193,7 +210,10 @@ delete_edge <- function(graph,
           dplyr::select(label) %>%
           dplyr::filter(label == to) %>%
           nrow() > 1) {
-        stop("The node `label` provided in `to` is not distinct in the graph.")
+
+        emit_error(
+          fcn_name = fcn_name,
+          reasons = "The node `label` provided in `to` is not distinct in the graph")
       }
 
       # Use the `translate_to_node_id()` helper function to map
@@ -206,6 +226,7 @@ delete_edge <- function(graph,
 
       from_id <- from_to_node_id$from
       to_id <- from_to_node_id$to
+
     } else {
 
       from_id <- from
@@ -222,7 +243,10 @@ delete_edge <- function(graph,
 
   # Stop function if both nodes not present in graph
   if (nodes_available_in_graph == FALSE) {
-    stop("The nodes specified are not both present in the graph.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The nodes specified are not both present in the graph")
   }
 
   # Extract the graph's edge data frame
@@ -236,7 +260,10 @@ delete_edge <- function(graph,
     if (edf %>%
         dplyr::filter(from == from_id & to == to_id) %>%
         nrow == 0) {
-      stop("The edge provided is not in the graph.")
+
+      emit_error(
+        fcn_name = fcn_name,
+        reasons = "The edge provided is not in the graph")
     }
 
     # Filter out relevant rows from `edf`
@@ -260,7 +287,10 @@ delete_edge <- function(graph,
         dplyr::filter((from == from_id & to == to_id) |
                       (from == to_id & to == from_id)) %>%
         nrow == 0) {
-      stop("The edge provided is not in the graph.")
+
+      emit_error(
+        fcn_name = fcn_name,
+        reasons = "The edge provided is not in the graph")
     }
 
     # Filter out relevant rows from `edf`
@@ -285,11 +315,12 @@ delete_edge <- function(graph,
     add_action_to_log(
       graph_log = graph$graph_log,
       version_id = nrow(graph$graph_log) + 1,
-      function_used = "delete_edge",
+      function_used = fcn_name,
       time_modified = time_function_start,
       duration = graph_function_duration(time_function_start),
       nodes = nrow(graph$nodes_df),
-      edges = nrow(graph$edges_df))
+      edges = nrow(graph$edges_df),
+      d_e = as.integer(-1))
 
   # Perform graph actions, if any are available
   if (nrow(graph$graph_actions) > 0) {

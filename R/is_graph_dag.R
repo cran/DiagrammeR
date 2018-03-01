@@ -17,8 +17,8 @@
 #'
 #' # Determine whether this graph
 #' # is a DAG
-#' is_graph_dag(graph_tree)
-#' #> [1] TRUE
+#' graph_tree %>%
+#'   is_graph_dag()
 #'
 #' # Create a directed graph containing
 #' # a single cycle
@@ -28,8 +28,8 @@
 #'
 #' # Determine whether this graph
 #' # is a DAG
-#' is_graph_dag(graph_cycle)
-#' #> [1] FALSE
+#' graph_cycle %>%
+#'   is_graph_dag()
 #'
 #' # Create an undirected graph
 #' # containing a balanced tree
@@ -41,16 +41,22 @@
 #'
 #' # Determine whether this graph
 #' # is a DAG
-#' is_graph_dag(graph_tree_undirected)
-#' #> [1] FALSE
+#' graph_tree_undirected %>%
+#'   is_graph_dag()
 #' @importFrom igraph is_dag
 #' @export is_graph_dag
 
 is_graph_dag <- function(graph) {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # If the graph contains no nodes, it

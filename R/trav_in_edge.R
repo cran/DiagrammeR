@@ -15,6 +15,14 @@
 #' traversed edges. If the edge attribute already exists,
 #' the values will be merged to the traversed edges;
 #' otherwise, a new edge attribute will be created.
+#' @param copy_attrs_as if a node attribute name
+#' is provided in \code{copy_attrs_from}, this option
+#' will allow the copied attribute values to be
+#' written under a different edge attribute name.
+#' If the attribute name provided in
+#' \code{copy_attrs_as} does not exist in the graph's
+#' edf, the new edge attribute will be created
+#' with the chosen name.
 #' @return a graph object of class \code{dgr_graph}.
 #' @examples
 #' # Set a seed
@@ -52,13 +60,8 @@
 #'   join_edge_attrs(df = df)
 #'
 #' # Show the graph's internal edge data frame
-#' get_edge_df(graph)
-#' #>   id from to  rel values
-#' #> 1  1    1  2 <NA>   6.00
-#' #> 2  2    1  3    A   6.11
-#' #> 3  3    2  4    B   4.72
-#' #> 4  4    2  5    C   6.02
-#' #> 5  5    3  5    D   5.05
+#' graph %>%
+#'   get_edge_df()
 #'
 #' # Perform a simple traversal from
 #' # nodes to inbound edges with no
@@ -68,7 +71,6 @@
 #'   select_nodes_by_id(nodes = 2) %>%
 #'   trav_in_edge() %>%
 #'   get_selection()
-#' #> [1] 1
 #'
 #' # Traverse from node `2` to any
 #' # inbound edges, filtering to
@@ -79,7 +81,6 @@
 #'   trav_in_edge(
 #'     conditions = is.na(rel)) %>%
 #'   get_selection()
-#' #> [1] 1
 #'
 #' # Traverse from node `2` to any
 #' # inbound edges, filtering to those
@@ -93,7 +94,6 @@
 #'   trav_in_edge(
 #'     conditions = !is.na(rel)) %>%
 #'   get_selection()
-#' #> [1] 2
 #'
 #' # Traverse from node `5` to any
 #' # inbound edges, filtering to those
@@ -105,7 +105,6 @@
 #'   trav_in_edge(
 #'     conditions = values > 5.5) %>%
 #'   get_selection()
-#' #> [1] 4
 #'
 #' # Traverse from node `5` to any
 #' # inbound edges, filtering to those
@@ -116,7 +115,6 @@
 #'   trav_in_edge(
 #'     conditions = rel == "D") %>%
 #'   get_selection()
-#' #> [1] 5
 #'
 #' # Traverse from node `5` to any
 #' # inbound edges, filtering to those
@@ -128,7 +126,6 @@
 #'   trav_in_edge(
 #'     conditions = rel %in% c("C", "D")) %>%
 #'   get_selection()
-#' #> [1] 4 5
 #'
 #' # Traverse from node `5` to any
 #' # inbound edges, and use multiple
@@ -140,7 +137,6 @@
 #'       rel %in% c("C", "D") &
 #'       values > 5.5) %>%
 #'   get_selection()
-#' #> [1] 4
 #'
 #' # Traverse from node `5` to any
 #' # inbound edges, and use multiple
@@ -153,7 +149,6 @@
 #'       rel %in% c("D", "E") |
 #'       values > 5.5) %>%
 #'   get_selection()
-#' #> [1] 4 5
 #'
 #' # Traverse from node `5` to any
 #' # inbound edges, and use a regular
@@ -163,27 +158,14 @@
 #'   trav_in_edge(
 #'     conditions = grepl("C|D", rel)) %>%
 #'   get_selection()
-#' #> [1] 4 5
 #'
 #' # Show the graph's internal ndf
 #' graph %>%
 #'   get_node_df()
-#' #>   id type label
-#' #> 1  1    a   asd
-#' #> 2  2    a  iekd
-#' #> 3  3    b   idj
-#' #> 4  4    b   edl
-#' #> 5  5    b   ohd
 #'
 #' # Show the graph's internal edf
 #' graph %>%
 #'   get_edge_df()
-#' #>   id from to  rel values
-#' #> 1  1    1  2 <NA>   6.00
-#' #> 2  2    1  3    A   6.11
-#' #> 3  3    2  4    B   4.72
-#' #> 4  4    2  5    C   6.02
-#' #> 5  5    3  5    D   5.05
 #'
 #' # Perform a traversal from all
 #' # nodes to their incoming edges and,
@@ -200,50 +182,79 @@
 #' # data frame after this change
 #' graph %>%
 #'   get_edge_df()
-#' #>   id from to  rel label values
-#' #> 1  1    1  2 <NA>  iekd   6.00
-#' #> 2  2    1  3    A   idj   6.11
-#' #> 3  3    2  4    B   edl   4.72
-#' #> 4  4    2  5    C   ohd   6.02
-#' #> 5  5    3  5    D   ohd   5.05
 #' @importFrom dplyr filter select select_ full_join rename everything
-#' @importFrom rlang enquo UQ
+#' @importFrom rlang enquo UQ get_expr
 #' @export trav_in_edge
 
 trav_in_edge <- function(graph,
                          conditions = NULL,
-                         copy_attrs_from = NULL) {
-
-  conditions <- rlang::enquo(conditions)
-
-  copy_attrs_from <- rlang::enquo(copy_attrs_from)
-  copy_attrs_from <- (rlang::UQ(copy_attrs_from) %>% paste())[2]
-
-  if (copy_attrs_from == "NULL") {
-    copy_attrs_from <- NULL
-  }
+                         copy_attrs_from = NULL,
+                         copy_attrs_as = NULL) {
 
   # Get the time of function start
   time_function_start <- Sys.time()
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Validation: Graph contains nodes
   if (graph_contains_nodes(graph) == FALSE) {
-    stop("The graph contains no nodes, so, no traversal can occur.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no nodes")
   }
 
   # Validation: Graph contains edges
   if (graph_contains_edges(graph) == FALSE) {
-    stop("The graph contains no edges, so, no traversal can occur.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no edges")
   }
 
   # Validation: Graph object has valid node selection
   if (graph_contains_node_selection(graph) == FALSE) {
-    stop("There is no selection of nodes, so, no traversal can occur.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = c(
+        "There is no selection of nodes available.",
+        "any traversal requires an active selection",
+        "this type of traversal requires a selection of nodes"))
+  }
+
+  # Capture provided conditions
+  conditions <- rlang::enquo(conditions)
+
+  # Get the requested `copy_attrs_from`
+  copy_attrs_from <-
+    rlang::enquo(copy_attrs_from) %>% rlang::get_expr() %>% as.character()
+
+  # Get the requested `copy_attrs_as`
+  copy_attrs_as <-
+    rlang::enquo(copy_attrs_as) %>% rlang::get_expr() %>% as.character()
+
+  if (length(copy_attrs_from) == 0) {
+    copy_attrs_from <- NULL
+  }
+
+  if (length(copy_attrs_as) == 0) {
+    copy_attrs_as <- NULL
+  }
+
+  if (!is.null(copy_attrs_as) & !is.null(copy_attrs_from)) {
+    if (copy_attrs_as == copy_attrs_from) {
+      copy_attrs_as <- NULL
+    }
   }
 
   # Create bindings for specific variables
@@ -277,7 +288,9 @@ trav_in_edge <- function(graph,
   # If traversal conditions are provided then
   # pass in those conditions and filter the
   # data frame of `valid_edges`
-  if (!((rlang::UQ(conditions) %>% paste())[2] == "NULL")) {
+  if (!is.null(
+    rlang::enquo(conditions) %>%
+    rlang::get_expr())) {
 
     valid_edges <-
       filter(
@@ -297,14 +310,29 @@ trav_in_edge <- function(graph,
   # operation
   if (!is.null(copy_attrs_from)) {
 
+    ndf_2 <-
+      ndf %>%
+      dplyr::filter(id %in% starting_nodes) %>%
+      dplyr::select_("id", copy_attrs_from)
+
+    if (!is.null(copy_attrs_as)) {
+
+      if (copy_attrs_as %in% c("id", "from", "to")) {
+
+        emit_error(
+          fcn_name = fcn_name,
+          reasons = "Copied attributes should not overwrite either of the `id`, `from`, or `to` edge attributes")
+      }
+
+      colnames(ndf_2)[2] <- copy_attrs_from <- copy_attrs_as
+    }
+
     # If node attribute doesn't exist in the edf,
     # perform a full join
     if (!(copy_attrs_from %in% colnames(edf))) {
 
       edges <-
-        ndf %>%
-        dplyr::filter(id %in% starting_nodes) %>%
-        dplyr::select_("id", copy_attrs_from) %>%
+        ndf_2 %>%
         dplyr::right_join(edf, c("id" = "to")) %>%
         dplyr::rename(to = id) %>%
         dplyr::rename(id = id.y) %>%
@@ -315,9 +343,7 @@ trav_in_edge <- function(graph,
     if (copy_attrs_from %in% colnames(edf)) {
 
       edges <-
-        ndf %>%
-        dplyr::filter(id %in% starting_nodes) %>%
-        dplyr::select_("id", copy_attrs_from) %>%
+        ndf_2 %>%
         dplyr::right_join(edf, c("id" = "to")) %>%
         dplyr::rename(to = id.y)
 
@@ -369,7 +395,7 @@ trav_in_edge <- function(graph,
     add_action_to_log(
       graph_log = graph$graph_log,
       version_id = nrow(graph$graph_log) + 1,
-      function_used = "trav_in_edge",
+      function_used = fcn_name,
       time_modified = time_function_start,
       duration = graph_function_duration(time_function_start),
       nodes = nrow(graph$nodes_df),

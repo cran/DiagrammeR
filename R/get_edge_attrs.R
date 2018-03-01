@@ -57,8 +57,6 @@
 #' graph %>%
 #'   get_edge_attrs(
 #'     edge_attr = value)
-#' #> 1->2 2->3 1->4 4->3
-#' #>  1.6  2.9  4.3  8.4
 #'
 #' # To only return edge attribute
 #' # values for specified edges, use
@@ -68,10 +66,8 @@
 #'     edge_attr = value,
 #'     from = c(1, 2),
 #'       to = c(2, 3))
-#' #> 1->2 2->3
-#' #>  1.6  2.9
 #' @importFrom dplyr mutate filter pull
-#' @importFrom rlang enquo UQ
+#' @importFrom rlang enquo UQ get_expr
 #' @export get_edge_attrs
 
 get_edge_attrs <- function(graph,
@@ -79,9 +75,15 @@ get_edge_attrs <- function(graph,
                            from = NULL,
                            to = NULL) {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   edge_attr <- rlang::enquo(edge_attr)
@@ -89,13 +91,21 @@ get_edge_attrs <- function(graph,
   # Create binding for a specific variable
   from_to <- NULL
 
-  if ((rlang::UQ(edge_attr) %>% paste())[2] %in% c("id", "from", "to")) {
-    stop("This is not an edge attribute.")
+  if (rlang::enquo(edge_attr) %>%
+      rlang::get_expr() %>%
+      as.character() %in% c("id", "from", "to")) {
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "This is not an edge attribute")
   }
 
   if (!is.null(from) & !is.null(to)) {
     if (length(from) != length(to)) {
-      stop("The number of nodes in `from` and `to` must be the same.")
+
+      emit_error(
+        fcn_name = fcn_name,
+        reasons = "The number of nodes in `from` and `to` must be the same")
     }
   }
 

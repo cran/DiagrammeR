@@ -5,10 +5,13 @@
 #' \code{dgr_graph}.
 #' @examples
 #' \dontrun{
-#' # Create a random graph
+#' # Create a random graph using the
+#' # `add_gnm_graph()` function
 #' graph <-
-#'   create_random_graph(
-#'     n = 10, m = 22,
+#'   create_graph() %>%
+#'   add_gnm_graph(
+#'     n = 10,
+#'     m = 15,
 #'     set_seed = 23)
 #'
 #' # Get a summary of the graph
@@ -32,13 +35,13 @@ print.dgr_graph <- function(x, ...) {
       "get_selection" = " info: `get_selection()`",
       "get_cache" = " info: `get_cache()",
       "get_attr_dfs" = " info: `get_attr_dfs()`",
-      "get_global_graph_attrs" = " info: `get_global_graph_attrs()`")
+      "get_global_graph_attr_info" = " info: `get_global_graph_attr_info()`")
 
   # Get a count of all nodes in the graph
-  node_count <- x %>% node_count()
+  node_count <- x %>% count_nodes()
 
   # Get a count of all edges in the graph
-  edge_count <- x %>% edge_count()
+  edge_count <- x %>% count_edges()
 
   # Get the node `type` status
   if (all(is.na(x$nodes_df$type))) {
@@ -51,12 +54,12 @@ print.dgr_graph <- function(x, ...) {
       paste0(
         x$nodes_df$type %>%
           unique() %>%
-          setdiff(as.character(NA)) %>%
+          base::setdiff(as.character(NA)) %>%
           length(), " val",
         ifelse(
           x$nodes_df$type %>%
             unique() %>%
-            setdiff(as.character(NA)) %>%
+            base::setdiff(as.character(NA)) %>%
             length() > 1, "s", ""))
 
   } else if (!any(is.na(x$nodes_df$type))) {
@@ -65,7 +68,7 @@ print.dgr_graph <- function(x, ...) {
       paste0(
         x$nodes_df$type %>%
           unique() %>%
-          setdiff(as.character(NA)) %>%
+          base::setdiff(as.character(NA)) %>%
           length(), " vals - complete")
   }
 
@@ -79,12 +82,12 @@ print.dgr_graph <- function(x, ...) {
       paste0(
         x$nodes_df$label %>%
           unique() %>%
-          setdiff(as.character(NA)) %>%
+          base::setdiff(as.character(NA)) %>%
           length(), " val",
         ifelse(
           x$nodes_df$label %>%
             unique() %>%
-            setdiff(as.character(NA)) %>%
+            base::setdiff(as.character(NA)) %>%
             length() > 1, "s", ""))
 
   } else if (!any(is.na(x$nodes_df$label))) {
@@ -93,7 +96,7 @@ print.dgr_graph <- function(x, ...) {
       paste0(
         x$nodes_df$label %>%
           unique() %>%
-          setdiff(as.character(NA)) %>%
+          base::setdiff(as.character(NA)) %>%
           length(), " vals - complete")
 
     if (any(duplicated(x$nodes_df$label)) == FALSE) {
@@ -108,7 +111,7 @@ print.dgr_graph <- function(x, ...) {
   node_extra_attrs <-
     x$nodes_df %>%
     colnames() %>%
-    setdiff(c("id", "type", "label"))
+    base::setdiff(c("id", "type", "label"))
 
   if (length(node_extra_attrs) > 0) {
 
@@ -155,12 +158,12 @@ print.dgr_graph <- function(x, ...) {
       paste0(
         x$edges_df$rel %>%
           unique() %>%
-          setdiff(as.character(NA)) %>%
+          base::setdiff(as.character(NA)) %>%
           length(), " val",
         ifelse(
           x$edges_df$rel %>%
             unique() %>%
-            setdiff(as.character(NA)) %>%
+            base::setdiff(as.character(NA)) %>%
             length() > 1, "s", ""))
 
   } else if (!any(is.na(x$edges_df$rel))) {
@@ -168,7 +171,7 @@ print.dgr_graph <- function(x, ...) {
       paste0(
         x$edges_df$rel %>%
           unique() %>%
-          setdiff(as.character(NA)) %>%
+          base::setdiff(as.character(NA)) %>%
           length(), " vals - complete")
   }
 
@@ -176,7 +179,7 @@ print.dgr_graph <- function(x, ...) {
   edge_extra_attrs <-
     x$edges_df %>%
     colnames() %>%
-    setdiff(c("id", "from", "to", "rel"))
+    base::setdiff(c("id", "from", "to", "rel"))
 
   if (length(edge_extra_attrs) > 0) {
 
@@ -284,15 +287,15 @@ print.dgr_graph <- function(x, ...) {
 
     # Generate a string describing the density of
     # the graph
-    density_str <-
-      paste0(
-        "density: ", graph_info(x)$dens)
+    # density_str <-
+    #   paste0(
+    #     "density: ", graph_info(x)$dens)
 
     header_str <-
       paste0(
         "DiagrammeR Graph // ", node_count_str,
-        " / ", edge_count_str,
-        " / ", density_str)
+        " / ", edge_count_str)#,
+    # " / ", density_str)
 
   } else if (edge_count == 0) {
 
@@ -356,7 +359,8 @@ print.dgr_graph <- function(x, ...) {
   # Create string for active selections
   #
 
-  if (all(is.na(get_selection(x))) & length(get_selection(x)) == 1) {
+  if (all(is.na(suppressMessages(get_selection(x)))) &
+      length(suppressMessages(get_selection(x))) == 1) {
 
     selection_str <- "<none>"
 
@@ -478,7 +482,6 @@ print.dgr_graph <- function(x, ...) {
         "  STORED DFs / <none>")
   }
 
-
   #
   # Create string for global attributes
   #
@@ -514,7 +517,7 @@ print.dgr_graph <- function(x, ...) {
   } else {
 
     graph_actions_count <-
-      nrow(x$global_attrs)
+      nrow(x$graph_actions)
 
     graph_actions_str <-
       paste0(
@@ -552,7 +555,7 @@ print.dgr_graph <- function(x, ...) {
         "> -> ",
         paste0(
           paste(
-          tail_actions_logged$function_used, collapse = "() -> "), "()"))
+            tail_actions_logged$function_used, collapse = "() -> "), "()"))
   }
 
   graph_history_detail_str <-
@@ -572,7 +575,7 @@ print.dgr_graph <- function(x, ...) {
   info_labels_selection_length <- nchar(info_labels["get_selection"])[[1]]
   info_labels_cache_length <- nchar(info_labels["get_cache"])[[1]]
   info_labels_attr_dfs_length <- nchar(info_labels["get_attr_dfs"])[[1]]
-  info_labels_global_graph_attrs <- nchar(info_labels["get_global_graph_attrs"])[[1]]
+  info_labels_global_graph_attrs <- nchar(info_labels["get_global_graph_attr_info"])[[1]]
 
   if (console_width - node_detail_str_1_length - info_labels_node_df_length >= 5) {
 
@@ -604,8 +607,10 @@ print.dgr_graph <- function(x, ...) {
         info_labels["get_edge_df"])
   }
 
-  if (console_width - selection_detail_str_length - info_labels_selection_length >= 5 &
-      !is.na(get_selection(x))[1]) {
+  if (console_width -
+      selection_detail_str_length -
+      info_labels_selection_length >= 5 &
+      !is.na(suppressMessages(get_selection(x)))[1]) {
 
     selection_detail_str <-
       paste0(
@@ -620,7 +625,9 @@ print.dgr_graph <- function(x, ...) {
         info_labels["get_selection"])
   }
 
-  if (console_width - cache_detail_str_length - info_labels_cache_length >= 5 &
+  if (console_width -
+      cache_detail_str_length -
+      info_labels_cache_length >= 5 &
       !is.na(get_cache(x))[1]) {
 
     cache_detail_str <-
@@ -652,20 +659,24 @@ print.dgr_graph <- function(x, ...) {
         info_labels["get_attr_dfs"])
   }
 
-  if (console_width - global_attrs_detail_str_length - info_labels_global_graph_attrs >= 5 &
-      nrow(get_global_graph_attrs(x)) != 0) {
+  if (console_width -
+      global_attrs_detail_str_length -
+      info_labels_global_graph_attrs >= 5) {
 
-    global_attrs_detail_str <-
-      paste0(
-        global_attrs_detail_str,
-        paste(
-          rep(
-            x = " ",
-            times = (console_width -
-                       global_attrs_detail_str_length -
-                       info_labels_global_graph_attrs)),
-          collapse = ""),
-        info_labels["get_global_graph_attrs"])
+    if (inherits(get_global_graph_attr_info(x), "data.frame")) {
+
+      global_attrs_detail_str <-
+        paste0(
+          global_attrs_detail_str,
+          paste(
+            rep(
+              x = " ",
+              times = (console_width -
+                         global_attrs_detail_str_length -
+                         info_labels_global_graph_attrs)),
+            collapse = ""),
+          info_labels["get_global_graph_attr_info"])
+    }
   }
 
   # Generate the complete statement for printing
@@ -683,7 +694,7 @@ print.dgr_graph <- function(x, ...) {
       stored_dfs_detail_str, "\n",
       global_attrs_detail_str, "\n",
       graph_actions_detail_str, "\n",
-      graph_history_detail_str)
+      graph_history_detail_str, "\n")
 
   cat(complete_stmt)
 }

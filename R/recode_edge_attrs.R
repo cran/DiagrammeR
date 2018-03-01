@@ -21,31 +21,31 @@
 #' @return a graph object of class
 #' \code{dgr_graph}.
 #' @examples
-#' # Create a random graph
+#' # Create a random graph using the
+#' # `add_gnm_graph()` function
 #' graph <-
-#'   create_random_graph(
-#'     n = 4, m = 6,
+#'   create_graph() %>%
+#'   add_gnm_graph(
+#'     n = 4,
+#'     m = 6,
 #'     set_seed = 23) %>%
 #'   set_edge_attrs(
 #'     edge_attr = rel,
 #'     values = c("a", "b", "a",
 #'                "c", "b", "d"))
 #'
-#' # Get the graph's internal edf to show which
-#' # edge attributes are available
-#' get_edge_df(graph)
-#' #>   id from to rel
-#' #> 1  1    2  4   a
-#' #> 2  2    1  4   b
-#' #> 3  3    2  3   a
-#' #> 4  4    3  4   c
-#' #> 5  5    1  3   b
-#' #> 6  6    1  2   d
+#' # Get the graph's internal edf
+#' # to show which edge attributes
+#' # are available
+#' graph %>%
+#'   get_edge_df()
 #'
-#' # Recode the `rel` node attribute, creating a
-#' # new edge attribute called `penwidth`; here,
-#' # `a` is recoded to `1.0`, `b` maps to `1.5`, and
-#' # all other values become `0.5`
+#' # Recode the `rel` node
+#' # attribute, creating a new edge
+#' # attribute called `penwidth`;
+#' # here, `a` is recoded to `1.0`,
+#' # `b` maps to `1.5`, and all
+#' # other values become `0.5`
 #' graph <-
 #'   graph %>%
 #'   recode_edge_attrs(
@@ -55,19 +55,15 @@
 #'     otherwise = 0.5,
 #'     edge_attr_to = penwidth)
 #'
-#' # Get the graph's internal edf to show that the
-#' # node attribute values had been recoded and
-#' # copied into a new node attribute
-#' get_edge_df(graph)
-#' #>   id from to rel penwidth
-#' #> 1  1    2  4   a      1.0
-#' #> 2  2    1  4   b      1.5
-#' #> 3  3    2  3   a      1.0
-#' #> 4  4    3  4   c      0.5
-#' #> 5  5    1  3   b      1.5
-#' #> 6  6    1  2   d      0.5
+#' # Get the graph's internal edf
+#' # to show that the node
+#' # attribute values had been
+#' # recoded and copied into a
+#' # new node attribute
+#' graph %>%
+#'   get_edge_df()
 #' @importFrom stringr str_split
-#' @importFrom rlang enquo UQ
+#' @importFrom rlang enquo get_expr
 #' @export recode_edge_attrs
 
 recode_edge_attrs <- function(graph,
@@ -79,24 +75,36 @@ recode_edge_attrs <- function(graph,
   # Get the time of function start
   time_function_start <- Sys.time()
 
-  edge_attr_from <- rlang::enquo(edge_attr_from)
-  edge_attr_from <- (rlang::UQ(edge_attr_from) %>% paste())[2]
-
-  edge_attr_to <- rlang::enquo(edge_attr_to)
-  edge_attr_to <- (rlang::UQ(edge_attr_to) %>% paste())[2]
-
-  if (edge_attr_to == "NULL") {
-    edge_attr_to <- NULL
-  }
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
 
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Validation: Graph contains edges
   if (graph_contains_edges(graph) == FALSE) {
-    stop("The graph contains no edges, so, no edges can be recoded.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no edges")
+  }
+
+  # Get the requested `edge_attr_from`
+  edge_attr_from <-
+    rlang::enquo(edge_attr_from) %>% rlang::get_expr() %>% as.character()
+
+  # Get the requested `edge_attr_to`
+  edge_attr_to <-
+    rlang::enquo(edge_attr_to) %>% rlang::get_expr() %>% as.character()
+
+
+  if (length(edge_attr_to) == 0) {
+    edge_attr_to <- NULL
   }
 
   # Get list object from named vectors
@@ -111,7 +119,10 @@ recode_edge_attrs <- function(graph,
   # Stop function if `edge_attr_from` is not one
   # of the graph's edge attributes
   if (!any(column_names_graph %in% edge_attr_from)) {
-    stop("The edge attribute to recode is not in the edf.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The edge attribute to recode is not in the edf")
   }
 
   # Get the column number for the edge attr to recode
@@ -139,7 +150,7 @@ recode_edge_attrs <- function(graph,
 
     indices <- which(vector_to_recode %in% pairing[1])
 
-    vector_to_recode[setdiff(indices, indices_stack)] <- pairing[2]
+    vector_to_recode[base::setdiff(indices, indices_stack)] <- pairing[2]
 
     indices_stack <- c(indices_stack, indices)
   }
@@ -165,7 +176,10 @@ recode_edge_attrs <- function(graph,
     # Stop function if `edge_attr_to` is
     # `from` or `to`
     if (any(c("from", "to") %in% edge_attr_to)) {
-      stop("You cannot use those names.")
+
+      emit_error(
+        fcn_name = fcn_name,
+        reasons = "You cannot use the names `from` or `to`")
     }
 
     if (any(column_names_graph %in% edge_attr_to)) {
@@ -206,7 +220,7 @@ recode_edge_attrs <- function(graph,
     add_action_to_log(
       graph_log = graph$graph_log,
       version_id = nrow(graph$graph_log) + 1,
-      function_used = "recode_edge_attrs",
+      function_used = fcn_name,
       time_modified = time_function_start,
       duration = graph_function_duration(time_function_start),
       nodes = nrow(graph$nodes_df),

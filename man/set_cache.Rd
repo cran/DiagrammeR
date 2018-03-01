@@ -4,36 +4,47 @@
 \alias{set_cache}
 \title{Cache a vector in the graph}
 \usage{
-set_cache(graph, name = NULL, to_cache, col = NULL)
+set_cache(graph, to_cache, name = NULL, col = NULL)
 }
 \arguments{
 \item{graph}{a graph object of class
 \code{dgr_graph}.}
 
-\item{name}{an optional name for the cached vector.}
+\item{to_cache}{any vector or data
+frame. If a data frame is supplied
+then a single column for the vector
+to pull must be provided in the
+\code{col} argument.}
 
-\item{to_cache}{any vector or data frame.}
+\item{name}{an optional name for the
+cached vector.}
 
-\item{col}{if a data frame is provided in
-\code{to_cache} then a column name from that data
-frame must provided here.}
+\item{col}{if a data frame is provided
+in \code{to_cache} then a column name
+from that data frame must provided here.}
 }
 \value{
-a graph object of class \code{dgr_graph}.
+a graph object of class
+\code{dgr_graph}.
 }
 \description{
-Place any in the cache of a graph
-object of class \code{dgr_graph}.
+Place any vector in the
+cache of a graph object of class
+\code{dgr_graph}.
 }
 \examples{
-# Create a random graph
+# Create a random graph using the
+# `add_gnm_graph()` function
 graph <-
-  create_random_graph(
-    n = 10, m = 22,
+  create_graph() \%>\%
+  add_gnm_graph(
+    n = 10,
+    m = 22,
     set_seed = 23)
 
-# Get the closeness values for all nodes from `1`
-# to `10` and store in the graph's cache
+# Get the closeness values for
+# all nodes from `1` to `10` and
+# store in the graph's cache
 graph <-
   graph \%>\%
   set_cache(
@@ -42,28 +53,24 @@ graph <-
     col = "closeness")
 
 # Get the graph's cache
-get_cache(
-  graph,
-  name = "closeness_vector")
-#> [1] 0.07142857 0.07142857 0.07142857 0.06250000
-#> [5] 0.07692308 0.09090909 0.06666667 0.05882353
-#> [9] 0.07692308 0.07692308
+graph \%>\%
+  get_cache(
+    name = "closeness_vector")
 
-# Get the difference of betweenness and closeness
-# values for nodes in the graph and store in the
-# graph's cache
+# Get the difference of betweenness
+# and closeness values for nodes in
+# the graph and store the vector in
+# the graph's cache
 graph <-
   graph \%>\%
   set_cache(
     name = "difference",
-    to_cache = get_betweenness(.)$betweenness -
-               get_closeness(.)$closeness)
+    to_cache =
+      get_betweenness(.)$betweenness -
+        get_closeness(.)$closeness)
 
 # Get the graph's cache
-get_cache(
-  graph,
-  name = "difference")
-#> [1] 5.83333333  4.83333333  1.71428571 -0.06250000
-#> [5] 5.66117216 20.43290043  3.26666667 -0.05882353
-#> [9] 3.66117216  3.99450549
+graph \%>\%
+  get_cache(
+    name = "difference")
 }

@@ -4,7 +4,7 @@
 \alias{add_edge}
 \title{Add an edge between nodes in a graph object}
 \usage{
-add_edge(graph, from, to, rel = NULL, ...)
+add_edge(graph, from, to, rel = NULL, edge_aes = NULL, edge_data = NULL)
 }
 \arguments{
 \item{graph}{a graph object of class
@@ -32,8 +32,19 @@ string.}
 relationship between the
 connected nodes.}
 
-\item{...}{optional edge attributes supplied as
-vectors.}
+\item{edge_aes}{an optional list of named vectors
+comprising edge aesthetic attributes. The helper
+function \code{edge_aes()} is strongly recommended
+for use here as it contains arguments for each
+of the accepted edge aesthetic attributes (e.g.,
+\code{shape}, \code{style}, \code{penwidth},
+\code{color}).}
+
+\item{edge_data}{an optional list of named vectors
+comprising edge data attributes. The helper
+function \code{edge_data()} is strongly recommended
+for use here as it helps bind data specifically
+to the created edges.}
 }
 \value{
 a graph object of class \code{dgr_graph}.
@@ -52,7 +63,8 @@ graph <-
   add_node(label = "three") \%>\%
   add_node(label = "four")
 
-# Add an edge between those nodes and attach a
+# Add an edge between those
+# nodes and attach a
 # relationship to the edge
 graph <-
  add_edge(
@@ -61,13 +73,14 @@ graph <-
    to = 2,
    rel = "A")
 
-# Use the `edge_info()` function to verify that
+# Use the `get_edge_info()`
+# function to verify that
 # the edge has been created
-edge_info(graph)
-#>   id from to rel
-#> 1  1    1  2   A
+graph \%>\%
+  get_edge_info()
 
-# Add another node and edge to the graph
+# Add another node and
+# edge to the graph
 graph <-
   graph \%>\%
   add_edge(
@@ -75,14 +88,17 @@ graph <-
     to = 2,
     rel = "A")
 
-# Verify that the edge has been created by
-# getting a count of graph edges
-edge_count(graph)
-#> [1] 2
+# Verify that the edge
+# has been created by
+# counting graph edges
+graph \%>\%
+  count_edges()
 
-# Add edges by specifying node `label`
-# values; note that all nodes must have
-# unique `label` values to use this option
+# Add edges by specifying
+# node `label` values; note
+# that all nodes must have
+# unique `label` values to
+# use this option
 graph <-
   graph \%>\%
   add_edge(
@@ -94,8 +110,30 @@ graph <-
     to = "one",
     rel = "L")
 
-# Use the `get_edges()` function to verify
+# Use `get_edges()` to verify
 # that the edges were added
-get_edges(graph)
-#> [1] "1->2" "3->2" "3->4" "4->1"
+graph \%>\%
+  get_edges()
+
+# Add edge aesthetic and data
+# attributes during edge creation
+graph_2 <-
+  create_graph() \%>\%
+  add_n_nodes(n = 2) \%>\%
+  add_edge(
+    from = 1,
+    to = 2,
+    rel = "M",
+    edge_aes = edge_aes(
+      penwidth = 1.5,
+      color = "blue"),
+    edge_data = edge_data(
+      value = 4.3))
+
+# Use the `get_edges()` function
+# to verify that the attribute
+# values were bound to the
+# newly created edge
+graph_2 \%>\%
+  get_edge_df()
 }

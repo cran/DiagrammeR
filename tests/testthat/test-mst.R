@@ -6,9 +6,11 @@ test_that("the MST algorithm is functional", {
   # similarity values for each pair of nodes
   # as a square matrix
   j_sim_matrix <-
-    create_random_graph(
-      n = 10, m = 22,
-      set_seed = 1) %>%
+    create_graph() %>%
+    add_gnm_graph(
+      n = 10,
+      m = 22,
+      set_seed = 23) %>%
     get_jaccard_similarity()
 
   # Create a weighted, undirected graph from the
@@ -26,11 +28,11 @@ test_that("the MST algorithm is functional", {
   # the lowest similarity values possible
   min_spanning_tree_graph <-
     graph %>%
-    get_min_spanning_tree()
+    transform_to_min_spanning_tree()
 
   # Expect no loops in `min_spanning_tree_graph`
   expect_true(
-    all(node_info(min_spanning_tree_graph)$loops == 0))
+    all(get_node_info(min_spanning_tree_graph)$loops == 0))
 
   # Expect that all nodes are connected
   expect_true(

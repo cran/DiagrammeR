@@ -35,25 +35,20 @@ graph <-
   add_edge(
     from =
       get_node_ids(
-        x = .,
-        conditions = type == "cycle_1") \%>\%
+        graph = .,
+        conditions =
+          type == "cycle_1") \%>\%
         sample(size = 1),
     to =
       get_node_ids(
-        x = .,
-        conditions = type == "cycle_2") \%>\%
+        graph = .,
+        conditions =
+          type == "cycle_2") \%>\%
         sample(size = 1))
 
 # Get the strongly connected
 # components as a data frame of
 # nodes and their groupings
-get_s_connected_cmpts(graph)
-#>   id sc_component
-#> 1  1            1
-#> 2  2            1
-#> 3  3            1
-#> 4  4            2
-#> 5  5            2
-#> 6  6            2
-#> 7  7            2
+graph \%>\%
+  get_s_connected_cmpts()
 }

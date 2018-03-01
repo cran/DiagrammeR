@@ -11,8 +11,8 @@ count_unconnected_node_pairs(graph)
 \code{dgr_graph}.}
 }
 \value{
-a single numeric value representing the
-number of unconnected node pairs.
+a single numeric value representing
+the number of unconnected node pairs.
 }
 \description{
 Get the number of unconnected
@@ -26,13 +26,12 @@ graph <-
 
 # Get a count of unconnected node
 # pairs in the graph
-count_unconnected_node_pairs(graph)
-#> [1] 5
+graph \%>\%
+  count_unconnected_node_pairs()
 
 # Create a full graph and then
 # count all unconnected node pairs
 create_graph() \%>\%
   add_full_graph(n = 10) \%>\%
   count_unconnected_node_pairs()
-#> [1] 0
 }

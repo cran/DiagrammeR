@@ -27,10 +27,13 @@ arguments to be run at every graph transformation
 step.
 }
 \examples{
-# Create a random graph
+# Create a random graph using the
+# `add_gnm_graph()` function
 graph <-
-  create_random_graph(
-    n = 10, m = 22,
+  create_graph() \%>\%
+  add_gnm_graph(
+    n = 10,
+    m = 22,
     set_seed = 23)
 
 # Add a graph action that sets a node
@@ -55,10 +58,4 @@ graph <-
 # `get_graph_actions()` function
 graph \%>\%
   get_graph_actions()
-#> # A tibble: 1 x 3
-#>   action_index action_name
-#>          <dbl>       <chr>
-#> 1            1   get_btwns
-#> # ... with 1 more variables:
-#> #   expression <chr>
 }

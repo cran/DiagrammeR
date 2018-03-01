@@ -1,12 +1,15 @@
-#' Get the number of automorphisms in the graph
-#' @description Get the number of automorphisms the
-#' graph contains. An automorphism of a graph is a
-#' form of symmetry in which the graph is mapped onto
-#' itself while preserving edge-node connectivity.
+#' Get the number of automorphisms
+#' @description Get the number of
+#' automorphisms the graph contains.
+#' An automorphism of a graph is a
+#' form of symmetry in which the graph
+#' is mapped onto itself while
+#' preserving edge-node connectivity.
 #' @param graph a graph object of class
 #' \code{dgr_graph}.
-#' @return a single numeric value representing the
-#' number of automorphisms the graph contains.
+#' @return a single numeric value
+#' representing the number of
+#' automorphisms the graph contains.
 #' @examples
 #' # Create a cycle graph
 #' graph <-
@@ -14,23 +17,28 @@
 #'   add_cycle(n = 5)
 #'
 #' # Get a count of automorphisms
-#' count_automorphisms(graph)
-#' #> [1] 10
+#' graph %>%
+#'   count_automorphisms()
 #'
 #' # Create a full graph and then
 #' # count the automorphisms
 #' create_graph() %>%
 #'   add_full_graph(n = 10) %>%
 #'   count_automorphisms()
-#' #> [1] 3628800
 #' @importFrom igraph automorphisms
 #' @export count_automorphisms
 
 count_automorphisms <- function(graph) {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # If the graph is empty, then return NA
@@ -46,7 +54,7 @@ count_automorphisms <- function(graph) {
 
   # Get the number of automorphisms in
   # the graph
-  automorphisms(
+  igraph::automorphisms(
     graph = ig_graph,
     sh = "fm")["group_size"] %>%
     unlist() %>%

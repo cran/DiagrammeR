@@ -2,11 +2,9 @@ context("Adding nodes and/or edges from a table to a graph")
 
 test_that("adding nodes from a table to a graph is possible", {
 
-  library(tibble)
-
   # Create a data frame for graph nodes
   node_table <-
-    tibble::tribble(
+    dplyr::tribble(
       ~iso_4217_code, ~curr_number, ~exponent,
       "AED", 784,  2,
       "AFN", 971,  2,
@@ -189,12 +187,12 @@ test_that("adding nodes from a table to a graph is possible", {
   # options
   graph_1_df <-
     create_graph() %>%
-    add_nodes_from_table(node_table)
+    add_nodes_from_table(table = node_table)
 
   # Expect that the graph has the same number of nodes
   # as there are rows in the CSV
   expect_equal(
-    nrow(node_table), node_count(graph_1_df))
+    nrow(node_table), count_nodes(graph = graph_1_df))
 
   # Expect certain columns to exist in the graph's
   # node data frame
@@ -208,7 +206,8 @@ test_that("adding nodes from a table to a graph is possible", {
   graph_2_df <-
     create_graph() %>%
     add_nodes_from_table(
-      node_table, label_col = "curr_number")
+      table = node_table,
+      label_col = curr_number)
 
   # Expect that there aren't any NA values in the
   # graph's `label` column
@@ -225,7 +224,7 @@ test_that("adding nodes from a table to a graph is possible", {
   graph_3_df <-
     create_graph() %>%
     add_nodes_from_table(
-      node_table,
+      table = node_table,
       set_type = "currency",
       label_col = curr_number)
 
@@ -239,10 +238,10 @@ test_that("adding nodes from a table to a graph is possible", {
   graph_4_df <-
     create_graph() %>%
     add_nodes_from_table(
-      node_table,
+      table = node_table,
       set_type = "currency",
       label_col = curr_number,
-      drop_cols = c("exponent", "currency_name"))
+      drop_cols = exponent & currency_name)
 
   # Expect that the node attributes `exponent`
   # and `currency_name` do not appear in the graph's
@@ -272,7 +271,7 @@ test_that("adding edges from a table to a graph is possible", {
 
   # Create a data frame for graph nodes
   node_table <-
-    tibble::tribble(
+    dplyr::tribble(
       ~iso_4217_code, ~curr_number, ~exponent,
       "AED", 784,  2,
       "AFN", 971,  2,
@@ -452,7 +451,7 @@ test_that("adding edges from a table to a graph is possible", {
 
   # Create a data frame for graph edges
   edge_table <-
-    tibble::tribble(
+    dplyr::tribble(
       ~from_currency, ~to_currency, ~cost_unit,
       "USD","ADF", 0.1672,
       "USD","ADP", 0.00659,
@@ -660,20 +659,21 @@ test_that("adding edges from a table to a graph is possible", {
   # options
   graph <-
     create_graph() %>%
-    add_nodes_from_table(node_table)
+    add_nodes_from_table(table = node_table)
 
   # Augment the graph by adding edges from a table
   # with the `add_edges_from_table()` function
   graph_nodes_edges <-
     graph %>%
     add_edges_from_table(
-      edge_table,
+      table = edge_table,
       from_col = from_currency,
       to_col = to_currency,
-      ndf_mapping = iso_4217_code)
+      from_to_map = iso_4217_code)
 
   # Expect that the graph has a certain number of edges
-  expect_equal(edge_count(graph_nodes_edges), 157)
+  expect_equal(
+    count_edges(graph = graph_nodes_edges), 157)
 
   # Expect certain columns to exist in the graph's
   # edge data frame
@@ -689,7 +689,7 @@ test_that("adding edges from a table to a graph is possible", {
         edge_table,
         from_col = from,
         to_col = to_currency,
-        ndf_mapping = iso_4217_code))
+        from_to_map = iso_4217_code))
 
   # Expect an error if value for `to_col` is
   # not in the table
@@ -699,9 +699,9 @@ test_that("adding edges from a table to a graph is possible", {
         edge_table,
         from_col = from_currency,
         to_col = to,
-        ndf_mapping = iso_4217_code))
+        from_to_map = iso_4217_code))
 
-  # Expect an error if value for `ndf_mapping` is
+  # Expect an error if value for `from_to_map` is
   # not in the table
   expect_error(
     graph %>%
@@ -709,7 +709,59 @@ test_that("adding edges from a table to a graph is possible", {
         edge_table,
         from_col = from_currency,
         to_col = to_currency,
-        ndf_mapping = iso_4217))
+        from_to_map = iso_4217))
+
+  # Augment the graph by first
+  # adding edges from a table
+  # with `add_edges_from_table()` and
+  # then dropping a column
+  graph_nodes_edges_drop <-
+    graph %>%
+    add_edges_from_table(
+      table = edge_table,
+      from_col = from_currency,
+      to_col = to_currency,
+      drop_cols = cost_unit,
+      from_to_map = iso_4217_code)
+
+  # Expect that the graph has a certain number of edges
+  expect_equal(
+    count_edges(graph = graph_nodes_edges_drop), 157)
+
+  # Expect certain columns to exist in the graph's
+  # edge data frame
+  expect_equal(
+    colnames(graph_nodes_edges_drop$edges_df),
+    c("id", "from", "to", "rel"))
+
+  # Augment the graph by first
+  # adding edges from a table
+  # with `add_edges_from_table()` and
+  # then setting a static `rel` value
+  graph_nodes_edges_set_rel <-
+    graph %>%
+    add_edges_from_table(
+      table = edge_table,
+      from_col = from_currency,
+      to_col = to_currency,
+      from_to_map = iso_4217_code,
+      set_rel = "change_to")
+
+  # Expect that the graph has a certain number of edges
+  expect_equal(
+    count_edges(graph = graph_nodes_edges_set_rel), 157)
+
+  # Expect certain columns to exist in the graph's
+  # edge data frame
+  expect_equal(
+    colnames(graph_nodes_edges_set_rel$edges_df),
+    c("id", "from", "to", "rel", "cost_unit"))
+
+  # Expect the same value (repeated down)
+  # for the `rel` edge attribute
+  expect_equal(
+    unique(graph_nodes_edges_set_rel$edges_df$rel),
+    "change_to")
 })
 
 test_that("adding nodes from several table columns to a graph is possible", {

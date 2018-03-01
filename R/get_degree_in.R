@@ -11,56 +11,48 @@
 #' @return a data frame with indegree values for
 #' each of the nodes.
 #' @examples
-#' # Create a random graph
+#' # Create a random graph using the
+#' # `add_gnm_graph()` function
 #' graph <-
-#'   create_random_graph(
-#'     n = 10, m = 22,
+#'   create_graph(
+#'     directed = FALSE) %>%
+#'   add_gnm_graph(
+#'     n = 10,
+#'     m = 15,
 #'     set_seed = 23)
 #'
-#' # Get the indegree values for all nodes
-#' # in the graph
-#' get_degree_in(graph)
-#' #>    id indegree
-#' #> 1   1        0
-#' #> 2   2        0
-#' #> 3   3        1
-#' #> 4   4        0
-#' #> 5   5        3
-#' #> 6   6        4
-#' #> 7   7        3
-#' #> 8   8        2
-#' #> 9   9        4
-#' #> 10 10        5
+#' # Get the indegree values for
+#' # all nodes in the graph
+#' graph %>%
+#'   get_degree_in()
 #'
-#' # Add the indegree values to the graph
-#' # as a node attribute
+#' # Add the indegree values
+#' # to the graph as a node
+#' # attribute
 #' graph <-
 #'   graph %>%
 #'   join_node_attrs(
 #'     df = get_degree_in(.))
 #'
-#' # Display the graph's node data frame
-#' get_node_df(graph)
-#' #>    id type label value indegree
-#' #> 1   1 <NA>     1   6.0        0
-#' #> 2   2 <NA>     2   2.5        0
-#' #> 3   3 <NA>     3   3.5        1
-#' #> 4   4 <NA>     4   7.5        0
-#' #> 5   5 <NA>     5   8.5        3
-#' #> 6   6 <NA>     6   4.5        4
-#' #> 7   7 <NA>     7  10.0        3
-#' #> 8   8 <NA>     8  10.0        2
-#' #> 9   9 <NA>     9   8.5        4
-#' #> 10 10 <NA>    10  10.0        5
+#' # Display the graph's
+#' # node data frame
+#' graph %>%
+#'   get_node_df()
 #' @importFrom igraph degree
 #' @export get_degree_in
 
 get_degree_in <- function(graph,
                           normalized = FALSE) {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Convert the graph to an igraph object

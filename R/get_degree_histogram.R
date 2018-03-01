@@ -11,37 +11,44 @@
 #' respectively.
 #' @return a data frame with degree counts.
 #' @examples
-#' # Create a random, directed graph with 18 nodes
-#' # and 22 edges
+#' # Create a random graph using the
+#' # `add_gnm_graph()` function
 #' graph <-
-#'   create_random_graph(
-#'     n = 18, m = 22,
+#'   create_graph(
+#'     directed = FALSE) %>%
+#'   add_gnm_graph(
+#'     n = 10,
+#'     m = 15,
 #'     set_seed = 23)
 #'
-#' # Get degree histogram data for the
-#' # `random_graph` (reporting on total degree)
+#' # Get degree histogram data for
+#' # the graph (reporting total degree)
 #' graph %>%
-#'   get_degree_histogram(mode = "total")
-#' #>   degree total_degree_hist
-#' #> 1      0                 1
-#' #> 2      1                 4
-#' #> 3      2                 4
-#' #> 4      3                 4
-#' #> 5      4                 5
+#'   get_degree_histogram(
+#'     mode = "total")
 #' @importFrom dplyr mutate select
 #' @export get_degree_histogram
 
 get_degree_histogram <- function(graph,
                                  mode = "total") {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Validation: Graph contains nodes
   if (graph_contains_nodes(graph) == FALSE) {
-    stop("The graph contains no nodes, so, a degree histogram cannot be produced.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no nodes")
   }
 
   # Create bindings for specific variables
@@ -57,7 +64,7 @@ get_degree_histogram <- function(graph,
 
     deg_hist_df <-
       get_degree_distribution(graph) %>%
-      dplyr::mutate(total_degree_hist = total_degree_dist * node_count(graph)) %>%
+      dplyr::mutate(total_degree_hist = total_degree_dist * count_nodes(graph)) %>%
       dplyr::select(degree, total_degree_hist)
   }
 
@@ -66,7 +73,7 @@ get_degree_histogram <- function(graph,
 
     deg_hist_df <-
       get_degree_distribution(graph, mode = "in") %>%
-      dplyr::mutate(indegree_hist = indegree_dist * node_count(graph)) %>%
+      dplyr::mutate(indegree_hist = indegree_dist * count_nodes(graph)) %>%
       dplyr::select(degree, indegree_hist)
   }
 
@@ -75,7 +82,7 @@ get_degree_histogram <- function(graph,
 
      deg_hist_df <-
       get_degree_distribution(graph, mode = "out") %>%
-      dplyr::mutate(outdegree_hist = outdegree_dist * node_count(graph)) %>%
+      dplyr::mutate(outdegree_hist = outdegree_dist * count_nodes(graph)) %>%
       dplyr::select(degree, outdegree_hist)
   }
 

@@ -9,10 +9,13 @@
 #' attribute column identified in \code{edge_attr_from}.
 #' @return a graph object of class \code{dgr_graph}.
 #' @examples
-#' # Create a random graph
+#' # Create a random graph using the
+#' # `add_gnm_graph()` function
 #' graph <-
-#'   create_random_graph(
-#'     n = 5, m = 8,
+#'   create_graph() %>%
+#'   add_gnm_graph(
+#'     n = 5,
+#'     m = 8,
 #'     set_seed = 23) %>%
 #'   set_edge_attrs(
 #'     edge_attr = color,
@@ -21,18 +24,10 @@
 #' # Get the graph's internal edf
 #' # to show which edge attributes
 #' # are available
-#' get_edge_df(graph)
-#' #>   id from to  rel color
-#' #> 1  1    2  3 <NA> green
-#' #> 2  2    3  5 <NA> green
-#' #> 3  3    3  4 <NA> green
-#' #> 4  4    2  4 <NA> green
-#' #> 5  5    2  5 <NA> green
-#' #> 6  6    4  5 <NA> green
-#' #> 7  7    1  4 <NA> green
-#' #> 8  8    1  3 <NA> green
+#' graph %>%
+#'   get_edge_df()
 #'
-#' # Rename the `value` node
+#' # Rename the `color` node
 #' # attribute as `weight`
 #' graph <-
 #'   graph %>%
@@ -43,17 +38,9 @@
 #' # Get the graph's internal
 #' # edf to show that the edge
 #' # attribute had been renamed
-#' get_edge_df(graph)
-#' #>   id from to  rel labelfontcolor
-#' #> 1  1    2  3 <NA>          green
-#' #> 2  2    3  5 <NA>          green
-#' #> 3  3    3  4 <NA>          green
-#' #> 4  4    2  4 <NA>          green
-#' #> 5  5    2  5 <NA>          green
-#' #> 6  6    4  5 <NA>          green
-#' #> 7  7    1  4 <NA>          green
-#' #> 8  8    1  3 <NA>          green
-#' @importFrom rlang enquo UQ
+#' graph %>%
+#'   get_edge_df()
+#' @importFrom rlang enquo get_expr
 #' @export rename_edge_attrs
 
 rename_edge_attrs <- function(graph,
@@ -63,26 +50,40 @@ rename_edge_attrs <- function(graph,
   # Get the time of function start
   time_function_start <- Sys.time()
 
-  edge_attr_from <- rlang::enquo(edge_attr_from)
-  edge_attr_from <- (rlang::UQ(edge_attr_from) %>% paste())[2]
-
-  edge_attr_to <- rlang::enquo(edge_attr_to)
-  edge_attr_to <- (rlang::UQ(edge_attr_to) %>% paste())[2]
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
 
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Validation: Graph contains edges
   if (graph_contains_edges(graph) == FALSE) {
-    stop("The graph contains no edges, so, no edge attributes can be renamed.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no edges")
   }
+
+  # Get the requested `edge_attr_from`
+  edge_attr_from <-
+    rlang::enquo(edge_attr_from) %>% rlang::get_expr() %>% as.character()
+
+  # Get the requested `edge_attr_to`
+  edge_attr_to <-
+    rlang::enquo(edge_attr_to) %>% rlang::get_expr() %>% as.character()
 
   # Stop function if `edge_attr_from` and
   # `edge_attr_to` are identical
   if (edge_attr_from == edge_attr_to) {
-    stop("You cannot rename using the same name.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "You cannot rename using the same name")
   }
 
   # Stop function if `edge_attr_to` is `from`, `to`,
@@ -90,14 +91,20 @@ rename_edge_attrs <- function(graph,
   # data frame
   if (any(colnames(get_edge_df(graph)) %in%
           edge_attr_to)) {
-    stop("You cannot use that name for `edge_attr_to`.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "You cannot use that name for `edge_attr_to`")
   }
 
   # Stop function if `edge_attr_from` is `from`, `to`
   # or `rel`
   if (any(c("from", "to", "rel") %in%
           edge_attr_from)) {
-    stop("You cannot use that name for `edge_attr_from`.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "You cannot use that name for `edge_attr_from`")
   }
 
   # Get the number of nodes ever created for
@@ -113,7 +120,10 @@ rename_edge_attrs <- function(graph,
   # Stop function if `edge_attr_from` is not one
   # of the graph's columns
   if (!any(column_names_graph %in% edge_attr_from)) {
-    stop("The edge attribute to rename is not in the edf.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The edge attribute to rename is not in the edf")
   }
 
   # Set the column name for the renamed attr
@@ -132,7 +142,7 @@ rename_edge_attrs <- function(graph,
     add_action_to_log(
       graph_log = graph$graph_log,
       version_id = nrow(graph$graph_log) + 1,
-      function_used = "rename_edge_attrs",
+      function_used = fcn_name,
       time_modified = time_function_start,
       duration = graph_function_duration(time_function_start),
       nodes = nrow(graph$nodes_df),

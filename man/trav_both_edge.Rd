@@ -6,7 +6,7 @@
 adjacent edges}
 \usage{
 trav_both_edge(graph, conditions = NULL, copy_attrs_from = NULL,
-  agg = "sum")
+  copy_attrs_as = NULL, agg = "sum")
 }
 \arguments{
 \item{graph}{a graph object of class
@@ -21,6 +21,15 @@ traversed edges. If the edge attribute already exists,
 the values will be merged to the traversed edges;
 otherwise, a new edge attribute will be created.}
 
+\item{copy_attrs_as}{if a node attribute name
+is provided in \code{copy_attrs_from}, this option
+will allow the copied attribute values to be
+written under a different edge attribute name.
+If the attribute name provided in
+\code{copy_attrs_as} does not exist in the graph's
+edf, the new edge attribute will be created
+with the chosen name.}
+
 \item{agg}{if a node attribute is provided
 to \code{copy_attrs_from}, then an aggregation
 function is required since there may be cases where
@@ -31,7 +40,8 @@ the following aggregation functions can be used:
 \code{median}.}
 }
 \value{
-a graph object of class \code{dgr_graph}.
+a graph object of class
+\code{dgr_graph}.
 }
 \description{
 From a graph object of class
@@ -76,13 +86,8 @@ graph <-
   join_edge_attrs(df = df)
 
 # Show the graph's internal edge data frame
-get_edge_df(graph)
-#>   id from to  rel values
-#> 1  1    1  2 <NA>   6.00
-#> 2  2    1  3    A   6.11
-#> 3  3    2  4    B   4.72
-#> 4  4    2  5    C   6.02
-#> 5  5    3  5    D   5.05
+graph \%>\%
+  get_edge_df()
 
 # Perform a simple traversal from nodes to
 # adjacent edges with no conditions on the
@@ -91,7 +96,6 @@ graph \%>\%
   select_nodes_by_id(nodes = 3) \%>\%
   trav_both_edge() \%>\%
   get_selection()
-#> [1] 2 5
 
 # Traverse from node `2` to any adjacent
 # edges, filtering to those edges that have
@@ -101,7 +105,6 @@ graph \%>\%
   trav_both_edge(
     conditions = is.na(rel)) \%>\%
   get_selection()
-#> [1] 1
 
 # Traverse from node `2` to any adjacent
 # edges, filtering to those edges that have
@@ -112,7 +115,6 @@ graph \%>\%
   trav_both_edge(
     conditions = values > 6.5) \%>\%
   get_selection()
-#> [1] 2
 
 # Traverse from node `5` to any adjacent
 # edges, filtering to those edges that
@@ -123,7 +125,6 @@ graph \%>\%
   trav_both_edge(
     conditions = rel == "C") \%>\%
   get_selection()
-#> [1] 4
 
 # Traverse from node `2` to any adjacent
 # edges, filtering to those edges that
@@ -134,7 +135,6 @@ graph \%>\%
   trav_both_edge(
     conditions = rel \%in\% c("B", "C")) \%>\%
   get_selection()
-#> [1] 3 4
 
 # Traverse from node `2` to any adjacent
 # edges, and use multiple conditions for the
@@ -146,7 +146,6 @@ graph \%>\%
       rel \%in\% c("B", "C") &
       values > 4.0) \%>\%
   get_selection()
-#> [1] 3 4
 
 # Traverse from node `2` to any adjacent
 # edges, and use multiple conditions with
@@ -158,7 +157,6 @@ graph \%>\%
       rel \%in\% c("B", "C") |
       values > 4.0) \%>\%
   get_selection()
-#> [1] 1 3 4
 
 # Traverse from node `2` to any adjacent
 # edges, and use a regular expression as
@@ -168,7 +166,6 @@ graph \%>\%
   trav_both_edge(
     conditions = grepl("B|C", rel)) \%>\%
   get_selection()
-#> [1] 3 4
 
 # Create another simple graph to demonstrate
 # copying of node attribute values to traversed
@@ -184,19 +181,10 @@ graph <-
 # Show the graph's internal edge data frame
 graph \%>\%
   get_edge_df()
-#>   id from to  rel
-#> 1  1    1  2 <NA>
-#> 2  2    2  3 <NA>
-#> 3  3    3  4 <NA>
 
 # Show the graph's internal node data frame
 graph \%>\%
   get_node_df()
-#>   id type label value
-#> 1  1 <NA>     1    NA
-#> 2  2 <NA>     2     5
-#> 3  3 <NA>     3     5
-#> 4  4 <NA>     4    NA
 
 # Perform a traversal from the nodes to
 # the adjacent edges while also applying
@@ -214,8 +202,4 @@ graph <-
 # after this change
 graph \%>\%
   get_edge_df()
-#>   id from to  rel value
-#> 1  1    1  2 <NA>     5
-#> 2  2    2  3 <NA>    10
-#> 3  3    3  4 <NA>     5
 }

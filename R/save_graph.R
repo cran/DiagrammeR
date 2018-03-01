@@ -33,8 +33,14 @@
 save_graph <- function(x,
                        file) {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   if (!inherits(file, "character")) {
-    stop("Provide a character string for the file.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "Provide a character string for the file")
   }
 
   if (inherits(x, "dgr_graph") |
@@ -47,6 +53,9 @@ save_graph <- function(x,
     saveRDS(x, file = file_name, compress = "xz")
 
   } else {
-    stop("The object provided is not a graph or graph series.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The object provided is not a graph or graph series")
   }
 }

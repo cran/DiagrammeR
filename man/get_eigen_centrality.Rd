@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_eigen_centrality.R
 \name{get_eigen_centrality}
 \alias{get_eigen_centrality}
-\title{Get the eigen centrality for nodes in the graph}
+\title{Get the eigen centrality for all nodes}
 \usage{
 get_eigen_centrality(graph, weights_attr = NULL)
 }
@@ -10,39 +10,35 @@ get_eigen_centrality(graph, weights_attr = NULL)
 \item{graph}{a graph object of class
 \code{dgr_graph}.}
 
-\item{weights_attr}{an optional name of the edge
-attribute to use in the adjacency matrix. If
-\code{NULL} then, if it exists, the \code{weight}
-edge attribute of the graph will be used. If
-\code{NA} then no edge weights will be used.}
+\item{weights_attr}{an optional name
+of the edge attribute to use in the
+adjacency matrix. If
+\code{NULL} then, if it exists, the
+\code{weight} edge attribute of the
+graph will be used. If \code{NA} then
+no edge weights will be used.}
 }
 \value{
-a data frame with eigen centrality scores
-for each of the nodes.
+a data frame with eigen
+centrality scores for each of the
+nodes.
 }
 \description{
-Get the eigen centrality values for
-all nodes in the graph.
+Get the eigen centrality
+values for all nodes in the graph.
 }
 \examples{
-# Create a random graph
+# Create a random graph using the
+# `add_gnm_graph()` function
 graph <-
-  create_random_graph(
-    n = 10, m = 22,
+  create_graph(
+    directed = FALSE) \%>\%
+  add_gnm_graph(
+    n = 10, m = 15,
     set_seed = 23)
 
-# Get the eigen centrality scores for nodes
-# in the graph
-get_eigen_centrality(graph)
-#>    id eigen_centrality
-#> 1   1        0.5893005
-#> 2   2        0.8160297
-#> 3   3        0.6985080
-#> 4   4        0.5669045
-#> 5   5        0.8129328
-#> 6   6        1.0000000
-#> 7   7        0.6266077
-#> 8   8        0.3372831
-#> 9   9        0.8487792
-#> 10 10        0.8583592
+# Get the eigen centrality scores
+# for nodes in the graph
+graph \%>\%
+  get_eigen_centrality()
 }

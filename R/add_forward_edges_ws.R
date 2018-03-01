@@ -40,7 +40,6 @@
 #' # Get the graph's edges
 #' graph %>%
 #'   get_edge_ids()
-#' #> [1] 1
 #'
 #' # Select the edge and create 2 additional edges
 #' # with the same definition (`1->2`) but with
@@ -53,11 +52,8 @@
 #'   clear_selection()
 #'
 #' # Get the graph's edge data frame
-#' get_edge_df(graph)
-#' #>   id from to rel
-#' #> 1  1    1  2   a
-#' #> 2  2    1  2   b
-#' #> 3  3    1  2   c
+#' graph %>%
+#'   get_edge_df()
 #' @importFrom dplyr select
 #' @export add_forward_edges_ws
 
@@ -67,19 +63,31 @@ add_forward_edges_ws <- function(graph,
   # Get the time of function start
   time_function_start <- Sys.time()
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Validation: Graph contains edges
   if (graph_contains_edges(graph) == FALSE) {
-    stop("The graph contains no edges and existing edges are required.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no edges")
   }
 
   # Validation: Graph object has valid edge selection
   if (graph_contains_edge_selection(graph) == FALSE) {
-    stop("There is no selection of edges, so, no new edges can be added.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no selection of edges")
   }
 
   # Create bindings for specific variables
@@ -95,6 +103,9 @@ add_forward_edges_ws <- function(graph,
   edges_in_selection <-
     graph$edge_selection %>%
     dplyr::select(from, to)
+
+  # Get the number of edges in the graph
+  edges_graph_1 <- graph %>% count_edges()
 
   # Add new edges to the graph for every edge
   # in the graph's active selection
@@ -113,16 +124,24 @@ add_forward_edges_ws <- function(graph,
       graph$graph_log[-nrow(graph$graph_log), ]
   }
 
+  # Get the updated number of edges in the graph
+  edges_graph_2 <- graph %>% count_edges()
+
+  # Get the number of edges added to
+  # the graph
+  edges_added <- edges_graph_2 - edges_graph_1
+
   # Update the `graph_log` df with an action
   graph$graph_log <-
     add_action_to_log(
       graph_log = graph$graph_log,
       version_id = nrow(graph$graph_log) + 1,
-      function_used = "add_forward_edges_ws",
+      function_used = fcn_name,
       time_modified = time_function_start,
       duration = graph_function_duration(time_function_start),
       nodes = nrow(graph$nodes_df),
-      edges = nrow(graph$edges_df))
+      edges = nrow(graph$edges_df),
+      d_e = edges_added)
 
   # Perform graph actions, if any are available
   if (nrow(graph$graph_actions) > 0) {

@@ -28,8 +28,8 @@
 #' # 4 is the number reciprocating edges
 #' # and 7 is the total number of edges
 #' # in the graph)
-#' get_reciprocity(graph)
-#' #> [1] 0.5714286
+#' graph %>%
+#'   get_reciprocity()
 #'
 #' # For an undirected graph, all edges
 #' # are reciprocal, so the ratio will
@@ -37,7 +37,6 @@
 #' graph %>%
 #'   set_graph_undirected() %>%
 #'   get_reciprocity()
-#' #> [1] 1
 #'
 #' # For a graph with no edges, the graph
 #' # reciprocity cannot be determined (and
@@ -46,15 +45,20 @@
 #' create_graph() %>%
 #'   add_n_nodes(n = 5) %>%
 #'   get_reciprocity()
-#' #> [1] NA
 #' @importFrom igraph reciprocity
 #' @export get_reciprocity
 
 get_reciprocity <- function(graph) {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # If the graph contains no edges, it
@@ -68,5 +72,5 @@ get_reciprocity <- function(graph) {
   ig_graph <- to_igraph(graph)
 
   # Get the reciprocity value for the graph
-  reciprocity(ig_graph)
+  igraph::reciprocity(ig_graph)
 }

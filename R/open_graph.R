@@ -30,8 +30,14 @@
 
 open_graph <- function(file) {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   if (!inherits(file, "character")) {
-    stop("Provide a character string for the file.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "Provide a character string for the file")
   }
 
   # Read the graph or graph series
@@ -43,6 +49,9 @@ open_graph <- function(file) {
     return(x)
 
   } else {
-    stop("The object opened is not a graph or graph series.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The object opened is not a graph or graph series")
   }
 }

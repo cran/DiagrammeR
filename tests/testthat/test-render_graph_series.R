@@ -45,96 +45,76 @@ test_that("rendering a graph from a series is also possible", {
   # Create a set of graphs for a graph series
   graph_1 <-
     create_graph() %>%
-    add_node(type = 1) %>%
-    add_node(type = 2) %>%
-    add_node(type = 3) %>%
-    add_edge(
-      from = 1,
-      to = 3) %>%
-    add_edge(
-      from = 1,
-      to = 2) %>%
-    add_edge(
-      from = 2,
-      to = 3)
+    add_path(n = 4)
 
   graph_2 <-
-    graph_1 %>%
-    add_node(type = 4) %>%
-    add_edge(
-      from = 4,
-      to = 3)
+    create_graph() %>%
+    add_cycle(n = 5)
 
   graph_3 <-
-    graph_2 %>%
-    add_node(type = 5) %>%
-    add_edge(
-      from = 5,
-      to = 2)
+    create_graph() %>%
+    add_star(n = 6)
 
   # Create an empty graph series
   series <-
-    create_series(series_type = "sequential")
+    create_graph_series(series_type = "sequential")
 
   # Add graphs to the graph series
   series <-
-    graph_1 %>%
-    add_to_series(graph_series = series)
-
-  series <-
-    graph_2 %>%
-    add_to_series(graph_series = series)
-
-  series <-
-    graph_3 %>%
-    add_to_series(graph_series = series)
+    series %>%
+    add_graph_to_graph_series(
+      graph = graph_1) %>%
+    add_graph_to_graph_series(
+      graph = graph_2) %>%
+    add_graph_to_graph_series(
+      graph = graph_3)
 
   # View the second graph from the graph series in
   # the RStudio Viewer
   series_graph_2 <-
-    render_graph_from_series(
+    render_graph_from_graph_series(
       graph_series = series,
       graph_no = 2)
 
   # Expect error when rendering graph 4 from the
   # series (which doesn't exist)
   expect_error(
-    render_graph_from_series(
+    render_graph_from_graph_series(
       graph_series = series,
       graph_no = 4))
 
   # Expect that each of the graphs is different
   expect_true(
-    render_graph_from_series(
+    render_graph_from_graph_series(
       graph_series = series,
       graph_no = 1)$x$diagram !=
-      render_graph_from_series(
+      render_graph_from_graph_series(
         graph_series = series,
         graph_no = 2)$x$diagram)
 
   expect_true(
-    render_graph_from_series(
+    render_graph_from_graph_series(
       graph_series = series,
       graph_no = 2)$x$diagram !=
-      render_graph_from_series(
+      render_graph_from_graph_series(
         graph_series = series,
         graph_no = 3)$x$diagram)
 
   expect_true(
-    render_graph_from_series(
+    render_graph_from_graph_series(
       graph_series = series,
       graph_no = 1)$x$diagram !=
-      render_graph_from_series(
+      render_graph_from_graph_series(
         graph_series = series,
         graph_no = 3)$x$diagram)
 
   # Create an empty graph series
   empty_series <-
-    create_series(series_type = "sequential")
+    create_graph_series(series_type = "sequential")
 
   # Expect an error if there are no graphs
   # in the series
   expect_error(
-    render_graph_from_series(
+    render_graph_from_graph_series(
       graph_series = empty_series))
 })

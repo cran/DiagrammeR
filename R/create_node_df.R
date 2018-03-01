@@ -2,7 +2,18 @@
 #' @description Combine several vectors for nodes
 #' and their attributes into a data frame, which can be
 #' combined with other similarly-generated data frames,
-#' or, added to a graph object.
+#' or, added to a graph object. A node data frame,
+#' or ndf, has at least the following columns:
+#'
+#' - \code{id} (of type \code{integer})
+#'
+#' - \code{type} (of type \code{character})
+#'
+#' - \code{label} (of type \code{character})
+#'
+#' An arbitrary number of additional columns containing
+#' aesthetic or data attributes can be part of the ndf,
+#' so long as they follow the aforementioned columns.
 #' @param n the total number of nodes to include in the
 #' node data frame.
 #' @param type an optional \code{type} for each
@@ -25,11 +36,6 @@
 #'
 #' # Display the node data frame
 #' node_df
-#' #>   id type label
-#' #> 1  1    a     1
-#' #> 2  2    a     2
-#' #> 3  3    b     3
-#' #> 4  4    b     4
 #'
 #' # Create an ndf with distinct labels and
 #' # additional node attributes (where their classes
@@ -47,11 +53,6 @@
 #'
 #' # Display the node data frame
 #' node_df
-#' #>   id type label  style color     shape value
-#' #> 1  1    a  2384 filled  aqua    circle   3.5
-#' #> 2  2    a  3942 filled  aqua    circle   2.6
-#' #> 3  3    a  8362 filled  aqua rectangle   9.4
-#' #> 4  4    a  2194 filled  aqua rectangle   2.7
 #' @importFrom dplyr bind_cols
 #' @export create_node_df
 
@@ -60,12 +61,21 @@ create_node_df <- function(n,
                            label = NULL,
                            ...) {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   if (!(inherits(n, "numeric") | inherits(n, "integer"))) {
-    stop("The value supplied for `n` must be numeric.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The value supplied to `n` must be numeric")
   }
 
   if (length(n) > 1) {
-    stop("The value supplied for `n` must be a single numeric value.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The value supplied to `n` must be a single numeric value")
   }
 
   if (is.null(type)) {

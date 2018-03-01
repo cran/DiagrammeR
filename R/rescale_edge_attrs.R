@@ -27,28 +27,26 @@
 #' set, the minimum value from the set will be used.
 #' @return a graph object of class \code{dgr_graph}.
 #' @examples
-#' # Create a random graph
+#' # Create a random graph using the
+#' # `add_gnm_graph()` function
 #' graph <-
-#'   create_random_graph(
-#'     n = 5, m = 7,
-#'     set_seed = 23,
-#'     directed = TRUE) %>%
+#'   create_graph() %>%
+#'   add_gnm_graph(
+#'     n = 10,
+#'     m = 7,
+#'     set_seed = 23) %>%
 #'   set_edge_attrs(
 #'     edge_attr = weight,
-#'     values = rnorm(edge_count(.), 5))
+#'     values = rnorm(
+#'       n = count_edges(.),
+#'       mean = 5,
+#'       sd = 1))
 #'
 #' # Get the graph's internal edf
 #' # to show which edge attributes
 #' # are available
-#' get_edge_df(graph)
-#' #>   id from to  rel   weight
-#' #> 1  1    2  3 <NA> 5.218288
-#' #> 2  2    3  5 <NA> 3.953465
-#' #> 3  3    3  4 <NA> 4.711311
-#' #> 4  4    2  4 <NA> 5.481550
-#' #> 5  5    2  5 <NA> 3.783624
-#' #> 6  6    4  5 <NA> 5.308137
-#' #> 7  7    1  4 <NA> 4.479822
+#' graph %>%
+#'   get_edge_df()
 #'
 #' # Rescale the `weight` edge
 #' # attribute, so that its values
@@ -56,20 +54,15 @@
 #' graph <-
 #'   graph %>%
 #'   rescale_edge_attrs(
-#'     edge_attr_from = weight)
+#'     edge_attr_from = weight,
+#'     to_lower_bound = 0,
+#'     to_upper_bound = 1)
 #'
 #' # Get the graph's internal edf
 #' # to show that the edge attribute
 #' # values had been rescaled
-#' get_edge_df(graph)
-#' #>   id from to  rel weight
-#' #> 1  1    2  3 <NA>  0.845
-#' #> 2  2    3  5 <NA>  0.100
-#' #> 3  3    3  4 <NA>  0.546
-#' #> 4  4    2  4 <NA>  1.000
-#' #> 5  5    2  5 <NA>  0.000
-#' #> 6  6    4  5 <NA>  0.898
-#' #> 7  7    1  4 <NA>  0.410
+#' graph %>%
+#'   get_edge_df()
 #'
 #' # Scale the values in the `weight`
 #' # edge attribute to different
@@ -96,16 +89,9 @@
 #' # in `color` and scaled numerical
 #' # values are in the `penwidth`
 #' # edge attribute
-#' get_edge_df(graph)
-#' #>   id from to  rel weight   color penwidth
-#' #> 1  1    2  3 <NA>  0.845 #484848    2.612
-#' #> 2  2    3  5 <NA>  0.100 #BBBBBB    0.750
-#' #> 3  3    3  4 <NA>  0.546 #747474    1.865
-#' #> 4  4    2  4 <NA>  1.000 #333333    3.000
-#' #> 5  5    2  5 <NA>  0.000 #CCCCCC    0.500
-#' #> 6  6    4  5 <NA>  0.898 #414141    2.745
-#' #> 7  7    1  4 <NA>  0.410 #898989    1.525
-#' @importFrom rlang enquo UQ
+#' graph %>%
+#'   get_edge_df()
+#' @importFrom rlang enquo UQ get_expr
 #' @importFrom scales rescale cscale seq_gradient_pal
 #' @importFrom grDevices colors
 #' @export rescale_edge_attrs
@@ -121,24 +107,35 @@ rescale_edge_attrs <- function(graph,
   # Get the time of function start
   time_function_start <- Sys.time()
 
-  edge_attr_from <- rlang::enquo(edge_attr_from)
-  edge_attr_from <- (rlang::UQ(edge_attr_from) %>% paste())[2]
-
-  edge_attr_to <- rlang::enquo(edge_attr_to)
-  edge_attr_to <- (rlang::UQ(edge_attr_to) %>% paste())[2]
-
-  if (edge_attr_to == "NULL") {
-    edge_attr_to <- NULL
-  }
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
 
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Validation: Graph contains edges
   if (graph_contains_edges(graph) == FALSE) {
-    stop("The graph contains no edges, so, no edge attributes can be rescaled.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no edges")
+  }
+
+  # Get the requested `edge_attr_from`
+  edge_attr_from <-
+    rlang::enquo(edge_attr_from) %>% rlang::get_expr() %>% as.character()
+
+  # Get the requested `edge_attr_to`
+  edge_attr_to <-
+    rlang::enquo(edge_attr_to) %>% rlang::get_expr() %>% as.character()
+
+  if (length(edge_attr_to) == 0) {
+    edge_attr_to <- NULL
   }
 
   # Extract the graph's edf
@@ -150,7 +147,10 @@ rescale_edge_attrs <- function(graph,
   # Stop function if `edge_attr_from` is not one
   # of the graph's edge attributes
   if (!any(column_names_graph %in% edge_attr_from)) {
-    stop("The edge attribute to rescale is not in the edf.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The edge attribute to rescale is not in the edf")
   }
 
   # Get the column number for the edge attr to rescale
@@ -217,7 +217,7 @@ rescale_edge_attrs <- function(graph,
   # in selection
   graph <-
     set_edge_attrs(
-      x = graph,
+      graph = graph,
       edge_attr = rlang::UQ(edge_attr_to_2),
       values = edges_attr_vector_rescaled)
 
@@ -229,7 +229,7 @@ rescale_edge_attrs <- function(graph,
     add_action_to_log(
       graph_log = graph$graph_log,
       version_id = nrow(graph$graph_log) + 1,
-      function_used = "rescale_edge_attrs",
+      function_used = fcn_name,
       time_modified = time_function_start,
       duration = graph_function_duration(time_function_start),
       nodes = nrow(graph$nodes_df),

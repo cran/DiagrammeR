@@ -21,10 +21,13 @@
 #' @return a graph object of class
 #' \code{dgr_graph}.
 #' @examples
-#' # Create a random graph
+#' # Create a random graph using the
+#' # `add_gnm_graph()` function
 #' graph <-
-#'   create_random_graph(
-#'     n = 5, m = 10,
+#'   create_graph() %>%
+#'   add_gnm_graph(
+#'     n = 5,
+#'     m = 10,
 #'     set_seed = 23) %>%
 #'   set_node_attrs(
 #'     node_attr = shape,
@@ -33,18 +36,15 @@
 #'         "rectangle", "rectangle",
 #'         "circle"))
 #'
-#' # Get the graph's internal ndf to show which
-#' # node attributes are available
-#' get_node_df(graph)
-#' #>   id type label value     shape
-#' #> 1  1 <NA>     1   6.0    circle
-#' #> 2  2 <NA>     2   2.5   hexagon
-#' #> 3  3 <NA>     3   3.5 rectangle
-#' #> 4  4 <NA>     4   7.5 rectangle
-#' #> 5  5 <NA>     5   8.5    circle
+#' # Get the graph's internal ndf
+#' # to show which node
+#' # attributes are available
+#' graph %>%
+#'   get_node_df()
 #'
-#' # Recode the `shape` node attribute, so that
-#' # `circle` is recoded to `square` and that
+#' # Recode the `shape` node
+#' # attribute, so that `circle`
+#' # is recoded to `square` and that
 #' # `rectangle` becomes `triangle`
 #' graph <-
 #'   graph %>%
@@ -53,20 +53,18 @@
 #'     "circle -> square",
 #'     "rectangle -> triangle")
 #'
-#' # Get the graph's internal ndf to show that the
-#' # node attribute values had been recoded
-#' get_node_df(graph)
-#' #>   id type label value    shape
-#' #> 1  1 <NA>     1   6.0   square
-#' #> 2  2 <NA>     2   2.5  hexagon
-#' #> 3  3 <NA>     3   3.5 triangle
-#' #> 4  4 <NA>     4   7.5 triangle
-#' #> 5  5 <NA>     5   8.5   square
+#' # Get the graph's internal
+#' # ndf to show that the node
+#' # attribute values had been recoded
+#' graph %>%
+#'   get_node_df()
 #'
-#' # Create a new node attribute, called `color`,
-#' # that is based on a recoding of `shape`; here,
-#' # map the square shape to a `red` color and map
-#' # all other shapes to a `green` color
+#' # Create a new node attribute,
+#' # called `color`, that is based
+#' # on a recoding of `shape`; here,
+#' # map the square shape to a `red`
+#' # color and map all other shapes
+#' # to a `green` color
 #' graph <-
 #'   graph %>%
 #'   recode_node_attrs(
@@ -75,36 +73,12 @@
 #'     otherwise = "green",
 #'     node_attr_to = color)
 #'
-#' # Get the graph's internal ndf to see the change
-#' get_node_df(graph)
-#' #>   id type label value    shape color
-#' #> 1  1 <NA>     1   6.0   square   red
-#' #> 2  2 <NA>     2   2.5  hexagon green
-#' #> 3  3 <NA>     3   3.5 triangle green
-#' #> 4  4 <NA>     4   7.5 triangle green
-#' #> 5  5 <NA>     5   8.5   square   red
-#'
-#' # Numeric values can be recoded as well;
-#' # here, perform several recodings for
-#' # values of the `value` node attribute
-#' graph <-
-#'   graph %>%
-#'   recode_node_attrs(
-#'     node_attr_from = value,
-#'     "6.0 -> 9.5",
-#'     "3.5 -> 10.5",
-#'     otherwise = 5.0)
-#'
-#' # Look at the graph's internal ndf
-#' get_node_df(graph)
-#' #>   id type label value    shape color
-#' #> 1  1 <NA>     1   9.5   square   red
-#' #> 2  2 <NA>     2   5.0  hexagon green
-#' #> 3  3 <NA>     3  10.5 triangle green
-#' #> 4  4 <NA>     4   5.0 triangle green
-#' #> 5  5 <NA>     5   5.0   square   red
+#' # Get the graph's internal ndf
+#' # to see the change
+#' graph %>%
+#'   get_node_df()
 #' @importFrom stringr str_split
-#' @importFrom rlang enquo UQ
+#' @importFrom rlang enquo get_expr
 #' @export recode_node_attrs
 
 recode_node_attrs <- function(graph,
@@ -116,24 +90,35 @@ recode_node_attrs <- function(graph,
   # Get the time of function start
   time_function_start <- Sys.time()
 
-  node_attr_from <- rlang::enquo(node_attr_from)
-  node_attr_from <- (rlang::UQ(node_attr_from) %>% paste())[2]
-
-  node_attr_to <- rlang::enquo(node_attr_to)
-  node_attr_to <- (rlang::UQ(node_attr_to) %>% paste())[2]
-
-  if (node_attr_to == "NULL") {
-    node_attr_to <- NULL
-  }
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
 
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Validation: Graph contains nodes
   if (graph_contains_nodes(graph) == FALSE) {
-    stop("The graph contains no nodes, so, no nodes can be recoded.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no nodes")
+  }
+
+  # Get the requested `node_attr_from`
+  node_attr_from <-
+    rlang::enquo(node_attr_from) %>% rlang::get_expr() %>% as.character()
+
+  # Get the requested `node_attr_to`
+  node_attr_to <-
+    rlang::enquo(node_attr_to) %>% rlang::get_expr() %>% as.character()
+
+  if (length(node_attr_to) == 0) {
+    node_attr_to <- NULL
   }
 
   # Get list object from named vectors
@@ -148,7 +133,10 @@ recode_node_attrs <- function(graph,
   # Stop function if `node_attr_from` is not one
   # of the graph's node attributes
   if (!any(column_names_graph %in% node_attr_from)) {
-    stop("The node attribute to recode is not in the ndf.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The node attribute to recode is not in the ndf")
   }
 
   # Get the column number for the node attr to recode
@@ -176,7 +164,7 @@ recode_node_attrs <- function(graph,
 
     indices <- which(vector_to_recode %in% pairing[1])
 
-    vector_to_recode[setdiff(indices, indices_stack)] <- pairing[2]
+    vector_to_recode[base::setdiff(indices, indices_stack)] <- pairing[2]
 
     indices_stack <- c(indices_stack, indices)
   }
@@ -202,7 +190,10 @@ recode_node_attrs <- function(graph,
     # Stop function if `node_attr_to` is
     # `id` or `nodes`
     if (any(c("id", "nodes") %in% node_attr_to)) {
-      stop("You cannot use those names.")
+
+      emit_error(
+        fcn_name = fcn_name,
+        reasons = "You cannot use the names `id` or `nodes`")
     }
 
     if (any(column_names_graph %in% node_attr_to)) {
@@ -243,7 +234,7 @@ recode_node_attrs <- function(graph,
     add_action_to_log(
       graph_log = graph$graph_log,
       version_id = nrow(graph$graph_log) + 1,
-      function_used = "recode_node_attrs",
+      function_used = fcn_name,
       time_modified = time_function_start,
       duration = graph_function_duration(time_function_start),
       nodes = nrow(graph$nodes_df),

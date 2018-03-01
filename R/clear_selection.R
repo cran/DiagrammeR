@@ -1,47 +1,39 @@
-#' Clear a selection of nodes or edges in a graph
-#' @description Clear the selection of nodes or edges
-#' within a graph object.
+#' Clear an active selection of nodes or edges
+#' @description Clear the selection of
+#' nodes or edges within a graph object.
 #' @param graph a graph object of class
 #' \code{dgr_graph}.
-#' @return a graph object of class \code{dgr_graph}.
+#' @return a graph object of class
+#' \code{dgr_graph}.
 #' @examples
-#' # Create a node data frame (ndf)
-#' ndf <-
-#'   create_node_df(
-#'     n = 4,
-#'     type = "basic",
-#'     label = TRUE,
-#'     value = c(3.5, 2.6, 9.4, 2.7))
-#'
-#' # Create an edge data frame (edf)
-#' edf <-
-#'   create_edge_df(
-#'     from = c(1, 2, 3),
-#'     to = c(4, 3, 1),
-#'     rel = "leading_to")
-#'
-#' # Create a graph with nodes and edges
+#' # Create a graph with
+#' # a single path
 #' graph <-
-#'   create_graph(
-#'     nodes_df = ndf,
-#'     edges_df = edf)
+#'   create_graph() %>%
+#'   add_path(n = 5)
 #'
-#' # Select nodes with IDs `1` and `3`
+#' # Select nodes with IDs `1`
+#' # and `3`
 #' graph <-
+#'   graph %>%
 #'   select_nodes(
-#'     graph = graph,
 #'     nodes = c(1, 3))
 #'
-#' # Verify that a node selection has been made
-#' get_selection(graph)
-#' #> [1] 1 3
+#' # Verify that a node selection
+#' # has been made
+#' graph %>%
+#'   get_selection()
 #'
-#' # Clear the selection with `clear_selection()`
-#' graph <- clear_selection(graph)
+#' # Clear the selection with
+#' # `clear_selection()`
+#' graph <-
+#'   graph %>%
+#'   clear_selection()
 #'
-#' # Verify that the node selection has been cleared
-#' get_selection(graph)
-#' #> [1] NA
+#' # Verify that the node
+#' # selection has been cleared
+#' graph %>%
+#'   get_selection()
 #' @export clear_selection
 
 clear_selection <- function(graph) {
@@ -49,10 +41,21 @@ clear_selection <- function(graph) {
   # Get the time of function start
   time_function_start <- Sys.time()
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
+
+  # Obtain the input graph's node and edge
+  # selection properties
+  n_e_select_properties_in <-
+    node_edge_selection_properties(graph = graph)
 
   # Clear the selection of nodes and edges in the graph
   graph$node_selection <- create_empty_nsdf()
@@ -63,7 +66,7 @@ clear_selection <- function(graph) {
     add_action_to_log(
       graph_log = graph$graph_log,
       version_id = nrow(graph$graph_log) + 1,
-      function_used = "clear_selection",
+      function_used = fcn_name,
       time_modified = time_function_start,
       duration = graph_function_duration(time_function_start),
       nodes = nrow(graph$nodes_df),
@@ -72,6 +75,22 @@ clear_selection <- function(graph) {
   # Write graph backup if the option is set
   if (graph$graph_info$write_backups) {
     save_graph_as_rds(graph = graph)
+  }
+
+  # Issue a message to the user
+  if (n_e_select_properties_in[["selection_count"]] > 0) {
+
+    emit_message(
+      fcn_name = fcn_name,
+      message_body = glue::glue(
+        "cleared an existing selection of \\
+       {n_e_select_properties_in[['selection_count_str']]}"))
+
+  } else {
+
+    emit_message(
+      fcn_name = fcn_name,
+      message_body = "no existing selection to clear; graph unchanged")
   }
 
   graph

@@ -25,6 +25,18 @@
 #' \code{dgr_graph}.
 #' @param rel an optional string to apply a
 #' \code{rel} attribute to all newly created edges.
+#' @param edge_aes an optional list of named vectors
+#' comprising edge aesthetic attributes. The helper
+#' function \code{edge_aes()} is strongly recommended
+#' for use here as it contains arguments for each
+#' of the accepted edge aesthetic attributes (e.g.,
+#' \code{shape}, \code{style}, \code{penwidth},
+#' \code{color}).
+#' @param edge_data an optional list of named vectors
+#' comprising edge data attributes. The helper
+#' function \code{edge_data()} is strongly recommended
+#' for use here as it helps bind data specifically
+#' to the created edges.
 #' @return a graph object of class \code{dgr_graph}.
 #' @examples
 #' # Create an empty graph, add 2 nodes to it,
@@ -43,7 +55,6 @@
 #' # Get the graph's edges
 #' graph %>%
 #'   get_edge_ids()
-#' #> [1] 1
 #'
 #' # Select the edge and create 2 additional edges
 #' # with the opposite definition of `1->2`, which
@@ -57,37 +68,51 @@
 #'   clear_selection()
 #'
 #' # Get the graph's edge data frame
-#' get_edge_df(graph)
-#' #>   id from to rel
-#' #> 1  1    1  2   a
-#' #> 2  2    2  1   b
-#' #> 3  3    2  1   c
-#' @importFrom dplyr select
+#' graph %>%
+#'   get_edge_df()
+#' @importFrom dplyr select bind_rows as_tibble
 #' @export add_reverse_edges_ws
 
 add_reverse_edges_ws <- function(graph,
-                                 rel = NULL) {
+                                 rel = NULL,
+                                 edge_aes = NULL,
+                                 edge_data = NULL) {
 
   # Get the time of function start
   time_function_start <- Sys.time()
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Validation: Graph contains edges
   if (graph_contains_edges(graph) == FALSE) {
-    stop("The graph contains no edges and existing edges are required.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no edges")
   }
 
   # Validation: Graph object has valid edge selection
   if (graph_contains_edge_selection(graph) == FALSE) {
-    stop("There is no selection of edges, so, no new edges can be added.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no selection of edges")
   }
 
   # Create bindings for specific variables
-  from <- to <- NULL
+  from <- to <- index__ <- id <- NULL
+
+  # Get the number of edges in the graph
+  edges_graph_1 <- graph %>% count_edges()
 
   # If no value(s) provided for `rel`, set to NA
   if (is.null(rel)) {
@@ -117,16 +142,88 @@ add_reverse_edges_ws <- function(graph,
       graph$graph_log[-nrow(graph$graph_log), ]
   }
 
+  # Get the updated number of edges in the graph
+  edges_graph_2 <- graph %>% count_edges()
+
+  # Get the number of edges added to
+  # the graph
+  edges_added <- edges_graph_2 - edges_graph_1
+
+  # Collect edge aesthetic attributes
+  if (!is.null(edge_aes)) {
+
+    edge_aes_tbl <- dplyr::as_tibble(edge_aes)
+
+    if (nrow(edge_aes_tbl) < edges_added) {
+
+      edge_aes$index__ <- 1:edges_added
+
+      edge_aes_tbl <-
+        dplyr::as_tibble(edge_aes) %>%
+        dplyr::select(-index__)
+    }
+
+    if ("id" %in% colnames(edge_aes_tbl)) {
+      edge_aes_tbl <-
+        edge_aes_tbl %>%
+        dplyr::select(-id)
+    }
+  }
+
+  # Collect edge data attributes
+  if (!is.null(edge_data)) {
+
+    edge_data_tbl <- dplyr::as_tibble(edge_data)
+
+    if (nrow(edge_data_tbl) < edges_added) {
+
+      edge_data$index__ <- 1:edges_added
+
+      edge_data_tbl <-
+        dplyr::as_tibble(edge_data) %>%
+        dplyr::select(-index__)
+    }
+
+    if ("id" %in% colnames(edge_data_tbl)) {
+      edge_data_tbl <-
+        edge_data_tbl %>%
+        dplyr::select(-id)
+    }
+  }
+
+  # Add edge aesthetics if available
+  if (exists("edge_aes_tbl")) {
+
+    graph$edges_df <-
+      bind_rows(
+        graph$edges_df[1:(nrow(graph$edges_df) - edges_added), ],
+        bind_cols(
+          graph$edges_df[(nrow(graph$edges_df) - edges_added + 1):nrow(graph$edges_df), ],
+          edge_aes_tbl))
+  }
+
+  # Add edge data if available
+  if (exists("edge_data_tbl")) {
+
+    graph$edges_df <-
+      bind_rows(
+        graph$edges_df[1:(nrow(graph$edges_df) - edges_added), ],
+        bind_cols(
+          graph$edges_df[(nrow(graph$edges_df) - edges_added + 1):nrow(graph$edges_df), ],
+          edge_data_tbl))
+  }
+
   # Update the `graph_log` df with an action
   graph$graph_log <-
     add_action_to_log(
       graph_log = graph$graph_log,
       version_id = nrow(graph$graph_log) + 1,
-      function_used = "add_reverse_edges_ws",
+      function_used = fcn_name,
       time_modified = time_function_start,
       duration = graph_function_duration(time_function_start),
       nodes = nrow(graph$nodes_df),
-      edges = nrow(graph$edges_df))
+      edges = nrow(graph$edges_df),
+      d_e = edges_added)
 
   # Perform graph actions, if any are available
   if (nrow(graph$graph_actions) > 0) {

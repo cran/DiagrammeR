@@ -13,16 +13,22 @@
 #'   add_cycle(n = 3)
 #'
 #' # Check if the graph is simple
-#' is_graph_simple(graph)
-#' #> [1] TRUE
+#' graph %>%
+#'   is_graph_simple()
 #' @importFrom igraph is_simple
 #' @export is_graph_simple
 
 is_graph_simple <- function(graph) {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Convert the graph to an igraph object

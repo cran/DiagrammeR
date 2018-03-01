@@ -30,7 +30,7 @@ test_that("getting info about a graph's nodes is possible", {
       edges_df = edges)
 
   # Get information on the graph's nodes
-  info_nodes <- node_info(graph)
+  info_nodes <- get_node_info(graph)
 
   # Expect a data frame object
   expect_is(
@@ -79,7 +79,7 @@ test_that("getting info about a graph's nodes is possible", {
     add_node(type = "free")
 
   # Get information on nodes that have no edges
-  info_nodes_no_edges <- node_info(graph)
+  info_nodes_no_edges <- get_node_info(graph)
 
   # Expect a data frame object
   expect_is(
@@ -93,11 +93,29 @@ test_that("getting info about a graph's nodes is possible", {
   expect_true(
     nrow(info_nodes_no_edges) == 4)
 
+  # Expect that the `deg`, `indeg`, `outdeg`,
+  # and `loops` columns have show 0
+  expect_equal(
+    info_nodes_no_edges$deg %>%
+      unique, 0)
+
+  expect_equal(
+    info_nodes_no_edges$indeg %>%
+      unique, 0)
+
+  expect_equal(
+    info_nodes_no_edges$outdeg %>%
+      unique, 0)
+
+  expect_equal(
+    info_nodes_no_edges$loops %>%
+      unique, 0)
+
   # Create an empty graph
   graph <- create_graph()
 
   # Get information on nodes from the empty graph
-  info_nodes_empty_graph <- node_info(graph)
+  info_nodes_empty_graph <- get_node_info(graph)
 
   # Expect a NULL value
   expect_null(
@@ -134,7 +152,7 @@ test_that("getting info about a graph's edges is possible", {
       edges_df = edges)
 
   # Get information on the graph's edges
-  info_edges <- edge_info(graph)
+  info_edges <- get_edge_info(graph)
 
   # Expect a data frame object
   expect_is(
@@ -148,8 +166,8 @@ test_that("getting info about a graph's edges is possible", {
   expect_true(
     nrow(info_edges) == 26)
 
-  # Expect that all columns will be classed
-  # as `character`
+  # Expect that columns will be classed
+  # as either as `integer` or `character`
   expect_is(
     info_edges$from, "integer")
 
@@ -168,7 +186,7 @@ test_that("getting info about a graph's edges is possible", {
     add_node()
 
   # Get information on a graph that has no edges
-  info_graph_no_edges <- edge_info(graph)
+  info_graph_no_edges <- get_edge_info(graph)
 
   # Expect an NA value
   expect_true(

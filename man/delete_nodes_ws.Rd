@@ -52,6 +52,6 @@ graph <-
   delete_nodes_ws()
 
 # Get a count of nodes in the graph
-node_count(graph)
-#> [1] 2
+graph \%>\%
+  count_nodes()
 }

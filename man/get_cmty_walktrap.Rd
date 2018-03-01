@@ -7,62 +7,51 @@
 get_cmty_walktrap(graph, steps = 4)
 }
 \arguments{
-\item{graph}{a graph object of class
-\code{dgr_graph}.}
+\item{graph}{a graph object of
+class \code{dgr_graph}.}
 
-\item{steps}{the number of steps to take for each
-of the random walks.}
+\item{steps}{the number of steps
+to take for each of the random walks.}
 }
 \value{
-a data frame with group membership
-assignments for each of the nodes.
+a data frame with group
+membership assignments for each of
+the nodes.
 }
 \description{
-With the Walktrap community finding
-algorithm, obtain the group membership values for
+With the Walktrap
+community finding algorithm, obtain
+the group membership values for
 each of the nodes in the graph.
 }
 \examples{
-# Create a random graph
+# Create a random graph using the
+# `add_gnm_graph()` function
 graph <-
-  create_random_graph(
-    n = 10, m = 22,
+  create_graph(
+    directed = FALSE) \%>\%
+  add_gnm_graph(
+    n = 10,
+    m = 15,
     set_seed = 23)
 
-# Get the group membership values for
-# all nodes in the graph through the
-# Walktrap community finding algorithm
-get_cmty_walktrap(graph)
-#>    id walktrap_group
-#> 1   1              1
-#> 2   2              2
-#> 3   3              2
-#> 4   4              1
-#> 5   5              1
-#> 6   6              1
-#> 7   7              2
-#> 8   8              1
-#> 9   9              2
-#> 10 10              1
+# Get the group membership
+# values for all nodes in the
+# graph through the Walktrap
+# community finding algorithm
+graph \%>\%
+  get_cmty_walktrap()
 
-# Add the group membership values to the
-# graph as a node attribute
+# Add the group membership
+# values to the graph as a
+# node attribute
 graph <-
   graph \%>\%
   join_node_attrs(
     df = get_cmty_walktrap(.))
 
-# Display the graph's node data frame
-get_node_df(graph)
-#>    id type label value walktrap_group
-#> 1   1 <NA>     1   6.0              1
-#> 2   2 <NA>     2   2.5              2
-#> 3   3 <NA>     3   3.5              2
-#> 4   4 <NA>     4   7.5              1
-#> 5   5 <NA>     5   8.5              1
-#> 6   6 <NA>     6   4.5              1
-#> 7   7 <NA>     7  10.0              2
-#> 8   8 <NA>     8  10.0              1
-#> 9   9 <NA>     9   8.5              2
-#> 10 10 <NA>    10  10.0              1
+# Display the graph's
+# node data frame
+graph \%>\%
+  get_node_df()
 }

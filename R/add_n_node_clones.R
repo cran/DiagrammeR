@@ -24,17 +24,12 @@
 #'   add_path(
 #'     n = 3,
 #'     label = c("d", "g", "r"),
-#'     type = c("a", "b", "c"),
-#'     value = c(10, 20, 30))
+#'     type = c("a", "b", "c"))
 #'
 #' # Display the graph's internal
 #' # node data frame
 #' graph %>%
 #'   get_node_df()
-#' #>   id type label value
-#' #> 1  1    a     d    10
-#' #> 2  2    b     g    20
-#' #> 3  3    c     r    30
 #'
 #' # Create 3 clones of node `1`
 #' # but assign new node label
@@ -52,13 +47,6 @@
 #' # `5`, and `6` are clones of `1`
 #' graph %>%
 #'   get_node_df()
-#' #>   id type label value
-#' #> 1  1    a     d    10
-#' #> 2  2    b     g    20
-#' #> 3  3    c     r    30
-#' #> 4  4    a     x    10
-#' #> 5  5    a     y    10
-#' #> 6  6    a     z    10
 #' @importFrom dplyr filter select
 #' @export add_n_node_clones
 
@@ -70,32 +58,50 @@ add_n_node_clones <- function(graph,
   # Get the time of function start
   time_function_start <- Sys.time()
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Validation: Graph contains nodes
   if (graph_contains_nodes(graph) == FALSE) {
-    stop("The graph contains no nodes, so, an edge cannot be added.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no nodes, so, clones of nodes cannot be added")
   }
 
   # Stop function if node is not a single numerical value
   if (length(node) > 1 | !inherits(node, "numeric")) {
-    stop("The value for `node` must be a single, numeric value.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The value for `node` must be a single, numeric value")
   }
 
   # Stop function the node ID does not correspond
   # to a node in the graph
   if (!(node %in% graph$nodes_df$id)) {
-    stop("The value provided in `node` does not correspond to a node in the graph.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The value provided in `node` does not correspond to a node in the graph")
   }
 
   # Stop function if vector provided for label but it
   # is not of length `n`
   if (!is.null(label)) {
     if (length(label) != n) {
-      stop("The vector provided for `label` is not the same length as the value of `n`.")
+
+      emit_error(
+        fcn_name = fcn_name,
+        reasons = "The vector provided for `label` is not the same length as the value of `n`")
     }
   }
 
@@ -117,11 +123,14 @@ add_n_node_clones <- function(graph,
 
   # Extract all of the node attributes
   # (`type` and additional node attrs)
-  node_attr_vals <-
-    graph %>%
-    get_node_df() %>%
-    dplyr::filter(id == node) %>%
-    dplyr::select(type, 4:n_col_ndf)
+  if (n_col_ndf >= 4) {
+
+    node_attr_vals <-
+      graph %>%
+      get_node_df() %>%
+      dplyr::filter(id == node) %>%
+      dplyr::select(type, 4:n_col_ndf)
+  }
 
   # Create one or more clones of
   # the selected node in the graph
@@ -129,14 +138,16 @@ add_n_node_clones <- function(graph,
     graph %>%
     add_n_nodes(
       n = n,
+      type = get_node_attrs(graph = graph, node_attr = type, nodes = node) %>% as.character(),
       label = label)
 
   # Obtain the node ID values for
   # the new nodes
   new_node_ids <-
-    graph %>%
-    select_last_nodes_created() %>%
-    get_selection()
+    suppressMessages(
+      graph %>%
+        select_last_nodes_created() %>%
+        get_selection())
 
   # Create a node selection for the
   # new nodes in the graph
@@ -147,20 +158,25 @@ add_n_node_clones <- function(graph,
 
   # Iteratively set node attribute values for
   # the new nodes in the graph
-  for (i in 1:ncol(node_attr_vals)) {
-    for (j in 1:length(new_node_ids)) {
 
-      graph$nodes_df[
-        which(graph$nodes_df[, 1] == new_node_ids[j]),
-        which(colnames(graph$nodes_df) == colnames(node_attr_vals)[i])] <-
+  if (exists("node_attr_vals")) {
+
+    for (i in 1:ncol(node_attr_vals)) {
+      for (j in 1:length(new_node_ids)) {
+
+        graph$nodes_df[
+          which(graph$nodes_df[, 1] == new_node_ids[j]),
+          which(colnames(graph$nodes_df) == colnames(node_attr_vals)[i])] <-
           node_attr_vals[[i]]
+      }
     }
   }
 
   # Clear the graph's active selection
   graph <-
-    graph %>%
-    clear_selection()
+    suppressMessages(
+      graph %>%
+        clear_selection())
 
   # Remove extra items from the `graph_log`
   graph$graph_log <-
@@ -172,11 +188,12 @@ add_n_node_clones <- function(graph,
     add_action_to_log(
       graph_log = graph$graph_log,
       version_id = nrow(graph$graph_log) + 1,
-      function_used = "add_n_node_clones",
+      function_used = fcn_name,
       time_modified = time_function_start,
       duration = graph_function_duration(time_function_start),
       nodes = nrow(graph$nodes_df),
-      edges = nrow(graph$edges_df))
+      edges = nrow(graph$edges_df),
+      d_n = n)
 
   # Perform graph actions, if any are available
   if (nrow(graph$graph_actions) > 0) {

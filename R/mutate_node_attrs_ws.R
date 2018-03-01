@@ -29,11 +29,8 @@
 #' # Get the graph's internal ndf
 #' # to show which node attributes
 #' # are available
-#' get_node_df(graph)
-#' #>   id type label width
-#' #> 1  1 <NA>     1   1.4
-#' #> 2  2 <NA>     2   0.3
-#' #> 3  3 <NA>     3   1.1
+#' graph %>%
+#'   get_node_df()
 #'
 #' # Mutate the `width` node
 #' # attribute for the nodes
@@ -50,11 +47,8 @@
 #' # ndf to show that the node
 #' # attribute `width` was
 #' # mutated only for node `1`
-#' get_node_df(graph)
-#' #>   id type label width
-#' #> 1  1 <NA>     1  0.7
-#' #> 2  2 <NA>     2  0.3
-#' #> 3  3 <NA>     3  1.1
+#' graph %>%
+#'   get_node_df()
 #'
 #' # Create a new node attribute,
 #' # called `length`, that is the
@@ -75,11 +69,8 @@
 #' # for nodes `2` and `3` (since
 #' # node `1` is excluded, an NA
 #' # value is applied)
-#' get_node_df(graph)
-#' #>   id type label width length
-#' #> 1  1 <NA>     1   0.7     NA
-#' #> 2  2 <NA>     2   0.3    0.8
-#' #> 3  3 <NA>     3   1.1    2.1
+#' graph %>%
+#'   get_node_df()
 #'
 #' # Create a new node attribute
 #' # called `area`, which is the
@@ -95,11 +86,8 @@
 #' # values had been multiplied
 #' # together (with new attr `area`)
 #' # for nodes `2` and `3`
-#' get_node_df(graph)
-#' #>   id type label width length area
-#' #> 1  1 <NA>     1   0.7     NA   NA
-#' #> 2  2 <NA>     2   0.3    0.8 0.24
-#' #> 3  3 <NA>     3   1.1    2.1 2.31
+#' graph %>%
+#'   get_node_df()
 #'
 #' # We can invert the selection
 #' # and mutate node `1` several
@@ -119,11 +107,8 @@
 #' # non-NA values for its node
 #' # attributes without changing
 #' # those of the other nodes
-#' get_node_df(graph)
-#' #>   id type label width length  area
-#' #> 1  1 <NA>     1   0.7   4.64 3.248
-#' #> 2  2 <NA>     2   0.3   0.80 0.240
-#' #> 3  3 <NA>     3   1.1   2.10 2.310
+#' graph %>%
+#'   get_node_df()
 #' @importFrom dplyr mutate_
 #' @importFrom rlang exprs
 #' @export mutate_node_attrs_ws
@@ -134,19 +119,31 @@ mutate_node_attrs_ws <- function(graph,
   # Get the time of function start
   time_function_start <- Sys.time()
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Validation: Graph contains nodes
   if (graph_contains_nodes(graph) == FALSE) {
-    stop("The graph contains no nodes, so, no node attributes can undergo mutation.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no nodes")
   }
 
   # Validation: Graph object has valid node selection
   if (graph_contains_node_selection(graph) == FALSE) {
-    stop("There is no selection of nodes available.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "There is no selection of nodes available.")
   }
 
   # Collect expressions
@@ -159,13 +156,18 @@ mutate_node_attrs_ws <- function(graph,
   # expressions mutate columns that
   # should not be changed
   if ("id" %in% names(exprs)) {
-    stop("The variable `id` cannot undergo mutation.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The variable `id` cannot undergo mutation")
   }
 
   # Determine which nodes are not
   # in the active selection
   unselected_nodes <-
-    base::setdiff(get_node_ids(graph), get_selection(graph))
+    base::setdiff(
+      get_node_ids(graph),
+      suppressMessages(get_selection(graph)))
 
   for (i in 1:length(exprs)) {
 
@@ -220,7 +222,7 @@ mutate_node_attrs_ws <- function(graph,
     add_action_to_log(
       graph_log = graph$graph_log,
       version_id = nrow(graph$graph_log) + 1,
-      function_used = "mutate_node_attrs_ws",
+      function_used = fcn_name,
       time_modified = time_function_start,
       duration = graph_function_duration(time_function_start),
       nodes = nrow(graph$nodes_df),

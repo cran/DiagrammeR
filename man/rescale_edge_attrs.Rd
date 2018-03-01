@@ -48,28 +48,26 @@ range, then write to the same edge attribute or to
 a new edge attribute column.
 }
 \examples{
-# Create a random graph
+# Create a random graph using the
+# `add_gnm_graph()` function
 graph <-
-  create_random_graph(
-    n = 5, m = 7,
-    set_seed = 23,
-    directed = TRUE) \%>\%
+  create_graph() \%>\%
+  add_gnm_graph(
+    n = 10,
+    m = 7,
+    set_seed = 23) \%>\%
   set_edge_attrs(
     edge_attr = weight,
-    values = rnorm(edge_count(.), 5))
+    values = rnorm(
+      n = count_edges(.),
+      mean = 5,
+      sd = 1))
 
 # Get the graph's internal edf
 # to show which edge attributes
 # are available
-get_edge_df(graph)
-#>   id from to  rel   weight
-#> 1  1    2  3 <NA> 5.218288
-#> 2  2    3  5 <NA> 3.953465
-#> 3  3    3  4 <NA> 4.711311
-#> 4  4    2  4 <NA> 5.481550
-#> 5  5    2  5 <NA> 3.783624
-#> 6  6    4  5 <NA> 5.308137
-#> 7  7    1  4 <NA> 4.479822
+graph \%>\%
+  get_edge_df()
 
 # Rescale the `weight` edge
 # attribute, so that its values
@@ -77,20 +75,15 @@ get_edge_df(graph)
 graph <-
   graph \%>\%
   rescale_edge_attrs(
-    edge_attr_from = weight)
+    edge_attr_from = weight,
+    to_lower_bound = 0,
+    to_upper_bound = 1)
 
 # Get the graph's internal edf
 # to show that the edge attribute
 # values had been rescaled
-get_edge_df(graph)
-#>   id from to  rel weight
-#> 1  1    2  3 <NA>  0.845
-#> 2  2    3  5 <NA>  0.100
-#> 3  3    3  4 <NA>  0.546
-#> 4  4    2  4 <NA>  1.000
-#> 5  5    2  5 <NA>  0.000
-#> 6  6    4  5 <NA>  0.898
-#> 7  7    1  4 <NA>  0.410
+graph \%>\%
+  get_edge_df()
 
 # Scale the values in the `weight`
 # edge attribute to different
@@ -117,13 +110,6 @@ graph <-
 # in `color` and scaled numerical
 # values are in the `penwidth`
 # edge attribute
-get_edge_df(graph)
-#>   id from to  rel weight   color penwidth
-#> 1  1    2  3 <NA>  0.845 #484848    2.612
-#> 2  2    3  5 <NA>  0.100 #BBBBBB    0.750
-#> 3  3    3  4 <NA>  0.546 #747474    1.865
-#> 4  4    2  4 <NA>  1.000 #333333    3.000
-#> 5  5    2  5 <NA>  0.000 #CCCCCC    0.500
-#> 6  6    4  5 <NA>  0.898 #414141    2.745
-#> 7  7    1  4 <NA>  0.410 #898989    1.525
+graph \%>\%
+  get_edge_df()
 }

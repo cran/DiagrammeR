@@ -13,33 +13,47 @@
 #' # Create a node data frame (ndf)
 #' ndf <- create_node_df(n = 26)
 #'
-#' # Create an edge data frame (edf)
+#' # Create an edge data
+#' # frame (edf)
 #' edf <-
 #'   create_edge_df(
-#'     from = sample(1:26, replace = TRUE),
-#'     to = sample(1:26, replace = TRUE))
+#'     from = sample(
+#'       1:26, replace = TRUE),
+#'     to = sample(
+#'       1:26, replace = TRUE))
 #'
-#' # From the ndf and edf, create a graph object
+#' # From the ndf and edf,
+#' # create a graph object
 #' graph <-
 #'   create_graph(
 #'     nodes_df = ndf,
 #'     edges_df = edf)
 #'
-#' # Get predecessors for node `23` in the graph
-#' get_predecessors(graph, node = 23)
-#' #> [1] 6
+#' # Get predecessors for node
+#' # `23` in the graph
+#' graph %>%
+#'   get_predecessors(
+#'     node = 23)
 #'
-#' # If there are no predecessors, `NA` is returned
-#' get_predecessors(graph, node = 26)
-#' #> [1] NA
+#' # If there are no predecessors,
+#' # `NA` is returned
+#' graph %>%
+#'   get_predecessors(
+#'     node = 26)
 #' @export get_predecessors
 
 get_predecessors <- function(graph,
                              node) {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # If the graph contains no edges, return NA
@@ -51,12 +65,12 @@ get_predecessors <- function(graph,
   graph_is_not_empty <- !is_graph_empty(graph)
 
   # Determine whether `node` is in the graph
-  node_is_in_graph <- node_present(graph, node)
+  node_is_in_graph <- node %in% graph$nodes_df$id
 
   # Obtain the node's predecessors
   if (graph_is_not_empty &
       node_is_in_graph &
-      nrow(edge_info(graph)) > 0) {
+      nrow(get_edge_info(graph)) > 0) {
 
     if (length(graph$edges_df[graph$edges_df$to ==
                               node,]$from) == 0) {

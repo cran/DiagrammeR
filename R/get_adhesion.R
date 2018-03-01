@@ -14,23 +14,28 @@
 #'   add_cycle(n = 5)
 #'
 #' # Determine the graph's adhesion
-#' get_adhesion(graph)
-#' #> [1] 1
+#' graph %>%
+#'   get_adhesion()
 #'
 #' # Create a full graph and then
 #' # get the adhesion for that
 #' create_graph() %>%
 #'   add_full_graph(n = 8) %>%
 #'   get_adhesion()
-#' #> [1] 7
 #' @importFrom igraph edge_connectivity
 #' @export get_adhesion
 
 get_adhesion <- function(graph) {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # If the graph is empty, then return NA

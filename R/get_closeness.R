@@ -11,63 +11,55 @@
 #' @return a data frame with closeness values for
 #' each of the nodes.
 #' @examples
-#' # Create a random graph
+#' # Create a random graph using the
+#' # `add_gnm_graph()` function
 #' graph <-
-#'   create_random_graph(
-#'     n = 10, m = 22,
+#'   create_graph() %>%
+#'   add_gnm_graph(
+#'     n = 10,
+#'     m = 12,
 #'     set_seed = 23)
 #'
 #' # Get closeness values for all nodes
 #' # in the graph
-#' get_closeness(graph)
-#' #>    id  closeness
-#' #> 1   1 0.07142857
-#' #> 2   2 0.07142857
-#' #> 3   3 0.07142857
-#' #> 4   4 0.06250000
-#' #> 5   5 0.07692308
-#' #> 6   6 0.09090909
-#' #> 7   7 0.06666667
-#' #> 8   8 0.05882353
-#' #> 9   9 0.07692308
-#' #> 10 10 0.07692308
+#' graph %>%
+#'   get_closeness()
 #'
-#' # Add the closeness values to the graph
-#' # as a node attribute
+#' # Add the closeness values to
+#' # the graph as a node attribute
 #' graph <-
 #'   graph %>%
 #'   join_node_attrs(
 #'     df = get_closeness(.))
 #'
 #' # Display the graph's node data frame
-#' get_node_df(graph)
-#' #>    id type label value  closeness
-#' #> 1   1 <NA>     1   6.0 0.07142857
-#' #> 2   2 <NA>     2   2.5 0.07142857
-#' #> 3   3 <NA>     3   3.5 0.07142857
-#' #> 4   4 <NA>     4   7.5 0.06250000
-#' #> 5   5 <NA>     5   8.5 0.07692308
-#' #> 6   6 <NA>     6   4.5 0.09090909
-#' #> 7   7 <NA>     7  10.0 0.06666667
-#' #> 8   8 <NA>     8  10.0 0.05882353
-#' #> 9   9 <NA>     9   8.5 0.07692308
-#' #> 10 10 <NA>    10  10.0 0.07692308
+#' graph %>%
+#'   get_node_df()
 #' @importFrom igraph closeness
 #' @export get_closeness
 
 get_closeness <- function(graph,
                           direction = "all") {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Ensure that values provided for the
   # `direction` argument are from the
   # valid options
   if (!(direction %in% c("all", "in", "out"))) {
-    stop("Valid options for `direction` are `all`, `in`, or `out`.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "Valid options for `direction` are `all`, `in`, or `out`.")
   }
 
   # Convert the graph to an igraph object

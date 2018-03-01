@@ -16,7 +16,7 @@
 #' multiple data frames), and (2) \code{single_df}
 #' (a single data frame which all of the data frame
 #' data).
-#' @return either a tibble, a data frame, or a list.
+#' @return either a tibble or a data frame.
 #' @examples
 #' # Create a node data frame (ndf)
 #' ndf <-
@@ -80,13 +80,6 @@
 #' get_attr_dfs(
 #'   graph,
 #'   node_id = c(1, 4))
-#' #> # A tibble: 4 x 6
-#' #>   node_edge__    id  type label     a     b
-#' #>         <chr> <int> <chr> <chr> <chr> <dbl>
-#' #> 1        node     1 basic     1   one     1
-#' #> 2        node     1 basic     1   two     2
-#' #> 3        node     4 basic     4 three     3
-#' #> 4        node     4 basic     4  four     4
 #'
 #' # You can also get data frames that are
 #' # associated with edges by using the
@@ -94,11 +87,6 @@
 #' get_attr_dfs(
 #'   graph,
 #'   edge_id = 1)
-#' #> # A tibble: 2 x 7
-#' #>   node_edge__    id        rel  from    to     c     d
-#' #>         <chr> <int>      <chr> <int> <int> <chr> <dbl>
-#' #> 1        edge     1 leading_to     1     4  five     5
-#' #> 2        edge     1 leading_to     1     4   six     6
 #'
 #' # It's also possible to collect data frames
 #' # associated with both nodes and edges
@@ -106,15 +94,6 @@
 #'   graph,
 #'   node_id = 4,
 #'   edge_id = 1)
-#' #> # A tibble: 4 x 11
-#' #>   node_edge__    id  type label        rel  from    to
-#' #>         <chr> <int> <chr> <chr>      <chr> <int> <int>
-#' #> 1        node     4 basic     4       <NA>    NA    NA
-#' #> 2        node     4 basic     4       <NA>    NA    NA
-#' #> 3        edge     1  <NA>  <NA> leading_to     1     4
-#' #> 4        edge     1  <NA>  <NA> leading_to     1     4
-#' #> # ... with 4 more variables: a <chr>, b <dbl>, c <chr>,
-#' #> #   d <dbl>
 #'
 #' # If a data frame is desired instead,
 #' # set `return_format = "single_df"`
@@ -122,11 +101,8 @@
 #'   graph,
 #'   edge_id = 1,
 #'   return_format = "single_df")
-#' #>   node_edge__ id        rel from to    c d
-#' #> 1        edge  1 leading_to    1  4 five 5
-#' #> 2        edge  1 leading_to    1  4  six 6
-#' @importFrom dplyr filter select bind_rows filter starts_with everything left_join
-#' @importFrom tibble as_tibble tibble
+#' @importFrom dplyr filter select bind_rows filter starts_with
+#' @importFrom dplyr everything left_join as_tibble tibble
 #' @importFrom purrr flatten_chr
 #' @export get_attr_dfs
 
@@ -135,14 +111,23 @@ get_attr_dfs <- function(graph,
                          edge_id = NULL,
                          return_format = "single_tbl") {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Validation: Graph contains nodes
   if (graph_contains_nodes(graph) == FALSE) {
-    stop("The graph contains no nodes, so, a df cannot be added.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no nodes, so, a df cannot be added")
   }
 
   # Create bindings for specific variables
@@ -157,7 +142,7 @@ get_attr_dfs <- function(graph,
       graph$nodes_df %>%
       dplyr::filter(id %in% node_id) %>%
       dplyr::select(id, type, label, dplyr::starts_with("df_id")) %>%
-      tibble::as_tibble() %>%
+      dplyr::as_tibble() %>%
       dplyr::select(df_id) %>%
       purrr::flatten_chr()
 
@@ -177,7 +162,7 @@ get_attr_dfs <- function(graph,
                 dplyr::select(-id__) %>%
                 dplyr::select(node_edge__, id, type, label, everything())
             } else {
-              tibble::tibble()
+              dplyr::tibble()
             }})
     }
   }
@@ -190,7 +175,7 @@ get_attr_dfs <- function(graph,
       graph$edges_df %>%
       dplyr::filter(id %in% edge_id) %>%
       dplyr::select(id, from, to, rel, dplyr::starts_with("df_id")) %>%
-      tibble::as_tibble() %>%
+      dplyr::as_tibble() %>%
       dplyr::select(df_id) %>%
       purrr::flatten_chr()
 
@@ -210,7 +195,7 @@ get_attr_dfs <- function(graph,
                 dplyr::select(-id__) %>%
                 dplyr::select(node_edge__, id, from, to, rel, everything())
             } else {
-              tibble::tibble()
+              dplyr::tibble()
             }})
     }
   }

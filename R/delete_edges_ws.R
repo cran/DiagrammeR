@@ -23,8 +23,9 @@
 #'   add_edges_w_string(
 #'     edges = "1->3 1->2 2->3")
 #'
-#' # Select edges attached to node with ID `3`
-#' # (these are `1`->`3` and `2`->`3`)
+#' # Select edges attached to
+#' # node with ID `3` (these are
+#' # `1`->`3` and `2`->`3`)
 #' graph <-
 #'   graph %>%
 #'   select_edges_by_node_id(nodes = 3)
@@ -35,8 +36,8 @@
 #'   delete_edges_ws()
 #'
 #' # Get a count of edges in the graph
-#' edge_count(graph)
-#' #> [1] 1
+#' graph %>%
+#'   count_edges()
 #' @export delete_edges_ws
 
 delete_edges_ws <- function(graph) {
@@ -44,29 +45,47 @@ delete_edges_ws <- function(graph) {
   # Get the time of function start
   time_function_start <- Sys.time()
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Validation: Graph contains nodes
   if (graph_contains_nodes(graph) == FALSE) {
-    stop("The graph contains no nodes, so, no edges can be deleted.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no nodes, so, there cannot be edges to delete")
   }
 
   # Validation: Graph contains edges
   if (graph_contains_edges(graph) == FALSE) {
-    stop("The graph contains no edges, so, no edges can be deleted.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no edges")
   }
 
   # Validation: Graph object has valid edge selection
   if (graph_contains_edge_selection(graph) == FALSE) {
-    stop("There is no selection of edges available.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no selection of edges")
   }
 
   # Get vectors of the nodes in edges to be deleted
   from_delete <- graph$edge_selection$from
   to_delete <- graph$edge_selection$to
+
+  # Get the number of edges in the graph
+  edges_graph_1 <- graph %>% count_edges()
 
   # Delete all edges in selection
   for (i in 1:length(from_delete)) {
@@ -92,16 +111,24 @@ delete_edges_ws <- function(graph) {
     graph %>%
     remove_linked_dfs()
 
+  # Get the updated number of edges in the graph
+  edges_graph_2 <- graph %>% count_edges()
+
+  # Get the number of edges added to
+  # the graph
+  edges_removed <- edges_graph_2 - edges_graph_1
+
   # Update the `graph_log` df with an action
   graph$graph_log <-
     add_action_to_log(
       graph_log = graph$graph_log,
       version_id = nrow(graph$graph_log) + 1,
-      function_used = "delete_edges_ws",
+      function_used = fcn_name,
       time_modified = time_function_start,
       duration = graph_function_duration(time_function_start),
       nodes = nrow(graph$nodes_df),
-      edges = nrow(graph$edges_df))
+      edges = nrow(graph$edges_df),
+      d_e = edges_removed)
 
   # Perform graph actions, if any are available
   if (nrow(graph$graph_actions) > 0) {

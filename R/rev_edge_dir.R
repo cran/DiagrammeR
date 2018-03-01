@@ -5,7 +5,8 @@
 #' \code{dgr_graph}.
 #' @return a graph object of class \code{dgr_graph}.
 #' @examples
-#' # Create a graph with a directed tree
+#' # Create a graph with a
+#' # directed tree
 #' graph <-
 #'   create_graph() %>%
 #'   add_balanced_tree(
@@ -14,20 +15,18 @@
 #' # Inspect the graph's edges
 #' graph %>%
 #'   get_edges()
-#' #> [1] "1->2" "1->3" "2->4" "2->5"
-#' #> [5] "3->6" "3->7"
 #'
-#' # Reverse the edge directions such that edges
-#' # are directed toward the root of the tree
+#' # Reverse the edge directions
+#' # such that edges are directed
+#' # toward the root of the tree
 #' graph <-
 #'   graph %>%
 #'   rev_edge_dir()
 #'
-#' # Inspect the graph's edges after their reversal
+#' # Inspect the graph's edges
+#' # after their reversal
 #' graph %>%
 #'   get_edges()
-#' #> [1] "2->1" "3->1" "4->2" "5->2"
-#' #> [5] "6->3" "7->3"
 #' @export rev_edge_dir
 
 rev_edge_dir <- function(graph) {
@@ -35,19 +34,31 @@ rev_edge_dir <- function(graph) {
   # Get the time of function start
   time_function_start <- Sys.time()
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Validation: Graph contains edges
   if (graph_contains_edges(graph) == FALSE) {
-    stop("The graph contains no edges, so, no edges can be reversed.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no edges")
   }
 
   # If graph is undirected, stop function
   if (graph$directed == FALSE) {
-    stop("The input graph must be a directed graph.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The input graph must be a directed graph")
   }
 
   # Get the graph nodes in the `from` and `to` columns
@@ -70,7 +81,7 @@ rev_edge_dir <- function(graph) {
     add_action_to_log(
       graph_log = graph$graph_log,
       version_id = nrow(graph$graph_log) + 1,
-      function_used = "rev_edge_dir",
+      function_used = fcn_name,
       time_modified = time_function_start,
       duration = graph_function_duration(time_function_start),
       nodes = nrow(graph$nodes_df),

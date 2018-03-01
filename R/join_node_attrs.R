@@ -49,13 +49,8 @@
 #'
 #' # Get the graph's internal ndf to show that the
 #' # join has been made
-#' get_node_df(graph)
-#' #>   id type label values
-#' #> 1  1 <NA>  <NA>   6.00
-#' #> 2  2 <NA>  <NA>   6.11
-#' #> 3  3 <NA>  <NA>   4.72
-#' #> 4  4 <NA>  <NA>   6.02
-#' #> 5  5 <NA>  <NA>   5.05
+#' graph %>%
+#'   get_node_df()
 #'
 #' # Get betweenness values for each node and
 #' # add them as a node attribute (Note the
@@ -68,13 +63,8 @@
 #'
 #' # Get the graph's internal ndf to show that
 #' # this join has been made
-#' get_node_df(graph)
-#' #>   id type label values betweenness
-#' #> 1  1 <NA>  <NA>   6.00           2
-#' #> 2  2 <NA>  <NA>   6.11           7
-#' #> 3  3 <NA>  <NA>   4.72           1
-#' #> 4  4 <NA>  <NA>   6.02           0
-#' #> 5  5 <NA>  <NA>   5.05           2
+#' graph %>%
+#'   get_node_df()
 #' @importFrom dplyr select everything
 #' @export join_node_attrs
 
@@ -86,17 +76,29 @@ join_node_attrs <- function(graph,
   # Get the time of function start
   time_function_start <- Sys.time()
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   if (is.null(by_graph) & !is.null(by_df)) {
-    stop("Both column specifications must be provided.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "Both column specifications must be provided")
   }
 
   if (!is.null(by_graph) & is.null(by_df)) {
-    stop("Both column specifications must be provided.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "Both column specifications must be provided")
   }
 
   # Create bindings for specific variables
@@ -143,7 +145,7 @@ join_node_attrs <- function(graph,
 
   # Get new column names in the revised ndf
   new_col_names <-
-    setdiff(colnames(nodes), column_names_graph)
+    base::setdiff(colnames(nodes), column_names_graph)
 
   # Get the column numbers for the new columns
   col_numbers <-
@@ -163,7 +165,7 @@ join_node_attrs <- function(graph,
     add_action_to_log(
       graph_log = graph$graph_log,
       version_id = nrow(graph$graph_log) + 1,
-      function_used = "join_node_attrs",
+      function_used = fcn_name,
       time_modified = time_function_start,
       duration = graph_function_duration(time_function_start),
       nodes = nrow(graph$nodes_df),

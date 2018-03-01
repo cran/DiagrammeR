@@ -5,7 +5,8 @@
 \title{Traverse from one or more selected nodes onto
 adjacent, inward nodes}
 \usage{
-trav_in(graph, conditions = NULL, copy_attrs_from = NULL, agg = "sum")
+trav_in(graph, conditions = NULL, copy_attrs_from = NULL,
+  copy_attrs_as = NULL, agg = "sum", add_to_selection = FALSE)
 }
 \arguments{
 \item{graph}{a graph object of class
@@ -19,6 +20,15 @@ name will copy those node attribute values to the
 traversed nodes. Any values extant on the nodes
 traversed to will be replaced.}
 
+\item{copy_attrs_as}{if a node attribute name
+is provided in \code{copy_attrs_from}, this option
+will allow the copied attribute values to be
+written under a different attribute name. If the
+attribute name provided in \code{copy_attrs_as}
+does not exist in the graph's ndf, the new
+node attribute will be created with the chosen
+name.}
+
 \item{agg}{if a node attribute is provided
 to \code{copy_attrs_from}, then an aggregation
 function is required since there may be cases where
@@ -27,6 +37,13 @@ the traversed node(s). To pass only a single value,
 the following aggregation functions can be used:
 \code{sum}, \code{min}, \code{max}, \code{mean}, or
 \code{median}.}
+
+\item{add_to_selection}{an option to
+either add the traversed to nodes
+to the active selection of nodes
+(\code{TRUE}) or switch the active
+selection entirely to those traversed
+to nodes (\code{FALSE}, the default case).}
 }
 \value{
 a graph object of class \code{dgr_graph}.
@@ -84,22 +101,12 @@ graph <-
   join_node_attrs(df = df_nodes)
 
 # Show the graph's internal node data frame
-get_node_df(graph)
-#>   id type label values
-#> 1  1    a   asd   8.58
-#> 2  2    a  iekd   7.22
-#> 3  3    b   idj   5.95
-#> 4  4    b   edl   6.71
-#> 5  5    b   ohd   7.48
+graph \%>\%
+  get_node_df()
 
 # Show the graph's internal edge data frame
-get_edge_df(graph)
-#>   id from to  rel values
-#> 1  1    1  2 <NA>   6.00
-#> 2  2    1  3    A   6.11
-#> 3  3    2  4    B   4.72
-#> 4  4    2  5    C   6.02
-#> 5  5    3  5    D   5.05
+graph \%>\%
+  get_edge_df()
 
 # Perform a simple traversal from node `4` to
 # inward adjacent edges with no conditions
@@ -108,7 +115,6 @@ graph \%>\%
   select_nodes_by_id(nodes = 4) \%>\%
   trav_in() \%>\%
   get_selection()
-#> [1] 2
 
 # Traverse from node `5` to inbound-facing
 # nodes, filtering to those nodes that have
@@ -119,7 +125,6 @@ graph \%>\%
   trav_in(
     conditions = values > 5.0) \%>\%
   get_selection()
-#> [1] 2
 
 # Traverse from node `5` to any inbound
 # nodes, filtering to those nodes that
@@ -129,7 +134,6 @@ graph \%>\%
   trav_in(
     conditions = type == "b") \%>\%
   get_selection()
-#> [1] 3
 
 # Traverse from node `5` to any inbound
 # nodes, filtering to those nodes that
@@ -137,7 +141,7 @@ graph \%>\%
 graph \%>\%
   {
   node_degrees <-
-    node_info(.) \%>\%
+    get_node_info(.) \%>\%
     dplyr::select(id, deg)
   join_node_attrs(., node_degrees)
   } \%>\%
@@ -145,7 +149,6 @@ graph \%>\%
   trav_in(
     conditions = deg == 2) \%>\%
   get_selection()
-#> [1] 3
 
 # Traverse from node `5` to any inbound
 # nodes, and use multiple conditions for the
@@ -157,7 +160,6 @@ graph \%>\%
       type == "a" &
       values > 6.0) \%>\%
   get_selection()
-#> [1] 2
 
 # Traverse from node `5` to any inbound
 # nodes, and use multiple conditions with
@@ -168,7 +170,6 @@ graph \%>\%
     conditions =
       type == "b" | values > 6.0) \%>\%
   get_selection()
-#> [1] 2 3
 
 # Traverse from node `5` to any inbound
 # nodes, and use a regular expression as
@@ -178,7 +179,6 @@ graph \%>\%
   trav_in(
     conditions = grepl("^i.*", label)) \%>\%
   get_selection()
-#> [1] 2
 
 # Create another simple graph to demonstrate
 # copying of node attribute values to traversed
@@ -199,17 +199,10 @@ graph <-
 # Show the graph's internal node data frame
 graph \%>\%
   get_node_df()
-#>   id type label value
-#> 1  1 <NA>  <NA>    NA
-#> 2  2 <NA>  <NA>     5
-#> 3  3 <NA>  <NA>     5
 
 # Show the graph's internal edge data frame
 graph \%>\%
   get_edge_df()
-#>   id from to  rel
-#> 1  1    1  2 <NA>
-#> 2  2    1  3 <NA>
 
 # Perform a traversal from the outer nodes
 # (`2` and `3`) to the central node (`1`) while
@@ -227,8 +220,4 @@ graph <-
 # after this change
 graph \%>\%
   get_node_df()
-#>   id type label value
-#> 1  1 <NA>  <NA>    10
-#> 2  2 <NA>  <NA>     5
-#> 3  3 <NA>  <NA>     5
 }

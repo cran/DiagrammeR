@@ -55,12 +55,10 @@ gml_graph <-
 
 # Get a count of the graph's nodes
 gml_graph \%>\%
-  node_count()
-#> [1] 34
+  count_nodes()
 
 # Get a count of the graph's edges
 gml_graph \%>\%
-  edge_count()
-#> [1] 78
+  count_edges()
 }
 }

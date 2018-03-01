@@ -1,11 +1,13 @@
 #' Invert selection of nodes or edges in a graph
-#' @description Modify the selection of nodes or edges
-#' within a graph object such that all nodes or edges
-#' previously unselected will now be selected and vice
-#' versa.
+#' @description Modify the selection
+#' of nodes or edges within a graph
+#' object such that all nodes or edges
+#' previously not selected will now be
+#' selected and vice versa.
 #' @param graph a graph object of class
 #' \code{dgr_graph}.
-#' @return a graph object of class \code{dgr_graph}.
+#' @return a graph object of class
+#' \code{dgr_graph}.
 #' @examples
 #' # Create a node data frame (ndf)
 #' ndf <-
@@ -26,22 +28,27 @@
 #'     nodes_df = ndf,
 #'     edges_df = edf)
 #'
-#' # Select nodes with ID values `1` and `3`
+#' # Select nodes with ID
+#' # values `1` and `3`
 #' graph <-
+#'   graph %>%
 #'   select_nodes(
-#'     graph = graph,
 #'     nodes = c(1, 3))
 #'
-#' # Verify that a node selection has been made
-#' get_selection(graph)
-#' #> [1] 1 3
+#' # Verify that a node
+#' # selection has been made
+#' graph %>%
+#'   get_selection()
 #'
 #' # Invert the selection
-#' graph <- invert_selection(graph)
+#' graph <-
+#'   graph %>%
+#'   invert_selection()
 #'
-#' # Verify that the node selection has been changed
-#' get_selection(graph)
-#' #> [1] 2 4
+#' # Verify that the node
+#' # selection has been changed
+#' graph %>%
+#'   get_selection()
 #' @importFrom dplyr filter select
 #' @export invert_selection
 
@@ -50,20 +57,34 @@ invert_selection <- function(graph) {
   # Get the time of function start
   time_function_start <- Sys.time()
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Validation: Graph object has valid selection of
   # nodes or edges
   if (!(graph_contains_node_selection(graph) |
         graph_contains_edge_selection(graph))) {
-    stop("There is no selection of nodes or edges available.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "There is no selection of nodes or edges available")
   }
 
   # Create bindings for specific variables
   id <- from <- to <- NULL
+
+  # Obtain the input graph's node and edge
+  # selection properties
+  n_e_select_properties_in <-
+    node_edge_selection_properties(graph = graph)
 
   # Invert the nodes in the selection
   if (nrow(graph$node_selection) > 0) {
@@ -113,12 +134,17 @@ invert_selection <- function(graph) {
     graph$node_selection <- create_empty_nsdf()
   }
 
+  # Obtain the output graph's node and edge
+  # selection properties
+  n_e_select_properties_out <-
+    node_edge_selection_properties(graph = graph)
+
   # Update the `graph_log` df with an action
   graph$graph_log <-
     add_action_to_log(
       graph_log = graph$graph_log,
       version_id = nrow(graph$graph_log) + 1,
-      function_used = "invert_selection",
+      function_used = fcn_name,
       time_modified = time_function_start,
       duration = graph_function_duration(time_function_start),
       nodes = nrow(graph$nodes_df),
@@ -128,6 +154,19 @@ invert_selection <- function(graph) {
   if (graph$graph_info$write_backups) {
     save_graph_as_rds(graph = graph)
   }
+
+  # Construct message body
+  msg_body <-
+    glue::glue(
+      "inverted an existing selection of \\
+       {n_e_select_properties_in[['selection_count_str']]}:
+       * {n_e_select_properties_out[['selection_count_str']]} \\
+       are now in the active selection")
+
+  # Issue a message to the user
+  emit_message(
+    fcn_name = fcn_name,
+    message_body = msg_body)
 
   graph
 }

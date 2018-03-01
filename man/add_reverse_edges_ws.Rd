@@ -5,7 +5,7 @@
 \title{Add new edges in the opposite directions of a
 selection of edges}
 \usage{
-add_reverse_edges_ws(graph, rel = NULL)
+add_reverse_edges_ws(graph, rel = NULL, edge_aes = NULL, edge_data = NULL)
 }
 \arguments{
 \item{graph}{a graph object of class
@@ -13,6 +13,20 @@ add_reverse_edges_ws(graph, rel = NULL)
 
 \item{rel}{an optional string to apply a
 \code{rel} attribute to all newly created edges.}
+
+\item{edge_aes}{an optional list of named vectors
+comprising edge aesthetic attributes. The helper
+function \code{edge_aes()} is strongly recommended
+for use here as it contains arguments for each
+of the accepted edge aesthetic attributes (e.g.,
+\code{shape}, \code{style}, \code{penwidth},
+\code{color}).}
+
+\item{edge_data}{an optional list of named vectors
+comprising edge data attributes. The helper
+function \code{edge_data()} is strongly recommended
+for use here as it helps bind data specifically
+to the created edges.}
 }
 \value{
 a graph object of class \code{dgr_graph}.
@@ -57,7 +71,6 @@ graph <-
 # Get the graph's edges
 graph \%>\%
   get_edge_ids()
-#> [1] 1
 
 # Select the edge and create 2 additional edges
 # with the opposite definition of `1->2`, which
@@ -71,9 +84,6 @@ graph <-
   clear_selection()
 
 # Get the graph's edge data frame
-get_edge_df(graph)
-#>   id from to rel
-#> 1  1    1  2   a
-#> 2  2    2  1   b
-#> 3  3    2  1   c
+graph \%>\%
+  get_edge_df()
 }

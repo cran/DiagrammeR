@@ -44,15 +44,9 @@
 #' # Show the internal node data frame to verify
 #' # that the node attribute has been set for
 #' # specific node
-#' get_node_df(graph)
-#' #>   id type label color
-#' #> 1  1 <NA>     1  <NA>
-#' #> 2  2 <NA>     2  blue
-#' #> 3  3 <NA>     3  blue
-#' #> 4  4 <NA>     4  blue
-#' #> 5  5 <NA>     5  blue
-#' #> 6  6 <NA>     6  <NA>
-#' @importFrom rlang enquo UQ
+#' graph %>%
+#'   get_node_df()
+#' @importFrom rlang enquo UQ get_expr
 #' @export set_node_attrs_ws
 
 set_node_attrs_ws <- function(graph,
@@ -62,23 +56,36 @@ set_node_attrs_ws <- function(graph,
   # Get the time of function start
   time_function_start <- Sys.time()
 
-  node_attr <- rlang::enquo(node_attr)
-  node_attr <- (rlang::UQ(node_attr) %>% paste())[2]
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
 
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Validation: Graph contains nodes
   if (graph_contains_nodes(graph) == FALSE) {
-    stop("The graph contains no nodes, so, no node attributes can be set.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no nodes")
   }
 
   # Validation: Graph object has valid node selection
   if (graph_contains_node_selection(graph) == FALSE) {
-    stop("There is no selection of nodes available.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "There is no selection of nodes available.")
   }
+
+  # Get the requested `node_attr`
+  node_attr <-
+    rlang::enquo(node_attr) %>% rlang::get_expr() %>% as.character()
 
   # Get vector of node ID values
   nodes <- graph$node_selection$node
@@ -89,7 +96,7 @@ set_node_attrs_ws <- function(graph,
   # and update the graph
   graph <-
     set_node_attrs(
-      x = graph,
+      graph = graph,
       node_attr = rlang::UQ(node_attr_2),
       values = value,
       nodes = nodes)
@@ -99,7 +106,7 @@ set_node_attrs_ws <- function(graph,
     graph$graph_log[-nrow(graph$graph_log),] %>%
     add_action_to_log(
       version_id = nrow(graph$graph_log) + 1,
-      function_used = "set_node_attrs_ws",
+      function_used = fcn_name,
       time_modified = time_function_start,
       duration = graph_function_duration(time_function_start),
       nodes = nrow(graph$nodes_df),

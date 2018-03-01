@@ -5,7 +5,8 @@
 \title{Traverse from one or more selected nodes onto
 adjacent, inward edges}
 \usage{
-trav_in_edge(graph, conditions = NULL, copy_attrs_from = NULL)
+trav_in_edge(graph, conditions = NULL, copy_attrs_from = NULL,
+  copy_attrs_as = NULL)
 }
 \arguments{
 \item{graph}{a graph object of class
@@ -19,6 +20,15 @@ name will copy those node attribute values to the
 traversed edges. If the edge attribute already exists,
 the values will be merged to the traversed edges;
 otherwise, a new edge attribute will be created.}
+
+\item{copy_attrs_as}{if a node attribute name
+is provided in \code{copy_attrs_from}, this option
+will allow the copied attribute values to be
+written under a different edge attribute name.
+If the attribute name provided in
+\code{copy_attrs_as} does not exist in the graph's
+edf, the new edge attribute will be created
+with the chosen name.}
 }
 \value{
 a graph object of class \code{dgr_graph}.
@@ -67,13 +77,8 @@ graph <-
   join_edge_attrs(df = df)
 
 # Show the graph's internal edge data frame
-get_edge_df(graph)
-#>   id from to  rel values
-#> 1  1    1  2 <NA>   6.00
-#> 2  2    1  3    A   6.11
-#> 3  3    2  4    B   4.72
-#> 4  4    2  5    C   6.02
-#> 5  5    3  5    D   5.05
+graph \%>\%
+  get_edge_df()
 
 # Perform a simple traversal from
 # nodes to inbound edges with no
@@ -83,7 +88,6 @@ graph \%>\%
   select_nodes_by_id(nodes = 2) \%>\%
   trav_in_edge() \%>\%
   get_selection()
-#> [1] 1
 
 # Traverse from node `2` to any
 # inbound edges, filtering to
@@ -94,7 +98,6 @@ graph \%>\%
   trav_in_edge(
     conditions = is.na(rel)) \%>\%
   get_selection()
-#> [1] 1
 
 # Traverse from node `2` to any
 # inbound edges, filtering to those
@@ -108,7 +111,6 @@ graph \%>\%
   trav_in_edge(
     conditions = !is.na(rel)) \%>\%
   get_selection()
-#> [1] 2
 
 # Traverse from node `5` to any
 # inbound edges, filtering to those
@@ -120,7 +122,6 @@ graph \%>\%
   trav_in_edge(
     conditions = values > 5.5) \%>\%
   get_selection()
-#> [1] 4
 
 # Traverse from node `5` to any
 # inbound edges, filtering to those
@@ -131,7 +132,6 @@ graph \%>\%
   trav_in_edge(
     conditions = rel == "D") \%>\%
   get_selection()
-#> [1] 5
 
 # Traverse from node `5` to any
 # inbound edges, filtering to those
@@ -143,7 +143,6 @@ graph \%>\%
   trav_in_edge(
     conditions = rel \%in\% c("C", "D")) \%>\%
   get_selection()
-#> [1] 4 5
 
 # Traverse from node `5` to any
 # inbound edges, and use multiple
@@ -155,7 +154,6 @@ graph \%>\%
       rel \%in\% c("C", "D") &
       values > 5.5) \%>\%
   get_selection()
-#> [1] 4
 
 # Traverse from node `5` to any
 # inbound edges, and use multiple
@@ -168,7 +166,6 @@ graph \%>\%
       rel \%in\% c("D", "E") |
       values > 5.5) \%>\%
   get_selection()
-#> [1] 4 5
 
 # Traverse from node `5` to any
 # inbound edges, and use a regular
@@ -178,27 +175,14 @@ graph \%>\%
   trav_in_edge(
     conditions = grepl("C|D", rel)) \%>\%
   get_selection()
-#> [1] 4 5
 
 # Show the graph's internal ndf
 graph \%>\%
   get_node_df()
-#>   id type label
-#> 1  1    a   asd
-#> 2  2    a  iekd
-#> 3  3    b   idj
-#> 4  4    b   edl
-#> 5  5    b   ohd
 
 # Show the graph's internal edf
 graph \%>\%
   get_edge_df()
-#>   id from to  rel values
-#> 1  1    1  2 <NA>   6.00
-#> 2  2    1  3    A   6.11
-#> 3  3    2  4    B   4.72
-#> 4  4    2  5    C   6.02
-#> 5  5    3  5    D   5.05
 
 # Perform a traversal from all
 # nodes to their incoming edges and,
@@ -215,10 +199,4 @@ graph <-
 # data frame after this change
 graph \%>\%
   get_edge_df()
-#>   id from to  rel label values
-#> 1  1    1  2 <NA>  iekd   6.00
-#> 2  2    1  3    A   idj   6.11
-#> 3  3    2  4    B   edl   4.72
-#> 4  4    2  5    C   ohd   6.02
-#> 5  5    3  5    D   ohd   5.05
 }

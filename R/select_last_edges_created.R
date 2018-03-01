@@ -31,17 +31,8 @@
 #'
 #' # Display the graph's internal edge
 #' # data frame to verify the change
-#' get_edge_df(graph)
-#' #>   id from to rel color
-#' #> 1  1    1  2   a  <NA>
-#' #> 2  2    2  3   a  <NA>
-#' #> 3  3    3  1   a  <NA>
-#' #> 4  4    4  5   b   red
-#' #> 5  5    4  6   b   red
-#' #> 6  6    5  7   b   red
-#' #> 7  7    5  8   b   red
-#' #> 8  8    6  9   b   red
-#' #> 9  9    6 10   b   red
+#' graph %>%
+#'   get_edge_df()
 #' @importFrom dplyr mutate filter select pull if_else
 #' @importFrom utils tail
 #' @export select_last_edges_created
@@ -51,14 +42,23 @@ select_last_edges_created <- function(graph) {
   # Get the time of function start
   time_function_start <- Sys.time()
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Validation: Graph contains edges
   if (graph_contains_edges(graph) == FALSE) {
-    stop("The graph contains no edges, so, no edges can be selected.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no edges")
   }
 
   # Create bindings for specific variables
@@ -84,7 +84,11 @@ select_last_edges_created <- function(graph) {
     if (graph_transform_steps %>%
         tail(1) %>%
         dplyr::pull(step_deleted_edges) == 1) {
-      stop("The previous graph transformation function resulted in a removal of edges.")
+
+      emit_error(
+        fcn_name = fcn_name,
+        reasons = "The previous graph transformation function resulted in a removal of edges")
+
     } else {
       if (nrow(graph_transform_steps) > 1) {
         number_of_edges_created <-
@@ -116,16 +120,18 @@ select_last_edges_created <- function(graph) {
 
     # Apply the selection of edges to the graph
     graph <-
-      select_edges_by_edge_id(
-        graph = graph,
-        edges = edge_id_values)
+      suppressMessages(
+        select_edges_by_edge_id(
+          graph = graph,
+          edges = edge_id_values)
+      )
 
     # Update the `graph_log` df with an action
     graph$graph_log <-
       graph$graph_log[-nrow(graph$graph_log),] %>%
       add_action_to_log(
         version_id = nrow(graph$graph_log) + 1,
-        function_used = "select_last_edges_created",
+        function_used = fcn_name,
         time_modified = time_function_start,
         duration = graph_function_duration(time_function_start),
         nodes = nrow(graph$nodes_df),

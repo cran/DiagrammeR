@@ -16,15 +16,20 @@
 #' # Find all non-neighbors of node `2`
 #' graph %>%
 #'   get_non_nbrs(node = 2)
-#' #> [1] 4 5
 #' @export get_non_nbrs
 
 get_non_nbrs <- function(graph,
                          node) {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Get predecessors and successors for the `node`
@@ -34,8 +39,8 @@ get_non_nbrs <- function(graph,
 
   # Get all non-neighbors to the `node`
   node_non_nbrs <-
-    setdiff(
-      setdiff(get_node_ids(graph), node),
+    base::setdiff(
+      base::setdiff(get_node_ids(graph), node),
       node_nbrs)
 
   # Get a unique set of node ID values

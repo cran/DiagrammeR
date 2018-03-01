@@ -1,17 +1,21 @@
 #' Add a clone of an existing edge to the graph
-#' @description Add a new edge to a graph object of
-#' class \code{dgr_graph} which is a clones of an edge
-#' already in the graph. All edge attributes are
+#' @description Add a new edge to
+#' a graph object of class
+#' \code{dgr_graph} which is a
+#' clone of an edge already in the
+#' graph. All edge attributes are
 #' preserved.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param edge an edge ID corresponding to the graph edge
+#' @param graph a graph object of
+#' class \code{dgr_graph}.
+#' @param edge an edge ID
+#' corresponding to the graph edge
 #' to be cloned.
-#' @param from the outgoing node from which the edge
-#' is connected.
-#' @param to the incoming nodes to which each edge
-#' is connected.
-#' @return a graph object of class \code{dgr_graph}.
+#' @param from the outgoing node
+#' from which the edge is connected.
+#' @param to the incoming nodes to
+#' which each edge is connected.
+#' @return a graph object of
+#' class \code{dgr_graph}.
 #' @examples
 #' # Create a graph with a path of
 #' # 2 nodes; supply a common `rel`
@@ -33,8 +37,6 @@
 #' # edge data frame
 #' graph %>%
 #'   get_edge_df()
-#' #>   id from to rel     color
-#' #> 1  1    1  2   a steelblue
 #'
 #' # Create a new node (will have
 #' # node ID of `3`) and then
@@ -54,9 +56,6 @@
 #' # edge data frame
 #' graph_2 %>%
 #'   get_edge_df()
-#' #>   id from to rel     color
-#' #> 1  1    1  2   a steelblue
-#' #> 2  2    3  1   a steelblue
 #'
 #' # The same change can be performed
 #' # with some helper functions in the
@@ -68,13 +67,11 @@
 #'       edge = get_last_edges_created(.),
 #'       from = get_last_nodes_created(.),
 #'       to = 1)
+#'
 #' # Display the graph's internal
 #' # edge data frame
 #' graph_3 %>%
 #'   get_edge_df()
-#' #>   id from to rel     color
-#' #> 1  1    1  2   a steelblue
-#' #> 2  2    3  1   a steelblue
 #' @importFrom dplyr filter select
 #' @export add_edge_clone
 
@@ -86,25 +83,40 @@ add_edge_clone <- function(graph,
   # Get the time of function start
   time_function_start <- Sys.time()
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Validation: Graph contains edges
   if (graph_contains_edges(graph) == FALSE) {
-    stop("The graph contains no edges, no edges attributes can be set.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no edges")
   }
 
   # Stop function if edge is not a single numerical value
   if (length(edge) > 1 | inherits(edge, "character") | inherits(edge, "logical")) {
-    stop("The value for `edge` must be a single, numeric value.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The value for `edge` must be a single, numeric value")
   }
 
   # Stop function the edge ID does not correspond
   # to an edge in the graph
   if (!(edge %in% graph$edges_df$id)) {
-    stop("The value provided in `edge` does not correspond to an edge in the graph.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The value provided in `edge` does not correspond to an edge in the graph")
   }
 
   # Create bindings for specific variables
@@ -156,8 +168,9 @@ add_edge_clone <- function(graph,
 
   # Clear the graph's active selection
   graph <-
-    graph %>%
-    clear_selection()
+    suppressMessages(
+      graph %>%
+        clear_selection())
 
   # Remove extra items from the `graph_log`
   graph$graph_log <-
@@ -169,11 +182,12 @@ add_edge_clone <- function(graph,
     add_action_to_log(
       graph_log = graph$graph_log,
       version_id = nrow(graph$graph_log) + 1,
-      function_used = "add_edge_clone",
+      function_used = fcn_name,
       time_modified = time_function_start,
       duration = graph_function_duration(time_function_start),
       nodes = nrow(graph$nodes_df),
-      edges = nrow(graph$edges_df))
+      edges = nrow(graph$edges_df),
+      d_e = 1)
 
   # Perform graph actions, if any are available
   if (nrow(graph$graph_actions) > 0) {

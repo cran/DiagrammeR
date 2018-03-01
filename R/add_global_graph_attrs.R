@@ -16,22 +16,24 @@
 #' \code{graph}, \code{node}, or \code{edge}.
 #' @return a graph object of class \code{dgr_graph}.
 #' @examples
-#' # Create a new graph and set some global attributes
+#' # Create a new graph with no
+#' # global graph attributes and
+#' # add a global graph attribute
 #' graph <-
-#'   create_graph() %>%
-#'   set_global_graph_attrs(
+#'   create_graph(
+#'     attr_theme = NULL) %>%
+#'   add_global_graph_attrs(
 #'     attr = "overlap",
 #'     value = "true",
 #'     attr_type = "graph")
 #'
-#' # Verify that the global attributes have been set
-#' get_global_graph_attrs(graph)
-#' #>      attr value attr_type
-#' #> 1 overlap  true     graph
+#' # Verify that the attribute
+#' # addition has been made
+#' graph %>%
+#'   get_global_graph_attr_info()
 #'
-#' # Add to this set with by using the
-#' # `add_global_graph_attrs()` function and then
-#' # view the collection of attributes
+#' # Add another attribute with
+#' # `add_global_graph_attrs()`
 #' graph <-
 #'   graph %>%
 #'   add_global_graph_attrs(
@@ -39,25 +41,22 @@
 #'     value = 12,
 #'     attr_type = "node")
 #'
-#' get_global_graph_attrs(graph)
-#' #>       attr value attr_type
-#' #> 1  overlap  true     graph
-#' #> 2 penwidth    12      node
+#' # Verify that the attribute
+#' # addition has been made
+#' graph %>%
+#'   get_global_graph_attr_info()
 #'
-#' # When adding an attribute where `attr`
-#' # and `attr_type` exists, the value provided
-#' # will serve as an update
+#' # When adding an attribute where
+#' # `attr` and `attr_type` already
+#' # exists, the value provided will
+#' # serve as an update
 #' graph %>%
 #'   add_global_graph_attrs(
 #'     attr = "penwidth",
 #'     value = 15,
 #'     attr_type = "node") %>%
-#'   get_global_graph_attrs()
-#' #>       attr value attr_type
-#' #> 1  overlap  true     graph
-#' #> 2 penwidth    15      node
-#' @importFrom dplyr full_join transmute coalesce select
-#' @importFrom tibble tibble
+#'   get_global_graph_attr_info()
+#' @importFrom dplyr full_join transmute coalesce select tibble
 #' @export add_global_graph_attrs
 
 add_global_graph_attrs <- function(graph,
@@ -68,9 +67,15 @@ add_global_graph_attrs <- function(graph,
   # Get the time of function start
   time_function_start <- Sys.time()
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Create bindings for specific variables
@@ -87,7 +92,7 @@ add_global_graph_attrs <- function(graph,
 
   # Create a table for the attributes
   global_attrs_to_add <-
-    tibble::tibble(
+    dplyr::tibble(
       attr = as.character(attr),
       value = as.character(value),
       attr_type = as.character(attr_type)) %>%
@@ -118,7 +123,7 @@ add_global_graph_attrs <- function(graph,
     add_action_to_log(
       graph_log = graph$graph_log,
       version_id = nrow(graph$graph_log) + 1,
-      function_used = "add_global_graph_attrs",
+      function_used = fcn_name,
       time_modified = time_function_start,
       duration = graph_function_duration(time_function_start),
       nodes = nrow(graph$nodes_df),

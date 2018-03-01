@@ -1,44 +1,57 @@
-#' Get the authority scores for nodes in the graph
-#' @description Get the Kleinberg authority centrality
-#' scores for all nodes in the graph.
+#' Get the authority scores for all nodes
+#' @description Get the Kleinberg
+#' authority centrality scores for all
+#' nodes in the graph.
 #' @param graph a graph object of class
 #' \code{dgr_graph}.
-#' @param weights_attr an optional name of the edge
-#' attribute to use in the adjacency matrix. If
-#' \code{NULL} then, if it exists, the \code{weight}
-#' edge attribute of the graph will be used.
-#' @return a data frame with authority scores for
-#' each of the nodes.
+#' @param weights_attr an optional name
+#' of the edge attribute to use in the
+#' adjacency matrix. If \code{NULL} then,
+#' if it exists, the \code{weight} edge
+#' attribute of the graph will be used.
+#' @return a data frame with authority
+#' scores for each of the nodes.
 #' @examples
-#' # Create a random graph
+#' # Create a random graph using the
+#' # `add_gnm_graph()` function
 #' graph <-
-#'   create_random_graph(
-#'     n = 10, m = 22,
+#'   create_graph() %>%
+#'   add_gnm_graph(
+#'     n = 10,
+#'     m = 15,
 #'     set_seed = 23)
 #'
 #' # Get the authority centrality scores
 #' # for all nodes in the graph
-#' get_authority_centrality(graph)
-#' #>    id authority_centrality
-#' #> 1   1            0.0000000
-#' #> 2   2            0.0000000
-#' #> 3   3            0.3237777
-#' #> 4   4            0.0000000
-#' #> 5   5            0.8083310
-#' #> 6   6            0.8593282
-#' #> 7   7            0.7895083
-#' #> 8   8            0.4482946
-#' #> 9   9            0.8023324
-#' #> 10 10            1.0000000
+#' graph %>%
+#'   get_authority_centrality()
+#'
+#' # Add the authority centrality
+#' # scores to the graph as a node
+#' # attribute
+#' graph <-
+#'   graph %>%
+#'   join_node_attrs(
+#'     df = get_authority_centrality(.))
+#'
+#' # Display the graph's node data frame
+#' graph %>%
+#'   get_node_df()
 #' @importFrom igraph authority_score
 #' @export get_authority_centrality
 
 get_authority_centrality <- function(graph,
                                      weights_attr = NULL) {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Convert the graph to an igraph object
@@ -50,12 +63,18 @@ get_authority_centrality <- function(graph,
 
       # Stop function if the edge attribute does not exist
       if (!(weights_attr %in% colnames(graph$edges_df))) {
-        stop("The edge attribute to be used as weights does not exist in the graph.")
+
+        emit_error(
+          fcn_name = fcn_name,
+          reasons = "The edge attribute to be used as weights does not exist in the graph")
       }
 
       # Stop function if the edge attribute is not numeric
       if (!is.numeric(graph$edges_df[, which(colnames(graph$edges_df) == weights_attr)])) {
-        stop("The edge attribute to be used as weights is not numeric.")
+
+        emit_error(
+          fcn_name = fcn_name,
+          reasons = "The edge attribute to be used as weights is not numeric")
       }
 
       weights_attr <- graph$edges_df[, which(colnames(graph$edges_df) == weights_attr)]

@@ -420,6 +420,78 @@ test_that("selecting an edge in a graph is possible", {
       select_edges())
 })
 
+test_that("deselecting nodes in a graph is possible", {
+
+  # Create a graph and select
+  # all nodes in the graph
+  graph <-
+    create_graph() %>%
+    add_path(n = 8) %>%
+    select_nodes()
+
+  # Deselect nodes `1` and `2`
+  graph <-
+    graph %>%
+    deselect_nodes(nodes = c(1, 2))
+
+  # Expect nodes `3`-`8` to be
+  # in the active selection of nodes
+  expect_equal(
+    get_selection(graph = graph),
+    3:8)
+
+  # Expect that using `deselect_nodes()`
+  # on a graph with no active selection
+  # of nodes will just return the graph
+  # (and the function won't appear in the
+  # graph log)
+  graph_2 <-
+    create_graph() %>%
+    add_path(n = 8) %>%
+    deselect_nodes(nodes = 1:4)
+
+  expect_equal(
+    (graph_2 %>% get_graph_log())$function_used[
+      nrow(graph_2 %>% get_graph_log())],
+    "add_path")
+})
+
+test_that("deselecting edges in a graph is possible", {
+
+  # Create a graph and select
+  # all edges in the graph
+  graph <-
+    create_graph() %>%
+    add_path(n = 8) %>%
+    select_edges()
+
+  # Deselect edges `1` and `2`
+  graph <-
+    graph %>%
+    deselect_edges(edges = c(1, 2))
+
+  # Expect edges `3`-`7` to be
+  # in the active selection of edges
+  expect_equal(
+    get_selection(graph = graph),
+    3:7)
+
+  # Expect that using `deselect_edges()`
+  # on a graph with no active selection
+  # of eges will just return the graph
+  # (and the function won't appear in the
+  # graph log)
+  graph_2 <-
+    create_graph() %>%
+    add_path(n = 8) %>%
+    deselect_edges(edges = 1:4)
+
+  expect_equal(
+    (graph_2 %>% get_graph_log())$function_used[
+      nrow(graph_2 %>% get_graph_log())],
+    "add_path")
+})
+
 test_that("selecting edges via node IDs is possible", {
 
   # Create a graph
@@ -663,10 +735,12 @@ test_that("getting/clearing a selection is possible", {
 
 test_that("selecting nodes by node degree is possible", {
 
-  # Create a graph
+  # Create a random graph
   graph <-
-    create_random_graph(
-      n = 35, m = 125,
+    create_graph() %>%
+    add_gnm_graph(
+      n = 35,
+      m = 125,
       set_seed = 23)
 
   # Expect specific nodes when making a selection
@@ -676,7 +750,7 @@ test_that("selecting nodes by node degree is possible", {
     graph %>%
       select_nodes_by_degree("deg == 9") %>%
       get_selection(),
-    c(2, 9, 10, 14, 17, 19, 31, 33))
+    c(5, 10, 26, 31))
 
   # Expect specific nodes when making a selection
   # of nodes which have a total degree greater
@@ -685,5 +759,5 @@ test_that("selecting nodes by node degree is possible", {
     graph %>%
       select_nodes_by_degree("deg >= 9") %>%
       get_selection(),
-    c(2, 6, 9, 10, 14, 17, 19, 22, 25, 29, 31, 33))
+    c(1, 2, 4, 5, 10, 12, 18, 25, 26, 31))
 })

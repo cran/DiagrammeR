@@ -3,10 +3,11 @@ context("Getting information on a graph series")
 test_that("graph series information can be obtained", {
 
   # Create an empty graph series
-  empty_series <- create_series()
+  empty_series <- create_graph_series()
 
   empty_series_info <-
-    series_info(graph_series = empty_series)
+    empty_series %>%
+    get_graph_series_info()
 
   # Expect that `empty_series_info` is a
   # data frame object
@@ -74,15 +75,22 @@ test_that("graph series information can be obtained", {
       to = 2)
 
   # Create an empty graph series
-  series <- create_series(series_type = "sequential")
+  series <- create_graph_series(series_type = "sequential")
 
   # Add graphs to the graph series
-  series <- graph_1 %>% add_to_series(series)
-  series <- graph_2 %>% add_to_series(series)
-  series <- graph_3 %>% add_to_series(series)
+  series <-
+    series %>%
+    add_graph_to_graph_series(
+      graph = graph_1) %>%
+    add_graph_to_graph_series(
+      graph = graph_2) %>%
+    add_graph_to_graph_series(
+      graph = graph_3)
 
   # Get information on the graphs in the series
-  info_on_series <- series_info(series)
+  info_on_series <-
+    series %>%
+    get_graph_series_info()
 
   # Expect that `info_on_series` is a data frame object
   expect_is(
@@ -132,7 +140,7 @@ test_that("graph series information can be obtained", {
   # Create a temporal graph series and add
   # a graph with name and time information
   graph_series_temporal_type <-
-    create_series(series_type = "temporal")
+    create_graph_series(series_type = "temporal")
 
   graph <-
     create_graph(
@@ -142,12 +150,13 @@ test_that("graph series information can be obtained", {
       tz = "GMT")
 
   graph_series_temporal_type <-
-    add_to_series(
-      graph = graph,
-      graph_series = graph_series_temporal_type)
+    graph_series_temporal_type %>%
+    add_graph_to_graph_series(
+      graph = graph)
 
   info_on_series_temporal <-
-    series_info(graph_series_temporal_type)
+    graph_series_temporal_type %>%
+    get_graph_series_info()
 
   # Expect that `info_on_series_temporal` is
   # a data frame object

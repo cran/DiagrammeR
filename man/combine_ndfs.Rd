@@ -7,24 +7,26 @@
 combine_ndfs(...)
 }
 \arguments{
-\item{...}{two or more node data frames, which
-contain node IDs and associated attributes.}
+\item{...}{two or more node data
+frames, which contain node IDs and
+associated attributes.}
 }
 \value{
 a combined node data frame.
 }
 \description{
-Combine several node data frames
-into a single node data frame.
+Combine several node
+data frames into a single node
+data frame.
 }
 \examples{
 # Create two node data frames
 node_df_1 <-
   create_node_df(
-    n = 4,
-    type = c("a", "a", "b", "b"),
-    label = c("D", "Z", "E", "G"),
-    value = c(8.4, 3.4, 2.9, 7.0))
+    n = 2,
+    type = c("a", "b"),
+    label = c("D", "Z"),
+    value = c(8.4, 3.4))
 
 node_df_2 <-
   create_node_df(
@@ -33,20 +35,13 @@ node_df_2 <-
     label = c("U", "A"),
     value = c(0.4, 3.4))
 
-# Combined the node data frames using the
+# Combine the ndfs using the
 # `combine_ndfs()` function
 node_df_combined <-
   combine_ndfs(
     node_df_1,
     node_df_2)
 
-# Inspect the combined node data frame
+# Inspect the combined ndf
 node_df_combined
-#>   id type label value
-#> 1  1    a     D   8.4
-#> 2  2    a     Z   3.4
-#> 3  3    b     E   2.9
-#> 4  4    b     G   7.0
-#> 5  5    b     U   0.4
-#> 6  6    c     A   3.4
 }

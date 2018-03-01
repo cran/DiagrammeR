@@ -1,11 +1,12 @@
 #' Get a cached vector from a graph object
-#' @description Get the vector cached in a graph object
-#' of class \code{dgr_graph}.
+#' @description Get the vector cached in a
+#' graph object of class \code{dgr_graph}.
 #' @param graph a graph object of class
 #' \code{dgr_graph}.
-#' @param name the name of the object to extract from
-#' the cache. If none supplied, the most recent object
-#' added to the cache will be returned.
+#' @param name the name of the object to
+#' extract from the cache. If none supplied,
+#' the most recent object added to the cache
+#' will be returned.
 #' @return a vector.
 #' @examples
 #' # Set a seed
@@ -16,8 +17,11 @@
 #'   create_graph() %>%
 #'   add_n_nodes(n = 5) %>%
 #'   set_node_attrs(
-#'     node_attr = "value",
-#'     values = rnorm(node_count(.), 8, 2)) %>%
+#'     node_attr = value,
+#'     values = rnorm(
+#'       n = count_nodes(.),
+#'       mean = 8,
+#'       sd = 2)) %>%
 #'   add_edges_w_string(
 #'     edges = "1->2 1->3 2->4 2->5 3->2")
 #'
@@ -25,23 +29,29 @@
 #' # as a numeric vector
 #' graph <-
 #'   graph %>%
-#'   cache_node_attrs(
-#'     node_attr = "value",
-#'     mode = "numeric")
+#'   set_cache(
+#'     name = "value",
+#'     to_cache = get_node_attrs(
+#'       graph = .,
+#'       node_attr = value))
 #'
 #' # Return the cached vector
 #' graph %>%
 #'   get_cache()
-#' #> [1] 9.993210 10.214981  7.443827
-#' #> [4] 10.038411  8.090874
 #' @export get_cache
 
 get_cache <- function(graph,
                       name = NULL) {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # If there is no cached vector available, return NA

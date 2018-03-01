@@ -1,17 +1,21 @@
 #' Drop an edge attribute column
-#' @description Within a graph's internal edge data
-#' frame (edf), remove an existing edge attribute.
+#' @description Within a graph's internal
+#' edge data frame (edf), remove an existing
+#' edge attribute.
 #' @param graph a graph object of class
 #' \code{dgr_graph}.
-#' @param edge_attr the name of the edge attribute
-#' column to drop.
+#' @param edge_attr the name of the edge
+#' attribute column to drop.
 #' @return a graph object of class
 #' \code{dgr_graph}.
 #' @examples
-#' # Create a random graph
+#' # Create a random graph using the
+#' # `add_gnm_graph()` function
 #' graph <-
-#'   create_random_graph(
-#'     n = 5, m = 6,
+#'   create_graph() %>%
+#'   add_gnm_graph(
+#'     n = 5,
+#'     m = 6,
 #'     set_seed = 23) %>%
 #'   set_edge_attrs(
 #'     edge_attr = value,
@@ -19,34 +23,26 @@
 #'   mutate_edge_attrs(
 #'     penwidth = value * 2)
 #'
-#' # Get the graph's internal edf to show which
-#' # edge attributes are available
-#' get_edge_df(graph)
-#' #>   id from to  rel value penwidth
-#' #> 1  1    2  3 <NA>     3        6
-#' #> 2  2    3  5 <NA>     3        6
-#' #> 3  3    3  4 <NA>     3        6
-#' #> 4  4    2  4 <NA>     3        6
-#' #> 5  5    2  5 <NA>     3        6
-#' #> 6  6    4  5 <NA>     3        6
+#' # Get the graph's internal
+#' # edf to show which edge
+#' # attributes are available
+#' graph %>%
+#'   get_edge_df()
 #'
-#' # Drop the `value` edge attribute
+#' # Drop the `value` edge
+#' # attribute
 #' graph <-
 #'   graph %>%
 #'   drop_edge_attrs(
 #'     edge_attr = value)
 #'
-#' # Get the graph's internal edf to show that
-#' # the edge attribute `value` had been removed
-#' get_edge_df(graph)
-#' #>   id from to  rel penwidth
-#' #> 1  1    2  3 <NA>        6
-#' #> 2  2    3  5 <NA>        6
-#' #> 3  3    3  4 <NA>        6
-#' #> 4  4    2  4 <NA>        6
-#' #> 5  5    2  5 <NA>        6
-#' #> 6  6    4  5 <NA>        6
-#' @importFrom rlang enquo UQ
+#' # Get the graph's internal
+#' # edf to show that the edge
+#' # attribute `value` had been
+#' # removed
+#' graph %>%
+#'   get_edge_df()
+#' @importFrom rlang enquo get_expr
 #' @export drop_edge_attrs
 
 drop_edge_attrs <- function(graph,
@@ -55,25 +51,29 @@ drop_edge_attrs <- function(graph,
   # Get the time of function start
   time_function_start <- Sys.time()
 
-  edge_attr <- rlang::enquo(edge_attr)
-  edge_attr <- (rlang::UQ(edge_attr) %>% paste())[2]
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
 
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
-  # Stop function if length of `edge_attr` is
-  # greater than one
-  if (length(edge_attr) > 1) {
-    stop("You can only provide a single column.")
-  }
+  # Get the requested `edge_attr`
+  edge_attr <-
+    rlang::enquo(edge_attr) %>% rlang::get_expr() %>% as.character()
 
   # Stop function if `edge_attr` is any of
   # `from`, `to`, or `rel`
   if (any(c("from", "to", "rel") %in%
           edge_attr)) {
-    stop("You cannot drop this column.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "You cannot drop this column")
   }
 
   # Extract the graph's edf
@@ -85,7 +85,10 @@ drop_edge_attrs <- function(graph,
   # Stop function if `edge_attr` is not one
   # of the graph's column
   if (!any(column_names_graph %in% edge_attr)) {
-    stop("The edge attribute to drop is not in the ndf.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The edge attribute to drop is not in the ndf")
   }
 
   # Get the column number for the edge attr to drop
@@ -103,7 +106,7 @@ drop_edge_attrs <- function(graph,
     add_action_to_log(
       graph_log = graph$graph_log,
       version_id = nrow(graph$graph_log) + 1,
-      function_used = "drop_edge_attrs",
+      function_used = fcn_name,
       time_modified = time_function_start,
       duration = graph_function_duration(time_function_start),
       nodes = nrow(graph$nodes_df),

@@ -60,29 +60,45 @@
 #' graph %>%
 #'   get_edge_attrs_ws(
 #'     edge_attr = value)
-#' #> 1->2 2->3
-#' #>  1.6  2.9
 #' @importFrom dplyr filter pull
-#' @importFrom rlang enquo UQ
+#' @importFrom rlang enquo UQ get_expr
 #' @export get_edge_attrs_ws
 
 get_edge_attrs_ws <- function(graph,
                               edge_attr) {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Validation: Graph object has a valid edge selection
   if (graph_contains_edge_selection(graph) == FALSE) {
-    stop("There is no selection of edges available.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "There is no selection of edges available.")
   }
 
   edge_attr <- rlang::enquo(edge_attr)
 
   # Create binding for a specific variable
   id <- NULL
+
+  if (rlang::enquo(edge_attr) %>%
+      rlang::get_expr() %>%
+      as.character() %in% c("id", "from", "to")) {
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "This is not an edge attribute")
+  }
 
   # Extract the edge data frame (edf)
   # from the graph

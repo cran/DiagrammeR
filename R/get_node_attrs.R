@@ -12,13 +12,17 @@
 #' @return a named vector of node attribute values for
 #' the attribute given by \code{node_attr} by node ID.
 #' @examples
-#' # Create a random graph and
-#' # incorporate the node attribute
-#' # called `value`
+#' # Create a random graph using the
+#' # `add_gnm_graph()` function
 #' graph <-
-#'   create_random_graph(
-#'     n = 4, m = 4,
-#'     set_seed = 23)
+#'   create_graph() %>%
+#'   add_gnm_graph(
+#'     n = 4,
+#'     m = 4,
+#'     set_seed = 23) %>%
+#'   set_node_attrs(
+#'     node_attr = value,
+#'     values = c(2.5, 8.2, 4.2, 2.4))
 #'
 #' # Get all of the values from
 #' # the `value` node attribute
@@ -26,8 +30,6 @@
 #' graph %>%
 #'   get_node_attrs(
 #'     node_attr = value)
-#' #>   1   2   3   4
-#' #> 6.0 2.5 3.5 7.5
 #'
 #' # To only return node attribute
 #' # values for specified nodes,
@@ -36,19 +38,23 @@
 #'   get_node_attrs(
 #'     node_attr = value,
 #'     nodes = c(1, 3))
-#' #>   1   3
-#' #> 6.0 3.5
 #' @importFrom dplyr filter pull
-#' @importFrom rlang enquo UQ
+#' @importFrom rlang enquo UQ get_expr
 #' @export get_node_attrs
 
 get_node_attrs <- function(graph,
                            node_attr,
                            nodes = NULL) {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   node_attr <- rlang::enquo(node_attr)
@@ -56,8 +62,13 @@ get_node_attrs <- function(graph,
   # Create binding for a specific variable
   id <- NULL
 
-  if ((rlang::UQ(node_attr) %>% paste())[2] %in% c("id", "nodes")) {
-    stop("This is not a node attribute.")
+  if (rlang::enquo(node_attr) %>%
+      rlang::get_expr() %>%
+      as.character() %in% c("id", "nodes")) {
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "This is not a node attribute")
   }
 
   # Extract the node data frame (ndf)

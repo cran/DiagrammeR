@@ -11,10 +11,10 @@ set_node_attr_to_display(graph, attr = NULL, nodes = NULL,
 \item{graph}{a graph object of class
 \code{dgr_graph}.}
 
-\item{attr}{the name of the attribute to
-set for the \code{type} of global attribute
-specified. If set to \code{NULL}, then \code{NA}
-values will be assigned to the \code{display}
+\item{attr}{the name of the attribute from
+which label text for the node will be obtained.
+If set to \code{NULL}, then \code{NA} values
+will be assigned to the \code{display} column
 for the chosen nodes.}
 
 \item{nodes}{a length vector containing one or
@@ -49,14 +49,21 @@ specified in \code{nodes} and a default value
 (\code{default}) for all remaining nodes.
 }
 \examples{
-# Create a random graph
+# Create a random graph using the
+# `add_gnm_graph()` function
 graph <-
-  create_random_graph(
-    n = 5, m = 5,
-    set_seed = 23)
+  create_graph() \%>\%
+  add_gnm_graph(
+    n = 4,
+    m = 4,
+    set_seed = 23) \%>\%
+  set_node_attrs(
+    node_attr = value,
+    values = c(2.5, 8.2, 4.2, 2.4))
 
-# For node ID values of `1` to `3`, choose
-# to display the node `value` attribute (for
+# For node ID values of `1`,
+# `2`, and `3`, choose to display
+# the node `value` attribute (for
 # the other nodes, display nothing)
 graph <-
   graph \%>\%
@@ -69,13 +76,8 @@ graph <-
 # `display` node attribute will show for
 # each row, which node attribute value to
 # display when the graph is rendered
-get_node_df(graph)
-#>   id type label display value
-#> 1  1 <NA>     1   value   6.0
-#> 2  2 <NA>     2   value   2.5
-#> 3  3 <NA>     3   value   3.5
-#> 4  4 <NA>     4    <NA>   7.5
-#> 5  5 <NA>     5    <NA>   8.5
+graph \%>\%
+  get_node_df()
 
 # This function can be called multiple
 # times on a graph; after the first time
@@ -87,13 +89,7 @@ graph \%>\%
     nodes = 4,
     attr = label) \%>\%
   set_node_attr_to_display(
-    nodes = c(1, 5),
+    nodes = c(1, 3),
     attr = id) \%>\%
   get_node_df()
-#>   id type label display value
-#> 1  1 <NA>     1      id   6.0
-#> 2  2 <NA>     2   value   2.5
-#> 3  3 <NA>     3   value   3.5
-#> 4  4 <NA>     4   label   7.5
-#> 5  5 <NA>     5      id   8.5
 }

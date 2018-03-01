@@ -36,11 +36,10 @@ graph <-
 
 # Determine the minimum cut
 # between nodes `1` and `4`
-get_min_cut_between(
-  graph = graph,
-  from = 1,
-  to = 2)
-#> [1] 1
+graph \%>\%
+  get_min_cut_between(
+    from = 1,
+    to = 2)
 
 # Create a cycle graph with
 # randomized values given to all
@@ -53,7 +52,7 @@ graph_capacity <-
     edge_attr = capacity,
     value =
       rnorm(
-        n = edge_count(.),
+        n = count_edges(.),
         mean = 5,
         sd = 1)) \%>\%
   clear_selection()
@@ -62,11 +61,10 @@ graph_capacity <-
 # between nodes `1` and `4` for
 # this graph, where `capacity`is
 # set as an edge attribute
-get_min_cut_between(
-  graph = graph_capacity,
-  from = 1,
-  to = 2)
-#> [1] 4.479822
+graph_capacity \%>\%
+  get_min_cut_between(
+    from = 1,
+    to = 2)
 
 # Create a full graph and then
 # get the minimum cut requirement
@@ -76,5 +74,4 @@ create_graph() \%>\%
   get_min_cut_between(
     from = 2,
     to = 8)
-#> [1] 9
 }

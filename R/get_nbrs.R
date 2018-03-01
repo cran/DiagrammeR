@@ -15,13 +15,11 @@
 #' # Find all neighbor nodes for node `2`
 #' graph %>%
 #'   get_nbrs(nodes = 2)
-#' #> [1] 1 3
 #'
 #' # Find all neighbor nodes for nodes `1`
 #' # and `5`
 #' graph %>%
 #'   get_nbrs(nodes = c(1, 5))
-#' #> [1] 2 4
 #'
 #' # Color node `3` with purple, get its
 #' # neighbors and color those nodes green
@@ -44,9 +42,15 @@
 get_nbrs <- function(graph,
                      nodes) {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Get predecessors and successors for all nodes

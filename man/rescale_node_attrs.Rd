@@ -48,23 +48,26 @@ range, then write to the same node attribute or to
 a new node attribute column.
 }
 \examples{
-# Create a random graph
+# Create a random graph using the
+# `add_gnm_graph()` function
 graph <-
-  create_random_graph(
-    n = 5, m = 10,
-    set_seed = 23,
-    directed = TRUE)
+  create_graph() \%>\%
+  add_gnm_graph(
+    n = 5,
+    m = 10,
+    set_seed = 23) \%>\%
+  set_node_attrs(
+    node_attr = value,
+    values = rnorm(
+      n = count_nodes(.),
+      mean = 5,
+      sd = 1) \%>\% round(1))
 
 # Get the graph's internal ndf
 # to show which node attributes
 # are available
-get_node_df(graph)
-#>   id type label value
-#> 1  1 <NA>     1   6.0
-#> 2  2 <NA>     2   2.5
-#> 3  3 <NA>     3   3.5
-#> 4  4 <NA>     4   7.5
-#> 5  5 <NA>     5   8.5
+graph \%>\%
+  get_node_df()
 
 # Rescale the `value` node
 # attribute, so that its values
@@ -72,18 +75,15 @@ get_node_df(graph)
 graph <-
   graph \%>\%
   rescale_node_attrs(
-    node_attr_from = value)
+    node_attr_from = value,
+    to_lower_bound = 0,
+    to_upper_bound = 1)
 
 # Get the graph's internal ndf
 # to show that the node attribute
 # values had been rescaled
-get_node_df(graph)
-#>   id type label value
-#> 1  1 <NA>     1 0.583
-#> 2  2 <NA>     2 0.000
-#> 3  3 <NA>     3 0.167
-#> 4  4 <NA>     4 0.833
-#> 5  5 <NA>     5 1.000
+graph \%>\%
+  get_node_df()
 
 # Scale the values in the `value`
 # node attribute to different
@@ -107,11 +107,6 @@ graph <-
 # grayscale colors are now available
 # in the `fillcolor` and `fontcolor`
 # node attributes
-get_node_df(graph)
-#>   id type label value fillcolor fontcolor
-#> 1  1 <NA>     1 0.583   #6E6E6E   #898989
-#> 2  2 <NA>     2 0.000   #CCCCCC   #0D0D0D
-#> 3  3 <NA>     3 0.167   #B0B0B0   #2E2E2E
-#> 4  4 <NA>     4 0.833   #4A4A4A   #C7C7C7
-#> 5  5 <NA>     5 1.000   #333333   #F2F2F2
+graph \%>\%
+  get_node_df()
 }

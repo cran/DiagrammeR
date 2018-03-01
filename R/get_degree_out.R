@@ -12,56 +12,48 @@
 #' @return a data frame with outdegree values for
 #' each of the nodes.
 #' @examples
-#' # Create a random graph
+#' # Create a random graph using the
+#' # `add_gnm_graph()` function
 #' graph <-
-#'   create_random_graph(
-#'     n = 10, m = 22,
+#'   create_graph(
+#'     directed = FALSE) %>%
+#'   add_gnm_graph(
+#'     n = 10,
+#'     m = 15,
 #'     set_seed = 23)
 #'
-#' # Get the outdegree values for all nodes
-#' # in the graph
-#' get_degree_out(graph)
-#' #>    id outdegree
-#' #> 1   1         4
-#' #> 2   2         5
-#' #> 3   3         3
-#' #> 4   4         3
-#' #> 5   5         2
-#' #> 6   6         3
-#' #> 7   7         1
-#' #> 8   8         0
-#' #> 9   9         1
-#' #> 10 10         0
+#' # Get the outdegree values
+#' # for all nodes in the graph
+#' graph %>%
+#'   get_degree_out()
 #'
-#' # Add the outdegree values to the graph
-#' # as a node attribute
+#' # Add the outdegree values
+#' # to the graph as a node
+#' # attribute
 #' graph <-
 #'   graph %>%
 #'   join_node_attrs(
 #'     df = get_degree_out(.))
 #'
-#' # Display the graph's node data frame
-#' get_node_df(graph)
-#' #>    id type label value outdegree
-#' #> 1   1 <NA>     1   6.0         4
-#' #> 2   2 <NA>     2   2.5         5
-#' #> 3   3 <NA>     3   3.5         3
-#' #> 4   4 <NA>     4   7.5         3
-#' #> 5   5 <NA>     5   8.5         2
-#' #> 6   6 <NA>     6   4.5         3
-#' #> 7   7 <NA>     7  10.0         1
-#' #> 8   8 <NA>     8  10.0         0
-#' #> 9   9 <NA>     9   8.5         1
-#' #> 10 10 <NA>    10  10.0         0
+#' # Display the graph's
+#' # node data frame
+#' graph %>%
+#'   get_node_df()
 #' @importFrom igraph degree
 #' @export get_degree_out
 
 get_degree_out <- function(graph,
                            normalized = FALSE) {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Convert the graph to an igraph object

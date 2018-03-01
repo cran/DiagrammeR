@@ -12,37 +12,44 @@
 #' respectively.
 #' @return a data frame with degree frequencies.
 #' @examples
-#' # Create a random, directed graph with
-#' # 18 nodes and 22 edges
+#' # Create a random graph using the
+#' # `add_gnm_graph()` function
 #' graph <-
-#'   create_random_graph(
-#'     n = 18, m = 22,
+#'   create_graph(
+#'     directed = FALSE) %>%
+#'   add_gnm_graph(
+#'     n = 10,
+#'     m = 15,
 #'     set_seed = 23)
 #'
-#' # Get the total degree distribution for
-#' # the `random_graph` graph
+#' # Get the total degree
+#' # distribution for the graph
 #' graph %>%
-#'   get_degree_distribution(mode = "total")
-#' #>   degree total_degree_dist
-#' #> 1      0        0.05555556
-#' #> 2      1        0.22222222
-#' #> 3      2        0.22222222
-#' #> 4      3        0.22222222
-#' #> 5      4        0.27777778
+#'   get_degree_distribution(
+#'     mode = "total")
 #' @importFrom igraph degree_distribution
 #' @export get_degree_distribution
 
 get_degree_distribution <- function(graph,
                                     mode = "total") {
 
+  # Get the name of the function
+  fcn_name <- get_calling_fcn()
+
   # Validation: Graph object is valid
   if (graph_object_valid(graph) == FALSE) {
-    stop("The graph object is not valid.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph object is not valid")
   }
 
   # Validation: Graph contains nodes
   if (graph_contains_nodes(graph) == FALSE) {
-    stop("The graph contains no nodes, so, a degree distribution data frame cannot be produced.")
+
+    emit_error(
+      fcn_name = fcn_name,
+      reasons = "The graph contains no nodes")
   }
 
   # Convert the graph to an igraph object
