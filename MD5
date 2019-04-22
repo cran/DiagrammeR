@@ -1,4 +1,4 @@
-b1b3a6778e90c7a0662ae16979c68bdd *DESCRIPTION
+91860474e46dccbedef125f71e5ecf4a *DESCRIPTION
 2c26ddc30c5b6a20a7cc59232f703e5f *LICENSE
 6bb80309ec327ac42c45dff18101493e *NAMESPACE
 e45fd33e3f9c7a92be945308d68b81f8 *NEWS.md
@@ -528,7 +528,7 @@ c996b3ea208a192db96ebae84192d46d *man/trigger_graph_actions.Rd
 bc856c2ff12864830b11c16779b24f05 *man/usd_exchange_rates.Rd
 a3ef021796b2e764c759830ba1a5667b *man/visnetwork.Rd
 bf1de846f2c878492252e7bfb00e2933 *man/x11_hex.Rd
-ce22c22a8288bcd6435bd586ceaf979f *tests/testthat.R
+4a1b02fcc81a25ad8544b22a8367108b *tests/testthat.R
 a0e14177fbe56430bb456e1a7eac6d61 *tests/testthat/test-add_forward_reverse_edges.R
 bdbef3e87ca8611c49931680d594b278 *tests/testthat/test-add_graphs.R
 7d7e5060ddf8ba26b30e45da54fd3ba2 *tests/testthat/test-add_node_edge.R
