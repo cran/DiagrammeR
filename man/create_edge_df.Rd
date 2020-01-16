@@ -7,41 +7,36 @@
 create_edge_df(from, to, rel = NULL, ...)
 }
 \arguments{
-\item{from}{a vector of node ID values from which
-edges are outbound. The vector length must equal
-that of the \code{to} vector.}
+\item{from}{A vector of node ID values from which edges are outbound. The
+vector length must equal that of the \code{to} vector.}
 
-\item{to}{a vector of node ID values to which edges
-are incoming. The vector length must equal that of
-the \code{from} vector.}
+\item{to}{A vector of node ID values to which edges are incoming. The vector
+length must equal that of the \code{from} vector.}
 
-\item{rel}{an optional \code{rel} label for each
-edge.}
+\item{rel}{An optional \code{rel} label for each edge.}
 
-\item{...}{one or more vectors for associated edge
-attributes.}
+\item{...}{One or more vectors for associated edge attributes.}
 }
 \value{
-an edge data frame (edf).
+An edge data frame (edf).
 }
 \description{
-Combine several vectors for edges
-and their attributes into a data frame, which can be
-combined with other similarly-generated data frames,
-or, added to a graph object. An edge data frame,
-or edf, has at least the following columns:
+Combine several vectors for edges and their attributes into a data frame,
+which can be combined with other similarly-generated data frames, or, added
+to a graph object. An edge data frame, or edf, has at least the following
+columns:
+}
+\details{
+\itemize{
+\item \code{id} (of type \code{integer})
+\item \code{from} (of type \code{integer})
+\item \code{to} (of type \code{integer})
+\item \code{rel} (of type \code{character})
+}
 
-- \code{id} (of type \code{integer})
-
-- \code{from} (of type \code{integer})
-
-- \code{to} (of type \code{integer})
-
-- \code{rel} (of type \code{character})
-
-An arbitrary number of additional columns containing
-aesthetic or data attributes can be part of the edf,
-so long as they follow the aforementioned columns.
+An arbitrary number of additional columns containing aesthetic or data
+attributes can be part of the edf, so long as they follow the aforementioned
+columns.
 }
 \examples{
 # Create a simple edge data frame (edf) and
@@ -69,4 +64,5 @@ edf <-
 
 # Display the edge data frame
 edf
+
 }

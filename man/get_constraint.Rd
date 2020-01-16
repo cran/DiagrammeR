@@ -7,22 +7,18 @@
 get_constraint(graph, nodes = NULL)
 }
 \arguments{
-\item{graph}{a graph object of class
-\code{dgr_graph}.}
+\item{graph}{A graph object of class \code{dgr_graph}.}
 
-\item{nodes}{an optional vector of node IDs to
-consider for constraint scores. If not supplied,
-then constraint scores for all nodes in the graph
+\item{nodes}{an optional vector of node IDs to consider for constraint
+scores. If not supplied, then constraint scores for all nodes in the graph
 will be calculated.}
 }
 \value{
-a data frame with constraint scores for one
-or more graph nodes.
+A data frame with constraint scores for one or more graph nodes.
 }
 \description{
-Get the constraint scores (based on
-Burt's Constraint Index) for one or more nodes in a
-graph.
+Get the constraint scores (based on Burt's Constraint Index) for one or more
+nodes in a graph.
 }
 \examples{
 # Create a random graph using the
@@ -37,8 +33,7 @@ graph <-
 
 # Get the constaint scores for all
 # nodes in the graph
-graph \%>\%
-  get_constraint()
+graph \%>\% get_constraint()
 
 # Get the constaint scores
 # for nodes `5` and `7`
@@ -55,6 +50,6 @@ graph <-
     df = get_constraint(.))
 
 # Display the graph's node data frame
-graph \%>\%
-  get_node_df()
+graph \%>\% get_node_df()
+
 }

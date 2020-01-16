@@ -1,13 +1,27 @@
 #' Get node attribute values from a selection of nodes
-#' @description From a graph object of class
-#' \code{dgr_graph}, get node attribute values from nodes
-#' currently active as a selection.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param node_attr the name of the attribute for which
-#' to get values.
-#' @return a named vector of node attribute values for
-#' the attribute given by \code{node_attr} by node ID.
+#'
+#' From a graph object of class `dgr_graph`, get node attribute values from
+#' nodes currently active as a selection.
+#'
+#' This function makes use of an active selection of nodes (and the function
+#' ending with `_ws` hints at this).
+#'
+#' Selections of nodes can be performed using the following node selection
+#' (`select_*()`) functions: [select_nodes()], [select_last_nodes_created()],
+#' [select_nodes_by_degree()], [select_nodes_by_id()], or
+#' [select_nodes_in_neighborhood()].
+#'
+#' Selections of nodes can also be performed using the following traversal
+#' (`trav_*()`) functions: [trav_out()], [trav_in()], [trav_both()],
+#' [trav_out_node()], [trav_in_node()], [trav_out_until()], or
+#' [trav_in_until()].
+#'
+#' @inheritParams render_graph
+#' @param node_attr The name of the attribute for which to get values.
+#'
+#' @return A named vector of node attribute values for the attribute given by
+#'   `node_attr` by node ID.
+#'
 #' @examples
 #' # Create a random graph using the
 #' # `add_gnm_graph()` function
@@ -34,10 +48,9 @@
 #' graph %>%
 #'   get_node_attrs_ws(
 #'     node_attr = value)
-#' @importFrom dplyr filter pull
-#' @importFrom rlang enquo UQ get_expr
-#' @export get_node_attrs_ws
-
+#'
+#' @import rlang
+#' @export
 get_node_attrs_ws <- function(graph,
                               node_attr) {
 
@@ -62,9 +75,6 @@ get_node_attrs_ws <- function(graph,
 
   node_attr <- rlang::enquo(node_attr)
 
-  # Create binding for a specific variable
-  id <- NULL
-
   if (rlang::enquo(node_attr) %>%
       rlang::get_expr() %>%
       as.character() %in% c("id", "nodes")) {
@@ -88,9 +98,7 @@ get_node_attrs_ws <- function(graph,
     dplyr::filter(id %in% nodes)
 
   # Extract the node attribute values
-  node_attr_vals <-
-    ndf %>%
-    dplyr::pull(rlang::UQ(node_attr))
+  node_attr_vals <- ndf %>% dplyr::pull(!!node_attr)
 
   # Add names to each of the values
   names(node_attr_vals) <- nodes

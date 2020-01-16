@@ -7,17 +7,14 @@
 combine_ndfs(...)
 }
 \arguments{
-\item{...}{two or more node data
-frames, which contain node IDs and
+\item{...}{Two or more node data frames, which contain node IDs and
 associated attributes.}
 }
 \value{
-a combined node data frame.
+A combined node data frame.
 }
 \description{
-Combine several node
-data frames into a single node
-data frame.
+Combine several node data frames into a single node data frame.
 }
 \examples{
 # Create two node data frames
@@ -44,4 +41,5 @@ node_df_combined <-
 
 # Inspect the combined ndf
 node_df_combined
+
 }

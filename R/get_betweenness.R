@@ -1,10 +1,10 @@
 #' Get betweenness centrality scores
-#' @description Get the betweenness centrality scores
-#' for all nodes in a graph.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @return a data frame with betweenness scores for
-#' each of the nodes.
+#'
+#' Get the betweenness centrality scores for all nodes in a graph.
+#' @inheritParams render_graph
+#'
+#' @return a data frame with betweenness scores for each of the nodes.
+#'
 #' @examples
 #' # Create a random graph using the
 #' # `add_gnm_graph()` function
@@ -17,8 +17,7 @@
 #'
 #' # Get the betweenness scores
 #' # for nodes in the graph
-#' graph %>%
-#'   get_betweenness()
+#' graph %>% get_betweenness()
 #'
 #' # Add the betweenness
 #' # values to the graph
@@ -30,11 +29,9 @@
 #'
 #' # Display the graph's node
 #' # data frame
-#' graph %>%
-#'   get_node_df()
-#' @importFrom igraph betweenness V
-#' @export get_betweenness
-
+#' graph %>% get_node_df()
+#'
+#' @export
 get_betweenness <- function(graph) {
 
   # Get the name of the function

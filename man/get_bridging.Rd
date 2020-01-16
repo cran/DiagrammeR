@@ -7,17 +7,14 @@
 get_bridging(graph)
 }
 \arguments{
-\item{graph}{a graph object of class
-\code{dgr_graph}.}
+\item{graph}{A graph object of class \code{dgr_graph}.}
 }
 \value{
-a data frame with bridging scores for
-each of the nodes.
+A data frame with bridging scores for each of the nodes.
 }
 \description{
-Get the bridging scores (based on
-Valente's Bridging vertex measure) for all nodes
-in a graph.
+Get the bridging scores (based on Valente's Bridging vertex measure) for all
+nodes in a graph.
 }
 \examples{
 # Create a random graph using the
@@ -31,8 +28,7 @@ graph <-
 
 # Get the bridging scores for nodes
 # in the graph
-graph \%>\%
-  get_bridging()
+graph \%>\% get_bridging()
 
 # Add the bridging scores to
 # the graph as a node attribute
@@ -42,6 +38,6 @@ graph <-
     df = get_bridging(.))
 
 # Display the graph's node data frame
-graph \%>\%
-  get_node_df()
+graph \%>\% get_node_df()
+
 }

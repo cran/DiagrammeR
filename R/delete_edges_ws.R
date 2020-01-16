@@ -1,20 +1,23 @@
 #' Delete all selected edges in an edge selection
-#' @description In a graph object of class
-#' \code{dgr_graph}, delete all edges present in a
+#'
+#' In a graph object of class `dgr_graph`, delete all edges present in a
 #' selection.
 #'
-#' Selections of edges can be performed using
-#' the following \code{select_...} functions:
-#' \code{select_edges()},
-#' \code{select_last_edge()}, or
-#' \code{select_edges_by_node_id()}.
-#' Selections of edges can also be performed using
-#' the following traversal functions:
-#' \code{trav_out_edge()}, \code{trav_in_edge()},
-#' or \code{trav_both_edge()}.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @return a graph object of class \code{dgr_graph}.
+#' This function makes use of an active selection of edges (and the function
+#' ending with `_ws` hints at this).
+#'
+#' Selections of edges can be performed using the following selection
+#' (`select_*()`) functions: [select_edges()], [select_last_edges_created()],
+#' [select_edges_by_edge_id()], or [select_edges_by_node_id()].
+#'
+#' Selections of edges can also be performed using the following traversal
+#' (`trav_*()`) functions: [trav_out_edge()], [trav_in_edge()],
+#' [trav_both_edge()], or [trav_reverse_edge()].
+#'
+#' @inheritParams render_graph
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Create a graph
 #' graph <-
@@ -36,10 +39,9 @@
 #'   delete_edges_ws()
 #'
 #' # Get a count of edges in the graph
-#' graph %>%
-#'   count_edges()
-#' @export delete_edges_ws
-
+#' graph %>% count_edges()
+#'
+#' @export
 delete_edges_ws <- function(graph) {
 
   # Get the time of function start

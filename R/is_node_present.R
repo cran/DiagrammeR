@@ -1,12 +1,14 @@
 #' Determine whether a specified node is present
-#' @description From a graph object of class
-#' \code{dgr_graph}, determine whether a
-#' specified node is present.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param node either a node ID value or a node
-#' label to test for presence in the graph.
-#' @return a logical value.
+#'
+#' From a graph object of class `dgr_graph`, determine whether a specified node
+#' is present.
+#'
+#' @inheritParams render_graph
+#' @param node Either a node ID value or a node label to test for presence in
+#'   the graph.
+#'
+#' @return A logical value.
+#'
 #' @examples
 #' # Create a simple graph with
 #' # a path of four nodes
@@ -33,8 +35,7 @@
 #' # with label `two` in the graph
 #' graph %>%
 #'   is_node_present(node = "two")
-#' @export is_node_present
-
+#' @export
 is_node_present <- function(graph,
                             node) {
 

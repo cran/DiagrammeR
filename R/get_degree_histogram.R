@@ -1,15 +1,14 @@
 #' Get histogram data for a graph's degree frequency
-#' @description Get histogram data for a graph's
-#' degree frequency. The bin width is set to 1 and
-#' zero-value degrees are omitted from the output.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param mode using \code{total} (the default),
-#' degree considered for each node will be the total
-#' degree. With \code{in} and \code{out} the degree
-#' used will be the in-degree and out-degree,
-#' respectively.
-#' @return a data frame with degree counts.
+#'
+#' Get histogram data for a graph's degree frequency. The bin width is set to 1
+#'   and zero-value degrees are omitted from the output.
+#' @inheritParams render_graph
+#' @param mode using `total` (the default), degree considered for each node
+#'   will be the total degree. With `in` and `out` the degree used
+#'   will be the in-degree and out-degree, respectively.
+#'
+#' @return A data frame with degree counts.
+#'
 #' @examples
 #' # Create a random graph using the
 #' # `add_gnm_graph()` function
@@ -26,9 +25,8 @@
 #' graph %>%
 #'   get_degree_histogram(
 #'     mode = "total")
-#' @importFrom dplyr mutate select
-#' @export get_degree_histogram
-
+#'
+#' @export
 get_degree_histogram <- function(graph,
                                  mode = "total") {
 
@@ -50,11 +48,6 @@ get_degree_histogram <- function(graph,
       fcn_name = fcn_name,
       reasons = "The graph contains no nodes")
   }
-
-  # Create bindings for specific variables
-  total_degree_dist <- total_degree_hist <-
-    indegree_dist <- indegree_hist <-
-    outdegree_dist <- outdegree_hist <- NULL
 
   # Convert the graph to an igraph object
   ig_graph <- to_igraph(graph)

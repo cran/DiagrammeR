@@ -2,24 +2,20 @@
 % Please edit documentation in R/add_node_df.R
 \name{add_node_df}
 \alias{add_node_df}
-\title{Add nodes from a node data frame to an existing
-graph object}
+\title{Add nodes from a node data frame to an existing graph object}
 \usage{
 add_node_df(graph, node_df)
 }
 \arguments{
-\item{graph}{a graph object of class
-\code{dgr_graph}.}
+\item{graph}{A graph object of class \code{dgr_graph}.}
 
-\item{node_df}{a node data frame that is created
-using \code{create_node_df}.}
+\item{node_df}{A node data frame that is created using \code{\link[=create_node_df]{create_node_df()}}.}
 }
 \value{
-a graph object of class \code{dgr_graph}.
+A graph object of class \code{dgr_graph}.
 }
 \description{
-With a graph object of class
-\code{dgr_graph} add nodes from a node data frame to
+With a graph object of class \code{dgr_graph} add nodes from a node data frame to
 that graph.
 }
 \examples{
@@ -39,8 +35,7 @@ graph <-
     node_df = ndf)
 
 # Inspect the graph's ndf
-graph \%>\%
-  get_node_df()
+graph \%>\% get_node_df()
 
 # Create another ndf
 ndf_2 <-
@@ -58,6 +53,6 @@ graph <-
 # View the graph's internal
 # node data frame using the
 # `get_node_df()` function
-graph \%>\%
-  get_node_df()
+graph \%>\% get_node_df()
+
 }

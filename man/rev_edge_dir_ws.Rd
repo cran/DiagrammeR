@@ -2,21 +2,31 @@
 % Please edit documentation in R/rev_edge_dir_ws.R
 \name{rev_edge_dir_ws}
 \alias{rev_edge_dir_ws}
-\title{Reverse the direction of selected edges in a graph}
+\title{Reverse the direction of selected edges in a graph using an edge selection}
 \usage{
 rev_edge_dir_ws(graph)
 }
 \arguments{
-\item{graph}{a graph object of class
-\code{dgr_graph}.}
+\item{graph}{A graph object of class \code{dgr_graph}.}
 }
 \value{
-a graph object of class \code{dgr_graph}.
+A graph object of class \code{dgr_graph}.
 }
 \description{
-Using a directed graph with a selection
-of edges as input, reverse the direction of those
-selected edges in input graph.
+Using a directed graph with a selection of edges as input, reverse the
+direction of those selected edges in input graph.
+}
+\details{
+This function makes use of an active selection of edges (and the function
+ending with \verb{_ws} hints at this).
+
+Selections of edges can be performed using the following selection
+(\verb{select_*()}) functions: \code{\link[=select_edges]{select_edges()}}, \code{\link[=select_last_edges_created]{select_last_edges_created()}},
+\code{\link[=select_edges_by_edge_id]{select_edges_by_edge_id()}}, or \code{\link[=select_edges_by_node_id]{select_edges_by_node_id()}}.
+
+Selections of edges can also be performed using the following traversal
+(\verb{trav_*()}) functions: \code{\link[=trav_out_edge]{trav_out_edge()}}, \code{\link[=trav_in_edge]{trav_in_edge()}},
+\code{\link[=trav_both_edge]{trav_both_edge()}}, or \code{\link[=trav_reverse_edge]{trav_reverse_edge()}}.
 }
 \examples{
 # Create a graph with a
@@ -27,8 +37,7 @@ graph <-
     k = 2, h = 2)
 
 # Inspect the graph's edges
-graph \%>\%
-  get_edges()
+graph \%>\% get_edges()
 
 # Select all edges associated
 # with nodes `1` and `2`
@@ -46,6 +55,6 @@ graph <-
 
 # Inspect the graph's edges
 # after their reversal
-graph \%>\%
-  get_edges()
+graph \%>\% get_edges()
+
 }

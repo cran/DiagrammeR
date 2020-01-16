@@ -1,20 +1,19 @@
 #' Add one or several clones of an existing node to the graph
-#' @description Add n new nodes to a graph object of
-#' class \code{dgr_graph} which are clones of a node already
-#' in the graph. All node attributes are preserved except for
-#' the node \code{label} attribute (to maintain the
-#' uniqueness of non-\code{NA} node label values). A vector
-#' of node \code{label} can be provided to bind new labels
-#' to the cloned nodes.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param n the number of node clones to add to the graph.
-#' @param node a node ID corresponding to the graph node
-#' to be cloned.
-#' @param label an optional vector of node label values.
-#' The vector length should correspond to the value set
-#' for \code{n}.
-#' @return a graph object of class \code{dgr_graph}.
+#'
+#' Add `n` new nodes to a graph object of class `dgr_graph` which are clones of
+#' a node already in the graph. All node attributes are preserved except for the
+#' node `label` attribute (to maintain the uniqueness of non-`NA` node label
+#' values). A vector of node `label` can be provided to bind new labels to the
+#' cloned nodes.
+#'
+#' @inheritParams render_graph
+#' @param n The number of node clones to add to the graph.
+#' @param node A node ID corresponding to the graph node to be cloned.
+#' @param label An optional vector of node label values. The vector length
+#'   should correspond to the value set for `n`.
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Create a graph with a path of
 #' # nodes; supply `label`, `type`,
@@ -28,8 +27,7 @@
 #'
 #' # Display the graph's internal
 #' # node data frame
-#' graph %>%
-#'   get_node_df()
+#' graph %>% get_node_df()
 #'
 #' # Create 3 clones of node `1`
 #' # but assign new node label
@@ -45,11 +43,9 @@
 #' # Display the graph's internal
 #' # node data frame: nodes `4`,
 #' # `5`, and `6` are clones of `1`
-#' graph %>%
-#'   get_node_df()
-#' @importFrom dplyr filter select
-#' @export add_n_node_clones
-
+#' graph %>% get_node_df()
+#'
+#' @export
 add_n_node_clones <- function(graph,
                               n,
                               node,
@@ -104,9 +100,6 @@ add_n_node_clones <- function(graph,
         reasons = "The vector provided for `label` is not the same length as the value of `n`")
     }
   }
-
-  # Create bindings for specific variables
-  id <- type <- version_id <- NULL
 
   # Get the value for the latest `version_id` for
   # graph (in the `graph_log`)

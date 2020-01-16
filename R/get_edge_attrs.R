@@ -1,19 +1,17 @@
 #' Get edge attribute values
-#' @description From a graph object of class
-#' \code{dgr_graph}, get edge attribute values for one
-#' or more edges.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param edge_attr the name of the attribute for which
-#' to get values.
-#' @param from an optional vector of node IDs from
-#' which the edge is outgoing for filtering the list
-#' of edges.
-#' @param to an optional vector of node IDs from which
-#' the edge is incoming for filtering the list of
-#' edges.
-#' @return a named vector of edge attribute values for
-#' the attribute given by \code{edge_attr} by edge.
+#'
+#' From a graph object of class `dgr_graph`, get edge attribute values for
+#'   one or more edges.
+#' @inheritParams render_graph
+#' @param edge_attr the name of the attribute for which to get values.
+#' @param from an optional vector of node IDs from which the edge is outgoing
+#'   for filtering the list of edges.
+#' @param to an optional vector of node IDs from which the edge is incoming for
+#'   filtering the list of edges.
+#'
+#' @return A named vector of edge attribute values for the attribute given by
+#'   `edge_attr` by edge.
+#'
 #' @examples
 #' # Create a simple graph where
 #' # edges have an edge attribute
@@ -66,10 +64,9 @@
 #'     edge_attr = value,
 #'     from = c(1, 2),
 #'       to = c(2, 3))
-#' @importFrom dplyr mutate filter pull
-#' @importFrom rlang enquo UQ get_expr
-#' @export get_edge_attrs
-
+#'
+#' @import rlang
+#' @export
 get_edge_attrs <- function(graph,
                            edge_attr,
                            from = NULL,
@@ -87,9 +84,6 @@ get_edge_attrs <- function(graph,
   }
 
   edge_attr <- rlang::enquo(edge_attr)
-
-  # Create binding for a specific variable
-  from_to <- NULL
 
   if (rlang::enquo(edge_attr) %>%
       rlang::get_expr() %>%
@@ -118,7 +112,7 @@ get_edge_attrs <- function(graph,
     # Extract the edge attribute values
     edge_attr_vals <-
       edf %>%
-      dplyr::pull(rlang::UQ(edge_attr))
+      dplyr::pull(!!edge_attr)
 
     # Extract the edge names
     edge_names <-
@@ -144,7 +138,7 @@ get_edge_attrs <- function(graph,
     # Extract the edge attribute values
     edge_attr_vals <-
       edf %>%
-      dplyr::pull(rlang::UQ(edge_attr))
+      dplyr::pull(!!edge_attr)
 
     # Extract the edge names
     edge_names <-

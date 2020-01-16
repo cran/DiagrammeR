@@ -1,36 +1,28 @@
 #' Set the edge attribute values to be rendered
-#' @description Set a edge attribute type to display
-#' as edge text when calling the \code{render_graph()}
-#' function. This allows for display of different types
-#' of edge attribute values on a per-edge basis.
-#' Without setting the \code{display} attribute,
-#' rendering a graph will default to not printing any
-#' text on edges. Setting the \code{display} edge
-#' attribute with this function for the first time
-#' (i.e., the \code{display} column doesn't exist in
-#' the graph's internal edge data frame) will insert
-#' the \code{attr} value for all edges specified in
-#' \code{edges} and a default value (\code{default})
-#' for all remaining edges.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param attr the name of the attribute from
-#' which label text for the edge will be obtained.
-#' If set to \code{NULL}, then \code{NA} values
-#' will be assigned to the \code{display} column
-#' for the chosen edges.
-#' @param edges a length vector containing one or
-#' several edge ID values (as integers) for which
-#' edge attributes are set for display in the
-#' rendered graph. If \code{NULL}, all edges from
-#' the graph are assigned the \code{display} value
-#' given as \code{attr}.
-#' @param default the name of an attribute to
-#' set for all other graph edges not included
-#' in \code{edges}. This value only gets used if
-#' the \code{display} edge attribute is not in
-#' the graph's internal edge data frame.
-#' @return a graph object of class \code{dgr_graph}.
+#'
+#' Set a edge attribute type to display as edge text when calling the
+#' [render_graph()] function. This allows for display of different types of edge
+#' attribute values on a per-edge basis. Without setting the `display`
+#' attribute, rendering a graph will default to not printing any text on edges.
+#' Setting the `display` edge attribute with this function for the first time
+#' (i.e., the `display` column doesn't exist in the graph's internal edge data
+#' frame) will insert the `attr` value for all edges specified in `edges` and a
+#' default value (`default`) for all remaining edges.
+#'
+#' @inheritParams render_graph
+#' @param attr The name of the attribute from which label text for the edge will
+#'   be obtained. If set to `NULL`, then `NA` values will be assigned to the
+#'   `display` column for the chosen edges.
+#' @param edges A length vector containing one or several edge ID values (as
+#'   integers) for which edge attributes are set for display in the rendered
+#'   graph. If `NULL`, all edges from the graph are assigned the `display` value
+#'   given as `attr`.
+#' @param default The name of an attribute to set for all other graph edges not
+#'   included in `edges`. This value only gets used if the `display` edge
+#'   attribute is not in the graph's internal edge data frame.
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Create a random graph using the
 #' # `add_gnm_graph()` function
@@ -59,8 +51,7 @@
 #' # `display` edge attribute will show, for
 #' # each row, which edge attribute value to
 #' # display when the graph is rendered
-#' graph %>%
-#'   get_edge_df()
+#' graph %>% get_edge_df()
 #'
 #' # This function can be called multiple
 #' # times on a graph; after the first time
@@ -75,11 +66,9 @@
 #'     edges = c(1, 3),
 #'     attr = id) %>%
 #'   get_edge_df()
-#' @importFrom dplyr mutate left_join coalesce bind_cols select
-#' @importFrom dplyr everything case_when tibble
-#' @importFrom rlang enquo get_expr
-#' @export set_edge_attr_to_display
-
+#'
+#' @import rlang
+#' @export
 set_edge_attr_to_display <- function(graph,
                                      attr = NULL,
                                      edges = NULL,
@@ -114,9 +103,6 @@ set_edge_attr_to_display <- function(graph,
   if (attr == "NULL") {
     attr <- NULL
   }
-
-  # Create bindings for specific variables
-  id <- from <- to <- rel <- display <- NULL
 
   # Get the graph's edge data frame as an object
   edf <- graph$edges_df

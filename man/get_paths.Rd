@@ -4,37 +4,38 @@
 \alias{get_paths}
 \title{Get paths from a specified node in a directed graph}
 \usage{
-get_paths(graph, from = NULL, to = NULL, shortest_path = FALSE,
-  longest_path = FALSE, distance = NULL)
+get_paths(
+  graph,
+  from = NULL,
+  to = NULL,
+  shortest_path = FALSE,
+  longest_path = FALSE,
+  distance = NULL
+)
 }
 \arguments{
-\item{graph}{a graph object of class
-\code{dgr_graph}.}
+\item{graph}{A graph object of class \code{dgr_graph}.}
 
-\item{from}{the node from which all paths will be
-determined.}
+\item{from}{The node from which all paths will be determined.}
 
-\item{to}{the node to which all paths will be
-determined.}
+\item{to}{The node to which all paths will be determined.}
 
-\item{shortest_path}{an option to return paths that
-are the shortest in the set of all determined paths.}
+\item{shortest_path}{An option to return paths that are the shortest in the
+set of all determined paths.}
 
-\item{longest_path}{an option to return paths that
-are the longest in the set of all determined paths.}
+\item{longest_path}{An option to return paths that are the longest in the set
+of all determined paths.}
 
-\item{distance}{a vector of integer values that
-specify which of the valid paths to return when
-filtering by distance.}
+\item{distance}{A vector of integer values that specify which of the valid
+paths to return when filtering by distance.}
 }
 \value{
-a list of paths, sorted by ascending
-traversal length, comprising vectors of node IDs in
-sequence of traversal through the graph.
+A list of paths, sorted by ascending traversal length, comprising
+vectors of node IDs in sequence of traversal through the graph.
 }
 \description{
-Obtain a list of all possible paths
-from a given node within a directed graph
+Obtain a list of all possible paths from a given node within a directed
+graph.
 }
 \examples{
 # Create a simple graph
@@ -84,4 +85,5 @@ get_paths(
   from = 1,
   to = 5,
   longest_path = TRUE)
+
 }

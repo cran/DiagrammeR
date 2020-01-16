@@ -1,12 +1,25 @@
 #' Fully connect all nodes in a selection of nodes
-#' @description With a selection of nodes in a
-#' graph, add any remaining edges required to
-#' fully connect this group of edges to each
-#' other.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @return a graph object of class
-#' \code{dgr_graph}.
+#'
+#' With a selection of nodes in a graph, add any remaining edges required to
+#' fully connect this group of edges to each other.
+#'
+#' This function makes use of an active selection of nodes (and the function
+#' ending with `_ws` hints at this).
+#'
+#' Selections of nodes can be performed using the following node selection
+#' (`select_*()`) functions: [select_nodes()], [select_last_nodes_created()],
+#' [select_nodes_by_degree()], [select_nodes_by_id()], or
+#' [select_nodes_in_neighborhood()].
+#'
+#' Selections of nodes can also be performed using the following traversal
+#' (`trav_*()`) functions: [trav_out()], [trav_in()], [trav_both()],
+#' [trav_out_node()], [trav_in_node()], [trav_out_until()], or
+#' [trav_in_until()].
+#'
+#' @inheritParams render_graph
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Create an empty graph and
 #' # then add a path of 3 nodes
@@ -28,8 +41,7 @@
 #'   fully_connect_nodes_ws()
 #'
 #' # Get the graph's edge data frame
-#' graph %>%
-#'   get_edge_df()
+#' graph %>% get_edge_df()
 #'
 #' # Create an undirected, empty
 #' # graph; add a path of 3 nodes
@@ -55,11 +67,9 @@
 #' # frame; in the undirected
 #' # case, reverse edges aren't
 #' # added
-#' graph %>%
-#'   get_edge_df()
-#' @importFrom dplyr rename setdiff bind_rows select
-#' @export fully_connect_nodes_ws
-
+#' graph %>% get_edge_df()
+#'
+#' @export
 fully_connect_nodes_ws <- function(graph) {
 
   # Get the time of function start
@@ -91,9 +101,6 @@ fully_connect_nodes_ws <- function(graph) {
       fcn_name = fcn_name,
       reasons = "There is no selection of nodes available.")
   }
-
-  # Create bindings for specific variables
-  from <- to <- V1 <- V2 <- NULL
 
   # Get the number of edges in the graph
   edges_graph_1 <- graph %>% count_edges()

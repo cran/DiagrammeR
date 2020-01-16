@@ -1,28 +1,24 @@
 #' R + viz.js
-#' @description Make diagrams in R using
-#' \href{https://github.com/mdaines/viz.js}{viz.js}
-#' with infrastructure provided by
-#' \href{http://www.htmlwidgets.org/}{htmlwidgets}.
-#' @param diagram spec for a diagram as either text,
-#' filename string, or file connection.
-#' @param engine string for the Graphviz layout engine;
-#' can be \code{dot} (default), \code{neato},
-#' \code{circo}, or \code{twopi}. For more information
-#' see \href{viz.js Usage}{https://github.com/mdaines/viz.js#usage}.
-#' @param allow_subst a boolean that enables/disables
-#' substitution functionality.
-#' @param options parameters supplied to the
-#' htmlwidgets framework.
-#' @param width an optional parameter for specifying
-#' the width of the resulting graphic in pixels.
-#' @param height an optional parameter for specifying
-#' the height of the resulting graphic in pixels.
-#' @return An object of class \code{htmlwidget} that
-#' will intelligently print itself into HTML in a
-#' variety of contexts including the R console, within
-#' R Markdown documents, and within Shiny output
-#' bindings.
-#' @importFrom rstudioapi isAvailable
+#'
+#' Make diagrams in R using `viz.js` with infrastructure provided by
+#' pkg{htmlwidgets}.
+#'
+#' @param diagram Spec for a diagram as either text, filename string, or file
+#'   connection.
+#' @param engine String for the Graphviz layout engine; can be `dot` (default),
+#'   `neato`, `circo`, or `twopi`.
+#' @param allow_subst A boolean that enables/disables substitution
+#'   functionality.
+#' @param options Parameters supplied to the htmlwidgets framework.
+#' @param width An optional parameter for specifying the width of the resulting
+#'   graphic in pixels.
+#' @param height An optional parameter for specifying the height of the
+#'   resulting graphic in pixels.
+#'
+#' @return An object of class `htmlwidget` that will intelligently print itself
+#'   into HTML in a variety of contexts including the R console, within R
+#'   Markdown documents, and within Shiny output bindings.
+#'
 #' @export
 grViz <- function(diagram = "",
                   engine = "dot",
@@ -34,11 +30,15 @@ grViz <- function(diagram = "",
   # Check for a connection or file
   if (inherits(diagram, "connection") ||
       file.exists(diagram)) {
+
     diagram <-
       readLines(diagram, encoding = "UTF-8", warn = FALSE)
+
     diagram <- paste0(diagram, collapse = "\n")
+
   } else {
-    # Check for vector with length > 1 and concatenate
+
+    # Concatenate any vector with length > 1
     if (length(diagram) > 1) {
       diagram <- paste0(diagram, collapse = "\n")
     }
@@ -49,24 +49,26 @@ grViz <- function(diagram = "",
   }
 
   # Single quotes within a diagram spec are problematic
-  # so try to replace with \"
+  # so try to replace with `\"`
   diagram <- gsub(x = diagram, "'", "\"")
 
-  # Forward options using x
-  x <- list(
-    diagram = diagram,
-    config = list(
-      engine = engine,
-      options = options
+  # Forward options using `x`
+  x <-
+    list(
+      diagram = diagram,
+      config = list(
+        engine = engine,
+        options = options
+      )
     )
-  )
 
-  # Only use the viewer for newer versions of RStudio,
+  # Only use the Viewer for newer versions of RStudio,
   # but allow other, non-RStudio viewers
-  viewer.suppress <- rstudioapi::isAvailable() &&
+  viewer.suppress <-
+    rstudioapi::isAvailable() &&
     !rstudioapi::isAvailable("0.99.120")
 
-  # Create widget
+  # Create the widget
   htmlwidgets::createWidget(
     name = "grViz",
     x = x,
@@ -78,56 +80,34 @@ grViz <- function(diagram = "",
 }
 
 #' Widget output function for use in Shiny
-#' @param outputId output variable to read from
-#' @param width a valid CSS unit for the width or a number, which will be
-#' coerced to a string and have \code{px} appended.
-#' @param height a valid CSS unit for the height or a number, which will be
-#' coerced to a string and have \code{px} appended.
-#' @examples
-#' \dontrun{
-#' library(shiny)
-#' library(shinyAce)
 #'
-#' ui = shinyUI(fluidPage(fluidRow(
-#'   column(
-#'     width=4
-#'     , aceEditor("ace", selectionId = "selection", value="digraph {A;}")
-#'   ),
-#'   column(
-#'     width = 6
-#'     , grVizOutput('diagram' )
-#'   )
-#' )))
+#' @param outputId Output variable to read from.
+#' @param width A valid CSS unit for the width or a number, which will be
+#'   coerced to a string and have `px` appended.
+#' @param height A valid CSS unit for the height or a number, which will be
+#'   coerced to a string and have `px` appended.
 #'
-#' server = function(input, output) {
-#'   output$diagram <- renderGrViz({
-#'     grViz(
-#'       input$ace
-#'     )
-#'   })
-#'
-#' }
-#'
-#' shinyApp(ui = ui, server = server)
-#' }
 #' @export
 grVizOutput <- function(outputId,
-                        width = '100%',
-                        height = '400px') {
+                        width = "100%",
+                        height = "400px") {
 
-  shinyWidgetOutput(outputId,
-                    'grViz',
-                    width,
-                    height,
-                    package = 'DiagrammeR')
+  htmlwidgets::shinyWidgetOutput(
+    outputId = outputId,
+    name = "grViz",
+    width = width,
+    height = height,
+    package = "DiagrammeR"
+  )
 }
 
 #' Widget render function for use in Shiny
+#'
 #' @param expr an expression that generates a DiagrammeR graph
 #' @param env the environment in which to evaluate expr.
 #' @param quoted is expr a quoted expression (with quote())? This is useful if
-#' you want to save an expression in a variable.
-#' @seealso \code{\link{grVizOutput}} for an example in Shiny
+#'   you want to save an expression in a variable.
+#' @seealso [grVizOutput()] for an example in Shiny.
 #' @export
 renderGrViz <- function(expr,
                         env = parent.frame(),
@@ -135,21 +115,23 @@ renderGrViz <- function(expr,
 
   if (!quoted) expr <- substitute(expr)
 
-  shinyRenderWidget(expr,
-                    grVizOutput,
-                    env,
-                    quoted = TRUE)
+  htmlwidgets::shinyRenderWidget(
+    expr = expr,
+    outputFunction = grVizOutput,
+    evn = env,
+    quoted = TRUE
+  )
 }
 
 #' Add MathJax-formatted equation text
-#' @param gv a \code{grViz} htmlwidget.
-#' @param include_mathjax \code{logical} to add mathjax JS.
-#' Change to \code{FALSE} if using with \code{RMarkdown} since
-#' MathJax will likely already be added.
-#' @return a \code{grViz} htmlwidget
-#' @importFrom htmltools browsable tags tagList htmlDependency
+#'
+#' @param gv A `grViz` htmlwidget.
+#' @param include_mathjax A `logical` to add mathjax JS. Change to `FALSE` if
+#'   using with \pkg{rmarkdown} since MathJax will likely already be added.
+#'
+#' @return A `grViz` htmlwidget
+#'
 #' @export
-
 add_mathjax <- function(gv = NULL,
                         include_mathjax = TRUE) {
 

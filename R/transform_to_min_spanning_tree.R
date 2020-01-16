@@ -1,9 +1,12 @@
 #' Get a minimum spanning tree subgraph
-#' @description Get a minimum spanning tree subgraph
-#' for a connected graph of class \code{dgr_graph}.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @return a graph object of class \code{dgr_graph}.
+#'
+#' Get a minimum spanning tree subgraph for a connected graph of class
+#' `dgr_graph`.
+#'
+#' @inheritParams render_graph
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Create a random graph using the
 #' # `add_gnm_graph()` function
@@ -52,9 +55,8 @@
 #'     to_lower_bound = 0.5,
 #'     to_upper_bound = 4.0,
 #'       edge_attr_to = penwidth)
-#' @importFrom igraph mst
-#' @export transform_to_min_spanning_tree
-
+#'
+#' @export
 transform_to_min_spanning_tree <- function(graph) {
 
   # Get the name of the function
@@ -72,7 +74,7 @@ transform_to_min_spanning_tree <- function(graph) {
   igraph <- to_igraph(graph)
 
   # Get the minimum spanning tree
-  igraph_mst <- mst(igraph)
+  igraph_mst <- igraph::mst(igraph)
 
   # Generate the graph object from an igraph graph
   from_igraph(igraph_mst)

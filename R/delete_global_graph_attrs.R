@@ -1,17 +1,16 @@
-#' Delete one of the global graph attributes stored
-#' within a graph object
-#' @description Delete one of the global attributes
-#' stored within a graph object of class
-#' \code{dgr_graph}).
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param attr the name of the attribute to
-#' delete for the \code{type} of global attribute
-#' specified.
-#' @param attr_type the specific type of global graph
-#' attribute to delete. The type is specified with
-#' \code{graph}, \code{node}, or \code{edge}.
-#' @return a graph object of class \code{dgr_graph}.
+#' Delete one of the global graph attributes stored within a graph object
+#'
+#' Delete one of the global attributes stored within a graph object of class
+#' `dgr_graph`).
+#'
+#' @inheritParams render_graph
+#' @param attr The name of the attribute to delete for the `type` of global
+#'   attribute specified.
+#' @param attr_type The specific type of global graph attribute to delete. The
+#'   type is specified with `graph`, `node`, or `edge`.
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Create a new graph and add
 #' # some extra global graph attrs
@@ -48,11 +47,10 @@
 #' # attributes for the graph
 #' graph %>%
 #'   get_global_graph_attr_info()
-#' @importFrom dplyr anti_join tibble filter
-#' @importFrom glue glue
-#' @importFrom rlang enquo UQ
-#' @export delete_global_graph_attrs
-
+#'
+#' @import glue
+#' @import rlang
+#' @export
 delete_global_graph_attrs <- function(graph,
                                       attr = NULL,
                                       attr_type = NULL) {
@@ -94,7 +92,7 @@ delete_global_graph_attrs <- function(graph,
 
     graph$global_attrs <-
       graph$global_attrs %>%
-      dplyr::filter(!(attr %in% rlang::UQ(attr)))
+      dplyr::filter(!(attr %in% !!attr))
   }
 
   if (!is.null(attr_type) & is.null(attr)) {
@@ -113,7 +111,7 @@ delete_global_graph_attrs <- function(graph,
 
     graph$global_attrs <-
       graph$global_attrs %>%
-      dplyr::filter(!(attr_type %in% rlang::UQ(attr_type)))
+      dplyr::filter(!(attr_type %in% !!attr_type))
   }
 
   if (!is.null(attr_type) & !is.null(attr)) {

@@ -1,12 +1,13 @@
-#' Combine multiple edge data frames into a single
-#' edge data frame
-#' @description Combine several edge data frames in
-#' the style of \code{rbind}, except, it works
-#' regardless of the number and ordering of the
-#' columns.
-#' @param ... two or more edge data frames, which
-#' contain edge IDs and associated attributes.
-#' @return a combined edge data frame.
+#' Combine multiple edge data frames into a single edge data frame
+#'
+#' Combine several edge data frames in the style of `rbind()`, except, it works
+#' regardless of the number and ordering of the columns.
+#'
+#' @param ... Two or more edge data frames, which contain edge IDs and
+#'   associated attributes.
+#'
+#' @return A combined edge data frame.
+#'
 #' @examples
 #' # Create an edge data frame (edf)
 #' edf_1 <-
@@ -27,14 +28,12 @@
 #'     color = "red")
 #'
 #' # Combine the two edge data frames
-#' all_edges <-
-#'   combine_edfs(edf_1, edf_2)
+#' all_edges <- combine_edfs(edf_1, edf_2)
 #'
 #' # View the combined edge data frame
 #' all_edges
-#' @importFrom dplyr bind_rows
-#' @export combine_edfs
-
+#'
+#' @export
 combine_edfs <- function(...) {
 
   data_frames <- list(...)
@@ -59,7 +58,7 @@ combine_edfs <- function(...) {
 
   edf_new <-
     edf_new %>%
-    mutate(id = as.integer(1:nrow(edf_new)))
+    dplyr::mutate(id = as.integer(1:nrow(edf_new)))
 
   edf_new
 }

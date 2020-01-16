@@ -1,42 +1,41 @@
-#' Traverse inward node-by_node until stopping conditions are met
-#' @description From a graph object of
-#' class \code{dgr_graph}, move along
-#' inward edges from one or more nodes
-#' present in a selection to other
-#' connected nodes, replacing the current
-#' nodes in the selection with those nodes
-#' traversed to until reaching nodes that
-#' satisfy one or more conditions.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param conditions an option to use a
-#' stopping condition for the traversal.
-#' If the condition is met during the
-#' traversal (i.e., the node(s) traversed
-#' to match the condition), then those
-#' traversals will terminate at those
-#' nodes. Otherwise, traversals with
-#' continue and terminate when the number
-#' of steps provided in \code{max_steps}
-#' is reached.
-#' @param max_steps the maximum number
-#' of \code{trav_in()} steps (i.e.,
-#' node-to-node traversals in the inward
-#' direction) to allow before stopping.
-#' @param exclude_unmatched if \code{TRUE}
-#' (the default value) then any nodes not
-#' satisfying the conditions provided in
-#' \code{conditions} that are in the ending
-#' selection are excluded.
-#' @param add_to_selection if \code{TRUE}
-#' then every node traversed will be part
-#' of the final selection of nodes. If
-#' \code{FALSE} (the default value) then
-#' only the nodes finally traversed to
-#' will be part of the final node
-#' selection.
-#' @return a graph object of class
-#' \code{dgr_graph}.
+#' Traverse inward node-by-node until stopping conditions are met
+#'
+#' From a graph object of class `dgr_graph`, move along inward edges from one or
+#' more nodes present in a selection to other connected nodes, replacing the
+#' current nodes in the selection with those nodes traversed to until reaching
+#' nodes that satisfy one or more conditions.
+#'
+#' This traversal function makes use of an active selection of nodes. After the
+#' traversal, depending on the traversal conditions, there will either be a
+#' selection of nodes or no selection at all.
+#'
+#' Selections of nodes can be performed using the following node selection
+#' (`select_*()`) functions: [select_nodes()], [select_last_nodes_created()],
+#' [select_nodes_by_degree()], [select_nodes_by_id()], or
+#' [select_nodes_in_neighborhood()].
+#'
+#' Selections of nodes can also be performed using the following traversal
+#' (`trav_*()`) functions: [trav_out()], [trav_in()], [trav_both()],
+#' [trav_out_node()], [trav_in_node()], [trav_out_until()], or
+#' [trav_in_until()].
+#'
+#' @inheritParams render_graph
+#' @param conditions An option to use a stopping condition for the traversal. If
+#'   the condition is met during the traversal (i.e., the node(s) traversed to
+#'   match the condition), then those traversals will terminate at those nodes.
+#'   Otherwise, traversals with continue and terminate when the number of steps
+#'   provided in `max_steps` is reached.
+#' @param max_steps The maximum number of `trav_in()` steps (i.e., node-to-node
+#'   traversals in the inward direction) to allow before stopping.
+#' @param exclude_unmatched If `TRUE` (the default value) then any nodes not
+#'   satisfying the conditions provided in `conditions` that are in the ending
+#'   selection are excluded.
+#' @param add_to_selection If `TRUE` then every node traversed will be part of
+#'   the final selection of nodes. If `FALSE` (the default value) then only the
+#'   nodes finally traversed to will be part of the final node selection.
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Create a path graph and add
 #' # values of 1 to 10 across the
@@ -61,8 +60,7 @@
 #'       value == 1)
 #'
 #' # Get the graph's node selection
-#' graph %>%
-#'   get_selection()
+#' graph %>% get_selection()
 #'
 #' # Create two cycles in a graph and
 #' # add values of 1 to 6 to the
@@ -97,13 +95,10 @@
 #'     exclude_unmatched = TRUE)
 #'
 #' # Get the graph's node selection
-#' graph %>%
-#'   get_selection()
-#' @importFrom rlang enquo UQ
-#' @importFrom igraph all_simple_paths
-#' @importFrom purrr map
-#' @export trav_in_until
-
+#' graph %>% get_selection()
+#'
+#' @import rlang
+#' @export
 trav_in_until <- function(graph,
                           conditions,
                           max_steps = 30,
@@ -168,8 +163,7 @@ trav_in_until <- function(graph,
   # conditions provided
   all_nodes_conditions_met <-
     graph %>%
-    get_node_ids(
-      conditions = rlang::UQ(conditions))
+    get_node_ids(conditions = !!conditions)
 
   if (exclude_unmatched & all(is.na(all_nodes_conditions_met))) {
 

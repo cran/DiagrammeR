@@ -1,23 +1,26 @@
 #' Set edge attributes with an edge selection
-#' @description From a graph object of class
-#' \code{dgr_graph} or an edge data frame, set edge
+#'
+#' From a graph object of class `dgr_graph` or an edge data frame, set edge
 #' attribute properties for one or more edges.
 #'
-#' Selections of edges can be performed using
-#' the following \code{select_...} functions:
-#' \code{select_edges()},
-#' \code{select_last_edge()}, or
-#' \code{select_edges_by_node_id()}.
-#' Selections of edges can also be performed using
-#' the following traversal functions:
-#' \code{trav_out_edge()}, \code{trav_in_edge()},
-#' or \code{trav_both_edge()}.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param edge_attr the name of the attribute to set.
-#' @param value the value to be set for the chosen
-#' attribute for the edges in the current selection.
-#' @return a graph object of class \code{dgr_graph}.
+#' This function makes use of an active selection of edges (and the function
+#' ending with `_ws` hints at this).
+#'
+#' Selections of edges can be performed using the following selection
+#' (`select_*()`) functions: [select_edges()], [select_last_edges_created()],
+#' [select_edges_by_edge_id()], or [select_edges_by_node_id()].
+#'
+#' Selections of edges can also be performed using the following traversal
+#' (`trav_*()`) functions: [trav_out_edge()], [trav_in_edge()],
+#' [trav_both_edge()], or [trav_reverse_edge()].
+#'
+#' @inheritParams render_graph
+#' @param edge_attr The name of the attribute to set.
+#' @param value The value to be set for the chosen attribute for the edges in
+#'   the current selection.
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Create a simple graph
 #' graph <-
@@ -40,12 +43,10 @@
 #' # frame to verify that the
 #' # edge attribute has been set
 #' # for specific edges
-#' graph %>%
-#'   get_edge_df()
-#' @importFrom rlang enquo get_expr
-#' @importFrom dplyr mutate case_when
-#' @export set_edge_attrs_ws
-
+#' graph %>% get_edge_df()
+#'
+#' @import rlang
+#' @export
 set_edge_attrs_ws <- function(graph,
                               edge_attr,
                               value) {

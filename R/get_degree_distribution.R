@@ -1,16 +1,14 @@
 #' Get total degree distribution data for a graph
-#' @description Get degree distribution data for
-#' a graph. Graph degree is represented as a
-#' frequency of total degree values over all nodes
-#' in the graph.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param mode using \code{total} (the default),
-#' degree considered for each node will be the total
-#' degree. With \code{in} and \code{out} the degree
-#' used will be the in-degree and out-degree,
-#' respectively.
-#' @return a data frame with degree frequencies.
+#'
+#' Get degree distribution data for a graph. Graph degree is represented as a
+#'   frequency of total degree values over all nodes in the graph.
+#' @inheritParams render_graph
+#' @param mode using `total` (the default), degree considered for each node
+#'   will be the total degree. With `in` and `out` the degree used
+#'   will be the in-degree and out-degree, respectively.
+#'
+#' @return A data frame with degree frequencies.
+#'
 #' @examples
 #' # Create a random graph using the
 #' # `add_gnm_graph()` function
@@ -27,9 +25,8 @@
 #' graph %>%
 #'   get_degree_distribution(
 #'     mode = "total")
-#' @importFrom igraph degree_distribution
-#' @export get_degree_distribution
-
+#'
+#' @export
 get_degree_distribution <- function(graph,
                                     mode = "total") {
 
@@ -57,7 +54,7 @@ get_degree_distribution <- function(graph,
 
   # Get the total degree distribution for the graph
   if (mode %in% c("all", "total", "both")) {
-    deg_dist <- degree_distribution(ig_graph, mode = "all")
+    deg_dist <- igraph::degree_distribution(ig_graph, mode = "all")
 
     # Transform to a data frame
     deg_dist_df <-
@@ -69,7 +66,7 @@ get_degree_distribution <- function(graph,
 
   # Get the total in-degree distribution for the graph
   if (mode == "in") {
-    deg_dist <- degree_distribution(ig_graph, mode = "in")
+    deg_dist <- igraph::degree_distribution(ig_graph, mode = "in")
 
     # Transform to a data frame
     deg_dist_df <-
@@ -81,7 +78,7 @@ get_degree_distribution <- function(graph,
 
   # Get the total out-degree distribution for the graph
   if (mode == "out") {
-    deg_dist <- degree_distribution(ig_graph, mode = "out")
+    deg_dist <- igraph::degree_distribution(ig_graph, mode = "out")
 
     # Transform to a data frame
     deg_dist_df <-

@@ -1,10 +1,12 @@
 #' Get count of all unconnected nodes
-#' @description From a graph object of class
-#' \code{dgr_graph}, get a count of nodes in the
-#' graph that are not connected to any other node.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @return a numeric vector of single length.
+#'
+#' From a graph object of class `dgr_graph`, get a count of nodes in the graph
+#' that are not connected to any other node.
+#'
+#' @inheritParams render_graph
+#'
+#' @return A numeric vector of single length.
+#'
 #' @examples
 #' # Create a graph with a
 #' # path of nodes and 3
@@ -16,17 +18,15 @@
 #'
 #' # Get a count of all nodes
 #' # in the graph
-#' graph %>%
-#'   count_nodes()
+#' graph %>% count_nodes()
 #'
 #' # Get a count of all
 #' # unconnected nodes in the
 #' # graph
 #' graph %>%
 #'   count_unconnected_nodes()
-#' @importFrom dplyr bind_rows select rename distinct setdiff pull
-#' @export count_unconnected_nodes
-
+#'
+#' @export
 count_unconnected_nodes <- function(graph) {
 
   # Get the name of the function
@@ -44,9 +44,6 @@ count_unconnected_nodes <- function(graph) {
   if (is_graph_empty(graph)) {
     return(0)
   }
-
-  # Create bindings for specific variables
-  id <- from <- to <- node_id <- NULL
 
   # Get tbl with all nodes that are part
   # of edges

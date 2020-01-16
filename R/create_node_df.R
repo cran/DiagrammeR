@@ -1,27 +1,27 @@
 #' Create a node data frame
-#' @description Combine several vectors for nodes
-#' and their attributes into a data frame, which can be
-#' combined with other similarly-generated data frames,
-#' or, added to a graph object. A node data frame,
-#' or ndf, has at least the following columns:
 #'
-#' - \code{id} (of type \code{integer})
+#' Combine several vectors for nodes and their attributes into a data frame,
+#' which can be combined with other similarly-generated data frames, or, added
+#' to a graph object. A node data frame, or ndf, has at least the following
+#' columns:
 #'
-#' - \code{type} (of type \code{character})
+#' - `id` (of type `integer`)
 #'
-#' - \code{label} (of type \code{character})
+#' - `type` (of type `character`)
 #'
-#' An arbitrary number of additional columns containing
-#' aesthetic or data attributes can be part of the ndf,
-#' so long as they follow the aforementioned columns.
-#' @param n the total number of nodes to include in the
-#' node data frame.
-#' @param type an optional \code{type} for each
-#' node.
-#' @param label an optional \code{label} for each node.
-#' @param ... one or more vectors for associated node
-#' attributes.
-#' @return a node data frame (ndf).
+#' - `label` (of type `character`)
+#'
+#' An arbitrary number of additional columns containing aesthetic or data
+#' attributes can be part of the ndf, so long as they follow the aforementioned
+#' columns.
+#'
+#' @param n The total number of nodes to include in the node data frame.
+#' @param type An optional `type` for each node.
+#' @param label An optional `label` for each node.
+#' @param ... One or more vectors for associated node attributes.
+#'
+#' @return A node data frame (ndf).
+#'
 #' @examples
 #' # Create a node data frame (ndf) where the labels
 #' # are equivalent to the node ID values (this is not
@@ -53,9 +53,8 @@
 #'
 #' # Display the node data frame
 #' node_df
-#' @importFrom dplyr bind_cols
-#' @export create_node_df
-
+#'
+#' @export
 create_node_df <- function(n,
                            type = NULL,
                            label = NULL,

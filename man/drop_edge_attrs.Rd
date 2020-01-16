@@ -7,20 +7,16 @@
 drop_edge_attrs(graph, edge_attr)
 }
 \arguments{
-\item{graph}{a graph object of class
-\code{dgr_graph}.}
+\item{graph}{A graph object of class \code{dgr_graph}.}
 
-\item{edge_attr}{the name of the edge
-attribute column to drop.}
+\item{edge_attr}{The name of the edge attribute column to drop.}
 }
 \value{
-a graph object of class
-\code{dgr_graph}.
+A graph object of class \code{dgr_graph}.
 }
 \description{
-Within a graph's internal
-edge data frame (edf), remove an existing
-edge attribute.
+Within a graph's internal edge data frame (edf), remove an existing edge
+attribute.
 }
 \examples{
 # Create a random graph using the
@@ -40,8 +36,7 @@ graph <-
 # Get the graph's internal
 # edf to show which edge
 # attributes are available
-graph \%>\%
-  get_edge_df()
+graph \%>\% get_edge_df()
 
 # Drop the `value` edge
 # attribute
@@ -54,6 +49,6 @@ graph <-
 # edf to show that the edge
 # attribute `value` had been
 # removed
-graph \%>\%
-  get_edge_df()
+graph \%>\% get_edge_df()
+
 }

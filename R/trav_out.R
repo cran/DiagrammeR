@@ -1,45 +1,48 @@
-#' Traverse from one or more selected nodes onto
-#' adjacent, outward nodes
-#' @description From a graph object of class
-#' \code{dgr_graph} move along outward edges from one
-#' or more nodes present in a selection to other
-#' connected nodes, replacing the current nodes in
-#' the selection with those nodes traversed to. An
-#' optional filter by node attribute can limit the set
-#' of nodes traversed to.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param conditions an option to use filtering
-#' conditions for the traversal.
-#' @param copy_attrs_from providing a node attribute
-#' name will copy those node attribute values to the
-#' traversed nodes. Any values extant on the nodes
-#' traversed to will be replaced.
-#' @param copy_attrs_as if a node attribute name
-#' is provided in \code{copy_attrs_from}, this option
-#' will allow the copied attribute values to be
-#' written under a different attribute name. If the
-#' attribute name provided in \code{copy_attrs_as}
-#' does not exist in the graph's ndf, the new
-#' node attribute will be created with the chosen
-#' name.
-#' @param agg if a node attribute is provided
-#' to \code{copy_attrs_from}, then an aggregation
-#' function is required since there may be cases where
-#' multiple edge attribute values will be passed onto
-#' the traversed node(s). To pass only a single value,
-#' the following aggregation functions can be used:
-#' \code{sum}, \code{min}, \code{max}, \code{mean}, or
-#' \code{median}.
-#' @param add_to_selection an option to
-#' either add the traversed to nodes
-#' to the active selection of nodes
-#' (\code{TRUE}) or switch the active
-#' selection entirely to those traversed
-#' to nodes (\code{FALSE}, the default case).
-#' @return a graph object of class \code{dgr_graph}.
+#' Traverse from one or more selected nodes onto adjacent, outward nodes
+#'
+#' From a graph object of class `dgr_graph` move along outward edges from one or
+#' more nodes present in a selection to other connected nodes, replacing the
+#' current nodes in the selection with those nodes traversed to. An optional
+#' filter by node attribute can limit the set of nodes traversed to.
+#'
+#' This traversal function makes use of an active selection of nodes. After the
+#' traversal, depending on the traversal conditions, there will either be a
+#' selection of nodes or no selection at all.
+#'
+#' Selections of nodes can be performed using the following node selection
+#' (`select_*()`) functions: [select_nodes()], [select_last_nodes_created()],
+#' [select_nodes_by_degree()], [select_nodes_by_id()], or
+#' [select_nodes_in_neighborhood()].
+#'
+#' Selections of nodes can also be performed using the following traversal
+#' (`trav_*()`) functions: [trav_out()], [trav_in()], [trav_both()],
+#' [trav_out_node()], [trav_in_node()], [trav_out_until()], or
+#' [trav_in_until()].
+#'
+#' @inheritParams render_graph
+#' @param conditions An option to use filtering conditions for the traversal.
+#' @param copy_attrs_from Providing a node attribute name will copy those node
+#'   attribute values to the traversed nodes. Any values extant on the nodes
+#'   traversed to will be replaced.
+#' @param copy_attrs_as If a node attribute name is provided in
+#'   `copy_attrs_from`, this option will allow the copied attribute values to be
+#'   written under a different attribute name. If the attribute name provided in
+#'   `copy_attrs_as` does not exist in the graph's ndf, the new node attribute
+#'   will be created with the chosen name.
+#' @param agg If a node attribute is provided to `copy_attrs_from`, then an
+#'   aggregation function is required since there may be cases where multiple
+#'   edge attribute values will be passed onto the traversed node(s). To pass
+#'   only a single value, the following aggregation functions can be used:
+#'   `sum`, `min`, `max`, `mean`, or `median`.
+#' @param add_to_selection An option to either add the traversed to nodes to the
+#'   active selection of nodes (`TRUE`) or switch the active selection entirely
+#'   to those traversed to nodes (`FALSE`, the default case).
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Set a seed
+#' suppressWarnings(RNGversion("3.5.0"))
 #' set.seed(23)
 #'
 #' # Create a simple graph
@@ -82,12 +85,10 @@
 #'   join_node_attrs(df = df_nodes)
 #'
 #' # Show the graph's internal node data frame
-#' graph %>%
-#'   get_node_df()
+#' graph %>% get_node_df()
 #'
 #' # Show the graph's internal edge data frame
-#' graph %>%
-#'   get_edge_df()
+#' graph %>% get_edge_df()
 #'
 #' # Perform a simple traversal from node `3`
 #' # to outward adjacent nodes with no conditions
@@ -181,12 +182,10 @@
 #'     value = 5)
 #'
 #' # Show the graph's internal node data frame
-#' graph %>%
-#'   get_node_df()
+#' graph %>% get_node_df()
 #'
 #' # Show the graph's internal edge data frame
-#' graph %>%
-#'   get_edge_df()
+#' graph %>% get_edge_df()
 #'
 #' # Perform a traversal from the outer nodes
 #' # (`2` and `3`) to the central node (`1`) while
@@ -202,14 +201,10 @@
 #'
 #' # Show the graph's internal node data
 #' # frame after this change
-#' graph %>%
-#'   get_node_df()
-#' @importFrom stats as.formula
-#' @importFrom dplyr filter inner_join right_join rename distinct as_tibble
-#' @importFrom dplyr select select_ group_by ungroup summarize_ everything
-#' @importFrom rlang enquo UQ get_expr
-#' @export trav_out
-
+#' graph %>% get_node_df()
+#'
+#' @import rlang
+#' @export
 trav_out <- function(graph,
                      conditions = NULL,
                      copy_attrs_from = NULL,
@@ -283,9 +278,6 @@ trav_out <- function(graph,
     }
   }
 
-  # Create bindings for specific variables
-  id <- from <- to <- type <- label <- NULL
-
   # Get the selection of nodes as the starting
   # nodes for the traversal
   starting_nodes <- graph$node_selection$node
@@ -324,10 +316,7 @@ trav_out <- function(graph,
     rlang::enquo(conditions) %>%
     rlang::get_expr())) {
 
-    valid_nodes <-
-      dplyr::filter(
-        .data = valid_nodes,
-        rlang::UQ(conditions))
+    valid_nodes <- dplyr::filter(.data = valid_nodes, !!conditions)
   }
 
   # If the option is taken to copy node attribute
@@ -348,7 +337,7 @@ trav_out <- function(graph,
       nodes <-
         nodes %>%
         dplyr::group_by(id) %>%
-        dplyr::summarize_(.dots = setNames(
+        dplyr::summarize_(.dots = stats::setNames(
           list(stats::as.formula(
             paste0("~", agg, "(", copy_attrs_from, ", na.rm = TRUE)"))),
           copy_attrs_from)) %>%

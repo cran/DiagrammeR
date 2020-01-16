@@ -1,23 +1,17 @@
 #' Display a property graph's underlying model
-#' @description With a graph object of class
-#' \code{dgr_graph} that is also a property
-#' graph (i.e., all nodes have an assigned
-#' \code{type} value and all edges have an assigned
-#' \code{rel} value), display its metagraph in the
-#' RStudio Viewer. This representation provides all
-#' combinations of edges of different \code{rel}
-#' values to all nodes with distinct \code{type}
-#' values, including any edges to nodes of the same
-#' \code{type} (shown as loops). The precondition
-#' of the graph being a property graph can be
-#' verified by using the \code{is_property_graph()}
-#' function.
-#' @param graph a graph object of class
-#' \code{dgr_graph}. This graph must fulfill the
-#' condition of being a property graph, otherwise
-#' the function yields an error.
+#'
+#' With a graph object of class `dgr_graph` that is also a property graph (i.e.,
+#' all nodes have an assigned `type` value and all edges have an assigned `rel`
+#' value), display its metagraph in the RStudio Viewer. This representation
+#' provides all combinations of edges of different `rel` values to all nodes
+#' with distinct `type` values, including any edges to nodes of the same `type`
+#' (shown as loops). The precondition of the graph being a property graph can be
+#' verified by using the [is_property_graph()] function.
+#'
+#' @param graph A graph object of class `dgr_graph`. This graph must fulfill the
+#'   condition of being a property graph, otherwise the function yields an
+#'   error.
 #' @examples
-#' \dontrun{
 #' # Create a randomized property
 #' # graph with 1000 nodes and 1350 edges
 #' property_graph <-
@@ -78,11 +72,9 @@
 #' # Display this graph's
 #' # metagraph, or, the underlying
 #' # graph model for a property graph
-#' display_metagraph(property_graph)
-#' }
-#' @importFrom dplyr select distinct inner_join rename mutate
-#' @export display_metagraph
-
+#' # display_metagraph(property_graph)
+#'
+#' @export
 display_metagraph <- function(graph) {
 
   # Get the name of the function
@@ -103,10 +95,6 @@ display_metagraph <- function(graph) {
       fcn_name = fcn_name,
       reasons = "The graph object is not a property graph")
   }
-
-  # Create bindings for specific variables
-  id <- from <- to <- type <- rel <- label <-
-    from_type <- to_type <- NULL
 
   # Get a distinct list of node `type` values
   unique_node_list <-

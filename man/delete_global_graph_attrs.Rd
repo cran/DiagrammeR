@@ -2,29 +2,24 @@
 % Please edit documentation in R/delete_global_graph_attrs.R
 \name{delete_global_graph_attrs}
 \alias{delete_global_graph_attrs}
-\title{Delete one of the global graph attributes stored
-within a graph object}
+\title{Delete one of the global graph attributes stored within a graph object}
 \usage{
 delete_global_graph_attrs(graph, attr = NULL, attr_type = NULL)
 }
 \arguments{
-\item{graph}{a graph object of class
-\code{dgr_graph}.}
+\item{graph}{A graph object of class \code{dgr_graph}.}
 
-\item{attr}{the name of the attribute to
-delete for the \code{type} of global attribute
-specified.}
+\item{attr}{The name of the attribute to delete for the \code{type} of global
+attribute specified.}
 
-\item{attr_type}{the specific type of global graph
-attribute to delete. The type is specified with
-\code{graph}, \code{node}, or \code{edge}.}
+\item{attr_type}{The specific type of global graph attribute to delete. The
+type is specified with \code{graph}, \code{node}, or \code{edge}.}
 }
 \value{
-a graph object of class \code{dgr_graph}.
+A graph object of class \code{dgr_graph}.
 }
 \description{
-Delete one of the global attributes
-stored within a graph object of class
+Delete one of the global attributes stored within a graph object of class
 \code{dgr_graph}).
 }
 \examples{
@@ -63,4 +58,5 @@ graph <-
 # attributes for the graph
 graph \%>\%
   get_global_graph_attr_info()
+
 }

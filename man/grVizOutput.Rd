@@ -7,42 +7,14 @@
 grVizOutput(outputId, width = "100\%", height = "400px")
 }
 \arguments{
-\item{outputId}{output variable to read from}
+\item{outputId}{Output variable to read from.}
 
-\item{width}{a valid CSS unit for the width or a number, which will be
+\item{width}{A valid CSS unit for the width or a number, which will be
 coerced to a string and have \code{px} appended.}
 
-\item{height}{a valid CSS unit for the height or a number, which will be
+\item{height}{A valid CSS unit for the height or a number, which will be
 coerced to a string and have \code{px} appended.}
 }
 \description{
 Widget output function for use in Shiny
-}
-\examples{
-\dontrun{
-library(shiny)
-library(shinyAce)
-
-ui = shinyUI(fluidPage(fluidRow(
-  column(
-    width=4
-    , aceEditor("ace", selectionId = "selection", value="digraph {A;}")
-  ),
-  column(
-    width = 6
-    , grVizOutput('diagram' )
-  )
-)))
-
-server = function(input, output) {
-  output$diagram <- renderGrViz({
-    grViz(
-      input$ace
-    )
-  })
-
-}
-
-shinyApp(ui = ui, server = server)
-}
 }

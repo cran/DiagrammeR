@@ -1,64 +1,18 @@
 #' Add a 3D grid of nodes to the graph
-#' @description With a graph object
-#' of class \code{dgr_graph}, add a
-#' three-dimensional grid to the graph.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param x the number of nodes in
-#' the x direction.
-#' @param y the number of nodes in
-#' the y direction.
-#' @param z the number of nodes in
-#' the z direction.
-#' @param type an optional string
-#' that describes the entity type for
-#' the nodes to be added.
-#' @param label either a vector
-#' object of length \code{x * y * z}
-#' that provides optional labels for
-#' the new nodes, or, a boolean
-#' value where setting to \code{TRUE}
-#' ascribes node IDs to the label and
-#' \code{FALSE} yields a blank label.
-#' @param rel an optional string for
-#' providing a relationship label to
-#' all new edges created in the grid.
-#' @param node_aes an optional list
-#' of named vectors comprising node
-#' aesthetic attributes. The helper
-#' function \code{node_aes()} is
-#' strongly recommended for use here
-#' as it contains arguments for each
-#' of the accepted node aesthetic
-#' attributes (e.g., \code{shape},
-#' \code{style}, \code{color},
-#' \code{fillcolor}).
-#' @param edge_aes an optional list
-#' of named vectors comprising edge
-#' aesthetic attributes. The helper
-#' function \code{edge_aes()} is
-#' strongly recommended for use here
-#' as it contains arguments for each
-#' of the accepted edge aesthetic
-#' attributes (e.g., \code{shape},
-#' \code{style}, \code{penwidth},
-#' \code{color}).
-#' @param node_data an optional list
-#' of named vectors comprising node
-#' data attributes. The helper
-#' function \code{node_data()} is
-#' strongly recommended for use here
-#' as it helps bind data specifically
-#' to the created nodes.
-#' @param edge_data an optional list
-#' of named vectors comprising edge
-#' data attributes. The helper function
-#' \code{edge_data()} is strongly
-#' recommended for use here as it helps
-#' bind data specifically to the
-#' created edges.
-#' @return a graph object of class
-#' \code{dgr_graph}.
+#'
+#' With a graph object of class `dgr_graph`, add a three-dimensional grid to the
+#' graph.
+#'
+#' @inheritParams node_edge_aes_data
+#' @inheritParams render_graph
+#' @inheritParams add_grid_2d
+#' @param z The number of nodes in the z direction.
+#' @param label Either a vector object of length `x * y * z` that provides
+#'   optional labels for the new nodes, or, a logical value where setting to
+#'   `TRUE` ascribes node IDs to the label and `FALSE` yields a blank label.
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Create a new graph and add
 #' # a 2 x 2 x 2 grid
@@ -101,16 +55,12 @@
 #'         6.3, 9.3)))
 #'
 #' # Get the graph's node data frame
-#' graph_w_attrs %>%
-#'   get_node_df()
+#' graph_w_attrs %>% get_node_df()
 #'
 #' # Get the graph's edge data frame
-#' graph_w_attrs %>%
-#'   get_edge_df()
-#' @importFrom igraph make_lattice
-#' @importFrom dplyr as_tibble select bind_cols pull
-#' @export add_grid_3d
-
+#' graph_w_attrs %>% get_edge_df()
+#'
+#' @export
 add_grid_3d <- function(graph,
                         x,
                         y,
@@ -160,9 +110,6 @@ add_grid_3d <- function(graph,
       fcn_name = fcn_name,
       reasons = "The value for `z` must be at least 2")
   }
-
-  # Create bindings for specific variables
-  index__ <- id <- from <- to <- NULL
 
   # Get the number of nodes ever created for
   # this graph

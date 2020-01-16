@@ -7,42 +7,27 @@
 add_edges_w_string(graph, edges, rel = NULL, use_labels = FALSE)
 }
 \arguments{
-\item{graph}{a graph object of
-class \code{dgr_graph}.}
+\item{graph}{A graph object of class \code{dgr_graph}.}
 
-\item{edges}{a single-length vector
-with a character string specifying
-the edges. For a directed graph, the
-string object should be formatted as
-a series of node ID values as
-\code{[node_ID_1]->[node_ID_2]}
-separated by a one or more space
-characters. For undirected graphs,
-\code{--} should replace \code{->}.
-Line breaks in the vector won't cause
-an error.}
+\item{edges}{A single-length vector with a character string specifying the
+edges. For a directed graph, the string object should be formatted as a
+series of node ID values as \verb{[node_ID_1]->[node_ID_2]} separated by a one
+or more space characters. For undirected graphs, \verb{--} should replace \verb{->}.
+Line breaks in the vector won't cause an error.}
 
-\item{rel}{an optional vector
-specifying the relationship between
-the connected nodes.}
+\item{rel}{An optional vector specifying the relationship between the
+connected nodes.}
 
-\item{use_labels}{an option to
-use node \code{label} values in the
-\code{edges} string to define node
-connections. Note that this is
-only possible if all nodes have
-distinct \code{label} values set
-and none exist as an empty string.}
+\item{use_labels}{An option to use node \code{label} values in the \code{edges} string
+to define node connections. Note that this is only possible if all nodes
+have distinct \code{label} values set and none exist as an empty string.}
 }
 \value{
-a graph object of class
-\code{dgr_graph}.
+A graph object of class \code{dgr_graph}.
 }
 \description{
-With a graph object
-of class \code{dgr_graph}, add one
-or more edges to the graph using a
-text string.
+With a graph object of class \code{dgr_graph}, add one or more edges to the graph
+using a text string.
 }
 \examples{
 # Create a graph with 4 nodes
@@ -63,8 +48,7 @@ graph_node_id <-
 
 # Show the graph's internal
 # edge data frame
-graph_node_id \%>\%
-  get_edge_df()
+graph_node_id \%>\% get_edge_df()
 
 # Add edges between nodes using
 # a character string with node
@@ -83,6 +67,5 @@ graph_node_label <-
 # Show the graph's internal
 # edge data frame (it's the
 # same as before)
-graph_node_label \%>\%
-  get_edge_df()
+graph_node_label \%>\% get_edge_df()
 }

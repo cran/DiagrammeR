@@ -1,9 +1,11 @@
 #' Get an edge data frame from a graph
-#' @description From a graph, obtain an edge data frame
-#' with all current edge attributes.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @return an edge data frame.
+#'
+#' From a graph, obtain an edge data frame with all current edge attributes.
+#'
+#' @inheritParams render_graph
+#'
+#' @return An edge data frame.
+#'
 #' @examples
 #' # Create a graph
 #' graph <-
@@ -35,10 +37,9 @@
 #'
 #' # Get the graph's internal
 #' # edge data frame (edf)
-#' graph %>%
-#'   get_edge_df()
-#' @export get_edge_df
-
+#' graph %>% get_edge_df()
+#'
+#' @export
 get_edge_df <- function(graph) {
 
   # Get the name of the function

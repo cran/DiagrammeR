@@ -1,13 +1,12 @@
-#' Get the current selection available in
-#' a graph object
-#' @description Get the current
-#' selection of node IDs or edge IDs
-#' from a graph object of class
-#' \code{dgr_graph}.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @return a vector with the current
-#' selection of nodes or edges.
+#' Get the current selection available in a graph object
+#'
+#' Get the current selection of node IDs or edge IDs from a graph object of
+#' class `dgr_graph`.
+#'
+#' @inheritParams render_graph
+#'
+#' @return A vector with the current selection of node or edge ID values.
+#'
 #' @examples
 #' # Create a simple graph
 #' graph <-
@@ -33,8 +32,8 @@
 #'   select_edges_by_node_id(
 #'     nodes = 4) %>%
 #'   get_selection()
-#' @export get_selection
-
+#'
+#' @export
 get_selection <- function(graph) {
 
   # Get the name of the function
@@ -56,9 +55,16 @@ get_selection <- function(graph) {
   # If there is no selection available, return NA
   if (is.na(n_e_select_properties_in[["selection_type"]])) {
 
-    emit_message(
-      fcn_name = fcn_name,
-      message_body = "there is no active selection of nodes or edges")
+    # Emit a message about the modification of a selection
+    # if that option is set
+    if (!is.null(graph$graph_info$display_msgs) &&
+        graph$graph_info$display_msgs) {
+
+      # Issue a message to the user
+      emit_message(
+        fcn_name = fcn_name,
+        message_body = "there is no active selection of nodes or edges")
+    }
 
     return(NA)
   }
@@ -67,12 +73,18 @@ get_selection <- function(graph) {
   # ID values
   if (n_e_select_properties_in[["selection_type"]] == "node") {
 
+    # Emit a message about the modification of a selection
+    # if that option is set
+    if (!is.null(graph$graph_info$display_msgs) &&
+        graph$graph_info$display_msgs) {
+
     # Issue a message to the user
     emit_message(
       fcn_name = fcn_name,
       message_body = glue::glue(
         "there is an active selection of \\
         {n_e_select_properties_in[['selection_count_str']]}"))
+    }
 
     return(as.integer(sort(graph$node_selection$node)))
   }
@@ -81,11 +93,18 @@ get_selection <- function(graph) {
   # ID values
   if (n_e_select_properties_in[["selection_type"]] == "edge") {
 
-    emit_message(
-      fcn_name = fcn_name,
-      message_body = glue::glue(
-        "there is an active selection of\\
+    # Emit a message about the modification of a selection
+    # if that option is set
+    if (!is.null(graph$graph_info$display_msgs) &&
+        graph$graph_info$display_msgs) {
+
+      # Issue a message to the user
+      emit_message(
+        fcn_name = fcn_name,
+        message_body = glue::glue(
+          "there is an active selection of\\
         {n_e_select_properties_in[['selection_count_str']]}"))
+    }
 
     return(as.integer(sort(graph$edge_selection$edge)))
   }

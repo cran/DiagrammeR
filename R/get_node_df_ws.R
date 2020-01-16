@@ -1,11 +1,25 @@
 #' Get the graph's ndf filtered by a selection of nodes
-#' @description From a graph object of class
-#' \code{dgr_graph}, get the graph's internal
-#' node data frame that is filtered by the node
-#' ID values currently active as a selection.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @return a node data frame.
+#'
+#' From a graph object of class `dgr_graph`, get the graph's internal node data
+#' frame that is filtered by the node ID values currently active as a selection.
+#'
+#' This function makes use of an active selection of nodes (and the function
+#' ending with `_ws` hints at this).
+#'
+#' Selections of nodes can be performed using the following node selection
+#' (`select_*()`) functions: [select_nodes()], [select_last_nodes_created()],
+#' [select_nodes_by_degree()], [select_nodes_by_id()], or
+#' [select_nodes_in_neighborhood()].
+#'
+#' Selections of nodes can also be performed using the following traversal
+#' (`trav_*()`) functions: [trav_out()], [trav_in()], [trav_both()],
+#' [trav_out_node()], [trav_in_node()], [trav_out_until()], or
+#' [trav_in_until()].
+#'
+#' @inheritParams render_graph
+#'
+#' @return A node data frame.
+#'
 #' @examples
 #' # Create a random graph using the
 #' # `add_gnm_graph()` function
@@ -29,11 +43,9 @@
 #' # Get the node data frame that's
 #' # limited to the rows that correspond
 #' # to the node selection
-#' graph %>%
-#'   get_node_df_ws()
-#' @importFrom dplyr filter
-#' @export get_node_df_ws
-
+#' graph %>% get_node_df_ws()
+#'
+#' @export
 get_node_df_ws <- function(graph) {
 
   # Get the name of the function
@@ -54,9 +66,6 @@ get_node_df_ws <- function(graph) {
       fcn_name = fcn_name,
       reasons = "There is no selection of nodes available.")
   }
-
-  # Create binding for specific variable
-  id <- NULL
 
   # Extract the node data frame (ndf)
   # from the graph and get only those nodes

@@ -7,20 +7,17 @@
 get_edge_ids(graph, conditions = NULL)
 }
 \arguments{
-\item{graph}{a graph object of class
-\code{dgr_graph}.}
+\item{graph}{A graph object of class \code{dgr_graph}.}
 
-\item{conditions}{an option to use filtering
-conditions for the retrieval of edges.}
+\item{conditions}{an option to use filtering conditions for the retrieval of
+edges.}
 }
 \value{
-a vector of edge ID values.
+A vector of edge ID values.
 }
 \description{
-Obtain a vector of edge ID values
-from a graph object. An optional filter by
-edge attribute can limit the set of edge ID
-values returned.
+Obtain a vector of edge ID values from a graph object. An optional filter by
+edge attribute can limit the set of edge ID values returned.
 }
 \examples{
 # Create a node data frame (ndf)
@@ -47,8 +44,7 @@ graph <-
     edges_df = edf)
 
 # Get a vector of all edges in a graph
-graph \%>\%
-  get_edge_ids()
+graph \%>\% get_edge_ids()
 
 # Get a vector of edge ID values using a
 # numeric comparison (i.e., all edges with
@@ -71,4 +67,5 @@ get_edge_ids(
   conditions =
     color == "blue" &
     value > 5)
+
 }

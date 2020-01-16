@@ -1,62 +1,21 @@
 #' Add a star of nodes to the graph
-#' @description With a graph object of
-#' class \code{dgr_graph}, add a node
-#' star to the graph.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param n the number of nodes
-#' comprising the star. The first node
-#' will be the center of the star.
-#' @param type an optional string
-#' that describes the entity type for
-#' the nodes to be added.
-#' @param label either a vector object
-#' of length \code{n} that provides
-#' optional labels for the new nodes,
-#' or, a boolean value where setting to
-#' \code{TRUE} ascribes node IDs to the
-#' label and \code{FALSE} yields a
-#' blank label.
-#' @param rel an optional string for
-#' providing a relationship label to
-#' all new edges created in the node
-#' star.
-#' @param node_aes an optional list
-#' of named vectors comprising node
-#' aesthetic attributes. The helper
-#' function \code{node_aes()} is
-#' strongly recommended for use here
-#' as it contains arguments for each
-#' of the accepted node aesthetic
-#' attributes (e.g., \code{shape},
-#' \code{style}, \code{color},
-#' \code{fillcolor}).
-#' @param edge_aes an optional list
-#' of named vectors comprising edge
-#' aesthetic attributes. The helper
-#' function \code{edge_aes()} is
-#' strongly recommended for use here
-#' as it contains arguments for each
-#' of the accepted edge aesthetic
-#' attributes (e.g., \code{shape},
-#' \code{style}, \code{penwidth},
-#' \code{color}).
-#' @param node_data an optional list
-#' of named vectors comprising node
-#' data attributes. The helper
-#' function \code{node_data()} is
-#' strongly recommended for use here
-#' as it helps bind data specifically
-#' to the created nodes.
-#' @param edge_data an optional list
-#' of named vectors comprising edge
-#' data attributes. The helper function
-#' \code{edge_data()} is strongly
-#' recommended for use here as it helps
-#' bind data specifically to the
-#' created edges.
-#' @return a graph object of class
-#' \code{dgr_graph}.
+#'
+#' With a graph object of class `dgr_graph`, add a node star to the graph.
+#'
+#' @inheritParams node_edge_aes_data
+#' @inheritParams render_graph
+#' @param n The number of nodes comprising the star. The first node will be the
+#'   center of the star.
+#' @param type An optional string that describes the entity type for the nodes
+#'   to be added.
+#' @param label Either a vector object of length `n` that provides optional
+#'   labels for the new nodes, or, a logical value where setting to `TRUE`
+#'   ascribes node IDs to the label and `FALSE` yields a blank label.
+#' @param rel An optional string for providing a relationship label to all new
+#'   edges created in the node star.
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Create a new graph and add 2
 #' # stars of varying numbers of nodes
@@ -70,8 +29,7 @@
 #'     type = "five_star")
 #'
 #' # Get node information from this graph
-#' graph %>%
-#'   get_node_info()
+#' graph %>% get_node_info()
 #'
 #' # Node and edge aesthetic and data
 #' # attributes can be specified in
@@ -79,6 +37,7 @@
 #' # `node_data`, and `edge_data`
 #' # arguments
 #'
+#' suppressWarnings(RNGversion("3.5.0"))
 #' set.seed(23)
 #'
 #' graph_w_attrs <-
@@ -107,15 +66,12 @@
 #'           sd = 1.0)))
 #'
 #' # Get the graph's node data frame
-#' graph_w_attrs %>%
-#'   get_node_df()
+#' graph_w_attrs %>% get_node_df()
 #'
 #' # Get the graph's edge data frame
-#' graph_w_attrs %>%
-#'   get_edge_df()
-#' @importFrom dplyr select bind_cols as_tibble
-#' @export add_star
-
+#' graph_w_attrs %>% get_edge_df()
+#'
+#' @export
 add_star <- function(graph,
                      n,
                      type = NULL,
@@ -147,9 +103,6 @@ add_star <- function(graph,
       fcn_name = fcn_name,
       reasons = "The value for `n` must be at least 4")
   }
-
-  # Create bindings for specific variables
-  id <- index__ <- NULL
 
   # Get the number of nodes ever created for
   # this graph

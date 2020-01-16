@@ -7,18 +7,28 @@
 fully_connect_nodes_ws(graph)
 }
 \arguments{
-\item{graph}{a graph object of class
-\code{dgr_graph}.}
+\item{graph}{A graph object of class \code{dgr_graph}.}
 }
 \value{
-a graph object of class
-\code{dgr_graph}.
+A graph object of class \code{dgr_graph}.
 }
 \description{
-With a selection of nodes in a
-graph, add any remaining edges required to
-fully connect this group of edges to each
-other.
+With a selection of nodes in a graph, add any remaining edges required to
+fully connect this group of edges to each other.
+}
+\details{
+This function makes use of an active selection of nodes (and the function
+ending with \verb{_ws} hints at this).
+
+Selections of nodes can be performed using the following node selection
+(\verb{select_*()}) functions: \code{\link[=select_nodes]{select_nodes()}}, \code{\link[=select_last_nodes_created]{select_last_nodes_created()}},
+\code{\link[=select_nodes_by_degree]{select_nodes_by_degree()}}, \code{\link[=select_nodes_by_id]{select_nodes_by_id()}}, or
+\code{\link[=select_nodes_in_neighborhood]{select_nodes_in_neighborhood()}}.
+
+Selections of nodes can also be performed using the following traversal
+(\verb{trav_*()}) functions: \code{\link[=trav_out]{trav_out()}}, \code{\link[=trav_in]{trav_in()}}, \code{\link[=trav_both]{trav_both()}},
+\code{\link[=trav_out_node]{trav_out_node()}}, \code{\link[=trav_in_node]{trav_in_node()}}, \code{\link[=trav_out_until]{trav_out_until()}}, or
+\code{\link[=trav_in_until]{trav_in_until()}}.
 }
 \examples{
 # Create an empty graph and
@@ -41,8 +51,7 @@ graph <-
   fully_connect_nodes_ws()
 
 # Get the graph's edge data frame
-graph \%>\%
-  get_edge_df()
+graph \%>\% get_edge_df()
 
 # Create an undirected, empty
 # graph; add a path of 3 nodes
@@ -68,6 +77,6 @@ graph <-
 # frame; in the undirected
 # case, reverse edges aren't
 # added
-graph \%>\%
-  get_edge_df()
+graph \%>\% get_edge_df()
+
 }

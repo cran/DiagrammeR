@@ -1,23 +1,33 @@
 #' Move layout positions of a selection of nodes
-#' @description With an active selection of nodes,
-#' move the position in either the \code{x} or
-#' \code{y} directions, or both. Nodes in the
-#' selection that do not have position information
-#' (i.e., \code{NA} values for the \code{x} or
-#' \code{y} node attributes) will be ignored.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param dx a single numeric value specifying the
-#' amount that selected nodes (with non-\code{NA}
-#' values for the \code{x} and \code{y} attributes)
-#' will be moved in the x direction. A positive
-#' value will move nodes right, negative left.
-#' @param dy a single numeric value specifying the
-#' amount that selected nodes (with non-\code{NA}
-#' values for the \code{x} and \code{y} attributes)
-#' will be moved in the y direction. A positive
-#' value will move nodes up, negative down.
-#' @return a graph object of class \code{dgr_graph}.
+#'
+#' With an active selection of nodes, move the position in either the `x` or `y`
+#' directions, or both. Nodes in the selection that do not have position
+#' information (i.e., `NA` values for the `x` or `y` node attributes) will be
+#' ignored.
+#'
+#' This function makes use of an active selection of nodes (and the function
+#' ending with `_ws` hints at this).
+#'
+#' Selections of nodes can be performed using the following node selection
+#' (`select_*()`) functions: [select_nodes()], [select_last_nodes_created()],
+#' [select_nodes_by_degree()], [select_nodes_by_id()], or
+#' [select_nodes_in_neighborhood()].
+#'
+#' Selections of nodes can also be performed using the following traversal
+#' (`trav_*()`) functions: [trav_out()], [trav_in()], [trav_both()],
+#' [trav_out_node()], [trav_in_node()], [trav_out_until()], or
+#' [trav_in_until()].
+#'
+#' @inheritParams render_graph
+#' @param dx A single numeric value specifying the amount that selected nodes
+#'   (with non-`NA` values for the `x` and `y` attributes) will be moved in the
+#'   x direction. A positive value will move nodes right, negative left.
+#' @param dy A single numeric value specifying the amount that selected nodes
+#'   (with non-`NA` values for the `x` and `y` attributes) will be moved in the
+#'   y direction. A positive value will move nodes up, negative down.
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Create a simple graph with 4 nodes
 #' graph <-
@@ -61,8 +71,7 @@
 #'     dx = 5, dy = 0)
 #'
 #' # View the graph's node data frame
-#' graph %>%
-#'   get_node_df()
+#' graph %>% get_node_df()
 #'
 #' # Now select nodes that have `type == "b"`
 #' # and move them in the `y` direction 2 units
@@ -77,11 +86,9 @@
 #'     dx = 0, dy = 2)
 #'
 #' # View the graph's node data frame
-#' graph %>%
-#'   get_node_df()
-#' @importFrom dplyr filter case_when coalesce
-#' @export nudge_node_positions_ws
-
+#' graph %>% get_node_df()
+#'
+#' @export
 nudge_node_positions_ws <- function(graph,
                                     dx,
                                     dy) {
@@ -115,9 +122,6 @@ nudge_node_positions_ws <- function(graph,
       fcn_name = fcn_name,
       reasons = "There is no selection of nodes available.")
   }
-
-  # Create bindings for specific variables
-  nodes <- x <- y <- id <- NULL
 
   # Get the graph's node data frame as an object
   ndf <- graph$nodes_df

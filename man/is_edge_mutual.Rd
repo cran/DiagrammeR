@@ -7,18 +7,16 @@
 is_edge_mutual(graph, edge)
 }
 \arguments{
-\item{graph}{a graph object of class
-\code{dgr_graph}.}
+\item{graph}{A graph object of class \code{dgr_graph}.}
 
-\item{edge}{a numeric edge ID value.}
+\item{edge}{A numeric edge ID value.}
 }
 \value{
-a logical value.
+A logical value.
 }
 \description{
-Determines whether an edge
-definition has a mutual analogue with the
-same node pair.
+Determines whether an edge definition has a mutual analogue with the same
+node pair.
 }
 \examples{
 # Create a graph that has mutual
@@ -35,8 +33,7 @@ graph <-
 
 # Get the graph's internal
 # edge data frame
-graph \%>\%
-  get_edge_df()
+graph \%>\% get_edge_df()
 
 # Determine if edge `1` has
 # a mutual edge
@@ -47,4 +44,5 @@ graph \%>\%
 # a mutual edge
 graph \%>\%
   is_edge_mutual(edge = 2)
+
 }

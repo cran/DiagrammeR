@@ -4,45 +4,63 @@
 \alias{import_graph}
 \title{Import a graph from various graph formats}
 \usage{
-import_graph(graph_file, file_type = NULL, edges_extra_attr_names = NULL,
-  edges_extra_attr_coltypes = NULL)
+import_graph(
+  graph_file,
+  file_type = NULL,
+  edges_extra_attr_names = NULL,
+  edges_extra_attr_coltypes = NULL,
+  graph_name = NULL,
+  attr_theme = "default",
+  write_backups = FALSE,
+  display_msgs = FALSE
+)
 }
 \arguments{
-\item{graph_file}{a connection to a graph file.
-When provided as a path to a file, it will read the
-file from disk. Files starting with \code{http://},
-\code{https://}, \code{ftp://}, or \code{ftps://}
-will be automatically downloaded.}
+\item{graph_file}{A connection to a graph file. When provided as a path to a
+file, it will read the file from disk. Files starting with \verb{http://},
+\verb{https://}, \verb{ftp://}, or \verb{ftps://} will be automatically downloaded.}
 
-\item{file_type}{the type of file to be imported.
-Options are: \code{gml} (GML), \code{sif} (SIF),
-\code{edges} (a .edges file), and \code{mtx}
-(MatrixMarket format). If not supplied, the type
-of graph file will be inferred by its file extension.}
+\item{file_type}{The type of file to be imported. Options are: \code{gml} (GML),
+\code{sif} (SIF), \code{edges} (a .edges file), and \code{mtx} (MatrixMarket format). If
+not supplied, the type of graph file will be inferred by its file
+extension.}
 
-\item{edges_extra_attr_names}{for \code{edges} files,
-a vector of attribute names beyond the \code{from}
-and \code{to} data columns can be provided in the
-order they appear in the input data file.}
+\item{edges_extra_attr_names}{For \code{edges} files, a vector of attribute names
+beyond the \code{from} and \code{to} data columns can be provided in the order they
+appear in the input data file.}
 
-\item{edges_extra_attr_coltypes}{for \code{edges}
-files, this is a string of column types for any
-attribute columns provided for
-\code{edges_extra_attr_names}. This string
-representation is where each character represents
-each of the extra columns of data and the mappings
-are: \code{c} -> character, \code{i} -> integer,
-\code{n} -> number, \code{d} -> double,
-\code{l} -> logical, \code{D} -> date, \code{T} ->
-date time, \code{t} -> time, \code{?} -> guess,
-or \code{_/-}, which skips the column.}
+\item{edges_extra_attr_coltypes}{For \code{edges} files, this is a string of
+column types for any attribute columns provided for
+\code{edges_extra_attr_names}. This string representation is where each
+character represents each of the extra columns of data and the mappings
+are: \code{c} -> character, \code{i} -> integer, \code{n} -> number, \code{d} -> double, \code{l} ->
+logical, \code{D} -> date, \code{T} -> date time, \code{t} -> time, \verb{?} -> guess, or
+\verb{_/-}, which skips the column.}
+
+\item{graph_name}{An optional string for labeling the graph object.}
+
+\item{attr_theme}{The theme (i.e., collection of \code{graph}, \code{node}, and \code{edge}
+global graph attributes) to use for this graph. The default theme is called
+\code{default}; there are hierarchical layout themes called \code{lr}, \code{tb}, \code{rl},
+and \code{bt} (these operate from left-to-right, top-to-bottom, right-to-left,
+and bottom-to-top); and, for larger graphs, the \code{fdp} theme provides a
+force directed layout. If this is set to \code{NULL} then no global graph
+attributes will be applied to the graph upon creation.}
+
+\item{write_backups}{An option to write incremental backups of changing graph
+states to disk. If \code{TRUE}, a subdirectory within the working directory will
+be created and used to store \code{RDS} files. The default value is \code{FALSE} so
+one has to opt in to use this functionality.}
+
+\item{display_msgs}{An option to display messages primarily concerned with
+changes in graph selections. By default, this is \code{FALSE}.}
 }
 \value{
-a graph object of class \code{dgr_graph}.
+A graph object of class \code{dgr_graph}.
 }
 \description{
-Import a variety of graphs from
-different graph formats and create a graph object.
+Import a variety of graphs from different graph formats and create a graph
+object.
 }
 \examples{
 \dontrun{
@@ -61,4 +79,5 @@ gml_graph \%>\%
 gml_graph \%>\%
   count_edges()
 }
+
 }

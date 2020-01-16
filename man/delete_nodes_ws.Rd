@@ -2,35 +2,33 @@
 % Please edit documentation in R/delete_nodes_ws.R
 \name{delete_nodes_ws}
 \alias{delete_nodes_ws}
-\title{Delete all selected nodes in a node selection}
+\title{Delete all nodes in a node selection}
 \usage{
 delete_nodes_ws(graph)
 }
 \arguments{
-\item{graph}{a graph object of class
-\code{dgr_graph}.}
+\item{graph}{A graph object of class \code{dgr_graph}.}
 }
 \value{
-a graph object of class \code{dgr_graph}.
+A graph object of class \code{dgr_graph}.
 }
 \description{
-In a graph object of class
-\code{dgr_graph}, delete all nodes present in a
-selection.
+In a graph object of class \code{dgr_graph}, delete all nodes present in a
+selection of nodes.
+}
+\details{
+This function makes use of an active selection of nodes (and the function
+ending with \verb{_ws} hints at this).
 
-Selections of nodes can be performed using
-the following \code{select_...} functions:
-\code{select_nodes()},
-\code{select_last_nodes_created()},
-\code{select_nodes_by_degree()},
-\code{select_nodes_by_id()}, or
-\code{select_nodes_in_neighborhood()}.
-Selections of nodes can also be performed using
-the following traversal functions:
-(\code{trav_...}):
-\code{trav_out()}, \code{trav_in()},
-\code{trav_both()}, \code{trav_in_node()},
-\code{trav_out_node()}.
+Selections of nodes can be performed using the following node selection
+(\verb{select_*()}) functions: \code{\link[=select_nodes]{select_nodes()}}, \code{\link[=select_last_nodes_created]{select_last_nodes_created()}},
+\code{\link[=select_nodes_by_degree]{select_nodes_by_degree()}}, \code{\link[=select_nodes_by_id]{select_nodes_by_id()}}, or
+\code{\link[=select_nodes_in_neighborhood]{select_nodes_in_neighborhood()}}.
+
+Selections of nodes can also be performed using the following traversal
+(\verb{trav_*()}) functions: \code{\link[=trav_out]{trav_out()}}, \code{\link[=trav_in]{trav_in()}}, \code{\link[=trav_both]{trav_both()}},
+\code{\link[=trav_out_node]{trav_out_node()}}, \code{\link[=trav_in_node]{trav_in_node()}}, \code{\link[=trav_out_until]{trav_out_until()}}, or
+\code{\link[=trav_in_until]{trav_in_until()}}.
 }
 \examples{
 # Create a graph with 3 nodes
@@ -52,6 +50,6 @@ graph <-
   delete_nodes_ws()
 
 # Get a count of nodes in the graph
-graph \%>\%
-  count_nodes()
+graph \%>\% count_nodes()
+
 }

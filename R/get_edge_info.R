@@ -1,13 +1,13 @@
 #' Get detailed information on edges
-#' @description Obtain a data frame
-#' with detailed information on edges
-#' and their interrelationships
-#' within the graph.
-#' @param graph a graph object of
-#' class \code{dgr_graph}.
-#' @return a data frame containing
-#' information specific to each edge
-#' within the graph.
+#'
+#' Obtain a data frame with detailed information on edges and their
+#' interrelationships within the graph.
+#'
+#' @inheritParams render_graph
+#'
+#' @return A data frame containing information specific to each edge within the
+#'   graph.
+#'
 #' @examples
 #' # Create a simple graph
 #' graph <-
@@ -18,11 +18,9 @@
 #'
 #' # Get information on the
 #' # graph's edges
-#' graph %>%
-#'   get_edge_info()
-#' @importFrom dplyr select
-#' @export get_edge_info
-
+#' graph %>% get_edge_info()
+#'
+#' @export
 get_edge_info <- function(graph) {
 
   # Get the name of the function
@@ -35,9 +33,6 @@ get_edge_info <- function(graph) {
       fcn_name = fcn_name,
       reasons = "The graph object is not valid")
   }
-
-  # Create bindings for specific variables
-  id <- from <- to <- rel <- NULL
 
   # For graphs with no edges, return NA
   if (nrow(graph$edges_df) == 0) {

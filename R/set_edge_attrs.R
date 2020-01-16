@@ -1,27 +1,19 @@
 #' Set edge attribute values
-#' @description From a graph object of
-#' class \code{dgr_graph}, set edge
-#' attribute values for one or more
-#' edges.
-#' @param graph a graph object of
-#' class \code{dgr_graph}.
-#' @param edge_attr the name of the
-#' attribute to set.
-#' @param values the values to be
-#' set for the chosen attribute for
-#' the chosen edges.
-#' @param from an optional vector of
-#' node IDs from which the edge is
-#' outgoing for filtering list of
-#' nodes with outgoing edges in the
-#' graph.
-#' @param to an optional vector of
-#' node IDs from which the edge is
-#' incoming for filtering list of
-#' nodes with incoming edges in the
-#' graph.
-#' @return a graph object of class
-#' \code{dgr_graph}.
+#'
+#' From a graph object of class `dgr_graph`, set edge attribute values for one
+#' or more edges.
+#'
+#' @inheritParams render_graph
+#' @param edge_attr The name of the attribute to set.
+#' @param values The values to be set for the chosen attribute for the chosen
+#'   edges.
+#' @param from An optional vector of node IDs from which the edge is outgoing
+#'   for filtering list of nodes with outgoing edges in the graph.
+#' @param to An optional vector of node IDs from which the edge is incoming for
+#'   filtering list of nodes with incoming edges in the graph.
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Create a simple graph
 #' ndf <-
@@ -80,10 +72,9 @@
 #'     edge_attr = color,
 #'     values = "black",
 #'     to = 1)
-#' @importFrom dplyr mutate
-#' @importFrom rlang enquo get_expr
-#' @export set_edge_attrs
-
+#'
+#' @import rlang
+#' @export
 set_edge_attrs <- function(graph,
                            edge_attr,
                            values,

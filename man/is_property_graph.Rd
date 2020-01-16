@@ -7,22 +7,28 @@
 is_property_graph(graph)
 }
 \arguments{
-\item{graph}{a graph object of class
-\code{dgr_graph}.}
+\item{graph}{A graph object of class \code{dgr_graph}.}
 }
 \value{
-a logical value.
+A logical value.
+}
+\description{
+Provides a logical value on whether the graph is property graph (i.e., all
+nodes have an assigned \code{type} value and all edges have an assigned \code{rel}
+value).
+}
+\examples{
 # Create a graph with 2 nodes
 # (with `type` values) and a
 # single edge (with a `rel`)
 simple_property_graph <-
-  create_graph() %>%
+  create_graph() \%>\%
   add_node(
     type = "a",
-    label = "first") %>%
+    label = "first") \%>\%
   add_node(
     type = "b",
-    label = "second") %>%
+    label = "second") \%>\%
   add_edge(
     from = "first",
     to = "second",
@@ -36,20 +42,15 @@ is_property_graph(simple_property_graph)
 # If a `type` attribute is
 # removed, then this graph will
 # no longer be a property graph
-simple_property_graph %>%
+simple_property_graph \%>\%
   set_node_attrs(
     node_attr = type,
     values = NA,
-    nodes = 1) %>%
+    nodes = 1) \%>\%
   is_property_graph()
 
 # An empty graph will return FALSE
-create_graph() %>%
+create_graph() \%>\%
   is_property_graph()
-}
-\description{
-Provides a logical value on whether
-the graph is property graph (i.e., all nodes have
-an assigned \code{type} value and all edges have
-an assigned \code{rel} value).
+
 }

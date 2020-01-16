@@ -1,8 +1,8 @@
 #' Print the graph to the terminal
-#' @description This function will provide a summary
-#' of the graph.
-#' @param x a graph object of class
-#' \code{dgr_graph}.
+#'
+#' This function will provide a summary of the graph.
+#'
+#' @param x A graph object of class `dgr_graph`.
 #' @examples
 #' \dontrun{
 #' # Create a random graph using the
@@ -19,7 +19,6 @@
 #' }
 #' @keywords internal
 #' @export
-
 print.dgr_graph <- function(x, ...) {
 
   args <- list(...)

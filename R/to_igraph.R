@@ -1,9 +1,11 @@
 #' Convert a DiagrammeR graph to an igraph one
-#' @description Convert a DiagrammeR graph to
-#' an igraph graph object.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @return an igraph object.
+#'
+#' Convert a DiagrammeR graph to an igraph graph object.
+#'
+#' @inheritParams render_graph
+#'
+#' @return An igraph object.
+#'
 #' @examples
 #' # Create a random graph using the
 #' # `add_gnm_graph()` function
@@ -30,10 +32,8 @@
 #' # Get a summary of the igraph
 #' # graph object
 #' summary(ig_graph)
-#' @importFrom igraph graph_from_data_frame
-#' @importFrom dplyr select_
-#' @export to_igraph
-
+#'
+#' @export
 to_igraph <- function(graph) {
 
   # Get the name of the function

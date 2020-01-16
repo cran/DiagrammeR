@@ -4,48 +4,37 @@
 \alias{get_edges}
 \title{Get node IDs associated with edges}
 \usage{
-get_edges(graph, conditions = NULL, return_type = "vector",
-  return_values = "id")
+get_edges(
+  graph,
+  conditions = NULL,
+  return_type = "vector",
+  return_values = "id"
+)
 }
 \arguments{
-\item{graph}{a graph object of
-class \code{dgr_graph}.}
+\item{graph}{A graph object of class \code{dgr_graph}.}
 
-\item{conditions}{an option to
-use filtering conditions for the
-retrieval of edges.}
+\item{conditions}{an option to use filtering conditions for the retrieval of
+edges.}
 
-\item{return_type}{using
-\code{vector} (the default), a
-vector of character objects
-representing the edges is provided.
-With \code{list} a list object will
-be provided that contains vectors
-of outgoing and incoming node IDs
-associated with edges. With
-\code{df}, a data frame containing
-outgoing and incoming node IDs
-associated with edges.}
+\item{return_type}{using \code{vector} (the default), a vector of character
+objects representing the edges is provided. With \code{list} a list object will
+be provided that contains vectors of outgoing and incoming node IDs
+associated with edges. With \code{df}, a data frame containing outgoing and
+incoming node IDs associated with edges.}
 
-\item{return_values}{using
-\code{id} (the default) results in
-node ID values returned in the edge
-definitions. With \code{label}, the
-node labels will instead be used to
-define edges.}
+\item{return_values}{using \code{id} (the default) results in node ID values
+returned in the edge definitions. With \code{label}, the node labels will
+instead be used to define edges.}
 }
 \value{
-a list, data frame, or a
-vector object, depending on the
-value given to \code{return_type}.
+A list, data frame, or a vector object, depending on the value given
+to \code{return_type}.
 }
 \description{
-Obtain a vector,
-data frame, or list of node IDs
-associated with edges in a graph
-object. An optional filter by edge
-attribute can limit the set of
-edges returned.
+Obtain a vector, data frame, or list of node IDs associated with edges in a
+graph object. An optional filter by edge attribute can limit the set of edges
+returned.
 }
 \examples{
 # Create a node data frame (ndf)
@@ -124,4 +113,5 @@ graph \%>\%
       value > 3,
     return_type = "vector",
     return_values = "label")
+
 }

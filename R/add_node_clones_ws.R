@@ -1,31 +1,35 @@
 #' Add clones of a selection of nodes
-#' @description Add new nodes to a
-#' graph object of class \code{dgr_graph}
-#' which are clones of nodes in an active
-#' selection of nodes. All node attributes
-#' are preserved except for the node
-#' \code{label} attribute (to maintain the
-#' uniqueness of non-\code{NA} node label
-#' values). A vector of node \code{label}
-#' can be provided to bind new labels
-#' to the cloned nodes.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param add_edges an option for whether to
-#' add edges from the selected nodes to each
-#' of their clones, or, in the opposite
-#' direction.
-#' @param direction using \code{from} will
-#' create new edges from existing nodes to
-#' the new, cloned nodes. The \code{to} option
-#' will create new edges directed toward the
-#' existing nodes.
-#' @param label an optional vector of node
-#' label values. The vector length should
-#' correspond to the number of nodes in the
-#' active selection of nodes.
-#' @return a graph object of class
-#' \code{dgr_graph}.
+#'
+#' Add new nodes to a graph object of class `dgr_graph` which are clones of
+#' nodes in an active selection of nodes. All node attributes are preserved
+#' except for the node `label` attribute (to maintain the uniqueness of non-`NA`
+#' node label values). A vector of node `label` can be provided to bind new
+#' labels to the cloned nodes.
+#'
+#' This function makes use of an active selection of nodes (and the function
+#' ending with `_ws` hints at this).
+#'
+#' Selections of nodes can be performed using the following node selection
+#' (`select_*()`) functions: [select_nodes()], [select_last_nodes_created()],
+#' [select_nodes_by_degree()], [select_nodes_by_id()], or
+#' [select_nodes_in_neighborhood()].
+#'
+#' Selections of nodes can also be performed using the following traversal
+#' (`trav_*()`) functions: [trav_out()], [trav_in()], [trav_both()],
+#' [trav_out_node()], [trav_in_node()], [trav_out_until()], or
+#' [trav_in_until()].
+#'
+#' @inheritParams render_graph
+#' @param add_edges An option for whether to add edges from the selected nodes
+#'   to each of their clones, or, in the opposite direction.
+#' @param direction Using `from` will create new edges from existing nodes to
+#'   the new, cloned nodes. The `to` option will create new edges directed
+#'   toward the existing nodes.
+#' @param label An optional vector of node label values. The vector length
+#'   should correspond to the number of nodes in the active selection of nodes.
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Create a graph with a path of
 #' # nodes; supply `label`, `type`,
@@ -41,8 +45,7 @@
 #'
 #' # Display the graph's internal
 #' # node data frame
-#' graph %>%
-#'   get_node_df()
+#' graph %>% get_node_df()
 #'
 #' # Create clones of all nodes
 #' # in the selection but assign
@@ -58,8 +61,7 @@
 #' # node data frame: nodes `4`,
 #' # `5`, and `6` are clones of
 #' # `1`, `2`, and `3`
-#' graph %>%
-#'   get_node_df()
+#' graph %>% get_node_df()
 #'
 #' # Select the last nodes
 #' # created (`4`, `5`, and `6`)
@@ -79,11 +81,9 @@
 #' # edge data frame; there are
 #' # edges between the selected
 #' # nodes and their clones
-#' graph %>%
-#'   get_edge_df()
-#' @importFrom dplyr filter select
-#' @export add_node_clones_ws
-
+#' graph %>% get_edge_df()
+#'
+#' @export
 add_node_clones_ws <- function(graph,
                                add_edges = FALSE,
                                direction = NULL,
@@ -128,9 +128,6 @@ add_node_clones_ws <- function(graph,
   #       call. = FALSE
   #   }
   # }
-
-  # Create bindings for specific variables
-  id <- type <- version_id <- NULL
 
   # Get the value for the latest `version_id` for
   # graph (in the `graph_log`)

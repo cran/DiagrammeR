@@ -1,10 +1,23 @@
-#' Reverse the direction of selected edges in a graph
-#' @description Using a directed graph with a selection
-#' of edges as input, reverse the direction of those
-#' selected edges in input graph.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @return a graph object of class \code{dgr_graph}.
+#' Reverse the direction of selected edges in a graph using an edge selection
+#'
+#' Using a directed graph with a selection of edges as input, reverse the
+#' direction of those selected edges in input graph.
+#'
+#' This function makes use of an active selection of edges (and the function
+#' ending with `_ws` hints at this).
+#'
+#' Selections of edges can be performed using the following selection
+#' (`select_*()`) functions: [select_edges()], [select_last_edges_created()],
+#' [select_edges_by_edge_id()], or [select_edges_by_node_id()].
+#'
+#' Selections of edges can also be performed using the following traversal
+#' (`trav_*()`) functions: [trav_out_edge()], [trav_in_edge()],
+#' [trav_both_edge()], or [trav_reverse_edge()].
+#'
+#' @inheritParams render_graph
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Create a graph with a
 #' # directed tree
@@ -14,8 +27,7 @@
 #'     k = 2, h = 2)
 #'
 #' # Inspect the graph's edges
-#' graph %>%
-#'   get_edges()
+#' graph %>% get_edges()
 #'
 #' # Select all edges associated
 #' # with nodes `1` and `2`
@@ -33,11 +45,9 @@
 #'
 #' # Inspect the graph's edges
 #' # after their reversal
-#' graph %>%
-#'   get_edges()
-#' @importFrom dplyr filter rename select everything bind_rows
-#' @export rev_edge_dir_ws
-
+#' graph %>% get_edges()
+#'
+#' @export
 rev_edge_dir_ws <- function(graph) {
 
   # Get the time of function start
@@ -78,9 +88,6 @@ rev_edge_dir_ws <- function(graph) {
       reasons = "The input graph must be a directed graph")
   }
 
-  # Create bindings for specific variables
-  id <- from <- to <- . <- NULL
-
   # Get the graph nodes in the `from` and `to` columns
   # of the edf
   from <- get_edges(graph, return_type = "df")[, 1]
@@ -100,7 +107,7 @@ rev_edge_dir_ws <- function(graph) {
     dplyr::filter(from != to) %>%
     dplyr::rename(from = to, to = from) %>%
     dplyr::select(id, from, to, dplyr::everything()) %>%
-    dplyr::bind_rows(., edges %>% filter(!(id %in% edge_ids)))
+    dplyr::bind_rows(., edges %>% dplyr::filter(!(id %in% edge_ids)))
 
   # Modify the graph object
   graph$edges_df <- edges_new

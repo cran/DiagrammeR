@@ -2,29 +2,23 @@
 % Please edit documentation in R/delete_graph_actions.R
 \name{delete_graph_actions}
 \alias{delete_graph_actions}
-\title{Delete one or more graph actions stored
-within a graph object}
+\title{Delete one or more graph actions stored within a graph object}
 \usage{
 delete_graph_actions(graph, actions)
 }
 \arguments{
-\item{graph}{a graph object of class
-\code{dgr_graph}.}
+\item{graph}{A graph object of class \code{dgr_graph}.}
 
-\item{actions}{either a vector of integer
-numbers indicating which actions to delete
-(based on \code{action_index} values), or,
-a character vector corresponding to
-\code{action_name} values.}
+\item{actions}{Either a vector of integer numbers indicating which actions to
+delete (based on \code{action_index} values), or, a character vector
+corresponding to \code{action_name} values.}
 }
 \value{
-a graph object of class
-\code{dgr_graph}.
+A graph object of class \code{dgr_graph}.
 }
 \description{
-Delete one or more graph
-actions stored within a graph object
-of class \code{dgr_graph}).
+Delete one or more graph actions stored within a graph object of class
+\code{dgr_graph}).
 }
 \examples{
 # Create a random graph using the
@@ -59,8 +53,7 @@ graph <-
 # View the graph actions for the graph
 # object by using the `get_graph_actions()`
 # function
-graph \%>\%
-  get_graph_actions()
+graph \%>\% get_graph_actions()
 
 # Delete the second and third graph
 # actions using `delete_graph_actions()`
@@ -72,6 +65,6 @@ graph <-
 # Verify that these last two graph
 # actions were deleted by again using
 # the `get_graph_actions()` function
-graph \%>\%
-  get_graph_actions()
+graph \%>\% get_graph_actions()
+
 }

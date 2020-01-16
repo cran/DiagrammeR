@@ -7,18 +7,15 @@
 get_non_nbrs(graph, node)
 }
 \arguments{
-\item{graph}{a graph object of class
-\code{dgr_graph}.}
+\item{graph}{A graph object of class \code{dgr_graph}.}
 
-\item{node}{a single-length vector containing a
-node ID value.}
+\item{node}{A single-length vector containing a node ID value.}
 }
 \value{
-a vector of node ID values.
+A vector of node ID values.
 }
 \description{
-Get the set of all nodes not
-neighboring a single graph node.
+Get the set of all nodes not neighboring a single graph node.
 }
 \examples{
 # Create a simple, directed graph with 5
@@ -28,6 +25,6 @@ graph <-
   add_path(n = 5)
 
 # Find all non-neighbors of node `2`
-graph \%>\%
-  get_non_nbrs(node = 2)
+graph \%>\% get_non_nbrs(node = 2)
+
 }

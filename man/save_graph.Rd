@@ -7,16 +7,14 @@
 save_graph(x, file)
 }
 \arguments{
-\item{x}{a graph object of class \code{dgr_graph}
-or a graph series object of type \code{dgr_graph_1D}.}
+\item{x}{A graph object of class \code{dgr_graph} or a graph series object of type
+\code{dgr_graph_1D}.}
 
-\item{file}{a file name for the graph or
-graph series. Provide a character string and the
-\code{.dgr} extension will be applied to it.}
+\item{file}{A file name for the graph or graph series. Provide a character
+string and the \code{.dgr} extension will be applied to it.}
 }
 \description{
-Save a graph or a graph series object
-to disk.
+Save a graph or a graph series object to disk.
 }
 \examples{
 # Create an undirected GNP
@@ -31,13 +29,16 @@ gnp_graph <-
 
 # Save the graph to disk; use
 # the file name `gnp_graph.dgr`
-save_graph(
-  x = gnp_graph,
-  file = "gnp_graph")
+# save_graph(
+#   x = gnp_graph,
+#   file = "gnp_graph"
+# )
 
 # To read the graph file from
 # disk, use `open_graph()`
-gnp_graph_2 <-
-  open_graph(
-    file = "gnp_graph.dgr")
+# gnp_graph_2 <-
+#   open_graph(
+#     file = "gnp_graph.dgr"
+# )
+
 }

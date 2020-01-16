@@ -1,25 +1,23 @@
 #' Recode a set of node attribute values
-#' @description Within a graph's internal node data
-#' frame (ndf), recode character or numeric node
-#' attribute values. Optionally, one can specify a
-#' replacement value for any unmatched mappings.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param node_attr_from the name of the node attribute
-#' column from which values will be recoded.
-#' @param ... single-length character vectors with
-#' the recoding instructions. The first component should
-#' have the value to replace and the second should have
-#' the replacement value (in the form
-#' \code{"[to_replace] -> [replacement]", ...}).
-#' @param otherwise an optional single value for
-#' recoding any unmatched values.
-#' @param node_attr_to an optional name of a new node
-#' attribute to which the recoded values will be
-#' applied. This will retain the original node
-#' attribute and its values.
-#' @return a graph object of class
-#' \code{dgr_graph}.
+#'
+#' Within a graph's internal node data frame (ndf), recode character or numeric
+#' node attribute values. Optionally, one can specify a replacement value for
+#' any unmatched mappings.
+#'
+#' @inheritParams render_graph
+#' @param node_attr_from The name of the node attribute column from which values
+#'   will be recoded.
+#' @param ... Single-length character vectors with the recoding instructions.
+#'   The first component should have the value to replace and the second should
+#'   have the replacement value (in the form `"[to_replace] -> [replacement]",
+#'   ...`).
+#' @param otherwise An optional single value for recoding any unmatched values.
+#' @param node_attr_to An optional name of a new node attribute to which the
+#'   recoded values will be applied. This will retain the original node
+#'   attribute and its values.
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Create a random graph using the
 #' # `add_gnm_graph()` function
@@ -39,8 +37,7 @@
 #' # Get the graph's internal ndf
 #' # to show which node
 #' # attributes are available
-#' graph %>%
-#'   get_node_df()
+#' graph %>% get_node_df()
 #'
 #' # Recode the `shape` node
 #' # attribute, so that `circle`
@@ -56,8 +53,7 @@
 #' # Get the graph's internal
 #' # ndf to show that the node
 #' # attribute values had been recoded
-#' graph %>%
-#'   get_node_df()
+#' graph %>% get_node_df()
 #'
 #' # Create a new node attribute,
 #' # called `color`, that is based
@@ -75,12 +71,10 @@
 #'
 #' # Get the graph's internal ndf
 #' # to see the change
-#' graph %>%
-#'   get_node_df()
-#' @importFrom stringr str_split
-#' @importFrom rlang enquo get_expr
-#' @export recode_node_attrs
-
+#' graph %>% get_node_df()
+#'
+#' @import rlang
+#' @export
 recode_node_attrs <- function(graph,
                               node_attr_from,
                               ...,

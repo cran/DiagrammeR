@@ -1,19 +1,18 @@
 #' Set a data frame as an edge attribute
-#' @description From a graph object of class
-#' \code{dgr_graph}, bind a data frame as an edge
-#' attribute property for one given graph edge. The
-#' data frames are stored in list columns within
-#' a \code{df_tbl} object, itself residing within
-#' the graph object. A \code{df_id} value is
-#' generated and serves as a pointer to the table
-#' row that contains the ingested data frame.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param edge the edge ID to which the data frame
-#' will be bound as an attribute.
-#' @param df the data frame to be bound to the
-#' edge as an attribute.
-#' @return a graph object of class \code{dgr_graph}.
+#'
+#' From a graph object of class `dgr_graph`, bind a data frame as an edge
+#' attribute property for one given graph edge. The data frames are stored in
+#' list columns within a `df_tbl` object, itself residing within the graph
+#' object. A `df_id` value is generated and serves as a pointer to the table row
+#' that contains the ingested data frame.
+#'
+#' @inheritParams render_graph
+#' @param edge The edge ID to which the data frame will be bound as an
+#'   attribute.
+#' @param df The data frame to be bound to the edge as an attribute.
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Create a node data frame (ndf)
 #' ndf <-
@@ -51,10 +50,8 @@
 #'   set_df_as_edge_attr(
 #'     edge = 1,
 #'     df = df)
-#' @importFrom dplyr filter everything mutate select bind_rows as_tibble
-#' @importFrom purrr flatten_chr
-#' @export set_df_as_edge_attr
-
+#'
+#' @export
 set_df_as_edge_attr <- function(graph,
                                 edge,
                                 df) {
@@ -98,9 +95,6 @@ set_df_as_edge_attr <- function(graph,
       reasons = "The value given for `edge` does not correspond to an edge ID")
   }
 
-  # Create bindings for specific variables
-  df_id__ <- node_edge__ <- id__ <- NULL
-
   # Generate an empty `df_storage` list if not present
   # TODO: put this in `create_graph()`
   if (is.null(graph$df_storage)) {
@@ -122,7 +116,7 @@ set_df_as_edge_attr <- function(graph,
       df_id__ = df_id,
       node_edge__ = "edge",
       id__ = edge) %>%
-    dplyr::select(df_id__, node_edge__, id__, everything()) %>%
+    dplyr::select(df_id__, node_edge__, id__, dplyr::everything()) %>%
     dplyr::as_tibble()
 
   # If there is an existing data frame attributed

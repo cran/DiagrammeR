@@ -7,41 +7,32 @@
 delete_edge(graph, from = NULL, to = NULL, id = NULL)
 }
 \arguments{
-\item{graph}{a graph object of class
-\code{dgr_graph}.}
+\item{graph}{A graph object of class \code{dgr_graph}.}
 
-\item{from}{a node ID from which the edge to be
-removed is outgoing. If an edge ID is provided to
-\code{id}, then this argument is ignored. There
-is the option to use a node \code{label}
-value here (and this must correspondingly also be
-done for the \code{to} argument) for defining
-node connections. Note that this is only possible
-if all nodes have distinct \code{label} values set
-and none exist as an empty string.}
+\item{from}{a node ID from which the edge to be removed is outgoing. If an
+edge ID is provided to \code{id}, then this argument is ignored. There is
+the option to use a node \code{label} value here (and this must
+correspondingly also be done for the \code{to} argument) for defining node
+connections. Note that this is only possible if all nodes have distinct
+\code{label} values set and none exist as an empty string.}
 
-\item{to}{a node ID to which the edge to be removed
-is incoming. If an edge ID is provided to
-\code{id}, then this argument is ignored. There
-is the option to use a node \code{label}
-value here (and this must correspondingly also be
-for the \code{from} argument) for defining
-node connections. Note that this is only possible
-if all nodes have distinct \code{label} values set
-and none exist as an empty string.}
+\item{to}{a node ID to which the edge to be removed is incoming. If an edge
+ID is provided to \code{id}, then this argument is ignored. There is the
+option to use a node \code{label} value here (and this must correspondingly
+also be for the \code{from} argument) for defining node connections. Note
+that this is only possible if all nodes have distinct \code{label} values
+set and none exist as an empty string.}
 
 \item{id}{an edge ID of the edge to be removed.}
 }
 \value{
-a graph object of class \code{dgr_graph}.
+A graph object of class \code{dgr_graph}.
 }
 \description{
-From a graph object of class
-\code{dgr_graph}, delete an existing edge by
-specifying either: (1) a pair of node IDs
-corresponding to the edge (keeping into
-consideration the direction of the edge in
-a directed graph), or (2) an edge ID.
+From a graph object of class \code{dgr_graph}, delete an existing edge by
+specifying either: (1) a pair of node IDs corresponding to the edge
+(keeping into consideration the direction of the edge in a directed graph),
+or (2) an edge ID.
 }
 \examples{
 # Create a graph with 2 nodes
@@ -64,8 +55,7 @@ graph <-
     to = 2)
 
 # Get the count of edges in the graph
-graph \%>\%
-  count_edges()
+graph \%>\% count_edges()
 
 # Create an undirected graph with
 # 2 nodes and an edge
@@ -112,4 +102,5 @@ graph_labeled_nodes \%>\%
     from = "one",
     to = "two") \%>\%
   count_edges()
+
 }

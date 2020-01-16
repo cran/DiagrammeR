@@ -1,13 +1,13 @@
-#' Add nodes from a node data frame to an existing
-#' graph object
-#' @description With a graph object of class
-#' \code{dgr_graph} add nodes from a node data frame to
+#' Add nodes from a node data frame to an existing graph object
+#'
+#' With a graph object of class `dgr_graph` add nodes from a node data frame to
 #' that graph.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param node_df a node data frame that is created
-#' using \code{create_node_df}.
-#' @return a graph object of class \code{dgr_graph}.
+#'
+#' @inheritParams render_graph
+#' @param node_df A node data frame that is created using [create_node_df()].
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Create an empty graph
 #' graph <- create_graph()
@@ -25,8 +25,7 @@
 #'     node_df = ndf)
 #'
 #' # Inspect the graph's ndf
-#' graph %>%
-#'   get_node_df()
+#' graph %>% get_node_df()
 #'
 #' # Create another ndf
 #' ndf_2 <-
@@ -44,11 +43,9 @@
 #' # View the graph's internal
 #' # node data frame using the
 #' # `get_node_df()` function
-#' graph %>%
-#'   get_node_df()
-#' @importFrom dplyr bind_rows
-#' @export add_node_df
-
+#' graph %>% get_node_df()
+#'
+#' @export
 add_node_df <- function(graph,
                         node_df) {
 

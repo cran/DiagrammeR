@@ -1,27 +1,18 @@
 #' Add one or several unconnected nodes to the graph
-#' @description Add n new nodes to a graph object of
-#' class \code{dgr_graph}. Optionally, set node
-#' \code{type} values for the new nodes.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param n the number of new nodes to add to the graph.
-#' @param type an optional character vector that
-#' provides group identifiers for the nodes to be added.
-#' @param label an optional character object that
-#' describes the nodes to be added.
-#' @param node_aes an optional list of named vectors
-#' comprising node aesthetic attributes. The helper
-#' function \code{node_aes()} is strongly recommended
-#' for use here as it contains arguments for each
-#' of the accepted node aesthetic attributes (e.g.,
-#' \code{shape}, \code{style}, \code{color},
-#' \code{fillcolor}).
-#' @param node_data an optional list of named vectors
-#' comprising node data attributes. The helper
-#' function \code{node_data()} is strongly recommended
-#' for use here as it helps bind data specifically
-#' to the created nodes.
-#' @return a graph object of class \code{dgr_graph}.
+#'
+#' Add `n` new nodes to a graph object of class `dgr_graph`. Optionally, set
+#' node `type` values for the new nodes.
+#'
+#' @inheritParams node_edge_aes_data
+#' @inheritParams render_graph
+#' @param n The number of new nodes to add to the graph.
+#' @param type An optional character vector that provides group identifiers for
+#'   the nodes to be added.
+#' @param label An optional character object that describes the nodes to be
+#'   added.
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Create an empty graph and
 #' # add 5 nodes; these nodes
@@ -32,11 +23,9 @@
 #'   add_n_nodes(n = 5)
 #'
 #' # Get the graph's node IDs
-#' graph %>%
-#'   get_node_ids()
-#' @importFrom dplyr select bind_cols bind_rows as_tibble
-#' @export add_n_nodes
-
+#' graph %>% get_node_ids()
+#'
+#' @export
 add_n_nodes <- function(graph,
                         n,
                         type = NULL,
@@ -65,9 +54,6 @@ add_n_nodes <- function(graph,
   if (is.null(label)) {
     label <- as.character(NA)
   }
-
-  # Create bindings for specific variables
-  id <- index__ <- NULL
 
   # Collect node aesthetic attributes
   if (!is.null(node_aes)) {

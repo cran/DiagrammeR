@@ -7,17 +7,14 @@
 get_graph_log(graph)
 }
 \arguments{
-\item{graph}{a graph object of class
-\code{dgr_graph}.}
+\item{graph}{A graph object of class \code{dgr_graph}.}
 }
 \value{
-a \code{df_tbl} object.
+A \code{df_tbl} object.
 }
 \description{
-Get a tibble of the graph log, which
-contains information on the functions called on
-the graph that resulted in some transformation of
-the graph.
+Get a tibble of the graph log, which contains information on the functions
+called on the graph that resulted in some transformation of the graph.
 }
 \examples{
 # Create a random graph using the
@@ -35,6 +32,6 @@ graph <-
 
 # Get the graph log, which is a
 # record of all graph transformations
-graph \%>\%
-  get_graph_log()
+graph \%>\% get_graph_log()
+
 }

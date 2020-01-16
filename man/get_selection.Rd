@@ -2,24 +2,19 @@
 % Please edit documentation in R/get_selection.R
 \name{get_selection}
 \alias{get_selection}
-\title{Get the current selection available in
-a graph object}
+\title{Get the current selection available in a graph object}
 \usage{
 get_selection(graph)
 }
 \arguments{
-\item{graph}{a graph object of class
-\code{dgr_graph}.}
+\item{graph}{A graph object of class \code{dgr_graph}.}
 }
 \value{
-a vector with the current
-selection of nodes or edges.
+A vector with the current selection of node or edge ID values.
 }
 \description{
-Get the current
-selection of node IDs or edge IDs
-from a graph object of class
-\code{dgr_graph}.
+Get the current selection of node IDs or edge IDs from a graph object of
+class \code{dgr_graph}.
 }
 \examples{
 # Create a simple graph
@@ -46,4 +41,5 @@ graph \%>\%
   select_edges_by_node_id(
     nodes = 4) \%>\%
   get_selection()
+
 }

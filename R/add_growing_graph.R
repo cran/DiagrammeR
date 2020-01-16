@@ -1,69 +1,23 @@
 #' Create a random growing graph with m edges added per step
-#' @description To an existing graph
-#' object, add a graph built by adding
-#' \code{m} new edges at each time
-#' step (where a node is added).
-#' @param graph a graph object of
-#' class \code{dgr_graph}.
-#' @param n the number of nodes
-#' comprising the generated graph.
-#' @param m the number of edges
-#' added per time step.
-#' @param citation a logical value
-#' (default is \code{FALSE}) that
-#' governs whether a citation graph
-#' is to be created. This is where
-#' new edges specifically originate
-#' from the newly added node in the
-#' most recent time step.
-#' @param type an optional string that
-#' describes the entity type for all the
-#' nodes to be added.
-#' @param label a boolean value where
-#' setting to \code{TRUE} ascribes node
-#' IDs to the label and \code{FALSE}
-#' yields a blank label.
-#' @param rel an optional string for
-#' providing a relationship label to all
-#' edges to be added.
-#' @param node_aes an optional list
-#' of named vectors comprising node
-#' aesthetic attributes. The helper
-#' function \code{node_aes()} is
-#' strongly recommended for use here
-#' as it contains arguments for each
-#' of the accepted node aesthetic
-#' attributes (e.g., \code{shape},
-#' \code{style}, \code{color},
-#' \code{fillcolor}).
-#' @param edge_aes an optional list
-#' of named vectors comprising edge
-#' aesthetic attributes. The helper
-#' function \code{edge_aes()} is
-#' strongly recommended for use here
-#' as it contains arguments for each
-#' of the accepted edge aesthetic
-#' attributes (e.g., \code{shape},
-#' \code{style}, \code{penwidth},
-#' \code{color}).
-#' @param node_data an optional list
-#' of named vectors comprising node
-#' data attributes. The helper
-#' function \code{node_data()} is
-#' strongly recommended for use here
-#' as it helps bind data specifically
-#' to the created nodes.
-#' @param edge_data an optional list
-#' of named vectors comprising edge
-#' data attributes. The helper function
-#' \code{edge_data()} is strongly
-#' recommended for use here as it helps
-#' bind data specifically to the
-#' created edges.
-#' @param set_seed supplying a
-#' value sets a random seed of the
-#' \code{Mersenne-Twister}
-#' implementation.
+#'
+#' To an existing graph object, add a graph built by adding `m` new edges at
+#' each time step (where a node is added).
+#'
+#' @inheritParams node_edge_aes_data
+#' @inheritParams render_graph
+#' @param n The number of nodes comprising the generated graph.
+#' @param m The number of edges added per time step.
+#' @param citation A logical value (default is `FALSE`) that governs whether a
+#'   citation graph is to be created. This is where new edges specifically
+#'   originate from the newly added node in the most recent time step.
+#' @param type An optional string that describes the entity type for all the
+#'   nodes to be added.
+#' @param label A logical value where setting to `TRUE` ascribes node IDs to the
+#'   label and `FALSE` yields a blank label.
+#' @param rel An optional string for providing a relationship label to all edges
+#'   to be added.
+#' @param set_seed Supplying a value sets a random seed of the
+#'   `Mersenne-Twister` implementation.
 #' @examples
 #' # Create a random, growing
 #' # citation graph with 100
@@ -78,16 +32,12 @@
 #'     set_seed = 23)
 #'
 #' # Get a count of nodes
-#' growing_graph %>%
-#'   count_nodes()
+#' growing_graph %>% count_nodes()
 #'
 #' # Get a count of edges
-#' growing_graph %>%
-#'   count_edges()
-#' @importFrom igraph sample_growing
-#' @importFrom dplyr select bind_cols as_tibble
-#' @export add_growing_graph
-
+#' growing_graph %>% count_edges()
+#'
+#' @export
 add_growing_graph <- function(graph,
                               n,
                               m = 1,
@@ -114,9 +64,6 @@ add_growing_graph <- function(graph,
       fcn_name = fcn_name,
       reasons = "The graph object is not valid")
   }
-
-  # Create bindings for specific variables
-  index__ <- id <- NULL
 
   # If a seed value is supplied, set a seed
   if (!is.null(set_seed)) {

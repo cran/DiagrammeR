@@ -1,68 +1,41 @@
-#' Add a multiple of new nodes with edges to or from
-#' one or more selected nodes
-#' @description Add n new nodes to or from one or more
-#' nodes available as a selection in a graph object of
-#' class \code{dgr_graph}. New graph edges will all
-#' move either from the nodes in the selection toward
-#' the newly created nodes (with the option
-#' \code{direction = "from"}), or to the selected nodes
-#' already in the graph (using \code{direction = "to"}).
-#' Optionally, set node \code{type} and edge \code{rel}
-#' values for all the new nodes and edges created,
-#' respectively.
+#' Add a multiple of new nodes with edges to or from one or more selected nodes
 #'
-#' Selections of nodes can be performed using
-#' the following \code{select_...} functions:
-#' \code{select_nodes()},
-#' \code{select_last_nodes_created()},
-#' \code{select_nodes_by_degree()},
-#' \code{select_nodes_by_id()}, or
-#' \code{select_nodes_in_neighborhood()}.
-#' Selections of nodes can also be performed using
-#' the following traversal functions:
-#' (\code{trav_...}):
-#' \code{trav_out()}, \code{trav_in()},
-#' \code{trav_both()}, \code{trav_in_node()},
-#' \code{trav_out_node()}.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param n the number of new nodes to attach as
-#' successor nodes to the nodes in the selection.
-#' @param direction using \code{from} will create new
-#' edges from existing nodes to the new nodes. The
-#' \code{to} option will create new edges directed
-#' toward the existing nodes.
-#' @param type an optional character vector that
-#' provides group identifiers for the nodes to be added.
-#' @param label an optional character object that
-#' describes the nodes to be added.
-#' @param rel an optional string to apply a
-#' \code{rel} attribute to all newly created edges.
-#' @param node_aes an optional list of named vectors
-#' comprising node aesthetic attributes. The helper
-#' function \code{node_aes()} is strongly recommended
-#' for use here as it contains arguments for each
-#' of the accepted node aesthetic attributes (e.g.,
-#' \code{shape}, \code{style}, \code{color},
-#' \code{fillcolor}).
-#' @param edge_aes an optional list of named vectors
-#' comprising edge aesthetic attributes. The helper
-#' function \code{edge_aes()} is strongly recommended
-#' for use here as it contains arguments for each
-#' of the accepted edge aesthetic attributes (e.g.,
-#' \code{shape}, \code{style}, \code{penwidth},
-#' \code{color}).
-#' @param node_data an optional list of named vectors
-#' comprising node data attributes. The helper
-#' function \code{node_data()} is strongly recommended
-#' for use here as it helps bind data specifically
-#' to the created nodes.
-#' @param edge_data an optional list of named vectors
-#' comprising edge data attributes. The helper
-#' function \code{edge_data()} is strongly recommended
-#' for use here as it helps bind data specifically
-#' to the created edges.
-#' @return a graph object of class \code{dgr_graph}.
+#' Add `n` new nodes to or from one or more nodes available as a selection in a
+#' graph object of class `dgr_graph`. New graph edges will all move either from
+#' the nodes in the selection toward the newly created nodes (with the option
+#' `direction = "from"`), or to the selected nodes already in the graph (using
+#' `direction = "to"`). Optionally, set node `type` and edge `rel` values for
+#' all the new nodes and edges created, respectively.
+#'
+#' This function makes use of an active selection of nodes (and the function
+#' ending with `_ws` hints at this).
+#'
+#' Selections of nodes can be performed using the following node selection
+#' (`select_*()`) functions: [select_nodes()], [select_last_nodes_created()],
+#' [select_nodes_by_degree()], [select_nodes_by_id()], or
+#' [select_nodes_in_neighborhood()].
+#'
+#' Selections of nodes can also be performed using the following traversal
+#' (`trav_*()`) functions: [trav_out()], [trav_in()], [trav_both()],
+#' [trav_out_node()], [trav_in_node()], [trav_out_until()], or
+#' [trav_in_until()].
+#'
+#' @inheritParams node_edge_aes_data
+#' @inheritParams render_graph
+#' @param n The number of new nodes to attach as successor nodes to the nodes in
+#'   the selection.
+#' @param direction Using `from` will create new edges from existing nodes to
+#'   the new nodes. The `to` option will create new edges directed toward the
+#'   existing nodes.
+#' @param type An optional character vector that provides group identifiers for
+#'   the nodes to be added.
+#' @param label An optional character object that describes the nodes to be
+#'   added.
+#' @param rel An optional string to apply a `rel` attribute to all newly created
+#'   edges.
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Create an empty graph, add a node to it, select
 #' # that node, and then add 5 more nodes to the graph
@@ -77,14 +50,10 @@
 #'     direction = "from")
 #'
 #' # Get the graph's nodes
-#' graph %>%
-#'   get_node_ids()
-#' #> [1] 1 2 3 4 5 6
+#' graph %>% get_node_ids()
 #'
 #' # Get the graph's edges
-#' graph %>%
-#'   get_edges()
-#' #> "1->2" "1->3" "1->4" "1->5" "1->6"
+#' graph %>% get_edges()
 #'
 #' # Create an empty graph, add a node to it, select
 #' # that node, and then add 5 more nodes to the graph
@@ -99,18 +68,12 @@
 #'     direction = "to")
 #'
 #' # Get the graph's nodes
-#' graph %>%
-#'   get_node_ids()
-#' #> [1] 1 2 3 4 5 6
+#' graph %>% get_node_ids()
 #'
 #' # Get the graph's edges
-#' graph %>%
-#'   get_edges()
-#' #> "2->1" "3->1" "4->1" "5->1" "6->1"
-#' @importFrom dplyr select pull mutate everything as_tibble
-#' @importFrom dplyr filter left_join bind_rows
-#' @export add_n_nodes_ws
-
+#' graph %>% get_edges()
+#'
+#' @export
 add_n_nodes_ws <- function(graph,
                            n,
                            direction = NULL,
@@ -151,9 +114,6 @@ add_n_nodes_ws <- function(graph,
       fcn_name = fcn_name,
       reasons = "There is no selection of nodes available.")
   }
-
-  # Create bindings for specific variables
-  index__ <- id <- NULL
 
   # If the graph is directed and there is no value
   # given for the `direction` argument, stop function
@@ -280,7 +240,7 @@ add_n_nodes_ws <- function(graph,
     graph %>%
     get_edge_df() %>%
     dplyr::select(id) %>%
-    tail(edges_added) %>%
+    utils::tail(edges_added) %>%
     dplyr::pull(id)
 
   # Get the node ID values for the
@@ -289,7 +249,7 @@ add_n_nodes_ws <- function(graph,
     graph %>%
     get_node_df() %>%
     dplyr::select(id) %>%
-    tail(nodes_added) %>%
+    utils::tail(nodes_added) %>%
     dplyr::pull(id)
 
   # Collect node aesthetic attributes
@@ -382,7 +342,7 @@ add_n_nodes_ws <- function(graph,
     node_aes_tbl <-
       node_aes_tbl %>%
       dplyr::mutate(id = new_node_id) %>%
-      dplyr::select(id, everything())
+      dplyr::select(id, dplyr::everything())
 
     columns_to_select <-
       c("id", base::setdiff(colnames(graph$nodes_df), colnames(node_aes_tbl)))
@@ -403,7 +363,7 @@ add_n_nodes_ws <- function(graph,
     node_data_tbl <-
       node_data_tbl %>%
       dplyr::mutate(id = new_node_id) %>%
-      dplyr::select(id, everything())
+      dplyr::select(id, dplyr::everything())
 
     columns_to_select <-
       c("id", base::setdiff(colnames(graph$nodes_df), colnames(node_data_tbl)))
@@ -424,7 +384,7 @@ add_n_nodes_ws <- function(graph,
     edge_aes_tbl <-
       edge_aes_tbl %>%
       dplyr::mutate(id = new_edge_id) %>%
-      dplyr::select(id, everything())
+      dplyr::select(id, dplyr::everything())
 
     columns_to_select <-
       c("id", base::setdiff(colnames(graph$edges_df), colnames(edge_aes_tbl)))
@@ -445,7 +405,7 @@ add_n_nodes_ws <- function(graph,
     edge_data_tbl <-
       edge_data_tbl %>%
       dplyr::mutate(id = new_edge_id) %>%
-      dplyr::select(id, everything())
+      dplyr::select(id, dplyr::everything())
 
     columns_to_select <-
       c("id", base::setdiff(colnames(graph$edges_df), colnames(edge_data_tbl)))

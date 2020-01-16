@@ -1,12 +1,13 @@
 #' Delete a node from an existing graph object
-#' @description From a graph object of class
-#' \code{dgr_graph}, delete an existing node by
+#'
+#' From a graph object of class `dgr_graph`, delete an existing node by
 #' specifying its node ID.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param node a node ID for the node to be deleted
-#' from the graph.
-#' @return a graph object of class \code{dgr_graph}.
+#'
+#' @inheritParams render_graph
+#' @param node A node ID for the node to be deleted from the graph.
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Create a graph with 5 nodes and
 #' # edges between each in a path
@@ -19,17 +20,14 @@
 #'
 #' # Verify that the node with ID `3`
 #' # is no longer in the graph
-#' graph %>%
-#'   get_node_ids()
+#' graph %>% get_node_ids()
 #'
 #' # Also note that edges are removed
 #' # since there were edges between the
 #' # removed node to and from other nodes
-#' graph %>%
-#'   get_edges()
-#' @importFrom dplyr filter
-#' @export delete_node
-
+#' graph %>% get_edges()
+#'
+#' @export
 delete_node <- function(graph,
                         node) {
 
@@ -54,9 +52,6 @@ delete_node <- function(graph,
       fcn_name = fcn_name,
       reasons = "The graph contains no nodes, so, a node cannot be deleted")
   }
-
-  # Create bindings for specific variables
-  id <- from <- to <- NULL
 
   # Verify that `node` is given as a single value
   node_is_single_value <-

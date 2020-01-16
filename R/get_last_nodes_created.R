@@ -1,12 +1,13 @@
 #' Get the last set of nodes created in a graph
-#' @description Get the last nodes that were created
-#' in a graph object of class \code{dgr_graph}.
-#' Provides a vector of node ID values. This function
-#' should ideally be used just after creating the
-#' nodes.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @return a vector of node ID values.
+#'
+#' Get the last nodes that were created in a graph object of class `dgr_graph`.
+#' Provides a vector of node ID values. This function should ideally be used
+#' just after creating the nodes.
+#'
+#' @inheritParams render_graph
+#'
+#' @return A vector of node ID values.
+#'
 #' @examples
 #' # Create a graph and add 4 nodes
 #' # in 2 separate function calls
@@ -23,13 +24,9 @@
 #'
 #' # Get the last nodes created (2 nodes
 #' # from the last function call)
-#' graph %>%
-#'   get_last_nodes_created()
-#' #> [1] 3 4
-#' @importFrom dplyr mutate filter select pull if_else
-#' @importFrom utils tail
-#' @export get_last_nodes_created
-
+#' graph %>% get_last_nodes_created()
+#'
+#' @export
 get_last_nodes_created <- function(graph) {
 
   # Get the name of the function
@@ -51,11 +48,6 @@ get_last_nodes_created <- function(graph) {
       reasons = "The graph contains no nodes")
   }
 
-  # Create bindings for specific variables
-  function_used <- nodes <- step_created_nodes <- NULL
-  step_deleted_nodes <- step_init_with_nodes <- version_id <- NULL
-  time_modified <- duration <- id <- NULL
-
   graph_transform_steps <-
     graph$graph_log %>%
     dplyr::mutate(step_created_nodes = dplyr::if_else(
@@ -72,7 +64,7 @@ get_last_nodes_created <- function(graph) {
   if (nrow(graph_transform_steps) > 0) {
 
     if (graph_transform_steps %>%
-        tail(1) %>%
+        utils::tail(1) %>%
         dplyr::pull(step_deleted_nodes) == 1) {
 
       emit_error(
@@ -84,11 +76,11 @@ get_last_nodes_created <- function(graph) {
         number_of_nodes_created <-
           (graph_transform_steps %>%
              dplyr::select(nodes) %>%
-             tail(2) %>%
+             utils::tail(2) %>%
              dplyr::pull(nodes))[2] -
           (graph_transform_steps %>%
              dplyr::select(nodes) %>%
-             tail(2) %>%
+             utils::tail(2) %>%
              dplyr::pull(nodes))[1]
       } else {
         number_of_nodes_created <-
@@ -100,7 +92,7 @@ get_last_nodes_created <- function(graph) {
     node_id_values <-
       graph$nodes_df %>%
       dplyr::select(id) %>%
-      tail(number_of_nodes_created) %>%
+      utils::tail(number_of_nodes_created) %>%
       dplyr::pull(id)
   } else {
     node_id_values <- NA

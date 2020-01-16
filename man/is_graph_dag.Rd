@@ -7,18 +7,15 @@
 is_graph_dag(graph)
 }
 \arguments{
-\item{graph}{a graph object of class
-\code{dgr_graph}.}
+\item{graph}{A graph object of class \code{dgr_graph}.}
 }
 \value{
-a logical value.
+A logical value.
 }
 \description{
-Provides a logical value on whether
-the graph is a directed acyclic graph (DAG). The
-conditions for a graph that is a DAG are that it
-should be a directed graph and it should not
-contain any cycles.
+Provides a logical value on whether the graph is a directed acyclic graph
+(DAG). The conditions for a graph that is a DAG are that it should be a
+directed graph and it should not contain any cycles.
 }
 \examples{
 # Create a directed graph containing
@@ -56,4 +53,5 @@ graph_tree_undirected <-
 # is a DAG
 graph_tree_undirected \%>\%
   is_graph_dag()
+
 }

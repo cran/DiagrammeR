@@ -1,22 +1,21 @@
 #' Get paths from a specified node in a directed graph
-#' @description Obtain a list of all possible paths
-#' from a given node within a directed graph
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param from the node from which all paths will be
-#' determined.
-#' @param to the node to which all paths will be
-#' determined.
-#' @param shortest_path an option to return paths that
-#' are the shortest in the set of all determined paths.
-#' @param longest_path an option to return paths that
-#' are the longest in the set of all determined paths.
-#' @param distance a vector of integer values that
-#' specify which of the valid paths to return when
-#' filtering by distance.
-#' @return a list of paths, sorted by ascending
-#' traversal length, comprising vectors of node IDs in
-#' sequence of traversal through the graph.
+#'
+#' Obtain a list of all possible paths from a given node within a directed
+#' graph.
+#'
+#' @inheritParams render_graph
+#' @param from The node from which all paths will be determined.
+#' @param to The node to which all paths will be determined.
+#' @param shortest_path An option to return paths that are the shortest in the
+#'   set of all determined paths.
+#' @param longest_path An option to return paths that are the longest in the set
+#'   of all determined paths.
+#' @param distance A vector of integer values that specify which of the valid
+#'   paths to return when filtering by distance.
+#'
+#' @return A list of paths, sorted by ascending traversal length, comprising
+#'   vectors of node IDs in sequence of traversal through the graph.
+#'
 #' @examples
 #' # Create a simple graph
 #' graph <-
@@ -65,8 +64,8 @@
 #'   from = 1,
 #'   to = 5,
 #'   longest_path = TRUE)
-#' @export get_paths
-
+#'
+#' @export
 get_paths <- function(graph,
                       from = NULL,
                       to = NULL,

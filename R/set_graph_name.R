@@ -1,9 +1,12 @@
 #' Set graph name
-#' @description Set a name for a graph object of class
-#' \code{dgr_graph}.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param name the name to set for the graph.
+#'
+#' Set a name for a graph object of class `dgr_graph`.
+#'
+#' @inheritParams render_graph
+#' @param name The name to set for the graph.
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Create an empty graph
 #' graph <- create_graph()
@@ -13,9 +16,8 @@
 #'   graph %>%
 #'   set_graph_name(
 #'     name = "example_name")
-#' @return a graph object of class \code{dgr_graph}.
-#' @export set_graph_name
-
+#'
+#' @export
 set_graph_name <- function(graph,
                            name) {
 

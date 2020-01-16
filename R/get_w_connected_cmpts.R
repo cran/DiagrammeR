@@ -1,12 +1,14 @@
 #' Get all nodes associated with connected components
-#' @description Determine which nodes in a graph belong
-#' to different weakly connected components (i.e.,
-#' distinct sets of nodes with traversable paths to and
-#' from each node in the set).
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @return a data frame with nodes and their membership
-#' in different weakly connected components.
+#'
+#' Determine which nodes in a graph belong to different weakly connected
+#' components (i.e., distinct sets of nodes with traversable paths to and from
+#' each node in the set).
+#'
+#' @inheritParams render_graph
+#'
+#' @return A data frame with nodes and their membership in different weakly
+#'   connected components.
+#'
 #' @examples
 #' # Create a graph with 2 cycles
 #' graph <-
@@ -20,12 +22,9 @@
 #'
 #' # Get the graph's weakly-connected
 #' # components
-#' graph %>%
-#'   get_w_connected_cmpts()
-#' @importFrom igraph components
-#' @importFrom dplyr select
-#' @export get_w_connected_cmpts
-
+#' graph %>% get_w_connected_cmpts()
+#'
+#' @export
 get_w_connected_cmpts <- function(graph) {
 
   # Get the name of the function
@@ -38,9 +37,6 @@ get_w_connected_cmpts <- function(graph) {
       fcn_name = fcn_name,
       reasons = "The graph object is not valid")
   }
-
-  # Create bindings for specific variables
-  id <- from <- to <- type <- label <- rel <- NULL
 
   # Create a graph where only mandatory
   # node and edge attributes are retained;

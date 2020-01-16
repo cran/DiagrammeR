@@ -1,11 +1,12 @@
 #' Deselect any selected edges in a graph
-#' @description Deselect edges in a graph object of
-#' class \code{dgr_graph}.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param edges a vector of edge IDs that
-#' should be deselected.
-#' @return a graph object of class \code{dgr_graph}.
+#'
+#' Deselect edges in a graph object of class `dgr_graph`.
+#'
+#' @inheritParams render_graph
+#' @param edges A vector of edge IDs that should be deselected.
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Create a graph with
 #' # a single path
@@ -22,8 +23,7 @@
 #'
 #' # Verify that an edge selection
 #' # has been made
-#' graph %>%
-#'   get_selection()
+#' graph %>% get_selection()
 #'
 #' # Deselect edge `1`
 #' graph <-
@@ -36,11 +36,9 @@
 #' # has been made for edges `1` and
 #' # `3` and that edge `1` has been
 #' # deselected (leaving only `3`)
-#' graph %>%
-#'   get_selection()
-#' @importFrom dplyr filter
-#' @export deselect_edges
-
+#' graph %>% get_selection()
+#'
+#' @export
 deselect_edges <- function(graph,
                            edges) {
 
@@ -62,9 +60,6 @@ deselect_edges <- function(graph,
   if (graph_contains_edge_selection(graph) == FALSE) {
     return(graph)
   }
-
-  # Create binding for specific variable
-  edge <- NULL
 
   # Extract the graph's edge selection
   graph$edge_selection <-

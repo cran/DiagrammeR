@@ -1,43 +1,31 @@
-#' Add new edges in the opposite directions of a
-#' selection of edges
-#' @description Add edges in the opposite direction
-#' of one or more edges available as an edge selection
-#' in a graph object of class \code{dgr_graph}. New
-#' graph edges have the opposite edge definitions as
-#' those in the selection. For example, a graph with
-#' the edge \code{1->2} in its active selection will
-#' gain a new \code{2->1} edge. There is also the
-#' option to assign a common \code{rel} grouping to the
-#' newly created edges. Upon addition of the edges, the
-#' edge selection will be retained for further
-#' selection or traversal operations.
+#' Add new edges in the opposite directions of a selection of edges
 #'
-#' Selections of edges can be performed using
-#' the following \code{select_...} functions:
-#' \code{select_edges()},
-#' \code{select_last_edge()}, or
-#' \code{select_edges_by_node_id()}.
-#' Selections of edges can also be performed using
-#' the following traversal functions:
-#' \code{trav_out_edge()}, \code{trav_in_edge()},
-#' or \code{trav_both_edge()}.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param rel an optional string to apply a
-#' \code{rel} attribute to all newly created edges.
-#' @param edge_aes an optional list of named vectors
-#' comprising edge aesthetic attributes. The helper
-#' function \code{edge_aes()} is strongly recommended
-#' for use here as it contains arguments for each
-#' of the accepted edge aesthetic attributes (e.g.,
-#' \code{shape}, \code{style}, \code{penwidth},
-#' \code{color}).
-#' @param edge_data an optional list of named vectors
-#' comprising edge data attributes. The helper
-#' function \code{edge_data()} is strongly recommended
-#' for use here as it helps bind data specifically
-#' to the created edges.
-#' @return a graph object of class \code{dgr_graph}.
+#' Add edges in the opposite direction of one or more edges available as an edge
+#' selection in a graph object of class `dgr_graph`. New graph edges have the
+#' opposite edge definitions as those in the selection. For example, a graph
+#' with the edge `1->2` in its active selection will gain a new `2->1` edge.
+#' There is also the option to assign a common `rel` grouping to the newly
+#' created edges. Upon addition of the edges, the edge selection will be
+#' retained for further selection or traversal operations.
+#'
+#' This function makes use of an active selection of edges (and the function
+#' ending with `_ws` hints at this).
+#'
+#' Selections of edges can be performed using the following selection
+#' (`select_*()`) functions: [select_edges()], [select_last_edges_created()],
+#' [select_edges_by_edge_id()], or [select_edges_by_node_id()].
+#'
+#' Selections of edges can also be performed using the following traversal
+#' (`trav_*()`) functions: [trav_out_edge()], [trav_in_edge()],
+#' [trav_both_edge()], or [trav_reverse_edge()].
+#'
+#' @inheritParams node_edge_aes_data
+#' @inheritParams render_graph
+#' @param rel An optional string to apply a `rel` attribute to all newly created
+#'   edges.
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Create an empty graph, add 2 nodes to it,
 #' # and create the edge `1->2`
@@ -53,8 +41,7 @@
 #'     rel = "a")
 #'
 #' # Get the graph's edges
-#' graph %>%
-#'   get_edge_ids()
+#' graph %>% get_edge_ids()
 #'
 #' # Select the edge and create 2 additional edges
 #' # with the opposite definition of `1->2`, which
@@ -68,11 +55,9 @@
 #'   clear_selection()
 #'
 #' # Get the graph's edge data frame
-#' graph %>%
-#'   get_edge_df()
-#' @importFrom dplyr select bind_rows as_tibble
-#' @export add_reverse_edges_ws
-
+#' graph %>% get_edge_df()
+#'
+#' @export
 add_reverse_edges_ws <- function(graph,
                                  rel = NULL,
                                  edge_aes = NULL,
@@ -107,9 +92,6 @@ add_reverse_edges_ws <- function(graph,
       fcn_name = fcn_name,
       reasons = "The graph contains no selection of edges")
   }
-
-  # Create bindings for specific variables
-  from <- to <- index__ <- id <- NULL
 
   # Get the number of edges in the graph
   edges_graph_1 <- graph %>% count_edges()
@@ -195,9 +177,9 @@ add_reverse_edges_ws <- function(graph,
   if (exists("edge_aes_tbl")) {
 
     graph$edges_df <-
-      bind_rows(
+      dplyr::bind_rows(
         graph$edges_df[1:(nrow(graph$edges_df) - edges_added), ],
-        bind_cols(
+        dplyr::bind_cols(
           graph$edges_df[(nrow(graph$edges_df) - edges_added + 1):nrow(graph$edges_df), ],
           edge_aes_tbl))
   }
@@ -206,9 +188,9 @@ add_reverse_edges_ws <- function(graph,
   if (exists("edge_data_tbl")) {
 
     graph$edges_df <-
-      bind_rows(
+      dplyr::bind_rows(
         graph$edges_df[1:(nrow(graph$edges_df) - edges_added), ],
-        bind_cols(
+        dplyr::bind_cols(
           graph$edges_df[(nrow(graph$edges_df) - edges_added + 1):nrow(graph$edges_df), ],
           edge_data_tbl))
   }

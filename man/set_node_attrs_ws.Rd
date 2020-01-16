@@ -7,36 +7,33 @@
 set_node_attrs_ws(graph, node_attr, value)
 }
 \arguments{
-\item{graph}{a graph object of class
-\code{dgr_graph}.}
+\item{graph}{A graph object of class \code{dgr_graph}.}
 
-\item{node_attr}{the name of the attribute to set.}
+\item{node_attr}{The name of the attribute to set.}
 
-\item{value}{the value to be set for the chosen
-attribute for the nodes in the current selection.}
+\item{value}{The value to be set for the chosen attribute for the nodes in
+the current selection.}
 }
 \value{
-a graph object of class \code{dgr_graph}.
+A graph object of class \code{dgr_graph}.
 }
 \description{
-From a graph object of class
-\code{dgr_graph} or a node data frame, set node
-attribute properties for nodes present in a node
-selection.
+From a graph object of class \code{dgr_graph} or a node data frame, set node
+attribute properties for nodes present in a node selection.
+}
+\details{
+This function makes use of an active selection of nodes (and the function
+ending with \verb{_ws} hints at this).
 
-Selections of nodes can be performed using
-the following \code{select_...} functions:
-\code{select_nodes()},
-\code{select_last_nodes_created()},
-\code{select_nodes_by_degree()},
-\code{select_nodes_by_id()}, or
-\code{select_nodes_in_neighborhood()}.
-Selections of nodes can also be performed using
-the following traversal functions:
-(\code{trav_...}):
-\code{trav_out()}, \code{trav_in()},
-\code{trav_both()}, \code{trav_in_node()},
-\code{trav_out_node()}.
+Selections of nodes can be performed using the following node selection
+(\verb{select_*()}) functions: \code{\link[=select_nodes]{select_nodes()}}, \code{\link[=select_last_nodes_created]{select_last_nodes_created()}},
+\code{\link[=select_nodes_by_degree]{select_nodes_by_degree()}}, \code{\link[=select_nodes_by_id]{select_nodes_by_id()}}, or
+\code{\link[=select_nodes_in_neighborhood]{select_nodes_in_neighborhood()}}.
+
+Selections of nodes can also be performed using the following traversal
+(\verb{trav_*()}) functions: \code{\link[=trav_out]{trav_out()}}, \code{\link[=trav_in]{trav_in()}}, \code{\link[=trav_both]{trav_both()}},
+\code{\link[=trav_out_node]{trav_out_node()}}, \code{\link[=trav_in_node]{trav_in_node()}}, \code{\link[=trav_out_until]{trav_out_until()}}, or
+\code{\link[=trav_in_until]{trav_in_until()}}.
 }
 \examples{
 # Create a simple graph
@@ -59,6 +56,6 @@ graph <-
 # Show the internal node data frame to verify
 # that the node attribute has been set for
 # specific node
-graph \%>\%
-  get_node_df()
+graph \%>\% get_node_df()
+
 }

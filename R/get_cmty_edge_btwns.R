@@ -1,11 +1,11 @@
 #' Get community membership by edge betweenness
-#' @description Using edge betweenness, obtain the
-#' group membership values for each of the nodes in
-#' the graph.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @return a data frame with group membership
-#' assignments for each of the nodes.
+#'
+#' Using edge betweenness, obtain the group membership values for each of the
+#'   nodes in the graph.
+#' @inheritParams render_graph
+#'
+#' @return A data frame with group membership assignments for each of the nodes.
+#'
 #' @examples
 #' # Create a random graph using the
 #' # `add_gnm_graph()` function
@@ -36,11 +36,9 @@
 #'
 #' # Display the graph's
 #' # node data frame
-#' graph %>%
-#'   get_node_df()
-#' @importFrom igraph cluster_edge_betweenness membership
-#' @export get_cmty_edge_btwns
-
+#' graph %>% get_node_df()
+#'
+#' @export
 get_cmty_edge_btwns <- function(graph) {
 
   # Get the name of the function

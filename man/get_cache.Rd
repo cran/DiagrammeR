@@ -7,23 +7,20 @@
 get_cache(graph, name = NULL)
 }
 \arguments{
-\item{graph}{a graph object of class
-\code{dgr_graph}.}
+\item{graph}{A graph object of class \code{dgr_graph}.}
 
-\item{name}{the name of the object to
-extract from the cache. If none supplied,
-the most recent object added to the cache
-will be returned.}
+\item{name}{the name of the object to extract from the cache. If none
+supplied, the most recent object added to the cache will be returned.}
 }
 \value{
-a vector.
+A vector.
 }
 \description{
-Get the vector cached in a
-graph object of class \code{dgr_graph}.
+Get the vector cached in a graph object of class \code{dgr_graph}.
 }
 \examples{
 # Set a seed
+suppressWarnings(RNGversion("3.5.0"))
 set.seed(23)
 
 # Create a graph with 5 nodes and 5 edges
@@ -50,6 +47,6 @@ graph <-
       node_attr = value))
 
 # Return the cached vector
-graph \%>\%
-  get_cache()
+graph \%>\% get_cache()
+
 }

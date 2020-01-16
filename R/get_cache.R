@@ -1,15 +1,15 @@
 #' Get a cached vector from a graph object
-#' @description Get the vector cached in a
-#' graph object of class \code{dgr_graph}.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param name the name of the object to
-#' extract from the cache. If none supplied,
-#' the most recent object added to the cache
-#' will be returned.
-#' @return a vector.
+#'
+#' Get the vector cached in a graph object of class `dgr_graph`.
+#' @inheritParams render_graph
+#' @param name the name of the object to extract from the cache. If none
+#'   supplied, the most recent object added to the cache will be returned.
+#'
+#' @return A vector.
+#'
 #' @examples
 #' # Set a seed
+#' suppressWarnings(RNGversion("3.5.0"))
 #' set.seed(23)
 #'
 #' # Create a graph with 5 nodes and 5 edges
@@ -36,10 +36,9 @@
 #'       node_attr = value))
 #'
 #' # Return the cached vector
-#' graph %>%
-#'   get_cache()
-#' @export get_cache
-
+#' graph %>% get_cache()
+#'
+#' @export
 get_cache <- function(graph,
                       name = NULL) {
 

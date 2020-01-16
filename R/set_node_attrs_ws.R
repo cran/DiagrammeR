@@ -1,28 +1,28 @@
 #' Set node attributes with a node selection
-#' @description From a graph object of class
-#' \code{dgr_graph} or a node data frame, set node
-#' attribute properties for nodes present in a node
-#' selection.
 #'
-#' Selections of nodes can be performed using
-#' the following \code{select_...} functions:
-#' \code{select_nodes()},
-#' \code{select_last_nodes_created()},
-#' \code{select_nodes_by_degree()},
-#' \code{select_nodes_by_id()}, or
-#' \code{select_nodes_in_neighborhood()}.
-#' Selections of nodes can also be performed using
-#' the following traversal functions:
-#' (\code{trav_...}):
-#' \code{trav_out()}, \code{trav_in()},
-#' \code{trav_both()}, \code{trav_in_node()},
-#' \code{trav_out_node()}.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param node_attr the name of the attribute to set.
-#' @param value the value to be set for the chosen
-#' attribute for the nodes in the current selection.
-#' @return a graph object of class \code{dgr_graph}.
+#' From a graph object of class `dgr_graph` or a node data frame, set node
+#' attribute properties for nodes present in a node selection.
+#'
+#' This function makes use of an active selection of nodes (and the function
+#' ending with `_ws` hints at this).
+#'
+#' Selections of nodes can be performed using the following node selection
+#' (`select_*()`) functions: [select_nodes()], [select_last_nodes_created()],
+#' [select_nodes_by_degree()], [select_nodes_by_id()], or
+#' [select_nodes_in_neighborhood()].
+#'
+#' Selections of nodes can also be performed using the following traversal
+#' (`trav_*()`) functions: [trav_out()], [trav_in()], [trav_both()],
+#' [trav_out_node()], [trav_in_node()], [trav_out_until()], or
+#' [trav_in_until()].
+#'
+#' @inheritParams render_graph
+#' @param node_attr The name of the attribute to set.
+#' @param value The value to be set for the chosen attribute for the nodes in
+#'   the current selection.
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Create a simple graph
 #' graph <-
@@ -44,11 +44,10 @@
 #' # Show the internal node data frame to verify
 #' # that the node attribute has been set for
 #' # specific node
-#' graph %>%
-#'   get_node_df()
-#' @importFrom rlang enquo UQ get_expr
-#' @export set_node_attrs_ws
-
+#' graph %>% get_node_df()
+#'
+#' @import rlang
+#' @export
 set_node_attrs_ws <- function(graph,
                               node_attr,
                               value) {
@@ -97,9 +96,10 @@ set_node_attrs_ws <- function(graph,
   graph <-
     set_node_attrs(
       graph = graph,
-      node_attr = rlang::UQ(node_attr_2),
+      node_attr = !!node_attr_2,
       values = value,
-      nodes = nodes)
+      nodes = nodes
+    )
 
   # Update the `graph_log` df with an action
   graph$graph_log <-

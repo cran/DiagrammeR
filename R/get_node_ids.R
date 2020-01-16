@@ -1,16 +1,14 @@
 #' Get a vector of node ID values
-#' @description Obtain a vector of
-#' node ID values from a graph
-#' object. An optional filter by
-#' node attribute can limit the set
-#' of node ID values returned.
-#' @param graph a graph object of
-#' class \code{dgr_graph}.
-#' @param conditions an option to
-#' use filtering conditions for the
-#' retrieval of nodes.
-#' @return a vector of node ID
-#' values.
+#'
+#' Obtain a vector of node ID values from a graph object. An optional filter by
+#' node attribute can limit the set of node ID values returned.
+#'
+#' @inheritParams render_graph
+#' @param conditions An option to use filtering conditions for the retrieval of
+#'   nodes.
+#'
+#' @return A vector of node ID values.
+#'
 #' @examples
 #' # Create a node data
 #' # frame (ndf)
@@ -31,8 +29,7 @@
 #'     nodes_df = ndf)
 #'
 #' # Get a vector of all nodes in a graph
-#' graph %>%
-#'   get_node_ids()
+#' graph %>% get_node_ids()
 #'
 #' # Get a vector of node ID values using a
 #' # numeric comparison (i.e., all nodes with
@@ -55,18 +52,14 @@
 #'     conditions =
 #'       color == "blue" &
 #'       value > 5)
-#' @importFrom dplyr filter pull
-#' @importFrom rlang enquo UQ get_expr
-#' @export get_node_ids
-
+#'
+#' @import rlang
+#' @export
 get_node_ids <- function(graph,
                          conditions = NULL) {
 
   # Get the name of the function
   fcn_name <- get_calling_fcn()
-
-  # Create binding for a specific variable
-  id <- NULL
 
   # Capture provided conditions
   conditions <- rlang::enquo(conditions)
@@ -84,10 +77,7 @@ get_node_ids <- function(graph,
     rlang::enquo(conditions) %>%
     rlang::get_expr())) {
 
-    nodes_df <-
-      filter(
-        .data = nodes_df,
-        rlang::UQ(conditions))
+    nodes_df <- dplyr::filter(.data = nodes_df, !!conditions)
   }
 
   # If no nodes remain then return NA
@@ -95,6 +85,5 @@ get_node_ids <- function(graph,
     return(NA)
   }
 
-  nodes_df %>%
-    dplyr::pull(id)
+  nodes_df %>% dplyr::pull(id)
 }

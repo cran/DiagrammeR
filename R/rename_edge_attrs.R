@@ -1,13 +1,15 @@
 #' Rename an edge attribute
-#' @description Within a graph's internal edge data
-#' frame (edf), rename an existing edge attribute.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param edge_attr_from the name of the edge attribute
-#' that will be renamed.
-#' @param edge_attr_to the new name of the edge
-#' attribute column identified in \code{edge_attr_from}.
-#' @return a graph object of class \code{dgr_graph}.
+#'
+#' Within a graph's internal edge data frame (edf), rename an existing edge
+#' attribute.
+#'
+#' @inheritParams render_graph
+#' @param edge_attr_from The name of the edge attribute that will be renamed.
+#' @param edge_attr_to The new name of the edge attribute column identified in
+#'   `edge_attr_from`.
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Create a random graph using the
 #' # `add_gnm_graph()` function
@@ -24,8 +26,7 @@
 #' # Get the graph's internal edf
 #' # to show which edge attributes
 #' # are available
-#' graph %>%
-#'   get_edge_df()
+#' graph %>% get_edge_df()
 #'
 #' # Rename the `color` node
 #' # attribute as `weight`
@@ -38,11 +39,10 @@
 #' # Get the graph's internal
 #' # edf to show that the edge
 #' # attribute had been renamed
-#' graph %>%
-#'   get_edge_df()
-#' @importFrom rlang enquo get_expr
-#' @export rename_edge_attrs
-
+#' graph %>% get_edge_df()
+#'
+#' @import rlang
+#' @export
 rename_edge_attrs <- function(graph,
                               edge_attr_from,
                               edge_attr_to) {

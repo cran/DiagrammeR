@@ -7,18 +7,18 @@
 get_s_connected_cmpts(graph)
 }
 \arguments{
-\item{graph}{a graph object of class
-\code{dgr_graph}.}
+\item{graph}{A graph object of class \code{dgr_graph}.}
 }
 \value{
-a data frame with nodes and their membership
-in different strongly connected components.
+A data frame with nodes and their membership in different strongly
+connected components.
 }
 \description{
-Determine which nodes in a graph belong
-to different strongly connected components.
+Determine which nodes in a graph belong to different strongly connected
+components.
 }
 \examples{
+suppressWarnings(RNGversion("3.5.0"))
 set.seed(23)
 
 # Create a graph with a random
@@ -49,6 +49,6 @@ graph <-
 # Get the strongly connected
 # components as a data frame of
 # nodes and their groupings
-graph \%>\%
-  get_s_connected_cmpts()
+graph \%>\% get_s_connected_cmpts()
+
 }

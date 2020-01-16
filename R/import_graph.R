@@ -1,32 +1,29 @@
 #' Import a graph from various graph formats
-#' @description Import a variety of graphs from
-#' different graph formats and create a graph object.
-#' @param graph_file a connection to a graph file.
-#' When provided as a path to a file, it will read the
-#' file from disk. Files starting with \code{http://},
-#' \code{https://}, \code{ftp://}, or \code{ftps://}
-#' will be automatically downloaded.
-#' @param file_type the type of file to be imported.
-#' Options are: \code{gml} (GML), \code{sif} (SIF),
-#' \code{edges} (a .edges file), and \code{mtx}
-#' (MatrixMarket format). If not supplied, the type
-#' of graph file will be inferred by its file extension.
-#' @param edges_extra_attr_names for \code{edges} files,
-#' a vector of attribute names beyond the \code{from}
-#' and \code{to} data columns can be provided in the
-#' order they appear in the input data file.
-#' @param edges_extra_attr_coltypes for \code{edges}
-#' files, this is a string of column types for any
-#' attribute columns provided for
-#' \code{edges_extra_attr_names}. This string
-#' representation is where each character represents
-#' each of the extra columns of data and the mappings
-#' are: \code{c} -> character, \code{i} -> integer,
-#' \code{n} -> number, \code{d} -> double,
-#' \code{l} -> logical, \code{D} -> date, \code{T} ->
-#' date time, \code{t} -> time, \code{?} -> guess,
-#' or \code{_/-}, which skips the column.
-#' @return a graph object of class \code{dgr_graph}.
+#'
+#' Import a variety of graphs from different graph formats and create a graph
+#' object.
+#'
+#' @param graph_file A connection to a graph file. When provided as a path to a
+#'   file, it will read the file from disk. Files starting with `http://`,
+#'   `https://`, `ftp://`, or `ftps://` will be automatically downloaded.
+#' @param file_type The type of file to be imported. Options are: `gml` (GML),
+#'   `sif` (SIF), `edges` (a .edges file), and `mtx` (MatrixMarket format). If
+#'   not supplied, the type of graph file will be inferred by its file
+#'   extension.
+#' @param edges_extra_attr_names For `edges` files, a vector of attribute names
+#'   beyond the `from` and `to` data columns can be provided in the order they
+#'   appear in the input data file.
+#' @param edges_extra_attr_coltypes For `edges` files, this is a string of
+#'   column types for any attribute columns provided for
+#'   `edges_extra_attr_names`. This string representation is where each
+#'   character represents each of the extra columns of data and the mappings
+#'   are: `c` -> character, `i` -> integer, `n` -> number, `d` -> double, `l` ->
+#'   logical, `D` -> date, `T` -> date time, `t` -> time, `?` -> guess, or
+#'   `_/-`, which skips the column.
+#' @inheritParams create_graph
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' \dontrun{
 #' # Import a GML graph file
@@ -44,29 +41,22 @@
 #' gml_graph %>%
 #'   count_edges()
 #' }
-#' @importFrom dplyr right_join select rename mutate everything bind_rows
-#' @importFrom dplyr arrange distinct tibble as_tibble
-#' @importFrom downloader download
-#' @importFrom purrr flatten_int
-#' @importFrom stringr str_extract str_detect str_split str_count
-#' @importFrom stringr str_replace_all str_extract_all
-#' @importFrom readr read_delim
-#' @importFrom utils unzip
-#' @export import_graph
-
+#'
+#' @export
 import_graph <- function(graph_file,
                          file_type = NULL,
                          edges_extra_attr_names = NULL,
-                         edges_extra_attr_coltypes = NULL) {
+                         edges_extra_attr_coltypes = NULL,
+                         graph_name = NULL,
+                         attr_theme = "default",
+                         write_backups = FALSE,
+                         display_msgs = FALSE) {
 
   # Get the time of function start
   time_function_start <- Sys.time()
 
   # Get the name of the function
   fcn_name <- get_calling_fcn()
-
-  # Assign NULL to several objects
-  id <- to_label <- from_label <-  NULL
 
   # Stop function if `file_type` specified is not part
   # of the group that can be imported
@@ -202,7 +192,11 @@ import_graph <- function(graph_file,
     the_graph <-
       create_graph(
         nodes_df = nodes,
-        edges_df = edges)
+        edges_df = edges,
+        graph_name = graph_name,
+        write_backups = write_backups,
+        display_msgs = display_msgs
+      )
 
     # Return the graph
     return(the_graph)
@@ -248,7 +242,11 @@ import_graph <- function(graph_file,
     the_graph <-
       create_graph(
         nodes_df = nodes,
-        edges_df = edges)
+        edges_df = edges,
+        graph_name = graph_name,
+        write_backups = write_backups,
+        display_msgs = display_msgs
+      )
 
     # Return the graph
     return(the_graph)
@@ -263,32 +261,32 @@ import_graph <- function(graph_file,
     # Extract information on whether graph is directed
     graph_directed <-
       unlist(
-        str_replace_all(
-          str_extract_all(gml_document,
+        stringr::str_replace_all(
+          stringr::str_extract_all(gml_document,
                           "directed [0-1]"),
           "directed ", ""))
 
     # Extract all node definitions
     node_defs <-
       unlist(
-        str_extract_all(gml_document,
+        stringr::str_extract_all(gml_document,
                         "node[ ]*?\\[.*?\\]"))
 
     # Get all node ID values
     node_id <-
       as.integer(
-        str_replace_all(
-          str_extract_all(
+        stringr::str_replace_all(
+          stringr::str_extract_all(
             node_defs,
             "id [a-z0-9_]*"),
           "id ", ""))
 
     # Get all node label values, if they exist
-    if (any(str_detect(node_defs, "label"))) {
+    if (any(stringr::str_detect(node_defs, "label"))) {
       node_label <-
-        str_replace_all(
-          str_replace_all(
-            str_extract_all(
+        stringr::str_replace_all(
+          stringr::str_replace_all(
+            stringr::str_extract_all(
               node_defs,
               "label \\\".*?\\\""),
             "label \"", ""),
@@ -297,42 +295,42 @@ import_graph <- function(graph_file,
 
     # Extract all edge definitions
     edge_defs <-
-      unlist(str_extract_all(
+      unlist(stringr::str_extract_all(
         gml_document,
         "edge[ ]*?\\[.*?\\]"))
 
     edges_from <-
       as.integer(
-        str_replace_all(
-          str_extract_all(
+        stringr::str_replace_all(
+          stringr::str_extract_all(
             edge_defs,
             "source [a-z0-9_]*"),
           "source ", ""))
 
     edges_to <-
       as.integer(
-        str_replace_all(
-          str_extract_all(
+        stringr::str_replace_all(
+          stringr::str_extract_all(
             edge_defs,
             "target [a-z0-9_]*"),
           "target ", ""))
 
 
-    if (any(str_detect(edge_defs, "label"))) {
+    if (any(stringr::str_detect(edge_defs, "label"))) {
       edge_label <-
-        str_replace_all(
-          str_replace_all(
-            str_extract_all(
+        stringr::str_replace_all(
+          stringr::str_replace_all(
+            stringr::str_extract_all(
               edge_defs,
               "label \\\".*?\\\""),
             "label \"", ""),
           "\"", "")
     }
 
-    if (any(str_detect(edge_defs, "value"))) {
+    if (any(stringr::str_detect(edge_defs, "value"))) {
       edge_value <-
-        str_replace_all(
-          str_extract_all(
+        stringr::str_replace_all(
+          stringr::str_extract_all(
             edge_defs,
             "value [a-z0-9\\.]*"),
           "value ", "")
@@ -366,7 +364,11 @@ import_graph <- function(graph_file,
         nodes_df = all_nodes,
         edges_df = all_edges,
         directed = ifelse(graph_directed == "1",
-                          TRUE, FALSE))
+                          TRUE, FALSE),
+        graph_name = graph_name,
+        write_backups = write_backups,
+        display_msgs = display_msgs
+      )
 
     # Return the graph
     return(the_graph)
@@ -386,9 +388,9 @@ import_graph <- function(graph_file,
         c(nodes,
           ifelse(
             length(
-              unlist(str_split(sif_document[i], "\t"))) == 1,
-            unlist(str_split(sif_document[i], "\t"))[1],
-            unlist(str_split(sif_document[i], "\t"))[-2]))
+              unlist(stringr::str_split(sif_document[i], "\t"))) == 1,
+            unlist(stringr::str_split(sif_document[i], "\t"))[1],
+            unlist(stringr::str_split(sif_document[i], "\t"))[-2]))
     }
 
     # Obtain a unique vector of nodes in the graph
@@ -401,8 +403,8 @@ import_graph <- function(graph_file,
         label = nodes)
 
     # Determine which lines have single nodes
-    if (any(!str_detect(sif_document, "\\t"))) {
-      single_nodes <- which(!str_detect(sif_document, "\\t"))
+    if (any(!stringr::str_detect(sif_document, "\\t"))) {
+      single_nodes <- which(!stringr::str_detect(sif_document, "\\t"))
     }
 
     # Initialize vectors for an edge data frame
@@ -410,11 +412,11 @@ import_graph <- function(graph_file,
     rel <- vector(mode = "character")
 
     # Obtain complete vectors for the edge data frame
-    for (i in which(str_count(sif_document, "\\t") > 1)) {
-      length_stmt <- length(str_split(sif_document[i], "\t")[[1]])
-      from <- c(from, str_split(sif_document[i], "\t")[[1]][1])
-      rel <- c(rel, str_split(sif_document[i], "\t")[[1]][2])
-      to <- c(to, str_split(sif_document[i], "\t")[[1]][3:length_stmt])
+    for (i in which(stringr::str_count(sif_document, "\\t") > 1)) {
+      length_stmt <- length(stringr::str_split(sif_document[i], "\t")[[1]])
+      from <- c(from, stringr::str_split(sif_document[i], "\t")[[1]][1])
+      rel <- c(rel, stringr::str_split(sif_document[i], "\t")[[1]][2])
+      to <- c(to, stringr::str_split(sif_document[i], "\t")[[1]][3:length_stmt])
     }
 
     # Create an edge data frame
@@ -435,7 +437,11 @@ import_graph <- function(graph_file,
     the_graph <-
       create_graph(
         nodes_df = ndf,
-        edges_df = edf)
+        edges_df = edf,
+        graph_name = graph_name,
+        write_backups = write_backups,
+        display_msgs = display_msgs
+      )
 
     # Return the graph
     return(the_graph)

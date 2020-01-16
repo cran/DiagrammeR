@@ -1,10 +1,12 @@
 #' Get nodes that form the graph periphery
-#' @description Get those nodes that are part of the
-#' graph periphery (i.e., have the maximum eccentricity
-#' in the graph).
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @return a vector of node IDs.
+#'
+#' Get those nodes that are part of the graph periphery (i.e., have the maximum
+#' eccentricity in the graph).
+#'
+#' @inheritParams render_graph
+#'
+#' @return A vector of node IDs.
+#'
 #' @examples
 #' # Create a random graph using the
 #' # `add_gnm_graph()` function and
@@ -15,9 +17,8 @@
 #'     m = 35,
 #'     set_seed = 23) %>%
 #'   get_periphery()
-#' @importFrom dplyr filter pull
-#' @export get_periphery
-
+#'
+#' @export
 get_periphery <- function(graph) {
 
   # Get the name of the function
@@ -30,9 +31,6 @@ get_periphery <- function(graph) {
       fcn_name = fcn_name,
       reasons = "The graph object is not valid")
   }
-
-  # Create bindings for specific variables
-  id <- NULL
 
   # Get the eccentricity for each of the graph's nodes
   eccentricity <- get_eccentricity(graph)

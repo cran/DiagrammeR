@@ -7,18 +7,15 @@
 delete_node(graph, node)
 }
 \arguments{
-\item{graph}{a graph object of class
-\code{dgr_graph}.}
+\item{graph}{A graph object of class \code{dgr_graph}.}
 
-\item{node}{a node ID for the node to be deleted
-from the graph.}
+\item{node}{A node ID for the node to be deleted from the graph.}
 }
 \value{
-a graph object of class \code{dgr_graph}.
+A graph object of class \code{dgr_graph}.
 }
 \description{
-From a graph object of class
-\code{dgr_graph}, delete an existing node by
+From a graph object of class \code{dgr_graph}, delete an existing node by
 specifying its node ID.
 }
 \examples{
@@ -33,12 +30,11 @@ graph <- delete_node(graph, node = 3)
 
 # Verify that the node with ID `3`
 # is no longer in the graph
-graph \%>\%
-  get_node_ids()
+graph \%>\% get_node_ids()
 
 # Also note that edges are removed
 # since there were edges between the
 # removed node to and from other nodes
-graph \%>\%
-  get_edges()
+graph \%>\% get_edges()
+
 }

@@ -1,31 +1,26 @@
-#' Get neighboring nodes based on node attribute
-#' similarity
-#' @description With a graph a single node serving as
-#' the starting point, get those nodes in a potential
-#' neighborhood of nodes (adjacent to the starting
-#' node) that have a common or similar (within
-#' threshold values) node attribute to the starting
+#' Get neighboring nodes based on node attribute similarity
+#'
+#' With a graph a single node serving as the starting point, get those nodes in
+#' a potential neighborhood of nodes (adjacent to the starting node) that have a
+#' common or similar (within threshold values) node attribute to the starting
 #' node.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param node a single-length vector containing a
-#' node ID value.
-#' @param node_attr the name of the node attribute
-#' to use to compare with adjacent nodes.
-#' @param tol_abs if the values contained in the node
-#' attribute \code{node_attr} are numeric, one can
-#' optionally supply a numeric vector of length 2 that
-#' provides a lower and upper numeric bound as criteria
-#' for neighboring node similarity to the starting
-#' node.
-#' @param tol_pct if the values contained in the node
-#' attribute \code{node_attr} are numeric, one can
-#' optionally supply a numeric vector of length 2 that
-#' specifies lower and upper bounds as negative and
-#' positive percentage changes to the value of the
-#' starting node. These bounds serve as criteria for
-#' neighboring node similarity to the starting node.
-#' @return a vector of node ID values.
+#'
+#' @inheritParams render_graph
+#' @param node A single-length vector containing a node ID value.
+#' @param node_attr The name of the node attribute to use to compare with
+#'   adjacent nodes.
+#' @param tol_abs If the values contained in the node attribute `node_attr` are
+#'   numeric, one can optionally supply a numeric vector of length 2 that
+#'   provides a lower and upper numeric bound as criteria for neighboring node
+#'   similarity to the starting node.
+#' @param tol_pct If the values contained in the node attribute `node_attr` are
+#'   numeric, one can optionally supply a numeric vector of length 2 that
+#'   specifies lower and upper bounds as negative and positive percentage
+#'   changes to the value of the starting node. These bounds serve as criteria
+#'   for neighboring node similarity to the starting node.
+#'
+#' @return A vector of node ID values.
+#'
 #' @examples
 #' # Getting similar neighbors can
 #' # be done through numerical comparisons;
@@ -83,9 +78,9 @@
 #'     node_attr = value,
 #'     tol_abs = c(10, 10)) %>%
 #'     length()
-#' @importFrom rlang enquo get_expr
-#' @export get_similar_nbrs
-
+#'
+#' @import rlang
+#' @export
 get_similar_nbrs <- function(graph,
                              node,
                              node_attr,

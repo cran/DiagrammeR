@@ -4,38 +4,42 @@
 \alias{render_graph}
 \title{Render the graph in various formats}
 \usage{
-render_graph(graph, layout = NULL, output = NULL, title = NULL,
-  width = NULL, height = NULL)
+render_graph(
+  graph,
+  layout = NULL,
+  output = NULL,
+  as_svg = FALSE,
+  title = NULL,
+  width = NULL,
+  height = NULL
+)
 }
 \arguments{
-\item{graph}{a graph object of class
-\code{dgr_graph}.}
+\item{graph}{A graph object of class \code{dgr_graph}.}
 
-\item{layout}{a string specifying a layout type to
-use for node placement in this rendering. Possible
-layouts include: \code{nicely}, \code{circle},
-\code{tree}, \code{kk}, and \code{fr}.}
+\item{layout}{A string specifying a layout type to use for node placement in
+this rendering. Possible layouts include: \code{nicely}, \code{circle}, \code{tree}, \code{kk},
+and \code{fr}.}
 
-\item{output}{a string specifying the output type;
-\code{graph} (the default) renders the graph using
-the \code{grViz} function and \code{visNetwork}
-renders the graph using the \code{visnetwork} function.}
+\item{output}{A string specifying the output type; \code{graph} (the default)
+renders the graph using the \code{\link[=grViz]{grViz()}} function and \code{visNetwork} renders the
+graph using the \code{\link[=visnetwork]{visnetwork()}} function.}
 
-\item{title}{an optional title for a graph when
-using \code{output = "graph"}.}
+\item{as_svg}{An option to render the graph as an SVG document.}
 
-\item{width}{an optional parameter for specifying
-the width of the resulting graphic in pixels.}
+\item{title}{An optional title for a graph when using \code{output = "graph"}.}
 
-\item{height}{an optional parameter for specifying
-the height of the resulting graphic in pixels.}
+\item{width}{An optional parameter for specifying the width of the resulting
+graphic in pixels.}
+
+\item{height}{An optional parameter for specifying the height of the
+resulting graphic in pixels.}
 }
 \description{
-Using a \code{dgr_graph} object,
-render the graph in the RStudio Viewer.
+Using a \code{dgr_graph} object, render the graph in the RStudio Viewer.
 }
 \examples{
-\dontrun{
+\donttest{
 # Render a graph that's a
 # balanced tree
 create_graph() \%>\%
@@ -76,4 +80,5 @@ create_graph() \%>\%
   render_graph(
     output = "visNetwork")
 }
+
 }

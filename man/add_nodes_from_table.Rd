@@ -4,44 +4,42 @@
 \alias{add_nodes_from_table}
 \title{Add nodes and attributes to graph from a table}
 \usage{
-add_nodes_from_table(graph, table, label_col = NULL, type_col = NULL,
-  set_type = NULL, drop_cols = NULL)
+add_nodes_from_table(
+  graph,
+  table,
+  label_col = NULL,
+  type_col = NULL,
+  set_type = NULL,
+  drop_cols = NULL
+)
 }
 \arguments{
-\item{graph}{a graph object of class
-\code{dgr_graph}.}
+\item{graph}{A graph object of class \code{dgr_graph}.}
 
-\item{table}{either a path to a CSV file, or, a data
-frame object.}
+\item{table}{Either a path to a CSV file, or, a data frame object.}
 
-\item{label_col}{an option to apply a column of data
-in the table as \code{label} attribute values.}
+\item{label_col}{An option to apply a column of data in the table as \code{label}
+attribute values.}
 
-\item{type_col}{an option to apply a column of data
-in the table as \code{type} attribute values.}
+\item{type_col}{An option to apply a column of data in the table as \code{type}
+attribute values.}
 
-\item{set_type}{an optional string to apply a
-\code{type} attribute to all nodes created from data
-in the external table.}
+\item{set_type}{An optional string to apply a \code{type} attribute to all nodes
+created from data in the external table.}
 
-\item{drop_cols}{an optional column selection
-statement for dropping columns from the external
-table before inclusion as attributes in the graph's
-internal node data frame. Several columns can be
-dropped by name using the syntax
-\code{col_1 & col_2 & ...}. Columns can also be
-dropped using a numeric column range with \code{:}
-(e.g., \code{5:8}), or, by using the \code{:}
-between column names to specify the range (e.g.,
-\code{col_5_name:col_8_name}).}
+\item{drop_cols}{An optional column selection statement for dropping columns
+from the external table before inclusion as attributes in the graph's
+internal node data frame. Several columns can be dropped by name using the
+syntax \code{col_1 & col_2 & ...}. Columns can also be dropped using a numeric
+column range with \code{:} (e.g., \code{5:8}), or, by using the \code{:} between column
+names to specify the range (e.g., \code{col_5_name:col_8_name}).}
 }
 \value{
-a graph object of class \code{dgr_graph}.
+A graph object of class \code{dgr_graph}.
 }
 \description{
-Add nodes and their attributes to an
-existing graph object from data in a CSV file or a
-data frame.
+Add nodes and their attributes to an existing graph object from data in a CSV
+file or a data frame.
 }
 \examples{
 # To add nodes from the dataset called
@@ -105,4 +103,5 @@ graph_3 <-
 graph_3 \%>\%
   get_node_df() \%>\%
   colnames()
+
 }

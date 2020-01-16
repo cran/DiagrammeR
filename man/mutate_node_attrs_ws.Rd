@@ -7,27 +7,34 @@
 mutate_node_attrs_ws(graph, ...)
 }
 \arguments{
-\item{graph}{a graph object of class
-\code{dgr_graph}.}
+\item{graph}{A graph object of class \code{dgr_graph}.}
 
-\item{...}{expressions used for the mutation
-of node attributes. LHS of each expression is
-either an existing or new node attribute name.
-The RHS can consist of any valid R code that
-uses node attributes as variables. Expressions
-are evaluated in the order provided, so, node
-attributes created or modified are ready to
-use in subsequent expressions.}
+\item{...}{Expressions used for the mutation of node attributes. LHS of each
+expression is either an existing or new node attribute name. The RHS can
+consist of any valid R code that uses node attributes as variables.
+Expressions are evaluated in the order provided, so, node attributes
+created or modified are ready to use in subsequent expressions.}
 }
 \value{
-a graph object of class
-\code{dgr_graph}.
+A graph object of class \code{dgr_graph}.
 }
 \description{
-Within a graph's internal node
-data frame (ndf), mutate node attribute
-values only for nodes in a selection by
-using one or more expressions.
+Within a graph's internal node data frame (ndf), mutate node attribute values
+only for nodes in a selection by using one or more expressions.
+}
+\details{
+This function makes use of an active selection of nodes (and the function
+ending with \verb{_ws} hints at this).
+
+Selections of nodes can be performed using the following node selection
+(\verb{select_*()}) functions: \code{\link[=select_nodes]{select_nodes()}}, \code{\link[=select_last_nodes_created]{select_last_nodes_created()}},
+\code{\link[=select_nodes_by_degree]{select_nodes_by_degree()}}, \code{\link[=select_nodes_by_id]{select_nodes_by_id()}}, or
+\code{\link[=select_nodes_in_neighborhood]{select_nodes_in_neighborhood()}}.
+
+Selections of nodes can also be performed using the following traversal
+(\verb{trav_*()}) functions: \code{\link[=trav_out]{trav_out()}}, \code{\link[=trav_in]{trav_in()}}, \code{\link[=trav_both]{trav_both()}},
+\code{\link[=trav_out_node]{trav_out_node()}}, \code{\link[=trav_in_node]{trav_in_node()}}, \code{\link[=trav_out_until]{trav_out_until()}}, or
+\code{\link[=trav_in_until]{trav_in_until()}}.
 }
 \examples{
 # Create a graph with 3 nodes
@@ -43,8 +50,7 @@ graph <-
 # Get the graph's internal ndf
 # to show which node attributes
 # are available
-graph \%>\%
-  get_node_df()
+graph \%>\% get_node_df()
 
 # Mutate the `width` node
 # attribute for the nodes
@@ -61,8 +67,7 @@ graph <-
 # ndf to show that the node
 # attribute `width` was
 # mutated only for node `1`
-graph \%>\%
-  get_node_df()
+graph \%>\% get_node_df()
 
 # Create a new node attribute,
 # called `length`, that is the
@@ -83,8 +88,7 @@ graph <-
 # for nodes `2` and `3` (since
 # node `1` is excluded, an NA
 # value is applied)
-graph \%>\%
-  get_node_df()
+graph \%>\% get_node_df()
 
 # Create a new node attribute
 # called `area`, which is the
@@ -100,8 +104,7 @@ graph <-
 # values had been multiplied
 # together (with new attr `area`)
 # for nodes `2` and `3`
-graph \%>\%
-  get_node_df()
+graph \%>\% get_node_df()
 
 # We can invert the selection
 # and mutate node `1` several
@@ -121,6 +124,6 @@ graph <-
 # non-NA values for its node
 # attributes without changing
 # those of the other nodes
-graph \%>\%
-  get_node_df()
+graph \%>\% get_node_df()
+
 }

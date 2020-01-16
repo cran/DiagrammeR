@@ -7,25 +7,21 @@
 copy_node_attrs(graph, node_attr_from, node_attr_to)
 }
 \arguments{
-\item{graph}{a graph object of class
-\code{dgr_graph}.}
+\item{graph}{A graph object of class \code{dgr_graph}.}
 
-\item{node_attr_from}{the name of the node attribute
-column from which values will be copied.}
+\item{node_attr_from}{The name of the node attribute column from which values
+will be copied.}
 
-\item{node_attr_to}{the name of the new node
-attribute column to which the copied values will be
-placed.}
+\item{node_attr_to}{The name of the new node attribute column to which the
+copied values will be placed.}
 }
 \value{
-a graph object of class
-\code{dgr_graph}.
+A graph object of class \code{dgr_graph}.
 }
 \description{
-Within a graph's internal node data
-frame (ndf), copy the contents an existing node
-attribute and create a distinct node attribute
-within the ndf with a different attribute name.
+Within a graph's internal node data frame (ndf), copy the contents an
+existing node attribute and create a distinct node attribute within the ndf
+with a different attribute name.
 }
 \examples{
 # Create a random graph using the
@@ -49,8 +45,7 @@ graph <-
 # Get the graph's internal
 # ndf to show which node
 # attributes are available
-graph \%>\%
-  get_node_df()
+graph \%>\% get_node_df()
 
 # Make a copy the `value`
 # node attribute as the
@@ -64,6 +59,6 @@ graph <-
 # Get the graph's internal
 # ndf to show that the node
 # attribute had been copied
-graph \%>\%
-  get_node_df()
+graph \%>\% get_node_df()
+
 }

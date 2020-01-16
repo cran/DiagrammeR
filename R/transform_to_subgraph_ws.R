@@ -1,23 +1,30 @@
-#' Create a subgraph using node/edge selection
-#' @description Create a subgraph based on a
-#' selection of nodes or edges stored in the graph
-#' object. Selections of nodes can be performed using
-#' the following \code{select_...} functions:
-#' \code{select_nodes()},
-#' \code{select_last_nodes_created()},
-#' \code{select_nodes_by_degree()},
-#' \code{select_nodes_by_id()}, or
-#' \code{select_nodes_in_neighborhood()}.
-#' Alternatively, selections of edges can be made
-#' with these functions: \code{select_edges()},
-#' \code{select_last_edge()}, or
-#' \code{select_edges_by_node_id()}. Selections of
-#' nodes or edges can also be performed using
-#' any of the traversal functions (\code{trav_...}).
-#' @param graph a graph object of class
-#' \code{dgr_graph} that is created using
-#' \code{create_graph}.
-#' @return a graph object of class \code{dgr_graph}.
+#' Create a subgraph using a node or edge selection
+#'
+#' Create a subgraph based on a selection of nodes or edges stored in the graph
+#' object.
+#'
+#' This function makes use of an active selection of nodes or edges (and the
+#' function ending with `_ws` hints at this).
+#'
+#' Selections of nodes can be performed using the following node selection
+#' (`select_*()`) functions: [select_nodes()], [select_last_nodes_created()],
+#' [select_nodes_by_degree()], [select_nodes_by_id()], or
+#' [select_nodes_in_neighborhood()].
+#'
+#' Selections of edges can be performed using the following edge selection
+#' (`select_*()`) functions: [select_edges()], [select_last_edges_created()],
+#' [select_edges_by_edge_id()], or [select_edges_by_node_id()].
+#'
+#' Selections of nodes or edges can also be performed using the following
+#' traversal (`trav_*()`) functions: [trav_out()], [trav_in()], [trav_both()],
+#' [trav_out_node()], [trav_in_node()], [trav_out_until()], [trav_in_until()],
+#' [trav_out_edge()], [trav_in_edge()], [trav_both_edge()], or
+#' [trav_reverse_edge()].
+#'
+#' @inheritParams render_graph
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Create a node data frame (ndf)
 #' ndf <-
@@ -30,8 +37,8 @@
 #' # Create an edge data frame (edf)
 #' edf <-
 #'   create_edge_df(
-#'     from = c(1, 2, 4, 5, 2, 6),
-#'       to = c(2, 4, 1, 3, 5, 5))
+#'     from = c(1, 2, 4, 5, 2, 6, 2),
+#'       to = c(2, 4, 1, 3, 5, 5, 4))
 #'
 #' # Create a graph
 #' graph <-
@@ -52,16 +59,31 @@
 #'   transform_to_subgraph_ws()
 #'
 #' # Display the graph's node data frame
-#' subgraph %>%
-#'   get_node_df()
+#' subgraph %>% get_node_df()
 #'
 #' # Display the graph's edge data frame
-#' subgraph %>%
-#'   get_edge_df()
-#' @importFrom dplyr filter semi_join
-#' @importFrom stringr str_split
-#' @export transform_to_subgraph_ws
-
+#' subgraph %>% get_edge_df()
+#'
+#' # Create a selection of edges, this selects
+#' # edges `1`, `2`
+#' graph <-
+#'   graph %>%
+#'   clear_selection() %>%
+#'   select_edges(
+#'   edges = c(1,2))
+#'
+#' # Create a subgraph based on the selection
+#' subgraph <-
+#'   graph %>%
+#'   transform_to_subgraph_ws()
+#'
+#' # Display the graph's node data frame
+#' subgraph %>% get_node_df()
+#'
+#' # Display the graph's edge data frame
+#' subgraph %>% get_edge_df()
+#'
+#' @export
 transform_to_subgraph_ws <- function(graph) {
 
   # Get the time of function start
@@ -81,15 +103,12 @@ transform_to_subgraph_ws <- function(graph) {
   # Validation: Graph object has valid selection of
   # nodes or edges
   if (!(graph_contains_node_selection(graph) |
-      graph_contains_edge_selection(graph))) {
+        graph_contains_edge_selection(graph))) {
 
     emit_error(
       fcn_name = fcn_name,
       reasons = "There is no selection of node or edges available.")
   }
-
-  # Create bindings for specific variables
-  id <- from <- to <- NULL
 
   # Get the number of nodes in the graph
   nodes_graph_1 <- graph %>% count_nodes()
@@ -118,15 +137,14 @@ transform_to_subgraph_ws <- function(graph) {
   # Filter the edges in the graph
   if (graph_contains_edge_selection(graph)) {
 
-    selection_from <- graph$edge_selection$from
-    selection_to <- graph$edge_selection$to
+    selection <- graph$edge_selection$edge
 
     selection_df <-
-      data.frame(from = selection_from, to = selection_to)
+      data.frame(id = selection)
 
     edf <-
       graph$edges_df %>%
-      dplyr::semi_join(selection_df, by = c("from", "to"))
+      dplyr::semi_join(selection_df, by = c("id"))
 
     ndf <-
       graph$nodes_df %>%

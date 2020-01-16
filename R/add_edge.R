@@ -1,41 +1,25 @@
 #' Add an edge between nodes in a graph object
-#' @description With a graph object of class
-#' \code{dgr_graph}, add an edge to nodes within the
+#'
+#' With a graph object of class `dgr_graph`, add an edge to nodes within the
 #' graph.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param from the outgoing node from which the edge
-#' is connected. There is the option to use a node
-#' \code{label} value here (and this must
-#' correspondingly also be done for the \code{to}
-#' argument) for defining node connections. Note that
-#' this is only possible if all nodes have distinct
-#' \code{label} values set and none exist as an empty
-#' string.
-#' @param to the incoming nodes to which each edge
-#' is connected. There is the option to use a node
-#' \code{label} value here (and this must
-#' correspondingly also be done for the \code{from}
-#' argument) for defining node connections. Note that
-#' this is only possible if all nodes have distinct
-#' \code{label} values set and none exist as an empty
-#' string.
-#' @param rel an optional string specifying the
-#' relationship between the
-#' connected nodes.
-#' @param edge_aes an optional list of named vectors
-#' comprising edge aesthetic attributes. The helper
-#' function \code{edge_aes()} is strongly recommended
-#' for use here as it contains arguments for each
-#' of the accepted edge aesthetic attributes (e.g.,
-#' \code{shape}, \code{style}, \code{penwidth},
-#' \code{color}).
-#' @param edge_data an optional list of named vectors
-#' comprising edge data attributes. The helper
-#' function \code{edge_data()} is strongly recommended
-#' for use here as it helps bind data specifically
-#' to the created edges.
-#' @return a graph object of class \code{dgr_graph}.
+#'
+#' @inheritParams node_edge_aes_data
+#' @inheritParams render_graph
+#' @param from The outgoing node from which the edge is connected. There is the
+#'   option to use a node `label` value here (and this must correspondingly also
+#'   be done for the `to` argument) for defining node connections. Note that
+#'   this is only possible if all nodes have distinct `label` values set and
+#'   none exist as an empty string.
+#' @param to The incoming nodes to which each edge is connected. There is the
+#'   option to use a node `label` value here (and this must correspondingly also
+#'   be done for the `from` argument) for defining node connections. Note that
+#'   this is only possible if all nodes have distinct `label` values set and
+#'   none exist as an empty string.
+#' @param rel An optional string specifying the relationship between the
+#'   connected nodes.
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Create a graph with 4 nodes
 #' graph <-
@@ -73,8 +57,7 @@
 #' # Verify that the edge
 #' # has been created by
 #' # counting graph edges
-#' graph %>%
-#'   count_edges()
+#' graph %>% count_edges()
 #'
 #' # Add edges by specifying
 #' # node `label` values; note
@@ -94,8 +77,7 @@
 #'
 #' # Use `get_edges()` to verify
 #' # that the edges were added
-#' graph %>%
-#'   get_edges()
+#' graph %>% get_edges()
 #'
 #' # Add edge aesthetic and data
 #' # attributes during edge creation
@@ -116,12 +98,9 @@
 #' # to verify that the attribute
 #' # values were bound to the
 #' # newly created edge
-#' graph_2 %>%
-#'   get_edge_df()
-#' @importFrom dplyr bind_rows select filter as_tibble
-#' @importFrom rlang UQ
-#' @export add_edge
-
+#' graph_2 %>% get_edge_df()
+#' @import rlang
+#' @export
 add_edge <- function(graph,
                      from,
                      to,
@@ -157,9 +136,6 @@ add_edge <- function(graph,
       fcn_name = fcn_name,
       reasons = "Only one edge can be specified in `from` or `to`")
   }
-
-  # Create bindings for specific variables
-  version_id <- label <- index__ <- id <-  NULL
 
   # Get the value for the latest `version_id` for
   # graph (in the `graph_log`)
@@ -307,8 +283,9 @@ add_edge <- function(graph,
         graph <-
           graph %>%
           set_edge_attrs_ws(
-            edge_attr = rlang::UQ(colnames(edge_aes_tbl)[i]),
-            value = edge_aes_tbl[1, i][[1]])
+            edge_attr = !!colnames(edge_aes_tbl)[i],
+            value = edge_aes_tbl[1, i][[1]]
+          )
       }
 
       # Clear the graph's active selection
@@ -335,8 +312,9 @@ add_edge <- function(graph,
         graph <-
           graph %>%
           set_edge_attrs_ws(
-            edge_attr = rlang::UQ(colnames(edge_data_tbl)[i]),
-            value = edge_data_tbl[1, i][[1]])
+            edge_attr = !!colnames(edge_data_tbl)[i],
+            value = edge_data_tbl[1, i][[1]]
+          )
       }
 
       # Clear the graph's active selection

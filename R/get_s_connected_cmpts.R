@@ -1,11 +1,15 @@
 #' Get nodes within strongly connected components
-#' @description Determine which nodes in a graph belong
-#' to different strongly connected components.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @return a data frame with nodes and their membership
-#' in different strongly connected components.
+#'
+#' Determine which nodes in a graph belong to different strongly connected
+#' components.
+#'
+#' @inheritParams render_graph
+#'
+#' @return A data frame with nodes and their membership in different strongly
+#'   connected components.
+#'
 #' @examples
+#' suppressWarnings(RNGversion("3.5.0"))
 #' set.seed(23)
 #'
 #' # Create a graph with a random
@@ -36,12 +40,9 @@
 #' # Get the strongly connected
 #' # components as a data frame of
 #' # nodes and their groupings
-#' graph %>%
-#'   get_s_connected_cmpts()
-#' @importFrom igraph components
-#' @importFrom dplyr select
-#' @export get_s_connected_cmpts
-
+#' graph %>% get_s_connected_cmpts()
+#'
+#' @export
 get_s_connected_cmpts <- function(graph) {
 
   # Get the name of the function
@@ -54,9 +55,6 @@ get_s_connected_cmpts <- function(graph) {
       fcn_name = fcn_name,
       reasons = "The graph object is not valid")
   }
-
-  # Create bindings for specific variables
-  id <- from <- to <- type <- label <- rel <- NULL
 
   # Create a graph where only mandatory
   # node and edge attributes are retained;

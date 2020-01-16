@@ -1,19 +1,17 @@
 #' Mutate a set of node attribute values
-#' @description Within a graph's internal node
-#' data frame (ndf), mutate numeric node
+#'
+#' Within a graph's internal node data frame (ndf), mutate numeric node
 #' attribute values using one or more expressions.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param ... expressions used for the mutation
-#' of node attributes. LHS of each expression is
-#' either an existing or new node attribute name.
-#' The RHS can consist of any valid R code that
-#' uses node attributes as variables. Expressions
-#' are evaluated in the order provided, so, node
-#' attributes created or modified are ready to
-#' use in subsequent expressions.
-#' @return a graph object of class
-#' \code{dgr_graph}.
+#'
+#' @inheritParams render_graph
+#' @param ... Expressions used for the mutation of node attributes. LHS of each
+#'   expression is either an existing or new node attribute name. The RHS can
+#'   consist of any valid R code that uses node attributes as variables.
+#'   Expressions are evaluated in the order provided, so, node attributes
+#'   created or modified are ready to use in subsequent expressions.
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Create a graph with 3 nodes
 #' graph <-
@@ -26,8 +24,7 @@
 #' # Get the graph's internal ndf
 #' # to show which node attributes
 #' # are available
-#' graph %>%
-#'   get_node_df()
+#' graph %>% get_node_df()
 #'
 #' # Mutate the `width` node
 #' # attribute, dividing each
@@ -41,8 +38,7 @@
 #' # ndf to show that the node
 #' # attribute `width` had its
 #' # values changed
-#' graph %>%
-#'   get_node_df()
+#' graph %>% get_node_df()
 #'
 #' # Create a new node attribute,
 #' # called `length`, that is the
@@ -58,8 +54,7 @@
 #' # Get the graph's internal ndf
 #' # to show that the node attribute
 #' # values had been mutated
-#' graph %>%
-#'   get_node_df()
+#' graph %>% get_node_df()
 #'
 #' # Create a new node attribute
 #' # called `area`, which is the
@@ -74,12 +69,10 @@
 #' # to show that the node attribute
 #' # values had been multiplied
 #' # together (with new attr `area`)
-#' graph %>%
-#'   get_node_df()
-#' @importFrom dplyr mutate_
-#' @importFrom rlang exprs
-#' @export mutate_node_attrs
-
+#' graph %>% get_node_df()
+#'
+#' @import rlang
+#' @export
 mutate_node_attrs <- function(graph,
                               ...) {
 
@@ -125,7 +118,7 @@ mutate_node_attrs <- function(graph,
     ndf <-
       ndf %>%
       dplyr::mutate_(
-        .dots = setNames(list((exprs %>% paste())[i]),
+        .dots = stats::setNames(list((exprs %>% paste())[i]),
                          names(exprs)[i]))
   }
 

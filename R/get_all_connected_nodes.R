@@ -1,12 +1,12 @@
 #' Get all nodes connected to a specified node
-#' @description With a single node serving as
-#' the starting point get all nodes connected (i.e.,
-#' reachable with a traversable path) to that node.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param node a single-length vector containing a
-#' node ID value.
-#' @return a vector of node ID values.
+#'
+#' With a single node serving as the starting point get all nodes connected
+#'   (i.e., reachable with a traversable path) to that node.
+#' @inheritParams render_graph
+#' @param node a single-length vector containing a node ID value.
+#'
+#' @return A vector of node ID values.
+#'
 #' @examples
 #' # Create a random graph using the
 #' # `add_gnm_graph()` function; it
@@ -54,9 +54,8 @@
 #' graph_2 %>%
 #'   get_all_connected_nodes(
 #'     node = 8)
-#' @importFrom dplyr filter
-#' @export get_all_connected_nodes
-
+#'
+#' @export
 get_all_connected_nodes <- function(graph,
                                     node) {
 
@@ -70,9 +69,6 @@ get_all_connected_nodes <- function(graph,
       fcn_name = fcn_name,
       reasons = "The graph object is not valid")
   }
-
-  # Create bindings for specific variables
-  id <- NULL
 
   # Verify that the node ID provided is in the graph
   if (!(node %in% get_node_ids(graph))) {

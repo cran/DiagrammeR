@@ -1,10 +1,12 @@
 #' Is the graph an undirected graph?
-#' @description Determines whether a graph
-#' is set as undirected or not and
-#' returns a logical value to that effect.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @return a logical value.
+#'
+#' Determines whether a graph is set as undirected or not and returns a logical
+#' value to that effect.
+#'
+#' @inheritParams render_graph
+#'
+#' @return A logical value.
+#'
 #' @examples
 #' # Create an empty graph; by
 #' # default, new graphs made
@@ -18,8 +20,7 @@
 #'
 #' # Determine whether the
 #' # graph is undirected
-#' graph %>%
-#'   is_graph_undirected()
+#' graph %>% is_graph_undirected()
 #'
 #' # Use the `set_graph_directed()`
 #' # function and check again
@@ -28,8 +29,8 @@
 #' graph %>%
 #'   set_graph_directed() %>%
 #'   is_graph_undirected()
-#' @export is_graph_undirected
-
+#'
+#' @export
 is_graph_undirected <- function(graph) {
 
   # Get the name of the function

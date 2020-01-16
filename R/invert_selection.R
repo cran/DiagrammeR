@@ -1,13 +1,12 @@
 #' Invert selection of nodes or edges in a graph
-#' @description Modify the selection
-#' of nodes or edges within a graph
-#' object such that all nodes or edges
-#' previously not selected will now be
-#' selected and vice versa.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @return a graph object of class
-#' \code{dgr_graph}.
+#'
+#' Modify the selection of nodes or edges within a graph object such that all
+#' nodes or edges previously not selected will now be selected and vice versa.
+#'
+#' @inheritParams render_graph
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Create a node data frame (ndf)
 #' ndf <-
@@ -37,8 +36,7 @@
 #'
 #' # Verify that a node
 #' # selection has been made
-#' graph %>%
-#'   get_selection()
+#' graph %>% get_selection()
 #'
 #' # Invert the selection
 #' graph <-
@@ -47,11 +45,9 @@
 #'
 #' # Verify that the node
 #' # selection has been changed
-#' graph %>%
-#'   get_selection()
-#' @importFrom dplyr filter select
-#' @export invert_selection
-
+#' graph %>% get_selection()
+#'
+#' @export
 invert_selection <- function(graph) {
 
   # Get the time of function start
@@ -77,9 +73,6 @@ invert_selection <- function(graph) {
       fcn_name = fcn_name,
       reasons = "There is no selection of nodes or edges available")
   }
-
-  # Create bindings for specific variables
-  id <- from <- to <- NULL
 
   # Obtain the input graph's node and edge
   # selection properties
@@ -155,18 +148,24 @@ invert_selection <- function(graph) {
     save_graph_as_rds(graph = graph)
   }
 
-  # Construct message body
-  msg_body <-
-    glue::glue(
-      "inverted an existing selection of \\
+  # Emit a message about the modification of a selection
+  # if that option is set
+  if (!is.null(graph$graph_info$display_msgs) &&
+      graph$graph_info$display_msgs) {
+
+    # Construct message body
+    msg_body <-
+      glue::glue(
+        "inverted an existing selection of \\
        {n_e_select_properties_in[['selection_count_str']]}:
        * {n_e_select_properties_out[['selection_count_str']]} \\
        are now in the active selection")
 
-  # Issue a message to the user
-  emit_message(
-    fcn_name = fcn_name,
-    message_body = msg_body)
+    # Issue a message to the user
+    emit_message(
+      fcn_name = fcn_name,
+      message_body = msg_body)
+  }
 
   graph
 }

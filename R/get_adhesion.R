@@ -1,12 +1,14 @@
 #' Get graph adhesion
-#' @description Get the adhesion of a graph, which is
-#' the minimum number of edges needed to remove to obtain
-#' a graph which is not strongly connected. This is the
-#' same as the edge connectivity of the graph.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @return a single numeric value representing the
-#' minimum number of edges to remove.
+#'
+#' Get the adhesion of a graph, which is the minimum number of edges needed to
+#' remove to obtain a graph which is not strongly connected. This is the same as
+#' the edge connectivity of the graph.
+#'
+#' @inheritParams render_graph
+#'
+#' @return A single numeric value representing the minimum number of edges to
+#'   remove.
+#'
 #' @examples
 #' # Create a cycle graph
 #' graph <-
@@ -14,17 +16,15 @@
 #'   add_cycle(n = 5)
 #'
 #' # Determine the graph's adhesion
-#' graph %>%
-#'   get_adhesion()
+#' graph %>% get_adhesion()
 #'
 #' # Create a full graph and then
 #' # get the adhesion for that
 #' create_graph() %>%
 #'   add_full_graph(n = 8) %>%
 #'   get_adhesion()
-#' @importFrom igraph edge_connectivity
-#' @export get_adhesion
-
+#'
+#' @export
 get_adhesion <- function(graph) {
 
   # Get the name of the function

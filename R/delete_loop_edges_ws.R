@@ -1,10 +1,24 @@
 #' Delete all loop edges associated with a selection of nodes
-#' @description With a selection of nodes in a
-#' graph, remove any associated loop edges.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @return a graph object of class
-#' \code{dgr_graph}.
+#'
+#' With a selection of nodes in a graph, remove any associated loop edges.
+#'
+#' This function makes use of an active selection of nodes (and the function
+#' ending with `_ws` hints at this).
+#'
+#' Selections of nodes can be performed using the following node selection
+#' (`select_*()`) functions: [select_nodes()], [select_last_nodes_created()],
+#' [select_nodes_by_degree()], [select_nodes_by_id()], or
+#' [select_nodes_in_neighborhood()].
+#'
+#' Selections of nodes can also be performed using the following traversal
+#' (`trav_*()`) functions: [trav_out()], [trav_in()], [trav_both()],
+#' [trav_out_node()], [trav_in_node()], [trav_out_until()], or
+#' [trav_in_until()].
+#'
+#' @inheritParams render_graph
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Create an undirected, full graph
 #' # of 5 nodes with loops retained
@@ -26,12 +40,9 @@
 #'
 #' # Count the number of loop
 #' # edges remaining in the graph
-#' graph %>%
-#'   count_loop_edges()
-#' @importFrom dplyr setdiff filter
-#' @importFrom purrr map_df
-#' @export delete_loop_edges_ws
-
+#' graph %>% count_loop_edges()
+#'
+#' @export
 delete_loop_edges_ws <- function(graph) {
 
   # Get the time of function start
@@ -63,9 +74,6 @@ delete_loop_edges_ws <- function(graph) {
       fcn_name = fcn_name,
       reasons = "There is no selection of nodes available.")
   }
-
-  # Create bindings for specific variables
-  from <- to <- NULL
 
   # Get the graph's edf
   edf <- graph$edges_df

@@ -1,17 +1,15 @@
 #' Combine two graphs into a single graph
-#' @description Combine two graphs in order
-#' to make a new graph.
-#' @param x a \code{DiagrammeR} graph
-#' object to which another graph will be
-#' unioned. This graph should be considered
-#' the graph from which global graph
-#' attributes will be inherited in the
-#' resulting graph.
-#' @param y a \code{DiagrammeR} graph
-#' object that is to be unioned with the
-#' graph supplied as \code{x}.
-#' @return a graph object of class
-#' \code{dgr_graph}.
+#'
+#' Combine two graphs in order to make a new graph.
+#'
+#' @param x A `DiagrammeR` graph object to which another graph will be unioned.
+#'   This graph should be considered the graph from which global graph
+#'   attributes will be inherited in the resulting graph.
+#' @param y A `DiagrammeR` graph object that is to be unioned with the graph
+#'   supplied as `x`.
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Create a graph with a cycle
 #' # containing 6 nodes
@@ -38,19 +36,16 @@
 #'
 #' # Get the number of nodes in
 #' # the combined graph
-#' combined_graph %>%
-#'   count_nodes()
+#' combined_graph %>% count_nodes()
 #'
 #' # The `combine_graphs()`
 #' # function will renumber
 #' # node ID values in graph `y`
 #' # during the union; this ensures
 #' # that node ID values are unique
-#' combined_graph %>%
-#'   get_node_ids()
-#' @importFrom dplyr inner_join rename select bind_rows ends_with
-#' @export combine_graphs
-
+#' combined_graph %>% get_node_ids()
+#'
+#' @export
 combine_graphs <- function(x,
                            y) {
 
@@ -75,9 +70,6 @@ combine_graphs <- function(x,
       fcn_name = fcn_name,
       reasons = "The graph object supplied to `y` is not valid")
   }
-
-  # Create bindings for specific variables
-  new_node_id <- type <- label <- NULL
 
   # Get the number of nodes ever created for
   # graph `x`
@@ -126,6 +118,14 @@ combine_graphs <- function(x,
     dplyr::rename(from_new = new_node_id) %>%
     dplyr::select(-type, -label)
 
+  # Rename `id` if it has a `.x` suffix
+  if ("id.x" %in% colnames(y_edges_df)) {
+
+    y_edges_df <-
+      y_edges_df %>%
+      dplyr::rename(id = id.x)
+  }
+
   y_edges_df <-
     dplyr::inner_join(
       y_edges_df,
@@ -133,6 +133,14 @@ combine_graphs <- function(x,
       by = c("to" = "id")) %>%
     dplyr::rename(to_new = new_node_id) %>%
     dplyr::select(-type, -label)
+
+  # Rename `id` if it has a `.x` suffix
+  if ("id.x" %in% colnames(y_edges_df)) {
+
+    y_edges_df <-
+      y_edges_df %>%
+      dplyr::rename(id = id.x)
+  }
 
   # Copy new node IDs to `from` and `to` edge attrs
   y_edges_df$from <- y_edges_df$from_new

@@ -1,21 +1,15 @@
 #' Add a clone of an existing edge to the graph
-#' @description Add a new edge to
-#' a graph object of class
-#' \code{dgr_graph} which is a
-#' clone of an edge already in the
-#' graph. All edge attributes are
-#' preserved.
-#' @param graph a graph object of
-#' class \code{dgr_graph}.
-#' @param edge an edge ID
-#' corresponding to the graph edge
-#' to be cloned.
-#' @param from the outgoing node
-#' from which the edge is connected.
-#' @param to the incoming nodes to
-#' which each edge is connected.
-#' @return a graph object of
-#' class \code{dgr_graph}.
+#'
+#' Add a new edge to a graph object of class `dgr_graph` which is a clone of an
+#' edge already in the graph. All edge attributes are preserved.
+#'
+#' @inheritParams render_graph
+#' @param edge An edge ID corresponding to the graph edge to be cloned.
+#' @param from The outgoing node from which the edge is connected.
+#' @param to The incoming nodes to which each edge is connected.
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Create a graph with a path of
 #' # 2 nodes; supply a common `rel`
@@ -35,8 +29,7 @@
 #'
 #' # Display the graph's internal
 #' # edge data frame
-#' graph %>%
-#'   get_edge_df()
+#' graph %>% get_edge_df()
 #'
 #' # Create a new node (will have
 #' # node ID of `3`) and then
@@ -54,8 +47,7 @@
 #'
 #' # Display the graph's internal
 #' # edge data frame
-#' graph_2 %>%
-#'   get_edge_df()
+#' graph_2 %>% get_edge_df()
 #'
 #' # The same change can be performed
 #' # with some helper functions in the
@@ -70,11 +62,8 @@
 #'
 #' # Display the graph's internal
 #' # edge data frame
-#' graph_3 %>%
-#'   get_edge_df()
-#' @importFrom dplyr filter select
-#' @export add_edge_clone
-
+#' graph_3 %>% get_edge_df()
+#' @export
 add_edge_clone <- function(graph,
                            edge,
                            from,
@@ -118,9 +107,6 @@ add_edge_clone <- function(graph,
       fcn_name = fcn_name,
       reasons = "The value provided in `edge` does not correspond to an edge in the graph")
   }
-
-  # Create bindings for specific variables
-  id <- version_id <- NULL
 
   # Get the value for the latest `version_id` for
   # graph (in the `graph_log`)

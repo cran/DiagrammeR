@@ -7,31 +7,31 @@
 set_edge_attrs_ws(graph, edge_attr, value)
 }
 \arguments{
-\item{graph}{a graph object of class
-\code{dgr_graph}.}
+\item{graph}{A graph object of class \code{dgr_graph}.}
 
-\item{edge_attr}{the name of the attribute to set.}
+\item{edge_attr}{The name of the attribute to set.}
 
-\item{value}{the value to be set for the chosen
-attribute for the edges in the current selection.}
+\item{value}{The value to be set for the chosen attribute for the edges in
+the current selection.}
 }
 \value{
-a graph object of class \code{dgr_graph}.
+A graph object of class \code{dgr_graph}.
 }
 \description{
-From a graph object of class
-\code{dgr_graph} or an edge data frame, set edge
+From a graph object of class \code{dgr_graph} or an edge data frame, set edge
 attribute properties for one or more edges.
+}
+\details{
+This function makes use of an active selection of edges (and the function
+ending with \verb{_ws} hints at this).
 
-Selections of edges can be performed using
-the following \code{select_...} functions:
-\code{select_edges()},
-\code{select_last_edge()}, or
-\code{select_edges_by_node_id()}.
-Selections of edges can also be performed using
-the following traversal functions:
-\code{trav_out_edge()}, \code{trav_in_edge()},
-or \code{trav_both_edge()}.
+Selections of edges can be performed using the following selection
+(\verb{select_*()}) functions: \code{\link[=select_edges]{select_edges()}}, \code{\link[=select_last_edges_created]{select_last_edges_created()}},
+\code{\link[=select_edges_by_edge_id]{select_edges_by_edge_id()}}, or \code{\link[=select_edges_by_node_id]{select_edges_by_node_id()}}.
+
+Selections of edges can also be performed using the following traversal
+(\verb{trav_*()}) functions: \code{\link[=trav_out_edge]{trav_out_edge()}}, \code{\link[=trav_in_edge]{trav_in_edge()}},
+\code{\link[=trav_both_edge]{trav_both_edge()}}, or \code{\link[=trav_reverse_edge]{trav_reverse_edge()}}.
 }
 \examples{
 # Create a simple graph
@@ -55,6 +55,6 @@ graph <-
 # frame to verify that the
 # edge attribute has been set
 # for specific edges
-graph \%>\%
-  get_edge_df()
+graph \%>\% get_edge_df()
+
 }

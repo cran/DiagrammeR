@@ -1,33 +1,32 @@
-#' Add new edges with identical definitions as with a
-#' selection of edges
-#' @description Add edges in the same direction
-#' of one or more edges available as an edge selection
-#' in a graph object of class \code{dgr_graph}. New
-#' graph edges have the same edge definitions as those
-#' in the selection except with new edge ID values.
-#' There is also the option to assign a common
-#' \code{rel} grouping to the newly created edges.
-#' Upon addition of the edges, the edge selection will
-#' be retained for further selection or traversal
-#' operations.
+#' Add new edges with identical definitions as with a selection of edges
 #'
-#' Selections of edges can be performed using
-#' the following \code{select_...} functions:
-#' \code{select_edges()},
-#' \code{select_last_edge()}, or
-#' \code{select_edges_by_node_id()}.
-#' Selections of edges can also be performed using
-#' the following traversal functions:
-#' \code{trav_out_edge()}, \code{trav_in_edge()},
-#' or \code{trav_both_edge()}.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param rel an optional string to apply a
-#' \code{rel} attribute to all newly created edges.
-#' @return a graph object of class \code{dgr_graph}.
+#' Add edges in the same direction of one or more edges available as an edge
+#' selection in a graph object of class `dgr_graph`. New graph edges have the
+#' same edge definitions as those in the selection except with new edge ID
+#' values. There is also the option to assign a common `rel` grouping to the
+#' newly created edges. Upon addition of the edges, the edge selection will be
+#' retained for further selection or traversal operations.
+#'
+#' This function makes use of an active selection of edges (and the function
+#' ending with `_ws` hints at this).
+#'
+#' Selections of edges can be performed using the following selection
+#' (`select_*()`) functions: [select_edges()], [select_last_edges_created()],
+#' [select_edges_by_edge_id()], or [select_edges_by_node_id()].
+#'
+#' Selections of edges can also be performed using the following traversal
+#' (`trav_*()`) functions: [trav_out_edge()], [trav_in_edge()],
+#' [trav_both_edge()], or [trav_reverse_edge()].
+#'
+#' @inheritParams render_graph
+#' @param rel An optional string to apply a `rel` attribute to all newly created
+#'   edges.
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
-#' # Create an empty graph, add 2 nodes to it,
-#' # and create the edge `1->2`
+#' # Create an empty graph, add 2 nodes
+#' # to it, and create the edge `1->2`
 #' graph <-
 #'   create_graph() %>%
 #'   add_n_nodes(
@@ -38,11 +37,11 @@
 #'     from = 1, to = 2, rel = "a")
 #'
 #' # Get the graph's edges
-#' graph %>%
-#'   get_edge_ids()
+#' graph %>% get_edge_ids()
 #'
-#' # Select the edge and create 2 additional edges
-#' # with the same definition (`1->2`) but with
+#' # Select the edge and create 2
+#' # additional edges with the same
+#' # definition (`1->2`) but with
 #' # different `rel` values (`b` and `c`)
 #' graph <-
 #'   graph %>%
@@ -52,11 +51,9 @@
 #'   clear_selection()
 #'
 #' # Get the graph's edge data frame
-#' graph %>%
-#'   get_edge_df()
-#' @importFrom dplyr select
-#' @export add_forward_edges_ws
-
+#' graph %>% get_edge_df()
+#'
+#' @export
 add_forward_edges_ws <- function(graph,
                                  rel = NULL) {
 
@@ -89,9 +86,6 @@ add_forward_edges_ws <- function(graph,
       fcn_name = fcn_name,
       reasons = "The graph contains no selection of edges")
   }
-
-  # Create bindings for specific variables
-  from <- to <- NULL
 
   # If no value(s) provided for `rel`, set to NA
   if (is.null(rel)) {

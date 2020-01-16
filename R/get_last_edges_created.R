@@ -1,11 +1,12 @@
 #' Get the last set of edges created in a graph
-#' @description Get the last edges that were created
-#' in a graph object of class \code{dgr_graph}. This
-#' function should ideally be used just after creating
-#' the edges.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @return a vector of edge ID values.
+#'
+#' Get the last edges that were created in a graph object of class `dgr_graph`.
+#' This function should ideally be used just after creating the edges.
+#'
+#' @inheritParams render_graph
+#'
+#' @return A vector of edge ID values.
+#'
 #' @examples
 #' # Create a graph and add a cycle and then
 #' # a tree in 2 separate function calls
@@ -20,12 +21,9 @@
 #'
 #' # Get the last edges created (all edges
 #' # from the tree)
-#' graph %>%
-#'   get_last_edges_created()
-#' @importFrom dplyr mutate filter select pull if_else
-#' @importFrom utils tail
-#' @export get_last_edges_created
-
+#' graph %>% get_last_edges_created()
+#'
+#' @export
 get_last_edges_created <- function(graph) {
 
   # Get the name of the function
@@ -47,11 +45,6 @@ get_last_edges_created <- function(graph) {
       reasons = "The graph contains no edges")
   }
 
-  # Create bindings for specific variables
-  function_used <- edges <- step_created_edges <- NULL
-  step_deleted_edges <- step_init_with_edges <- version_id <- NULL
-  time_modified <- duration <- id <- NULL
-
   graph_transform_steps <-
     graph$graph_log %>%
     dplyr::mutate(step_created_edges = dplyr::if_else(
@@ -68,7 +61,7 @@ get_last_edges_created <- function(graph) {
   if (nrow(graph_transform_steps) > 0) {
 
     if (graph_transform_steps %>%
-        tail(1) %>%
+        utils::tail(1) %>%
         dplyr::pull(step_deleted_edges) == 1) {
 
       emit_error(
@@ -80,11 +73,11 @@ get_last_edges_created <- function(graph) {
         number_of_edges_created <-
           (graph_transform_steps %>%
              dplyr::select(edges) %>%
-             tail(2) %>%
+             utils::tail(2) %>%
              dplyr::pull(edges))[2] -
           (graph_transform_steps %>%
              dplyr::select(edges) %>%
-             tail(2) %>%
+             utils::tail(2) %>%
              dplyr::pull(edges))[1]
       } else {
         number_of_edges_created <-
@@ -96,7 +89,7 @@ get_last_edges_created <- function(graph) {
     edge_id_values <-
       graph$edges_df %>%
       dplyr::select(id) %>%
-      tail(number_of_edges_created) %>%
+      utils::tail(number_of_edges_created) %>%
       dplyr::pull(id)
   } else {
     edge_id_values <- NA

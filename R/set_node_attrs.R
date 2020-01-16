@@ -1,20 +1,17 @@
 #' Set node attribute values
-#' @description From a graph object of
-#' class \code{dgr_graph}, set node
-#' attribute values for one or more
-#' nodes.
-#' @param graph a graph object of
-#' class \code{dgr_graph}.
-#' @param node_attr the name of the
-#' attribute to set.
-#' @param values the values to be
-#' set for the chosen attribute for
-#' the chosen nodes.
-#' @param nodes an optional vector
-#' of node IDs for filtering the list
-#' of nodes present in the graph.
-#' @return a graph object of class
-#' \code{dgr_graph}.
+#'
+#' From a graph object of class `dgr_graph`, set node attribute values for one
+#' or more nodes.
+#'
+#' @inheritParams render_graph
+#' @param node_attr The name of the attribute to set.
+#' @param values The values to be set for the chosen attribute for the chosen
+#'   nodes.
+#' @param nodes An optional vector of node IDs for filtering the list of nodes
+#'   present in the graph.
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Create a node data frame (ndf)
 #' ndf <-
@@ -47,8 +44,7 @@
 #'     nodes = c(1, 3))
 #'
 #' # View the graph's node data frame
-#' graph %>%
-#'   get_node_df()
+#' graph %>% get_node_df()
 #'
 #' # Set attribute `color = "blue"` for
 #' # all nodes in the graph
@@ -59,12 +55,10 @@
 #'     values = "blue")
 #'
 #' # Display the graph's ndf
-#' graph %>%
-#'   get_node_df()
-#' @importFrom dplyr mutate
-#' @importFrom rlang enquo get_expr
-#' @export set_node_attrs
-
+#' graph %>% get_node_df()
+#'
+#' @import rlang
+#' @export
 set_node_attrs <- function(graph,
                            node_attr,
                            values,
@@ -75,9 +69,6 @@ set_node_attrs <- function(graph,
 
   # Get the name of the function
   fcn_name <- get_calling_fcn()
-
-  # Create bindings for specific variables
-  id <- NULL
 
   # Get the requested `node_attr`
   node_attr <-

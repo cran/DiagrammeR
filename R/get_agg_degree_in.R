@@ -1,23 +1,17 @@
 #' Get an aggregate value from the indegree of nodes
-#' @description Get a single,
-#' aggregate value from the
-#' indegree values for all nodes
-#' in a graph, or, a subset of
-#' graph nodes.
-#' @param graph a graph object of
-#' class \code{dgr_graph}.
-#' @param agg the aggregation
-#' function to use for summarizing
-#' indegree values from graph nodes.
-#' The following aggregation functions
-#' can be used: \code{sum}, \code{min},
-#' \code{max}, \code{mean}, or
-#' \code{median}.
-#' @param conditions an option to use
-#' filtering conditions for the nodes
-#' to consider.
-#' @return a vector with an aggregate
-#' indegree value.
+#'
+#' Get a single, aggregate value from the indegree values for all nodes in a
+#' graph, or, a subset of graph nodes.
+#'
+#' @inheritParams render_graph
+#' @param agg The aggregation function to use for summarizing indegree values
+#'   from graph nodes. The following aggregation functions can be used: `sum`,
+#'   `min`, `max`, `mean`, or `median`.
+#' @param conditions An option to use filtering conditions for the nodes to
+#'   consider.
+#'
+#' @return A vector with an aggregate indegree value.
+#'
 #' @examples
 #' # Create a random graph using the
 #' # `add_gnm_graph()` function
@@ -57,12 +51,9 @@
 #'   get_agg_degree_in(
 #'     agg = "mean",
 #'     conditions = value > 5.0)
-#' @importFrom dplyr group_by summarize_ select filter ungroup pull
-#' @importFrom stats as.formula
-#' @importFrom purrr flatten_dbl
-#' @importFrom rlang enquo UQ get_expr
-#' @export get_agg_degree_in
-
+#'
+#' @import rlang
+#' @export
 get_agg_degree_in <- function(graph,
                               agg,
                               conditions = NULL) {
@@ -81,9 +72,6 @@ get_agg_degree_in <- function(graph,
   # Capture provided conditions
   conditions <- rlang::enquo(conditions)
 
-  # Create binding for variable
-  id <- NULL
-
   # If filtering conditions are provided then
   # pass in those conditions and filter the ndf
   if (!is.null(
@@ -92,11 +80,7 @@ get_agg_degree_in <- function(graph,
 
     # Extract the node data frame from the graph
     ndf <- get_node_df(graph)
-
-    ndf <-
-      filter(
-        .data = ndf,
-        rlang::UQ(conditions))
+    ndf <- dplyr::filter(.data = ndf, !!conditions)
 
     # Get a vector of node ID values
     node_ids <-

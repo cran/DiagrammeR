@@ -1,13 +1,14 @@
 #' Get a vector of edge ID values
-#' @description Obtain a vector of edge ID values
-#' from a graph object. An optional filter by
-#' edge attribute can limit the set of edge ID
-#' values returned.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param conditions an option to use filtering
-#' conditions for the retrieval of edges.
-#' @return a vector of edge ID values.
+#'
+#' Obtain a vector of edge ID values from a graph object. An optional filter by
+#'   edge attribute can limit the set of edge ID values returned.
+#'
+#' @inheritParams render_graph
+#' @param conditions an option to use filtering conditions for the retrieval of
+#'   edges.
+#'
+#' @return A vector of edge ID values.
+#'
 #' @examples
 #' # Create a node data frame (ndf)
 #' ndf <-
@@ -33,8 +34,7 @@
 #'     edges_df = edf)
 #'
 #' # Get a vector of all edges in a graph
-#' graph %>%
-#'   get_edge_ids()
+#' graph %>% get_edge_ids()
 #'
 #' # Get a vector of edge ID values using a
 #' # numeric comparison (i.e., all edges with
@@ -57,10 +57,9 @@
 #'   conditions =
 #'     color == "blue" &
 #'     value > 5)
-#' @importFrom dplyr filter pull
-#' @importFrom rlang enquo UQ get_expr
-#' @export get_edge_ids
-
+#'
+#' @import rlang
+#' @export
 get_edge_ids <- function(graph,
                          conditions = NULL) {
 
@@ -69,9 +68,6 @@ get_edge_ids <- function(graph,
 
   # Capture provided conditions
   conditions <- rlang::enquo(conditions)
-
-  # Create binding for a specific variable
-  id <- NULL
 
   # If the graph contains no edges, return NA
   if (nrow(graph$edges_df) == 0) {
@@ -88,10 +84,7 @@ get_edge_ids <- function(graph,
     rlang::enquo(conditions) %>%
     rlang::get_expr())) {
 
-    edges_df <-
-      filter(
-        .data = edges_df,
-        rlang::UQ(conditions))
+    edges_df <- dplyr::filter(.data = edges_df, !!conditions)
   }
 
   # If no edges remain then return NA
@@ -99,6 +92,5 @@ get_edge_ids <- function(graph,
     return(NA)
   }
 
-  edges_df %>%
-    dplyr::pull(id)
+  edges_df %>% dplyr::pull(id)
 }

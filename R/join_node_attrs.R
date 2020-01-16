@@ -1,27 +1,25 @@
 #' Join new node attribute values using a data frame
-#' @description Join new node attribute values in a
-#' left join using a data frame. The use of a left join
-#' in this function allows for no possibility that
-#' nodes in the graph might be removed after the join.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param df the data frame to use for joining.
-#' @param by_graph optional specification of the column
-#' in the graph's internal node data frame for the left
-#' join. If both \code{by_graph} and \code{by_df} are
-#' not provided, then a natural join will occur if
-#' there are columns in the graph's ndf and in
-#' \code{df} with identical names.
-#' @param by_df optional specification of the column in
-#' \code{df} for the left join. If both \code{by_graph}
-#' and \code{by_df} are not provided, then a natural
-#' join will occur if there are columns in the graph's
-#' ndf and in \code{df} with identical names.
-#' \code{dgr_graph} that is created using
-#' \code{create_graph}.
-#' @return a graph object of class \code{dgr_graph}.
+#'
+#' Join new node attribute values in a left join using a data frame. The use of
+#' a left join in this function allows for no possibility that nodes in the
+#' graph might be removed after the join.
+#'
+#' @inheritParams render_graph
+#' @param df The data frame to use for joining.
+#' @param by_graph Optional specification of the column in the graph's internal
+#'   node data frame for the left join. If both `by_graph` and `by_df` are not
+#'   provided, then a natural join will occur if there are columns in the
+#'   graph's ndf and in `df` with identical names.
+#' @param by_df Optional specification of the column in `df` for the left join.
+#'   If both `by_graph` and `by_df` are not provided, then a natural join will
+#'   occur if there are columns in the graph's ndf and in `df` with identical
+#'   names.
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Set a seed
+#' suppressWarnings(RNGversion("3.5.0"))
 #' set.seed(23)
 #'
 #' # Create a simple graph
@@ -49,8 +47,7 @@
 #'
 #' # Get the graph's internal ndf to show that the
 #' # join has been made
-#' graph %>%
-#'   get_node_df()
+#' graph %>% get_node_df()
 #'
 #' # Get betweenness values for each node and
 #' # add them as a node attribute (Note the
@@ -63,11 +60,9 @@
 #'
 #' # Get the graph's internal ndf to show that
 #' # this join has been made
-#' graph %>%
-#'   get_node_df()
-#' @importFrom dplyr select everything
-#' @export join_node_attrs
-
+#' graph %>% get_node_df()
+#'
+#' @export
 join_node_attrs <- function(graph,
                             df,
                             by_graph = NULL,
@@ -100,9 +95,6 @@ join_node_attrs <- function(graph,
       fcn_name = fcn_name,
       reasons = "Both column specifications must be provided")
   }
-
-  # Create bindings for specific variables
-  id <- type <- label <- NULL
 
   # Get the number of nodes ever created for
   # this graph

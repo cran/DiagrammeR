@@ -7,22 +7,18 @@
 get_closeness(graph, direction = "all")
 }
 \arguments{
-\item{graph}{a graph object of class
-\code{dgr_graph}.}
+\item{graph}{A graph object of class \code{dgr_graph}.}
 
-\item{direction}{using \code{all} (the default), the
-search will ignore edge direction while traversing
-through the graph. With \code{out}, measurements of
-paths will be from a node whereas with \code{in},
-measurements of paths will be to a node.}
+\item{direction}{using \code{all} (the default), the search will ignore edge
+direction while traversing through the graph. With \code{out}, measurements
+of paths will be from a node whereas with \verb{in}, measurements of paths
+will be to a node.}
 }
 \value{
-a data frame with closeness values for
-each of the nodes.
+A data frame with closeness values for each of the nodes.
 }
 \description{
-Get the closeness centrality values
-for all nodes in a graph.
+Get the closeness centrality values for all nodes in a graph.
 }
 \examples{
 # Create a random graph using the
@@ -36,8 +32,7 @@ graph <-
 
 # Get closeness values for all nodes
 # in the graph
-graph \%>\%
-  get_closeness()
+graph \%>\% get_closeness()
 
 # Add the closeness values to
 # the graph as a node attribute
@@ -47,6 +42,6 @@ graph <-
     df = get_closeness(.))
 
 # Display the graph's node data frame
-graph \%>\%
-  get_node_df()
+graph \%>\% get_node_df()
+
 }

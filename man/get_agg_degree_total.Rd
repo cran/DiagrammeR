@@ -7,28 +7,20 @@
 get_agg_degree_total(graph, agg, conditions = NULL)
 }
 \arguments{
-\item{graph}{a graph object of class
-\code{dgr_graph}.}
+\item{graph}{A graph object of class \code{dgr_graph}.}
 
-\item{agg}{the aggregation
-function to use for summarizing
-total degree values from graph nodes.
-The following aggregation functions
-can be used: \code{sum}, \code{min},
-\code{max}, \code{mean}, or \code{median}.}
+\item{agg}{the aggregation function to use for summarizing total degree
+values from graph nodes. The following aggregation functions can be used:
+\code{sum}, \code{min}, \code{max}, \code{mean}, or \code{median}.}
 
-\item{conditions}{an option to
-use filtering conditions for
-the nodes to consider.}
+\item{conditions}{an option to use filtering conditions for the nodes to
+consider.}
 }
 \value{
-a vector with an
-aggregate total degree value.
+A vector with an aggregate total degree value.
 }
 \description{
-Get a single,
-aggregate value from the total
-degree values for all nodes in a
+Get a single, aggregate value from the total degree values for all nodes in a
 graph, or, a subset of graph nodes.
 }
 \examples{
@@ -72,4 +64,5 @@ graph \%>\%
   get_agg_degree_total(
     agg = "mean",
     conditions = value < 5.0)
+
 }

@@ -1,17 +1,17 @@
 #' Select edges in a graph using edge ID values
-#' @description Select edges in a graph object of class
-#' \code{dgr_graph} using edge ID values.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param edges a vector of edge IDs for the selection
-#' of edges present in the graph.
-#' @param set_op the set operation to perform upon
-#' consecutive selections of graph edges This can
-#' either be as a \code{union} (the default), as an
-#' intersection of selections with \code{intersect},
-#' or, as a \code{difference} on the previous
-#' selection, if it exists.
-#' @return a graph object of class \code{dgr_graph}.
+#'
+#' Select edges in a graph object of class `dgr_graph` using edge ID values.
+#'
+#' @inheritParams render_graph
+#' @param edges A vector of edge IDs for the selection of edges present in the
+#'   graph.
+#' @param set_op The set operation to perform upon consecutive selections of
+#'   graph edges This can either be as a `union` (the default), as an
+#'   intersection of selections with `intersect`, or, as a `difference` on the
+#'   previous selection, if it exists.
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Create a graph with 5 nodes
 #' graph <-
@@ -26,8 +26,7 @@
 #'     edges = 1:2)
 #'
 #' # Get the selection of edges
-#' graph %>%
-#'   get_selection()
+#' graph %>% get_selection()
 #'
 #' # Perform another selection of edges,
 #' # with edge IDs `1`, `2`, and `4`
@@ -38,8 +37,7 @@
 #'     edges = c(1, 2, 4))
 #'
 #' # Get the selection of edges
-#' graph %>%
-#'   get_selection()
+#' graph %>% get_selection()
 #'
 #' # Get the fraction of edges selected
 #' # over all the edges in the graph
@@ -50,9 +48,8 @@
 #'     e <- count_edges(.)
 #'     l/e
 #'   }
-#' @importFrom dplyr filter select rename
-#' @export select_edges_by_edge_id
-
+#'
+#' @export
 select_edges_by_edge_id <- function(graph,
                                     edges,
                                     set_op = "union") {
@@ -78,9 +75,6 @@ select_edges_by_edge_id <- function(graph,
       fcn_name = fcn_name,
       reasons = "The graph contains no edges")
   }
-
-  # Create bindings for specific variables
-  id <- from <- to <- NULL
 
   # Extract the graph's internal edf
   edges_df <- graph$edges_df
@@ -150,43 +144,49 @@ select_edges_by_edge_id <- function(graph,
     save_graph_as_rds(graph = graph)
   }
 
-  # Construct message body
-  if (!n_e_select_properties_in[["node_selection_available"]] &
-      !n_e_select_properties_in[["edge_selection_available"]]) {
+  # Emit a message about the modification of a selection
+  # if that option is set
+  if (!is.null(graph$graph_info$display_msgs) &&
+      graph$graph_info$display_msgs) {
 
-    msg_body <-
-      glue::glue(
-        "created a new selection of \\
-        {n_e_select_properties_out[['selection_count_str']]}")
+    # Construct message body
+    if (!n_e_select_properties_in[["node_selection_available"]] &
+        !n_e_select_properties_in[["edge_selection_available"]]) {
 
-  } else if (n_e_select_properties_in[["node_selection_available"]] |
-             n_e_select_properties_in[["edge_selection_available"]]) {
-
-    if (n_e_select_properties_in[["edge_selection_available"]]) {
       msg_body <-
         glue::glue(
-          "modified an existing selection of\\
+          "created a new selection of \\
+        {n_e_select_properties_out[['selection_count_str']]}")
+
+    } else if (n_e_select_properties_in[["node_selection_available"]] |
+               n_e_select_properties_in[["edge_selection_available"]]) {
+
+      if (n_e_select_properties_in[["edge_selection_available"]]) {
+        msg_body <-
+          glue::glue(
+            "modified an existing selection of\\
            {n_e_select_properties_in[['selection_count_str']]}:
            * {n_e_select_properties_out[['selection_count_str']]}\\
            are now in the active selection
            * used the `{set_op}` set operation")
-    }
+      }
 
-    if (n_e_select_properties_in[["node_selection_available"]]) {
-      msg_body <-
-        glue::glue(
-          "created a new selection of\\
+      if (n_e_select_properties_in[["node_selection_available"]]) {
+        msg_body <-
+          glue::glue(
+            "created a new selection of\\
            {n_e_select_properties_out[['selection_count_str']]}:
            * this replaces\\
            {n_e_select_properties_in[['selection_count_str']]}\\
            in the prior selection")
+      }
     }
-  }
 
-  # Issue a message to the user
-  emit_message(
-    fcn_name = fcn_name,
-    message_body = msg_body)
+    # Issue a message to the user
+    emit_message(
+      fcn_name = fcn_name,
+      message_body = msg_body)
+  }
 
   graph
 }

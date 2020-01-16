@@ -1,26 +1,31 @@
 #' Traverse to any reverse edges
-#' @description From an active selection
-#' of edges in a graph object of class
-#' \code{dgr_graph}, traverse to any
-#' available reverse edges between the
-#' nodes common to the selected edges.
-#' For instance, if an active selection
-#' has the edge \code{1->2} but there is
-#' also an (not selected) edge \code{2->1},
-#' then this function can either switch
-#' to the selection of \code{2->1}, or,
-#' incorporate both those edges into the
+#'
+#' From an active selection of edges in a graph object of class `dgr_graph`,
+#' traverse to any available reverse edges between the nodes common to the
+#' selected edges. For instance, if an active selection has the edge `1->2` but
+#' there is also an (not selected) edge `2->1`, then this function can either
+#' switch to the selection of `2->1`, or, incorporate both those edges into the
 #' active selection of edges.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param add_to_selection an option to
-#' either add the reverse edges to the
-#' active selection of edges (\code{TRUE})
-#' or switch the active selection entirely
-#' to those reverse edges (\code{FALSE},
-#' the default case).
-#' @return a graph object of class
-#' \code{dgr_graph}.
+#'
+#' This traversal function makes use of an active selection of edges. After the
+#' traversal, depending on the traversal conditions, there will either be a
+#' selection of edges or no selection at all.
+#'
+#' Selections of edges can be performed using the following selection
+#' (`select_*()`) functions: [select_edges()], [select_last_edges_created()],
+#' [select_edges_by_edge_id()], or [select_edges_by_node_id()].
+#'
+#' Selections of edges can also be performed using the following traversal
+#' (`trav_*()`) functions: [trav_out_edge()], [trav_in_edge()],
+#' [trav_both_edge()], or [trav_reverse_edge()].
+#'
+#' @inheritParams render_graph
+#' @param add_to_selection An option to either add the reverse edges to the
+#'   active selection of edges (`TRUE`) or switch the active selection entirely
+#'   to those reverse edges (`FALSE`, the default case).
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Create a node data frame (ndf)
 #' ndf <-
@@ -54,8 +59,7 @@
 #'       to = 3)
 #'
 #' # Get the inital edge selection
-#' graph %>%
-#'   get_selection()
+#' graph %>% get_selection()
 #'
 #' # Traverse to the reverse edges
 #' # (edges `2`: `4`->`1` and
@@ -65,11 +69,9 @@
 #'   trav_reverse_edge()
 #'
 #' # Get the current selection of edges
-#' graph %>%
-#'   get_selection()
-#' @importFrom dplyr filter_ bind_rows select rename arrange as_tibble
-#' @export trav_reverse_edge
-
+#' graph %>% get_selection()
+#'
+#' @export
 trav_reverse_edge <- function(graph,
                               add_to_selection = FALSE) {
 
@@ -102,9 +104,6 @@ trav_reverse_edge <- function(graph,
       fcn_name = fcn_name,
       reasons = "The graph contains no selection of edges")
   }
-
-  # Create bindings for specific variables
-  id <- from <- to <- edge <- NULL
 
   # Extract the selection of edges
   edges_from <- graph$edge_selection$from

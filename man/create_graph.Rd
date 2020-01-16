@@ -4,64 +4,52 @@
 \alias{create_graph}
 \title{Create a graph object}
 \usage{
-create_graph(nodes_df = NULL, edges_df = NULL, directed = TRUE,
-  graph_name = NULL, attr_theme = "default", write_backups = FALSE)
+create_graph(
+  nodes_df = NULL,
+  edges_df = NULL,
+  directed = TRUE,
+  graph_name = NULL,
+  attr_theme = "default",
+  write_backups = FALSE,
+  display_msgs = FALSE
+)
 }
 \arguments{
-\item{nodes_df}{an optional data frame
-containing, at minimum, a column
-(called \code{id}) which contains
-node IDs for the graph. Additional
-columns (node attributes) can be
-included with values for the named
-node attribute.}
+\item{nodes_df}{An optional data frame containing, at minimum, a column
+(called \code{id}) which contains node IDs for the graph. Additional columns
+(node attributes) can be included with values for the named node attribute.}
 
-\item{edges_df}{an optional data
-frame containing, at minimum, two
-columns (called \code{from} and
-\code{to}) where node IDs are
-provided. Additional columns (edge
-attributes) can be included with
-values for the named edge attribute.}
+\item{edges_df}{An optional data frame containing, at minimum, two columns
+(called \code{from} and \code{to}) where node IDs are provided. Additional columns
+(edge attributes) can be included with values for the named edge attribute.}
 
-\item{directed}{with \code{TRUE}
-(the default) or \code{FALSE}, either
-directed or undirected edge
-operations will be generated,
-respectively.}
+\item{directed}{With \code{TRUE} (the default) or \code{FALSE}, either directed or
+undirected edge operations will be generated, respectively.}
 
-\item{graph_name}{an optional
-string for labeling the graph object.}
+\item{graph_name}{An optional string for labeling the graph object.}
 
-\item{attr_theme}{the theme (i.e.,
-collection of \code{graph},
-\code{node}, and \code{edge} global
-graph attributes) to use for this
-graph. The default theme is called
-\code{default}. If this is set to
-\code{NULL} then no global graph
-attributes will be applied to the
-graph upon creation.}
+\item{attr_theme}{The theme (i.e., collection of \code{graph}, \code{node}, and \code{edge}
+global graph attributes) to use for this graph. The default theme is called
+\code{default}; there are hierarchical layout themes called \code{lr}, \code{tb}, \code{rl},
+and \code{bt} (these operate from left-to-right, top-to-bottom, right-to-left,
+and bottom-to-top); and, for larger graphs, the \code{fdp} theme provides a
+force directed layout. If this is set to \code{NULL} then no global graph
+attributes will be applied to the graph upon creation.}
 
-\item{write_backups}{an option to
-write incremental backups of changing
-graph states to disk. If \code{TRUE},
-a subdirectory within the working
-directory will be created and used
-to store \code{RDS} files. The
-default value is \code{FALSE} so
-one has to opt in to use this
-functionality.}
+\item{write_backups}{An option to write incremental backups of changing graph
+states to disk. If \code{TRUE}, a subdirectory within the working directory will
+be created and used to store \code{RDS} files. The default value is \code{FALSE} so
+one has to opt in to use this functionality.}
+
+\item{display_msgs}{An option to display messages primarily concerned with
+changes in graph selections. By default, this is \code{FALSE}.}
 }
 \value{
-a graph object of class
-\code{dgr_graph}.
+A graph object of class \code{dgr_graph}.
 }
 \description{
-Generates a graph object
-with the option to use node data frames
-(ndfs) and/or edge data frames (edfs)
-to populate the initial graph.
+Generates a graph object with the option to use node data frames (ndfs)
+and/or edge data frames (edfs) to populate the initial graph.
 }
 \examples{
 # With `create_graph()` we can
@@ -124,9 +112,9 @@ edf <-
     rel = "leading_to",
     values = c(7.3, 2.6, 8.3))
 
-# 2. create the graph object with
-#    `create_graph()` and pass in
-#    the ndf and edf objects
+# Create the graph object with
+# `create_graph()` and pass in the
+# ndf and edf objects
 graph <-
   create_graph(
     nodes_df = ndf,
@@ -134,11 +122,10 @@ graph <-
 
 # Get information on the graph's
 # internal edge data frame (edf)
-graph \%>\%
-  get_edge_df()
+graph \%>\% get_edge_df()
 
 # Get information on the graph's
 # internal node data frame (ndf)
-graph \%>\%
-  get_node_df()
+graph \%>\% get_node_df()
+
 }

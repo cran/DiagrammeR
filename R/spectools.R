@@ -1,7 +1,8 @@
 #' Razor-like template for diagram specification
-#' @description Use Razor-like syntax to define a template for use in a
-#' \code{grViz} diagram.
-#' @param spec string spec to be parsed and evaluated
+#'
+#' Use Razor-like syntax to define a template for use in a `grViz` diagram.
+#'
+#' @param spec String spec to be parsed and evaluated.
 #' @examples
 #' \dontrun{
 #' # a simple example to use a LETTER as a node label
@@ -34,8 +35,8 @@
 #' "
 #' grViz(replace_in_spec(spec))
 #' }
+#'
 #' @export
-
 replace_in_spec <- function(spec) {
 
   # Directive for marking subscripted text in a label or tooltip '@_'
@@ -103,8 +104,8 @@ replace_in_spec <- function(spec) {
 
       while (grepl(paste0("@@", i, "([^-0-9])"), spec_body)) {
 
-        spec_body <- gsub(paste0("'@@", i, "'"),
-                          paste0("'", eval_expressions[[i]][1], "'"), spec_body)
+        spec_body <- gsub(paste0("@@", i),
+                          eval_expressions[[i]][1], spec_body)
       }
     }
 

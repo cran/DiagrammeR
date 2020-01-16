@@ -1,22 +1,20 @@
 #' Get Dice similarity coefficient scores
-#' @description Get the Dice similarity coefficient
-#' scores for one or more nodes in a graph.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param nodes an optional vector of node IDs to
-#' consider for Dice similarity scores. If not supplied,
-#' then similarity scores will be provided for every
-#' pair of nodes in the graph.
-#' @param direction using \code{all} (the default), the
-#' function will ignore edge direction when
-#' determining scores for neighboring nodes. With
-#' \code{out} and \code{in}, edge direction for
-#' neighboring nodes will be considered.
-#' @param round_to the maximum number of decimal places
-#' to retain for the Dice similarity coefficient
-#' scores. The default value is \code{3}.
-#' @return a matrix with Dice similarity values
-#' for each pair of nodes considered.
+#'
+#' Get the Dice similarity coefficient scores for one or more nodes in a graph.
+#' @inheritParams render_graph
+#' @param nodes an optional vector of node IDs to consider for Dice similarity
+#'   scores. If not supplied, then similarity scores will be provided for every
+#'   pair of nodes in the graph.
+#' @param direction using `all` (the default), the function will ignore
+#'   edge direction when determining scores for neighboring nodes. With
+#'   `out` and `in`, edge direction for neighboring nodes will be
+#'   considered.
+#' @param round_to the maximum number of decimal places to retain for the Dice
+#'   similarity coefficient scores. The default value is `3`.
+#'
+#' @return A matrix with Dice similarity values for each pair of nodes
+#'   considered.
+#'
 #' @examples
 #' # Create a random graph using the
 #' # `add_gnm_graph()` function
@@ -34,9 +32,8 @@
 #' graph %>%
 #'   get_dice_similarity(
 #'     nodes = 5:7)
-#' @importFrom igraph similarity V
-#' @export get_dice_similarity
-
+#'
+#' @export
 get_dice_similarity <- function(graph,
                                 nodes = NULL,
                                 direction = "all",
@@ -57,7 +54,7 @@ get_dice_similarity <- function(graph,
   ig_graph <- to_igraph(graph)
 
   if (is.null(nodes)) {
-    ig_nodes <- V(ig_graph)
+    ig_nodes <- igraph::V(ig_graph)
   }
 
   if (!is.null(nodes)) {
@@ -72,7 +69,7 @@ get_dice_similarity <- function(graph,
     }
 
     # Get an igraph representation of node ID values
-    ig_nodes <- V(ig_graph)[nodes]
+    ig_nodes <- igraph::V(ig_graph)[nodes]
   }
 
   # Get the Dice similarity scores

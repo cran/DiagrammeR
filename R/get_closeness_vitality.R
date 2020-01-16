@@ -1,12 +1,10 @@
 #' Get closeness vitality
-#' @description Get the closeness
-#' vitality values for all nodes in
-#' the graph.
-#' @param graph a graph object of
-#' class \code{dgr_graph}.
-#' @return a data frame with closeness
-#' vitality values for each of the
-#' nodes.
+#'
+#' Get the closeness vitality values for all nodes in the graph.
+#' @inheritParams render_graph
+#'
+#' @return A data frame with closeness vitality values for each of the nodes.
+#'
 #' @examples
 #' # Create a random graph using the
 #' # `add_gnm_graph()` function
@@ -19,8 +17,7 @@
 #'
 #' # Get closeness vitality values
 #' # for all nodes in the graph
-#' graph %>%
-#'   get_closeness_vitality()
+#' graph %>% get_closeness_vitality()
 #'
 #' # Add the closeness vitality
 #' # values to the graph as a
@@ -32,12 +29,9 @@
 #'
 #' # Display the graph's
 #' # node data frame
-#' graph %>%
-#'   get_node_df()
-#' @importFrom igraph distances delete_vertices
-#' @importFrom purrr map
-#' @export get_closeness_vitality
-
+#' graph %>% get_node_df()
+#'
+#' @export
 get_closeness_vitality <- function(graph) {
 
   # Get the name of the function

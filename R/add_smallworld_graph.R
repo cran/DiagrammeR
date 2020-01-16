@@ -1,72 +1,31 @@
 #' Add a Watts-Strogatz small-world graph
-#' @description To an existing graph
-#' object, add a graph built according
-#' to the Watts-Strogatz small-world
-#' model, which uses a lattice along
-#' with a rewiring probability to
-#' randomly modify edge definitions.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param dimension the dimension of
-#' the starting lattice.
-#' @param size the size of the lattice
-#' across each dimension.
-#' @param neighborhood the neighborhood
-#' where the lattice nodes are to be
-#' connected.
-#' @param p the rewiring probability.
-#' @param loops a logical value (default
-#' is \code{FALSE}) that governs whether
-#' loops are allowed to be created.
-#' @param multiple a logical value
-#' (default is \code{FALSE}) that
-#' governs whether multiple edges are
-#' allowed to be created.
-#' @param type an optional string that
-#' describes the entity type for all the
-#' nodes to be added.
-#' @param label a boolean value where
-#' setting to \code{TRUE} ascribes node
-#' IDs to the label and \code{FALSE}
-#' yields a blank label.
-#' @param rel an optional string for
-#' providing a relationship label to all
-#' edges to be added.
-#' @param node_aes an optional list of
-#' named vectors comprising node
-#' aesthetic attributes. The helper
-#' function \code{node_aes()} is strongly
-#' recommended for use here as it
-#' contains arguments for each of the
-#' accepted node aesthetic attributes
-#' (e.g., \code{shape}, \code{style},
-#' \code{color}, \code{fillcolor}).
-#' @param edge_aes an optional list of
-#' named vectors comprising edge
-#' aesthetic attributes. The helper
-#' function \code{edge_aes()} is strongly
-#' recommended for use here as it
-#' contains arguments for each of the
-#' accepted edge aesthetic attributes
-#' (e.g., \code{shape}, \code{style},
-#' \code{penwidth}, \code{color}).
-#' @param node_data an optional list
-#' of named vectors comprising node data
-#' attributes. The helper function
-#' \code{node_data()} is strongly
-#' recommended for use here as it helps
-#' bind data specifically to the created
-#' nodes.
-#' @param edge_data an optional list
-#' of named vectors comprising edge
-#' data attributes. The helper function
-#' \code{edge_data()} is strongly
-#' recommended for use here as it helps
-#' bind data specifically to the created
-#' edges.
-#' @param set_seed supplying a value
-#' sets a random seed of the
-#' \code{Mersenne-Twister} implementation.
+#'
+#' To an existing graph object, add a graph built according to the
+#' Watts-Strogatz small-world model, which uses a lattice along with a rewiring
+#' probability to randomly modify edge definitions.
+#'
+#' @inheritParams node_edge_aes_data
+#' @inheritParams render_graph
+#' @param dimension The dimension of the starting lattice.
+#' @param size The size of the lattice across each dimension.
+#' @param neighborhood The neighborhood where the lattice nodes are to be
+#'   connected.
+#' @param p The rewiring probability.
+#' @param loops A logical value (default is `FALSE`) that governs whether loops
+#'   are allowed to be created.
+#' @param multiple A logical value (default is `FALSE`) that governs whether
+#'   multiple edges are allowed to be created.
+#' @param type An optional string that describes the entity type for all the
+#'   nodes to be added.
+#' @param label A logical value where setting to `TRUE` ascribes node IDs to the
+#'   label and `FALSE` yields a blank label.
+#' @param rel An optional string for providing a relationship label to all edges
+#'   to be added.
+#' @param set_seed Supplying a value sets a random seed of the
+#'   `Mersenne-Twister` implementation.
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Create an undirected smallworld
 #' # graph with 100 nodes using
@@ -82,16 +41,12 @@
 #'     set_seed = 23)
 #'
 #' # Get a count of nodes
-#' smallworld_graph %>%
-#'   count_nodes()
+#' smallworld_graph %>% count_nodes()
 #'
 #' # Get a count of edges
-#' smallworld_graph %>%
-#'   count_edges()
-#' @importFrom igraph sample_smallworld
-#' @importFrom dplyr select bind_cols as_tibble
-#' @export add_smallworld_graph
-
+#' smallworld_graph %>% count_edges()
+#'
+#' @export
 add_smallworld_graph <- function(graph,
                                  dimension,
                                  size,
@@ -121,9 +76,6 @@ add_smallworld_graph <- function(graph,
       fcn_name = fcn_name,
       reasons = "The graph object is not valid")
   }
-
-  # Create bindings for specific variables
-  index__ <- id <- NULL
 
   # If a seed value is supplied, set a seed
   if (!is.null(set_seed)) {

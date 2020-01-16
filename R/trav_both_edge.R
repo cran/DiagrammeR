@@ -1,40 +1,46 @@
-#' Traverse from one or more selected nodes onto
-#' adjacent edges
-#' @description From a graph object of class
-#' \code{dgr_graph} move to adjacent edges from a
-#' selection of one or more selected nodes, thereby
-#' creating a selection of edges. An optional filter
-#' by edge attribute can limit the set of edges
+#' Traverse from one or more selected nodes onto adjacent edges
+#'
+#' From a graph object of class `dgr_graph` move to adjacent edges from a
+#' selection of one or more selected nodes, thereby creating a selection of
+#' edges. An optional filter by edge attribute can limit the set of edges
 #' traversed to.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param conditions an option to use filtering
-#' conditions for the traversal.
-#' @param copy_attrs_from providing a node attribute
-#' name will copy those node attribute values to the
-#' traversed edges. If the edge attribute already exists,
-#' the values will be merged to the traversed edges;
-#' otherwise, a new edge attribute will be created.
-#' @param copy_attrs_as if a node attribute name
-#' is provided in \code{copy_attrs_from}, this option
-#' will allow the copied attribute values to be
-#' written under a different edge attribute name.
-#' If the attribute name provided in
-#' \code{copy_attrs_as} does not exist in the graph's
-#' edf, the new edge attribute will be created
-#' with the chosen name.
-#' @param agg if a node attribute is provided
-#' to \code{copy_attrs_from}, then an aggregation
-#' function is required since there may be cases where
-#' multiple node attribute values will be passed onto
-#' the traversed edge(s). To pass only a single value,
-#' the following aggregation functions can be used:
-#' \code{sum}, \code{min}, \code{max}, \code{mean}, or
-#' \code{median}.
-#' @return a graph object of class
-#' \code{dgr_graph}.
+#'
+#' This traversal function makes use of an active selection of nodes. After the
+#' traversal, depending on the traversal conditions, there will either be a
+#' selection of edges or no selection at all.
+#'
+#' Selections of nodes can be performed using the following node selection
+#' (`select_*()`) functions: [select_nodes()], [select_last_nodes_created()],
+#' [select_nodes_by_degree()], [select_nodes_by_id()], or
+#' [select_nodes_in_neighborhood()].
+#'
+#' Selections of nodes can also be performed using the following traversal
+#' (`trav_*()`) functions: [trav_out()], [trav_in()], [trav_both()],
+#' [trav_out_node()], [trav_in_node()], [trav_out_until()], or
+#' [trav_in_until()].
+#'
+#' @inheritParams render_graph
+#' @param conditions An option to use filtering conditions for the traversal.
+#' @param copy_attrs_from Providing a node attribute name will copy those node
+#'   attribute values to the traversed edges. If the edge attribute already
+#'   exists, the values will be merged to the traversed edges; otherwise, a new
+#'   edge attribute will be created.
+#' @param copy_attrs_as If a node attribute name is provided in
+#'   `copy_attrs_from`, this option will allow the copied attribute values
+#'   to be written under a different edge attribute name. If the attribute name
+#'   provided in `copy_attrs_as` does not exist in the graph's edf, the new
+#'   edge attribute will be created with the chosen name.
+#' @param agg If a node attribute is provided to `copy_attrs_from`, then an
+#'   aggregation function is required since there may be cases where multiple
+#'   node attribute values will be passed onto the traversed edge(s). To pass
+#'   only a single value, the following aggregation functions can be used:
+#'   `sum`, `min`, `max`, `mean`, or `median`.
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Set a seed
+#' suppressWarnings(RNGversion("3.5.0"))
 #' set.seed(23)
 #'
 #' # Create a simple graph
@@ -68,8 +74,7 @@
 #'   join_edge_attrs(df = df)
 #'
 #' # Show the graph's internal edge data frame
-#' graph %>%
-#'   get_edge_df()
+#' graph %>% get_edge_df()
 #'
 #' # Perform a simple traversal from nodes to
 #' # adjacent edges with no conditions on the
@@ -161,13 +166,10 @@
 #'     value = 5)
 #'
 #' # Show the graph's internal edge data frame
-#' graph %>%
-#'   get_edge_df()
-
+#' graph %>%get_edge_df()
 #'
 #' # Show the graph's internal node data frame
-#' graph %>%
-#'   get_node_df()
+#' graph %>% get_node_df()
 #'
 #' # Perform a traversal from the nodes to
 #' # the adjacent edges while also applying
@@ -183,14 +185,10 @@
 #'
 #' # Show the graph's internal edge data frame
 #' # after this change
-#' graph %>%
-#'   get_edge_df()
-#' @importFrom stats median
-#' @importFrom dplyr filter select select_ left_join right_join rename bind_rows group_by summarize_
-#' @importFrom tibble as_tibble
-#' @importFrom rlang enquo UQ get_expr
-#' @export trav_both_edge
-
+#' graph %>% get_edge_df()
+#'
+#' @import rlang
+#' @export
 trav_both_edge <- function(graph,
                            conditions = NULL,
                            copy_attrs_from = NULL,
@@ -263,9 +261,6 @@ trav_both_edge <- function(graph,
     }
   }
 
-  # Create bindings for specific variables
-  from <- to <- id <- id.y <- rel <- e_id <- NULL
-
   # Get the selection of nodes as the starting
   # nodes for the traversal
   starting_nodes <- graph$node_selection$node
@@ -292,10 +287,7 @@ trav_both_edge <- function(graph,
     rlang::enquo(conditions) %>%
     rlang::get_expr())) {
 
-    valid_edges <-
-      dplyr::filter(
-        .data = valid_edges,
-        rlang::UQ(conditions))
+    valid_edges <- dplyr::filter(.data = valid_edges, !!conditions)
   }
 
   # If no rows returned, then there are no
@@ -354,12 +346,12 @@ trav_both_edge <- function(graph,
         dplyr::left_join(edf, by = c("e_id" = "id")) %>%
         dplyr::rename(id = e_id) %>%
         dplyr::group_by(id) %>%
-        dplyr::summarize_(.dots = setNames(
+        dplyr::summarize_(.dots = stats::setNames(
           list(stats::as.formula(
             paste0("~", agg, "(", copy_attrs_from, ", na.rm = TRUE)"))),
           copy_attrs_from)) %>%
         dplyr::right_join(edf, by = "id") %>%
-        dplyr::select(id, from, to, rel, everything()) %>%
+        dplyr::select(id, from, to, rel, dplyr::everything()) %>%
         as.data.frame(stringsAsFractions = FALSE)
     }
 
@@ -490,7 +482,7 @@ trav_both_edge <- function(graph,
         dplyr::arrange(e_id) %>%
         dplyr::rename(id = e_id) %>%
         dplyr::group_by(id) %>%
-        dplyr::summarize_(.dots = setNames(
+        dplyr::summarize_(.dots = stats::setNames(
           list(stats::as.formula(
             paste0("~", agg, "(", copy_attrs_from, ", na.rm = TRUE)"))), copy_attrs_from)) %>%
         dplyr::ungroup() %>%
@@ -519,7 +511,7 @@ trav_both_edge <- function(graph,
 
       edges <-
         joined_edges %>%
-        dplyr::select(id, from, to, rel, everything()) %>%
+        dplyr::select(id, from, to, rel, dplyr::everything()) %>%
         dplyr::arrange(id) %>%
         as.data.frame(stringsAsFractions = FALSE)
     }

@@ -1,16 +1,12 @@
 #' Convert an igraph graph to a DiagrammeR one
-#' @description Convert an igraph graph to a DiagrammeR
-#' graph object.
-#' @param igraph an igraph graph object.
-#' @param graph_name an optional string for labeling
-#' the graph object.
-#' @param write_backups an option to write incremental
-#' backups of changing graph states to disk. If
-#' \code{TRUE}, a subdirectory of the working directory
-#' will be used to store \code{RDS} files. The
-#' default value is \code{FALSE} so one has to opt in
-#' to use this functionality.
-#' @return a graph object of class \code{dgr_graph}.
+#'
+#' Convert an igraph graph to a DiagrammeR graph object.
+#'
+#' @param igraph An \pkg{igraph} graph object.
+#' @inheritParams create_graph
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Create a DiagrammeR graph object
 #' dgr_graph_orig <-
@@ -35,19 +31,15 @@
 #' # Get some graph information
 #' (dgr_graph_new %>%
 #'   get_graph_info())[, 1:6]
-#' @importFrom igraph V E vertex_attr_names edge_attr_names vertex_attr edge_attr is_directed ends
-#' @importFrom dplyr arrange
-#' @export from_igraph
-
+#'
+#' @export
 from_igraph <- function(igraph,
                         graph_name = NULL,
-                        write_backups = FALSE) {
+                        write_backups = FALSE,
+                        display_msgs = FALSE) {
 
   # Get the name of the function
   fcn_name <- get_calling_fcn()
-
-  # Create bindings for specific variables
-  id <- NULL
 
   # Get vectors of all node and edge attributes
   node_attrs <- igraph::vertex_attr_names(igraph)
@@ -168,7 +160,8 @@ from_igraph <- function(igraph,
       edges_df = edges_df,
       directed = igraph::is_directed(igraph),
       graph_name = graph_name,
-      write_backups = write_backups)
+      write_backups = write_backups,
+      display_msgs = display_msgs)
 
   graph
 }

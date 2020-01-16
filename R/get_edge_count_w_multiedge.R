@@ -1,14 +1,15 @@
 #' Get count of edge definitions where multiple edges occur
-#' @description Get a count of the number of edge
-#' definitions (e.g, `1` -> `2`) where there are multiple
-#' edges (i.e., more than 1 edge of that definition, having
-#' distinct edge ID values). So, for example, if there are 2
-#' edge definitions in the graph that involve 6 separate
-#' edge IDs (3 such edge IDs for each of the pairs of
-#' nodes), the count will be \code{2}.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @return a vector with a single, numerical value.
+#'
+#' Get a count of the number of edge definitions (e.g, `1` -> `2`) where there
+#' are multiple edges (i.e., more than 1 edge of that definition, having
+#' distinct edge ID values). So, for example, if there are 2 edge definitions in
+#' the graph that involve 6 separate edge IDs (3 such edge IDs for each of the
+#' pairs of nodes), the count will be `2`.
+#'
+#' @inheritParams render_graph
+#'
+#' @return A vector with a single, numerical value.
+#'
 #' @examples
 #' # Create a node data frame (ndf)
 #' ndf <-
@@ -33,11 +34,9 @@
 #' # there are multiple edges (i.e.,
 #' # distinct edges with separate edge
 #' # ID values)
-#' graph %>%
-#'   get_edge_count_w_multiedge()
-#' @importFrom dplyr select mutate group_by summarize ungroup filter n
-#' @export get_edge_count_w_multiedge
-
+#' graph %>% get_edge_count_w_multiedge()
+#'
+#' @export
 get_edge_count_w_multiedge <- function(graph) {
 
   # Get the name of the function
@@ -59,9 +58,6 @@ get_edge_count_w_multiedge <- function(graph) {
       reasons = "The graph contains no edges")
   }
 
-  # Create bindings for specific variables
-  from <- to <- edge_from_to <- NULL
-
   # Check for the number of multiple edges
   # regardless of which definitions these
   # edges have
@@ -71,7 +67,7 @@ get_edge_count_w_multiedge <- function(graph) {
     dplyr::mutate(edge_from_to = paste0(from, "_", to)) %>%
     dplyr::select(edge_from_to) %>%
     dplyr::group_by(edge_from_to) %>%
-    dplyr::summarize(n = n()) %>%
+    dplyr::summarize(n = dplyr::n()) %>%
     dplyr::ungroup() %>%
     dplyr::filter(n > 1) %>%
     nrow()

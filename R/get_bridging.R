@@ -1,11 +1,11 @@
 #' Get bridging scores
-#' @description Get the bridging scores (based on
-#' Valente's Bridging vertex measure) for all nodes
-#' in a graph.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @return a data frame with bridging scores for
-#' each of the nodes.
+#'
+#' Get the bridging scores (based on Valente's Bridging vertex measure) for all
+#' nodes in a graph.
+#' @inheritParams render_graph
+#'
+#' @return A data frame with bridging scores for each of the nodes.
+#'
 #' @examples
 #' # Create a random graph using the
 #' # `add_gnm_graph()` function
@@ -18,8 +18,7 @@
 #'
 #' # Get the bridging scores for nodes
 #' # in the graph
-#' graph %>%
-#'   get_bridging()
+#' graph %>% get_bridging()
 #'
 #' # Add the bridging scores to
 #' # the graph as a node attribute
@@ -29,11 +28,9 @@
 #'     df = get_bridging(.))
 #'
 #' # Display the graph's node data frame
-#' graph %>%
-#'   get_node_df()
-#' @importFrom influenceR bridging
-#' @export get_bridging
-
+#' graph %>% get_node_df()
+#'
+#' @export
 get_bridging <- function(graph) {
 
   # Get the name of the function

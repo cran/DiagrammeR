@@ -1,29 +1,25 @@
 #' Add nodes and attributes to graph from a table
-#' @description Add nodes and their attributes to an
-#' existing graph object from data in a CSV file or a
-#' data frame.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param table either a path to a CSV file, or, a data
-#' frame object.
-#' @param label_col an option to apply a column of data
-#' in the table as \code{label} attribute values.
-#' @param type_col an option to apply a column of data
-#' in the table as \code{type} attribute values.
-#' @param set_type an optional string to apply a
-#' \code{type} attribute to all nodes created from data
-#' in the external table.
-#' @param drop_cols an optional column selection
-#' statement for dropping columns from the external
-#' table before inclusion as attributes in the graph's
-#' internal node data frame. Several columns can be
-#' dropped by name using the syntax
-#' \code{col_1 & col_2 & ...}. Columns can also be
-#' dropped using a numeric column range with \code{:}
-#' (e.g., \code{5:8}), or, by using the \code{:}
-#' between column names to specify the range (e.g.,
-#' \code{col_5_name:col_8_name}).
-#' @return a graph object of class \code{dgr_graph}.
+#'
+#' Add nodes and their attributes to an existing graph object from data in a CSV
+#' file or a data frame.
+#'
+#' @inheritParams render_graph
+#' @param table Either a path to a CSV file, or, a data frame object.
+#' @param label_col An option to apply a column of data in the table as `label`
+#'   attribute values.
+#' @param type_col An option to apply a column of data in the table as `type`
+#'   attribute values.
+#' @param set_type An optional string to apply a `type` attribute to all nodes
+#'   created from data in the external table.
+#' @param drop_cols An optional column selection statement for dropping columns
+#'   from the external table before inclusion as attributes in the graph's
+#'   internal node data frame. Several columns can be dropped by name using the
+#'   syntax `col_1 & col_2 & ...`. Columns can also be dropped using a numeric
+#'   column range with `:` (e.g., `5:8`), or, by using the `:` between column
+#'   names to specify the range (e.g., `col_5_name:col_8_name`).
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # To add nodes from the dataset called
 #' # `currencies` (available as a dataset
@@ -86,11 +82,9 @@
 #' graph_3 %>%
 #'   get_node_df() %>%
 #'   colnames()
-#' @importFrom utils read.csv
-#' @importFrom dplyr bind_cols mutate select
-#' @importFrom rlang enquo get_expr
-#' @export add_nodes_from_table
-
+#'
+#' @import rlang
+#' @export
 add_nodes_from_table <- function(graph,
                                  table,
                                  label_col = NULL,
@@ -147,9 +141,6 @@ add_nodes_from_table <- function(graph,
     drop_cols <- paste(drop_cols, collapse = " & ")
   }
 
-  # Create bindings for specific variables
-  type <- id_external <- NULL
-
   # Get the number of nodes ever created for
   # this graph
   nodes_created <- graph$last_node
@@ -157,7 +148,7 @@ add_nodes_from_table <- function(graph,
   if (inherits(table, "character")) {
 
     # Load in CSV file
-    csv <- read.csv(table, stringsAsFactors = FALSE)
+    csv <- utils::read.csv(table, stringsAsFactors = FALSE)
 
   } else if (inherits(table, "data.frame")) {
 

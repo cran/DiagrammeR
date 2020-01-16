@@ -4,55 +4,57 @@
 \alias{from_adj_matrix}
 \title{Create a graph using an adjacency matrix}
 \usage{
-from_adj_matrix(x, mode = "undirected", weighted = FALSE, use_diag = TRUE,
-  graph_name = NULL, write_backups = FALSE)
+from_adj_matrix(
+  x,
+  mode = "undirected",
+  weighted = FALSE,
+  use_diag = TRUE,
+  graph_name = NULL,
+  write_backups = FALSE,
+  display_msgs = FALSE
+)
 }
 \arguments{
-\item{x}{a square \code{matrix} object serving as
-the adjacency matrix.}
+\item{x}{A square \code{matrix} object serving as the adjacency matrix.}
 
-\item{mode}{the method in which to interpret the
-input adjacency matrix. Options include:
-\code{undirected}, \code{directed}, \code{upper},
-\code{lower}, \code{max}, \code{min}, and
-\code{plus}.}
+\item{mode}{The method in which to interpret the input adjacency matrix.
+Options include: \code{undirected}, \code{directed}, \code{upper}, \code{lower}, \code{max}, \code{min},
+and \code{plus}.}
 
-\item{weighted}{whether to create a weighted graph
-from the adjacency matrix.}
+\item{weighted}{Whether to create a weighted graph from the adjacency matrix.}
 
-\item{use_diag}{whether to use the diagonal of the
-adjacency matrix in calculations. If \code{TRUE}
-then the diagonal values will be included as is. If
-\code{FALSE} then the diagonal values will be
-replaced with zero values before inclusion in any
-calculations.}
+\item{use_diag}{Whether to use the diagonal of the adjacency matrix in
+calculations. If \code{TRUE} then the diagonal values will be included as is. If
+\code{FALSE} then the diagonal values will be replaced with zero values before
+inclusion in any calculations.}
 
-\item{graph_name}{an optional string for labeling
-the graph object.}
+\item{graph_name}{An optional string for labeling the graph object.}
 
-\item{write_backups}{an option to write incremental
-backups of changing graph states to disk. If
-\code{TRUE}, a subdirectory of the working directory
-will be used to store \code{RDS} files. The
-default value is \code{FALSE} so one has to opt in
-to use this functionality.}
+\item{write_backups}{An option to write incremental backups of changing graph
+states to disk. If \code{TRUE}, a subdirectory within the working directory will
+be created and used to store \code{RDS} files. The default value is \code{FALSE} so
+one has to opt in to use this functionality.}
+
+\item{display_msgs}{An option to display messages primarily concerned with
+changes in graph selections. By default, this is \code{FALSE}.}
 }
 \value{
-a graph object of class \code{dgr_graph}.
+A graph object of class \code{dgr_graph}.
 }
 \description{
-Using an adjacency matrix object,
-generate a graph of class \code{dgr_graph}.
+Using an adjacency matrix object, generate a graph of class \code{dgr_graph}.
 }
 \examples{
 # Create an adjacency matrix
 adj_matrix <-
-  sample(0:1, 100,
-         replace = TRUE,
-         prob = c(0.9,0.1)) \%>\%
-  matrix(nc = 10)
+  sample(
+    0:1, 100,
+    replace = TRUE,
+    prob = c(0.9,0.1)
+  ) \%>\%
+  matrix(ncol = 10)
 
 # Create a graph from the adjacency matrix
-graph <-
-  from_adj_matrix(adj_matrix)
+graph <- from_adj_matrix(adj_matrix)
+
 }

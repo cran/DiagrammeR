@@ -1,13 +1,13 @@
 #' Get detailed information on nodes
-#' @description Obtain a data frame
-#' with detailed information on nodes
-#' and their interrelationships
-#' within the graph.
-#' @param graph a graph object of
-#' class \code{dgr_graph}.
-#' @return a data frame containing
-#' information specific to each node
-#' within the graph.
+#'
+#' Obtain a data frame with detailed information on nodes and their
+#' interrelationships within the graph.
+#'
+#' @param graph A graph object of class `dgr_graph`.
+#'
+#' @return A data frame containing information specific to each node within the
+#'   graph.
+#'
 #' @examples
 #' # Create a simple graph
 #' graph <-
@@ -16,13 +16,10 @@
 #'     n = 5, m = 10,
 #'     set_seed = 23)
 #'
-#' # Get information on the
-#' # graph's nodes
-#' graph %>%
-#'   get_node_info()
-#' @importFrom dplyr mutate arrange
-#' @export get_node_info
-
+#' # Get information on the graph's nodes
+#' graph %>% get_node_info()
+#'
+#' @export
 get_node_info <- function(graph) {
 
   # Get the name of the function
@@ -35,9 +32,6 @@ get_node_info <- function(graph) {
       fcn_name = fcn_name,
       reasons = "The graph object is not valid")
   }
-
-  # Create bindings for specific variables
-  id <- NULL
 
   # If graph is empty, return NULL
   if (is_graph_empty(graph)) {
@@ -76,11 +70,11 @@ get_node_info <- function(graph) {
 
     # Ensure that the `id` column is an integer
     node_properties <-
-      mutate(node_properties, id = as.integer(id))
+      dplyr::mutate(node_properties, id = as.integer(id))
 
     # Arrange the table by `id` ascending
     node_properties <-
-      arrange(node_properties, id)
+      dplyr::arrange(node_properties, id)
 
   } else if (!is.null(graph$edges_df)) {
 
@@ -108,7 +102,7 @@ get_node_info <- function(graph) {
       c(top_nodes, between_nodes, bottom_nodes)
 
     # Create data frame of node properties
-    for (i in 1:length(ordered_nodes)) {
+    for (i in seq(ordered_nodes)) {
       if (i == 1) {
         node_properties <-
           as.data.frame(

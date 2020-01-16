@@ -1,20 +1,28 @@
 #' Mutate edge attribute values for a selection of edges
-#' @description Within a graph's internal edge
-#' data frame (edf), mutate edge attribute
-#' values only for edges in a selection by
-#' using one or more expressions.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param ... expressions used for the mutation
-#' of edge attributes. LHS of each expression is
-#' either an existing or new edge attribute name.
-#' The RHS can consist of any valid R code that
-#' uses edge attributes as variables. Expressions
-#' are evaluated in the order provided, so, edge
-#' attributes created or modified are ready to
-#' use in subsequent expressions.
-#' @return a graph object of class
-#' \code{dgr_graph}.
+#'
+#' Within a graph's internal edge data frame (edf), mutate edge attribute values
+#' only for edges in a selection by using one or more expressions.
+#'
+#' This function makes use of an active selection of edges (and the function
+#' ending with `_ws` hints at this).
+#'
+#' Selections of edges can be performed using the following selection
+#' (`select_*()`) functions: [select_edges()], [select_last_edges_created()],
+#' [select_edges_by_edge_id()], or [select_edges_by_node_id()].
+#'
+#' Selections of edges can also be performed using the following traversal
+#' (`trav_*()`) functions: [trav_out_edge()], [trav_in_edge()],
+#' [trav_both_edge()], or [trav_reverse_edge()].
+#'
+#' @inheritParams render_graph
+#' @param ... Expressions used for the mutation of edge attributes. LHS of each
+#'   expression is either an existing or new edge attribute name. The RHS can
+#'   consist of any valid R code that uses edge attributes as variables.
+#'   Expressions are evaluated in the order provided, so, edge attributes
+#'   created or modified are ready to use in subsequent expressions.
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Create a graph with 3 edges
 #' # and then select edge `1`
@@ -29,8 +37,7 @@
 #' # Get the graph's internal edf
 #' # to show which edge attributes
 #' # are available
-#' graph %>%
-#'   get_edge_df()
+#' graph %>% get_edge_df()
 #'
 #' # Mutate the `width` edge
 #' # attribute for the edges
@@ -47,8 +54,7 @@
 #' # edf to show that the edge
 #' # attribute `width` had its
 #' # values changed
-#' graph %>%
-#'   get_edge_df()
+#' graph %>% get_edge_df()
 #'
 #' # Create a new edge attribute,
 #' # called `length`, that is the
@@ -69,8 +75,7 @@
 #' # for edges `2` and `3` (since
 #' # edge `1` is excluded, an NA
 #' # value is applied)
-#' graph %>%
-#'   get_edge_df()
+#' graph %>% get_edge_df()
 #'
 #' # Create a new edge attribute
 #' # called `area`, which is the
@@ -86,8 +91,7 @@
 #' # values had been multiplied
 #' # together (with new attr `area`)
 #' # for nodes `2` and `3`
-#' graph %>%
-#'   get_edge_df()
+#' graph %>% get_edge_df()
 #'
 #' # We can invert the selection
 #' # and mutate edge `1` several
@@ -107,12 +111,10 @@
 #' # non-NA values for its edge
 #' # attributes without changing
 #' # those of the other edges
-#' graph %>%
-#'   get_edge_df()
-#' @importFrom dplyr mutate_
-#' @importFrom rlang exprs
-#' @export mutate_edge_attrs_ws
-
+#' graph %>% get_edge_df()
+#'
+#' @import rlang
+#' @export
 mutate_edge_attrs_ws <- function(graph,
                                  ...) {
 
@@ -180,7 +182,7 @@ mutate_edge_attrs_ws <- function(graph,
       edf_replacement <-
         edf %>%
         dplyr::mutate_(
-          .dots = setNames(list((exprs %>% paste())[i]),
+          .dots = stats::setNames(list((exprs %>% paste())[i]),
                            names(exprs)[i]))
 
       edf_replacement[
@@ -203,7 +205,7 @@ mutate_edge_attrs_ws <- function(graph,
       edf_replacement <-
         edf %>%
         dplyr::mutate_(
-          .dots = setNames(list((exprs %>% paste())[i]),
+          .dots = stats::setNames(list((exprs %>% paste())[i]),
                            names(exprs)[i]))
 
       edf_replacement[

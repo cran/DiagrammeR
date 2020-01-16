@@ -1,14 +1,13 @@
 #' Generate DOT code using a graph object
-#' @description Generates Graphviz DOT code as an R
-#' character object using DiagrammeR graph object.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @return a character vector of length 1 containing
-#' Graphviz DOT code.
-#' @importFrom dplyr filter mutate pull
-#' @importFrom stringr str_replace str_replace_all
-#' @export generate_dot
-
+#'
+#' Generates Graphviz DOT code as an R character object using DiagrammeR graph
+#' object.
+#'
+#' @inheritParams render_graph
+#'
+#' @return A character vector of length 1 containing Graphviz DOT code.
+#'
+#' @export
 generate_dot <- function(graph) {
 
   # Get the name of the function
@@ -21,9 +20,6 @@ generate_dot <- function(graph) {
       fcn_name = fcn_name,
       reasons = "The graph object is not valid")
   }
-
-  # Create bindings for specific variables
-  attr_type <- attr <- value <- string <- NULL
 
   # Extract objects from the graph objecct
   nodes_df <- graph$nodes_df
@@ -106,9 +102,9 @@ generate_dot <- function(graph) {
     if (ncol(nodes_df) >= 4) {
       for (i in 4:ncol(nodes_df)) {
         nodes_df[, i] <-
-          ifelse(is.na(nodes_df[, i]), "", nodes_df[, i])
-        nodes_df[, i] <-
           as.character(nodes_df[, i])
+        nodes_df[, i] <-
+          ifelse(is.na(nodes_df[, i]), "", nodes_df[, i])
       }
     }
   }
@@ -133,7 +129,7 @@ generate_dot <- function(graph) {
     for (i in 1:nrow(nodes_df)) {
       if (grepl("^\\$.*\\$$", nodes_df[i, equation_col])) {
         nodes_df[i, equation_col] <-
-          str_replace_all(
+          stringr::str_replace_all(
             nodes_df[i, equation_col], "\\\\", "\\\\\\\\")
       } else {
         nodes_df[i, equation_col] <- ""
@@ -172,7 +168,7 @@ generate_dot <- function(graph) {
 
       edges_df <-
         edges_df %>%
-        mutate(label = as.character(NA))
+        dplyr::mutate(label = as.character(NA))
     }
 
     label_col <- which(colnames(edges_df) == "label")
@@ -452,6 +448,27 @@ generate_dot <- function(graph) {
                    }))
       }
 
+      else if ('cluster' %in% colnames(nodes_df)) {
+	clustered_node_block <- character(0)
+	clusters <- split(node_block, nodes_df$cluster)
+	for (i in seq_along(clusters)) {
+	  if (names(clusters)[[i]] == "") {
+	    # nodes not in clusters
+	    cluster_block <- clusters[[i]]
+	  } else {
+	    cluster_block <- paste0("subgraph cluster", i, "{\nlabel='",
+	                            names(clusters)[[i]], "'\n",
+	       			    paste0(clusters[[i]], collapse="\n"), "}\n")
+	  }
+	  clustered_node_block <- c(clustered_node_block, cluster_block)
+	}
+
+	node_block <- clustered_node_block
+
+	# cleanup variables
+	rm(clustered_node_block, clusters, cluster_block)
+      }
+
       # Construct the `node_block` character object
       node_block <- paste(node_block, collapse = "\n")
 
@@ -463,45 +480,6 @@ generate_dot <- function(graph) {
       # Remove the `attribute` object if it exists
       if (exists("attribute")) {
         rm(attribute)
-      }
-
-      if ('cluster' %in% colnames(nodes_df)) {
-
-        # Get column number for column with node
-        # attribute `cluster`
-        cluster_colnum <-
-          which(colnames(nodes_df) %in% "cluster")
-
-        # Get list of clusters defined for the nodes
-        cluster_ids <-
-          unique(nodes_df$cluster)[
-            which(
-              unique(nodes_df$cluster) != "")]
-
-        for (i in seq_along(cluster_ids)) {
-
-          regex <-
-            paste0("'",
-                   paste(nodes_df[which(nodes_df[, cluster_colnum] == i ), 1],
-                         collapse = "'.*?\n |'"), "'.*?\n")
-
-          node_block <-
-            stringr::str_replace_all(node_block, regex, "")
-
-          replacement <-
-            stringr::str_replace(
-              paste0("  cluster_", i, " [label = 'xN\n",
-                     cluster_ids[i],
-                     "'; shape = 'circle';",
-                     " fixedsize = 'true';",
-                     " fontsize = '8pt';",
-                     " peripheries = '2']  \n"), "x",
-              length(
-                nodes_df[which(nodes_df[, cluster_colnum] == i ), 1]))
-
-          node_block <-
-            stringr::str_replace(node_block, "^", replacement)
-        }
       }
     }
 
@@ -639,38 +617,6 @@ generate_dot <- function(graph) {
       # Construct the `edge_block` character object
       if (exists("edge_block")) {
         edge_block <- paste(edge_block, collapse = "\n")
-      }
-
-      if ("cluster" %in% colnames(nodes_df)) {
-
-        # Get column number for column with node
-        # attribute `cluster`
-        cluster_colnum <-
-          which(colnames(nodes_df) %in% "cluster")
-
-        # Get list of clusters defined for the nodes
-        cluster_ids <-
-          which(
-            unique(nodes_df$cluster) != "")
-
-        for (i in seq_along(cluster_ids)) {
-
-          regex <-
-            stringr::str_replace(
-              "'x'", "x",
-              paste(nodes_df[which(nodes_df[, cluster_colnum] == i ), 1],
-                    collapse = "'|'"))
-
-          edge_block <-
-            stringr::str_replace_all(edge_block, regex, paste0("'cluster_", i, "'"))
-
-          regex <-
-            paste0("('cluster_", i, "'->'cluster_", i, "' \n |",
-                   "'cluster_", i, "'->'cluster_", i, "')")
-
-          edge_block <-
-            stringr::str_replace_all(edge_block, regex, "")
-        }
       }
     }
 

@@ -7,16 +7,14 @@
 count_unconnected_nodes(graph)
 }
 \arguments{
-\item{graph}{a graph object of class
-\code{dgr_graph}.}
+\item{graph}{A graph object of class \code{dgr_graph}.}
 }
 \value{
-a numeric vector of single length.
+A numeric vector of single length.
 }
 \description{
-From a graph object of class
-\code{dgr_graph}, get a count of nodes in the
-graph that are not connected to any other node.
+From a graph object of class \code{dgr_graph}, get a count of nodes in the graph
+that are not connected to any other node.
 }
 \examples{
 # Create a graph with a
@@ -29,12 +27,12 @@ graph <-
 
 # Get a count of all nodes
 # in the graph
-graph \%>\%
-  count_nodes()
+graph \%>\% count_nodes()
 
 # Get a count of all
 # unconnected nodes in the
 # graph
 graph \%>\%
   count_unconnected_nodes()
+
 }

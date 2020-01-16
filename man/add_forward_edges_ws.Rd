@@ -2,46 +2,42 @@
 % Please edit documentation in R/add_forward_edges_ws.R
 \name{add_forward_edges_ws}
 \alias{add_forward_edges_ws}
-\title{Add new edges with identical definitions as with a
-selection of edges}
+\title{Add new edges with identical definitions as with a selection of edges}
 \usage{
 add_forward_edges_ws(graph, rel = NULL)
 }
 \arguments{
-\item{graph}{a graph object of class
-\code{dgr_graph}.}
+\item{graph}{A graph object of class \code{dgr_graph}.}
 
-\item{rel}{an optional string to apply a
-\code{rel} attribute to all newly created edges.}
+\item{rel}{An optional string to apply a \code{rel} attribute to all newly created
+edges.}
 }
 \value{
-a graph object of class \code{dgr_graph}.
+A graph object of class \code{dgr_graph}.
 }
 \description{
-Add edges in the same direction
-of one or more edges available as an edge selection
-in a graph object of class \code{dgr_graph}. New
-graph edges have the same edge definitions as those
-in the selection except with new edge ID values.
-There is also the option to assign a common
-\code{rel} grouping to the newly created edges.
-Upon addition of the edges, the edge selection will
-be retained for further selection or traversal
-operations.
+Add edges in the same direction of one or more edges available as an edge
+selection in a graph object of class \code{dgr_graph}. New graph edges have the
+same edge definitions as those in the selection except with new edge ID
+values. There is also the option to assign a common \code{rel} grouping to the
+newly created edges. Upon addition of the edges, the edge selection will be
+retained for further selection or traversal operations.
+}
+\details{
+This function makes use of an active selection of edges (and the function
+ending with \verb{_ws} hints at this).
 
-Selections of edges can be performed using
-the following \code{select_...} functions:
-\code{select_edges()},
-\code{select_last_edge()}, or
-\code{select_edges_by_node_id()}.
-Selections of edges can also be performed using
-the following traversal functions:
-\code{trav_out_edge()}, \code{trav_in_edge()},
-or \code{trav_both_edge()}.
+Selections of edges can be performed using the following selection
+(\verb{select_*()}) functions: \code{\link[=select_edges]{select_edges()}}, \code{\link[=select_last_edges_created]{select_last_edges_created()}},
+\code{\link[=select_edges_by_edge_id]{select_edges_by_edge_id()}}, or \code{\link[=select_edges_by_node_id]{select_edges_by_node_id()}}.
+
+Selections of edges can also be performed using the following traversal
+(\verb{trav_*()}) functions: \code{\link[=trav_out_edge]{trav_out_edge()}}, \code{\link[=trav_in_edge]{trav_in_edge()}},
+\code{\link[=trav_both_edge]{trav_both_edge()}}, or \code{\link[=trav_reverse_edge]{trav_reverse_edge()}}.
 }
 \examples{
-# Create an empty graph, add 2 nodes to it,
-# and create the edge `1->2`
+# Create an empty graph, add 2 nodes
+# to it, and create the edge `1->2`
 graph <-
   create_graph() \%>\%
   add_n_nodes(
@@ -52,11 +48,11 @@ graph <-
     from = 1, to = 2, rel = "a")
 
 # Get the graph's edges
-graph \%>\%
-  get_edge_ids()
+graph \%>\% get_edge_ids()
 
-# Select the edge and create 2 additional edges
-# with the same definition (`1->2`) but with
+# Select the edge and create 2
+# additional edges with the same
+# definition (`1->2`) but with
 # different `rel` values (`b` and `c`)
 graph <-
   graph \%>\%
@@ -66,6 +62,6 @@ graph <-
   clear_selection()
 
 # Get the graph's edge data frame
-graph \%>\%
-  get_edge_df()
+graph \%>\% get_edge_df()
+
 }

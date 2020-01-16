@@ -7,13 +7,11 @@
 open_graph(file)
 }
 \arguments{
-\item{file}{the filename for the graph or graph
-series. Optionally, this may contain a path to the
-file.}
+\item{file}{The filename for the graph or graph series. Optionally, this may
+contain a path to the file.}
 }
 \description{
-Load a graph or a graph series object
-from disk.
+Load a graph or a graph series object from disk.
 }
 \examples{
 # Create an undirected GNP
@@ -24,17 +22,21 @@ gnp_graph <-
     directed = FALSE) \%>\%
   add_gnp_graph(
     n = 100,
-    p = 0.05)
+    p = 0.05
+  )
 
 # Save the graph to disk; use
 # the file name `gnp_graph.dgr`
-save_graph(
-  x = gnp_graph,
-  file = "gnp_graph")
+# save_graph(
+#   x = gnp_graph,
+#   file = "gnp_graph"
+# )
 
 # To read the graph file from
 # disk, use `open_graph()`
-gnp_graph_2 <-
-  open_graph(
-    file = "gnp_graph.dgr")
+# gnp_graph_2 <-
+#   open_graph(
+#     file = "gnp_graph.dgr"
+#   )
+
 }

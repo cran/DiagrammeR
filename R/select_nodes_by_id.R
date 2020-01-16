@@ -1,24 +1,22 @@
-#' Select nodes in a graph by ID values
-#' @description Select nodes in a graph object of class
-#' \code{dgr_graph} by their node ID values. If nodes
-#' have IDs that are monotonically increasing integer
-#' values, then numeric ranges can be used for the
-#' selection.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param nodes a vector of node IDs for the selection
-#' of nodes present in the graph.
-#' @param set_op the set operation to perform upon
-#' consecutive selections of graph nodes. This can
-#' either be as a \code{union} (the default), as an
-#' intersection of selections with \code{intersect},
-#' or, as a \code{difference} on the previous
-#' selection, if it exists.
-#' @return a graph object of class \code{dgr_graph}.
+#' Select nodes in a graph by their ID values
+#'
+#' Select nodes in a graph object of class `dgr_graph` by their node ID values.
+#' If nodes have IDs that are monotonically increasing integer values, then
+#' numeric ranges can be used for the selection.
+#'
+#' @inheritParams render_graph
+#' @param nodes A vector of node IDs for the selection of nodes present in the
+#'   graph.
+#' @param set_op The set operation to perform upon consecutive selections of
+#'   graph nodes. This can either be as a `union` (the default), as an
+#'   intersection of selections with `intersect`, or, as a `difference` on the
+#'   previous selection, if it exists.
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Create a node data frame (ndf)
-#' ndf <-
-#'   create_node_df(n = 10)
+#' ndf <- create_node_df(n = 10)
 #'
 #' # Create a graph
 #' graph <-
@@ -30,8 +28,8 @@
 #' graph %>%
 #'   select_nodes_by_id(nodes = 1:5) %>%
 #'   get_selection()
-#' @export select_nodes_by_id
-
+#'
+#' @export
 select_nodes_by_id <- function(graph,
                                nodes,
                                set_op = "union") {
@@ -123,43 +121,49 @@ select_nodes_by_id <- function(graph,
     save_graph_as_rds(graph = graph)
   }
 
-  # Construct message body
-  if (!n_e_select_properties_in[["node_selection_available"]] &
-      !n_e_select_properties_in[["edge_selection_available"]]) {
+  # Emit a message about the modification of a selection
+  # if that option is set
+  if (!is.null(graph$graph_info$display_msgs) &&
+      graph$graph_info$display_msgs) {
 
-    msg_body <-
-      glue::glue(
-        "created a new selection of \\
-        {n_e_select_properties_out[['selection_count_str']]}")
+    # Construct message body
+    if (!n_e_select_properties_in[["node_selection_available"]] &
+        !n_e_select_properties_in[["edge_selection_available"]]) {
 
-  } else if (n_e_select_properties_in[["node_selection_available"]] |
-             n_e_select_properties_in[["edge_selection_available"]]) {
-
-    if (n_e_select_properties_in[["node_selection_available"]]) {
       msg_body <-
         glue::glue(
-          "modified an existing selection of\\
+          "created a new selection of \\
+        {n_e_select_properties_out[['selection_count_str']]}")
+
+    } else if (n_e_select_properties_in[["node_selection_available"]] |
+               n_e_select_properties_in[["edge_selection_available"]]) {
+
+      if (n_e_select_properties_in[["node_selection_available"]]) {
+        msg_body <-
+          glue::glue(
+            "modified an existing selection of\\
            {n_e_select_properties_in[['selection_count_str']]}:
            * {n_e_select_properties_out[['selection_count_str']]}\\
            are now in the active selection
            * used the `{set_op}` set operation")
-    }
+      }
 
-    if (n_e_select_properties_in[["edge_selection_available"]]) {
-      msg_body <-
-        glue::glue(
-          "created a new selection of\\
+      if (n_e_select_properties_in[["edge_selection_available"]]) {
+        msg_body <-
+          glue::glue(
+            "created a new selection of\\
            {n_e_select_properties_out[['selection_count_str']]}:
            * this replaces\\
            {n_e_select_properties_in[['selection_count_str']]}\\
            in the prior selection")
+      }
     }
-  }
 
-  # Issue a message to the user
-  emit_message(
-    fcn_name = fcn_name,
-    message_body = msg_body)
+    # Issue a message to the user
+    emit_message(
+      fcn_name = fcn_name,
+      message_body = msg_body)
+  }
 
   graph
 }

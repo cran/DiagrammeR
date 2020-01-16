@@ -1,83 +1,29 @@
 #' Add a fully connected graph
-#' @description With a graph object
-#' of class \code{dgr_graph}, add a
-#' fully connected graph either with
-#' or without loops. If the graph
-#' object set as directed, the added
-#' graph will have edges to and from
-#' each pair of nodes. In the
-#' undirected case, a single edge
-#' will link each pair of nodes.
-#' @param graph a graph object of
-#' class \code{dgr_graph}.
-#' @param n the number of nodes
-#' comprising the fully connected
-#' graph.
-#' @param type an optional string
-#' that describes the entity type
-#' for the nodes to be added.
-#' @param label either a vector
-#' object of length \code{n} that
-#' provides optional labels for the
-#' new nodes, or, a boolean value
-#' where setting to \code{TRUE}
-#' ascribes node IDs to the label
-#' and \code{FALSE} or \code{NULL}
-#' yields a blank label.
-#' @param rel an optional string
-#' for providing a relationship label
-#' to all new edges created in the
-#' connected graph.
-#' @param edge_wt_matrix an
-#' optional matrix of \code{n} by
-#' \code{n} dimensions containing
-#' values to apply as edge weights.
-#' If the matrix has row names or
-#' column names and
-#' \code{label = TRUE}, those row or
-#' column names will be used as node
-#' label values.
-#' @param keep_loops an option to
-#' simplify the fully connected
-#' graph by removing loops (edges
-#' from and to the same node). The
-#' default value is \code{FALSE}.
-#' @param node_aes an optional list
-#' of named vectors comprising node
-#' aesthetic attributes. The helper
-#' function \code{node_aes()} is
-#' strongly recommended for use here
-#' as it contains arguments for each
-#' of the accepted node aesthetic
-#' attributes (e.g., \code{shape},
-#' \code{style}, \code{color},
-#' \code{fillcolor}).
-#' @param edge_aes an optional list
-#' of named vectors comprising edge
-#' aesthetic attributes. The helper
-#' function \code{edge_aes()} is
-#' strongly recommended for use here
-#' as it contains arguments for each
-#' of the accepted edge aesthetic
-#' attributes (e.g., \code{shape},
-#' \code{style}, \code{penwidth},
-#' \code{color}).
-#' @param node_data an optional list
-#' of named vectors comprising node
-#' data attributes. The helper
-#' function \code{node_data()} is
-#' strongly recommended for use here
-#' as it helps bind data specifically
-#' to the created nodes.
-#' @param edge_data an optional list
-#' of named vectors comprising edge
-#' data attributes. The helper function
-#' \code{edge_data()} is strongly
-#' recommended for use here as it helps
-#' bind data specifically to the
-#' created edges.
-#' @return a graph object of class
-#' \code{dgr_graph}.
+#'
+#' With a graph object of class `dgr_graph`, add a fully connected graph either
+#' with or without loops. If the graph object set as directed, the added graph
+#' will have edges to and from each pair of nodes. In the undirected case, a
+#' single edge will link each pair of nodes.
+#'
+#' @inheritParams node_edge_aes_data
+#' @inheritParams render_graph
+#' @param n The number of nodes comprising the fully connected graph.
+#' @param type An optional string that describes the entity type for the nodes
+#'   to be added.
+#' @param label Either a vector object of length `n` that provides optional
+#'   labels for the new nodes, or, a boolean value where setting to `TRUE`
+#'   ascribes node IDs to the label and `FALSE` or `NULL` yields a blank label.
+#' @param rel An optional string for providing a relationship label to all new
+#'   edges created in the connected graph.
+#' @param edge_wt_matrix An optional matrix of `n` by `n` dimensions containing
+#'   values to apply as edge weights. If the matrix has row names or column
+#'   names and `label = TRUE`, those row or column names will be used as node
+#'   label values.
+#' @param keep_loops An option to simplify the fully connected graph by removing
+#'   loops (edges from and to the same node). The default value is `FALSE`.
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Create a new graph object
 #' # and add a directed and fully
@@ -90,12 +36,12 @@
 #' graph <-
 #'   create_graph() %>%
 #'   add_full_graph(
-#'     n = 3, keep_loops = TRUE)
+#'     n = 3, keep_loops = TRUE
+#'   )
 #'
 #' # Get node information
 #' # from this graph
-#' graph %>%
-#'   get_node_info()
+#' graph %>% get_node_info()
 #'
 #' # Using `keep_loops = FALSE`
 #' # (the default) will remove
@@ -113,17 +59,16 @@
 #'     n = 3,
 #'     type = "connected",
 #'     label = c("1st", "2nd", "3rd"),
-#'     rel = "connected_to")
+#'     rel = "connected_to"
+#'   )
 #'
 #' # Show the graph's node
 #' # data frame (ndf)
-#' graph %>%
-#'   get_node_df()
+#' graph %>% get_node_df()
 #'
 #' # Show the graph's edge
 #' # data frame (edf)
-#' graph %>%
-#'   get_edge_df()
+#' graph %>% get_edge_df()
 #'
 #' # Create a fully-connected and
 #' # directed graph with 3 nodes,
@@ -131,6 +76,7 @@
 #' # edge weights; first, create the
 #' # matrix (with row names to be
 #' # used as node labels)
+#' suppressWarnings(RNGversion("3.5.0"))
 #' set.seed(23)
 #'
 #' edge_wt_matrix <-
@@ -138,9 +84,10 @@
 #'   sample(9, FALSE) %>%
 #'   round(2) %>%
 #'   matrix(
-#'     nc = 3,
-#'     nr = 3,
-#'     dimnames = list(c("a", "b", "c")))
+#'     ncol = 3,
+#'     nrow = 3,
+#'     dimnames = list(c("a", "b", "c"))
+#'   )
 #'
 #' # Create the fully-connected
 #' # graph (without loops however)
@@ -156,13 +103,11 @@
 #'
 #' # Show the graph's node
 #' # data frame (ndf)
-#' graph %>%
-#'   get_node_df()
+#' graph %>% get_node_df()
 #'
 #' # Show the graph's edge
 #' # data frame (edf)
-#' graph %>%
-#'   get_edge_df()
+#' graph %>% get_edge_df()
 #'
 #' # An undirected graph can
 #' # also use a matrix with
@@ -176,11 +121,11 @@
 #'     label = TRUE,
 #'     rel = "related_to",
 #'     edge_wt_matrix = edge_wt_matrix,
-#'     keep_loops = FALSE) %>%
+#'     keep_loops = FALSE
+#'   ) %>%
 #'   get_edge_df()
-#' @importFrom dplyr select bind_cols as_tibble
-#' @export add_full_graph
-
+#'
+#' @export
 add_full_graph <- function(graph,
                            n,
                            type = NULL,
@@ -206,9 +151,6 @@ add_full_graph <- function(graph,
       fcn_name = fcn_name,
       reasons = "The graph object is not valid")
   }
-
-  # Create bindings for specific variables
-  id <- index__ <- NULL
 
   # Get the number of nodes ever created for
   # this graph

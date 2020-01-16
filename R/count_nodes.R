@@ -1,9 +1,11 @@
 #' Get a count of all nodes
-#' @description From a graph object of class
-#' \code{dgr_graph}, get a count of nodes in the graph.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @return a numeric vector of single length.
+#'
+#' From a graph object of class `dgr_graph`, get a count of nodes in the graph.
+#'
+#' @inheritParams render_graph
+#'
+#' @return A numeric vector of single length.
+#'
 #' @examples
 #' # Create a graph with a
 #' # path of nodes and 3
@@ -17,8 +19,8 @@
 #' # in the graph
 #' graph %>%
 #'   count_nodes()
-#' @export count_nodes
-
+#'
+#' @export
 count_nodes <- function(graph) {
 
   # Get the name of the function

@@ -7,19 +7,16 @@
 get_all_connected_nodes(graph, node)
 }
 \arguments{
-\item{graph}{a graph object of class
-\code{dgr_graph}.}
+\item{graph}{A graph object of class \code{dgr_graph}.}
 
-\item{node}{a single-length vector containing a
-node ID value.}
+\item{node}{a single-length vector containing a node ID value.}
 }
 \value{
-a vector of node ID values.
+A vector of node ID values.
 }
 \description{
-With a single node serving as
-the starting point get all nodes connected (i.e.,
-reachable with a traversable path) to that node.
+With a single node serving as the starting point get all nodes connected
+(i.e., reachable with a traversable path) to that node.
 }
 \examples{
 # Create a random graph using the
@@ -68,4 +65,5 @@ graph_2 \%>\%
 graph_2 \%>\%
   get_all_connected_nodes(
     node = 8)
+
 }

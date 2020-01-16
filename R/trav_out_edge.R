@@ -1,31 +1,41 @@
-#' Traverse from one or more selected nodes onto
-#' adjacent, outward edges
-#' @description From a graph object of class
-#' \code{dgr_graph} move to outgoing edges from a
-#' selection of one or more selected nodes, thereby
-#' creating a selection of edges. An optional filter
-#' by edge attribute can limit the set of edges
+#' Traverse from one or more selected nodes onto adjacent, outward edges
+#'
+#' From a graph object of class `dgr_graph` move to outgoing edges from a
+#' selection of one or more selected nodes, thereby creating a selection of
+#' edges. An optional filter by edge attribute can limit the set of edges
 #' traversed to.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param conditions an option to use filtering
-#' conditions for the traversal.
-#' @param copy_attrs_from providing a node attribute
-#' name will copy those node attribute values to the
-#' traversed edges. If the edge attribute already exists,
-#' the values will be merged to the traversed edges;
-#' otherwise, a new edge attribute will be created.
-#' @param copy_attrs_as if a node attribute name
-#' is provided in \code{copy_attrs_from}, this option
-#' will allow the copied attribute values to be
-#' written under a different edge attribute name.
-#' If the attribute name provided in
-#' \code{copy_attrs_as} does not exist in the graph's
-#' edf, the new edge attribute will be created
-#' with the chosen name.
-#' @return a graph object of class \code{dgr_graph}.
+#'
+#' This traversal function makes use of an active selection of nodes. After the
+#' traversal, depending on the traversal conditions, there will either be a
+#' selection of edges or no selection at all.
+#'
+#' Selections of nodes can be performed using the following node selection
+#' (`select_*()`) functions: [select_nodes()], [select_last_nodes_created()],
+#' [select_nodes_by_degree()], [select_nodes_by_id()], or
+#' [select_nodes_in_neighborhood()].
+#'
+#' Selections of nodes can also be performed using the following traversal
+#' (`trav_*()`) functions: [trav_out()], [trav_in()], [trav_both()],
+#' [trav_out_node()], [trav_in_node()], [trav_out_until()], or
+#' [trav_in_until()].
+#'
+#' @inheritParams render_graph
+#' @param conditions An option to use filtering conditions for the traversal.
+#' @param copy_attrs_from Providing a node attribute name will copy those node
+#'   attribute values to the traversed edges. If the edge attribute already
+#'   exists, the values will be merged to the traversed edges; otherwise, a new
+#'   edge attribute will be created.
+#' @param copy_attrs_as If a node attribute name is provided in
+#'   `copy_attrs_from`, this option will allow the copied attribute values to be
+#'   written under a different edge attribute name. If the attribute name
+#'   provided in `copy_attrs_as` does not exist in the graph's edf, the new edge
+#'   attribute will be created with the chosen name.
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Set a seed
+#' suppressWarnings(RNGversion("3.5.0"))
 #' set.seed(23)
 #'
 #' # Create a simple graph
@@ -64,12 +74,10 @@
 #'     df = df)
 #'
 #' # Show the graph's internal node data frame
-#' graph %>%
-#'   get_node_df()
+#' graph %>% get_node_df()
 #'
 #' # Show the graph's internal edge data frame
-#' graph %>%
-#'   get_edge_df()
+#' graph %>% get_edge_df()
 #'
 #' # Perform a simple traversal from nodes to
 #' # outbound edges with no conditions on the
@@ -161,12 +169,10 @@
 #'
 #' # Show the graph's internal edge
 #' # data frame after this change
-#' graph %>%
-#'   get_edge_df()
-#' @importFrom dplyr filter select select_ right_join rename everything
-#' @importFrom rlang enquo UQ get_expr
-#' @export trav_out_edge
-
+#' graph %>% get_edge_df()
+#'
+#' @import rlang
+#' @export
 trav_out_edge <- function(graph,
                           conditions = NULL,
                           copy_attrs_from = NULL,
@@ -238,9 +244,6 @@ trav_out_edge <- function(graph,
     }
   }
 
-  # Create bindings for specific variables
-  id <- id.y <- from <- to <- rel <- NULL
-
   # Get the selection of nodes as the starting
   # nodes for the traversal
   starting_nodes <- graph$node_selection$node
@@ -273,10 +276,7 @@ trav_out_edge <- function(graph,
     rlang::enquo(conditions) %>%
     rlang::get_expr())) {
 
-    valid_edges <-
-      dplyr::filter(
-        .data = valid_edges,
-        rlang::UQ(conditions))
+    valid_edges <- dplyr::filter(.data = valid_edges, !!conditions)
   }
 
   # If no rows returned, then there are no

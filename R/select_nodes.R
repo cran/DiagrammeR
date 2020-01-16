@@ -1,19 +1,19 @@
 #' Select nodes in a graph
-#' @description Select nodes from a graph object of
-#' class \code{dgr_graph}.
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @param conditions an option to use filtering
-#' conditions for the retrieval of nodes.
-#' @param set_op the set operation to perform upon
-#' consecutive selections of graph nodes. This can
-#' either be as a \code{union} (the default), as an
-#' intersection of selections with \code{intersect},
-#' or, as a \code{difference} on the previous
-#' selection, if it exists.
-#' @param nodes an optional vector of node IDs for
-#' filtering the list of nodes present in the graph.
-#' @return a graph object of class \code{dgr_graph}.
+#'
+#' Select nodes from a graph object of class `dgr_graph`.
+#'
+#' @inheritParams render_graph
+#' @param conditions An option to use filtering conditions for the retrieval of
+#'   nodes.
+#' @param set_op The set operation to perform upon consecutive selections of
+#'   graph nodes. This can either be as a `union` (the default), as an
+#'   intersection of selections with `intersect`, or, as a `difference` on the
+#'   previous selection, if it exists.
+#' @param nodes An optional vector of node IDs for filtering the list of nodes
+#'   present in the graph.
+#'
+#' @return A graph object of class `dgr_graph`.
+#'
 #' @examples
 #' # Create a node data frame (ndf)
 #' ndf <-
@@ -43,8 +43,7 @@
 #'
 #' # Verify that the node selection has been made
 #' # using the `get_selection()` function
-#' graph %>%
-#'   get_selection()
+#' graph %>% get_selection()
 #'
 #' # Select nodes based on the node `type`
 #' # being `z`
@@ -57,8 +56,7 @@
 #' # Verify that an node selection has been made, and
 #' # recall that the `3` and `4` nodes are of the
 #' # `z` type
-#' graph %>%
-#'   get_selection()
+#' graph %>% get_selection()
 #'
 #' # Select edges based on the node value attribute
 #' # being greater than 3.0 (first clearing the current
@@ -72,12 +70,10 @@
 #' # Verify that the correct node selection has been
 #' # made; in this case, nodes `1` and `3` have values
 #' # for `value` greater than 3.0
-#' graph %>%
-#'   get_selection()
-#' @importFrom dplyr filter pull
-#' @importFrom rlang enquo UQ get_expr
-#' @export select_nodes
-
+#' graph %>% get_selection()
+#'
+#' @import rlang
+#' @export
 select_nodes <- function(graph,
                          conditions = NULL,
                          set_op = "union",
@@ -119,9 +115,6 @@ select_nodes <- function(graph,
   # Capture provided conditions
   conditions <- rlang::enquo(conditions)
 
-  # Create binding for a specific variable
-  id <- NULL
-
   # Extract the graph's internal ndf
   nodes_df <- graph$nodes_df
 
@@ -137,10 +130,7 @@ select_nodes <- function(graph,
     rlang::enquo(conditions) %>%
     rlang::get_expr())) {
 
-    nodes_df <-
-      filter(
-        .data = nodes_df,
-        rlang::UQ(conditions))
+    nodes_df <- dplyr::filter(.data = nodes_df, !!conditions)
   }
 
   # Get the nodes as a vector
@@ -199,43 +189,49 @@ select_nodes <- function(graph,
     save_graph_as_rds(graph = graph)
   }
 
-  # Construct message body
-  if (!n_e_select_properties_in[["node_selection_available"]] &
-      !n_e_select_properties_in[["edge_selection_available"]]) {
+  # Emit a message about the modification of a selection
+  # if that option is set
+  if (!is.null(graph$graph_info$display_msgs) &&
+      graph$graph_info$display_msgs) {
 
-    msg_body <-
-      glue::glue(
-        "created a new selection of \\
-         {n_e_select_properties_out[['selection_count_str']]}")
+    # Construct message body
+    if (!n_e_select_properties_in[["node_selection_available"]] &
+        !n_e_select_properties_in[["edge_selection_available"]]) {
 
-  } else if (n_e_select_properties_in[["node_selection_available"]] |
-             n_e_select_properties_in[["edge_selection_available"]]) {
-
-    if (n_e_select_properties_in[["node_selection_available"]]) {
       msg_body <-
         glue::glue(
-          "modified an existing selection of \\
+          "created a new selection of \\
+         {n_e_select_properties_out[['selection_count_str']]}")
+
+    } else if (n_e_select_properties_in[["node_selection_available"]] |
+               n_e_select_properties_in[["edge_selection_available"]]) {
+
+      if (n_e_select_properties_in[["node_selection_available"]]) {
+        msg_body <-
+          glue::glue(
+            "modified an existing selection of \\
            {n_e_select_properties_in[['selection_count_str']]}:
            * {n_e_select_properties_out[['selection_count_str']]} \\
            are now in the active selection
            * used the `{set_op}` set operation")
-    }
+      }
 
-    if (n_e_select_properties_in[["edge_selection_available"]]) {
-      msg_body <-
-        glue::glue(
-          "created a new selection of \\
+      if (n_e_select_properties_in[["edge_selection_available"]]) {
+        msg_body <-
+          glue::glue(
+            "created a new selection of \\
            {n_e_select_properties_out[['selection_count_str']]}:
            * this replaces \\
            {n_e_select_properties_in[['selection_count_str']]} \\
            in the prior selection")
+      }
     }
-  }
 
-  # Issue a message to the user
-  emit_message(
-    fcn_name = fcn_name,
-    message_body = msg_body)
+    # Issue a message to the user
+    emit_message(
+      fcn_name = fcn_name,
+      message_body = msg_body)
+  }
 
   graph
 }

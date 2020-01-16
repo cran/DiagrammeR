@@ -1,11 +1,14 @@
 #' Is the graph a property graph?
-#' @description Provides a logical value on whether
-#' the graph is property graph (i.e., all nodes have
-#' an assigned \code{type} value and all edges have
-#' an assigned \code{rel} value).
-#' @param graph a graph object of class
-#' \code{dgr_graph}.
-#' @return a logical value.
+#'
+#' Provides a logical value on whether the graph is property graph (i.e., all
+#' nodes have an assigned `type` value and all edges have an assigned `rel`
+#' value).
+#'
+#' @inheritParams render_graph
+#'
+#' @return A logical value.
+#'
+#' @examples
 #' # Create a graph with 2 nodes
 #' # (with `type` values) and a
 #' # single edge (with a `rel`)
@@ -40,8 +43,8 @@
 #' # An empty graph will return FALSE
 #' create_graph() %>%
 #'   is_property_graph()
-#' @export is_property_graph
-
+#'
+#' @export
 is_property_graph <- function(graph) {
 
   # Get the name of the function

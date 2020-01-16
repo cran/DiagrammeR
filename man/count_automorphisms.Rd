@@ -7,20 +7,15 @@
 count_automorphisms(graph)
 }
 \arguments{
-\item{graph}{a graph object of class
-\code{dgr_graph}.}
+\item{graph}{A graph object of class \code{dgr_graph}.}
 }
 \value{
-a single numeric value
-representing the number of
-automorphisms the graph contains.
+A single numeric value representing the number of automorphisms the
+graph contains.
 }
 \description{
-Get the number of
-automorphisms the graph contains.
-An automorphism of a graph is a
-form of symmetry in which the graph
-is mapped onto itself while
+Get the number of automorphisms the graph contains. An automorphism of a
+graph is a form of symmetry in which the graph is mapped onto itself while
 preserving edge-node connectivity.
 }
 \examples{
@@ -38,4 +33,5 @@ graph \%>\%
 create_graph() \%>\%
   add_full_graph(n = 10) \%>\%
   count_automorphisms()
+
 }
