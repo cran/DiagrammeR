@@ -63,7 +63,7 @@
 #' # get made with columns that
 #' # are not character class columns
 #' graph %>% get_node_df()
-#'
+#' @family Node creation and removal
 #' @export
 add_nodes_from_df_cols <- function(graph,
                                    df,
@@ -136,7 +136,7 @@ add_nodes_from_df_cols <- function(graph,
           trimws() %>%
           stringr::str_split(" ") %>%
           purrr::flatten_chr() %>%
-          dplyr::as_tibble(.name_repair = "unique") %>%
+          tibble::enframe(name = NULL) %>%
           tidyr::drop_na() %>%
           dplyr::distinct() %>%
           purrr::flatten_chr())

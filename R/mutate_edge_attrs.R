@@ -72,6 +72,7 @@
 #' graph %>% get_edge_df()
 #'
 #' @import rlang
+#' @family Edge creation and removal
 #' @export
 mutate_edge_attrs <- function(graph,
                               ...) {
@@ -116,13 +117,7 @@ mutate_edge_attrs <- function(graph,
       reasons = "The variables `id`, `from`, or `to` cannot undergo mutation")
   }
 
-  for (i in 1:length(exprs)) {
-    edf <-
-      edf %>%
-      dplyr::mutate_(
-        .dots = stats::setNames(list((exprs %>% paste())[i]),
-                         names(exprs)[i]))
-  }
+  edf <- edf %>% dplyr::mutate(!!! enquos(...))
 
   # Update the graph
   graph$edges_df <- edf
