@@ -98,30 +98,34 @@ generate_dot <- function(graph) {
   }
 
 
-  # Replace NA values with empty strings in `nodes_df`
+  # Replace NA values with empty strings in character columns of `nodes_df`
   if (!is.null(nodes_df)) {
 
     if (ncol(nodes_df) >= 4) {
+      vars <- base::setdiff(colnames(nodes_df), c("id", "type", "label"))
+      vars <- vars[purrr::map_lgl(nodes_df[vars], is.character)]
 
       nodes_df <-
         nodes_df %>%
         dplyr::mutate_at(
-          .vars = base::setdiff(colnames(nodes_df), c("id", "type", "label")),
+          .vars = vars,
           .funs =  ~ tidyr::replace_na(., "")
         )
     }
   }
 
 
-  # Replace NA values with empty strings in `edges_df`
+  # Replace NA values with empty strings in character columns of `edges_df`
   if (!is.null(edges_df)) {
 
     if (ncol(edges_df) >= 5) {
+      vars <- base::setdiff(colnames(edges_df), c("id", "from", "to", "rel"))
+      vars <- vars[purrr::map_lgl(edges_df[vars], is.character)]
 
       edges_df <-
         edges_df %>%
         dplyr::mutate_at(
-          .vars = base::setdiff(colnames(edges_df), c("id", "from", "to", "rel")),
+          .vars = vars,
           .funs =  ~ tidyr::replace_na(., "")
         )
     }
@@ -452,7 +456,6 @@ generate_dot <- function(graph) {
       } else if ('cluster' %in% colnames(nodes_df)) {
 
         cluster_vals <- nodes_df$cluster
-        cluster_vals[cluster_vals == ""] <- NA_character_
 
         clustered_node_block <- character(0)
         clusters <- split(node_block, cluster_vals)
