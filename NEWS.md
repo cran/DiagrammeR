@@ -1,3 +1,7 @@
+# DiagrammeR 1.0.8
+
+* Reduce minimum R version requirement.
+
 # DiagrammeR 1.0.7
 
 * Fix malformed CSS selector in `htmlwidgets/grViz.js`

@@ -1,7 +1,7 @@
 Type: Package
 Package: DiagrammeR
 Title: Graph/Network Visualization
-Version: 1.0.7
+Version: 1.0.8
 Authors@R: 
     person("Richard", "Iannone", , "riannone@me.com", c("aut", "cre"),
            comment = c(ORCID = "0000-0003-3925-190X"))
@@ -16,7 +16,7 @@ Description:
 License: MIT + file LICENSE
 URL: https://github.com/rich-iannone/DiagrammeR
 BugReports: https://github.com/rich-iannone/DiagrammeR/issues
-Depends: R (>= 3.5)
+Depends: R (>= 3.2)
 Imports: dplyr (>= 1.0.7), downloader (>= 0.4), glue (>= 1.5.0),
         htmltools (>= 0.5.2), htmlwidgets (>= 1.5), igraph (>= 1.2.11),
         influenceR (>= 0.1.0.1), magrittr (>= 1.5), purrr (>= 0.3.4),
@@ -29,8 +29,8 @@ Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.2
 NeedsCompilation: no
-Packaged: 2022-01-15 19:48:26 UTC; rich
+Packaged: 2022-01-24 15:40:43 UTC; rich
 Author: Richard Iannone [aut, cre] (<https://orcid.org/0000-0003-3925-190X>)
 Maintainer: Richard Iannone <riannone@me.com>
 Repository: CRAN
-Date/Publication: 2022-01-15 21:12:41 UTC
+Date/Publication: 2022-01-24 16:42:50 UTC
