@@ -1,7 +1,7 @@
-3363a065c3d316aefaf6e2882d9f1430 *DESCRIPTION
+171d36ba493ce5250d2f9e04073ce9cc *DESCRIPTION
 4674af27c83836d90b8094afc941da5e *LICENSE
 9241641b185eea8a3a32b9bb1d3632b1 *NAMESPACE
-bab9a6dbb6c5d12b76f95f29c564122e *NEWS.md
+030aa5116bd1a976a15f5a8e3571bc87 *NEWS.md
 6999e508e04333e6added27789728195 *R/DiagrammeR.R
 d0ed44b7025c7c7f5b4f9b63294e3810 *R/add_balanced_tree.R
 19af2c186b3cc626651be816cdaf73bb *R/add_cycle.R
@@ -48,7 +48,7 @@ f05e6adb91436185a267d52dc3f34ea3 *R/copy_edge_attrs.R
 15be9cea842e39b1298527976fe207c0 *R/count_asymmetric_node_pairs.R
 c62c359800ed62e90ede4a09331807bb *R/count_automorphisms.R
 4eb7ee8f7ab89d0cb4fc1d008298170f *R/count_edges.R
-23291ed526fe8603cc90386fac105fb1 *R/count_graphs_in_graph_series.R
+949751b602d6a61eb971451a77c6b171 *R/count_graphs_in_graph_series.R
 9472e0b3d0799abde7344cbebf9071ff *R/count_loop_edges.R
 f70bb01acb535332d19b1de7e0ad1cf6 *R/count_mutual_node_pairs.R
 4d38a95db2fb9c6a1966d539dfdaff09 *R/count_nodes.R
@@ -81,7 +81,7 @@ f5827198ffe4fe21f386133a183907ec *R/edge_aes.R
 14573f60a16a5b87a77005a43fdc60ef *R/edge_data.R
 a4520ab16bcdcdec013dbf287d5886e5 *R/export_csv.R
 b27d4fe9f95e8a97138bcbd1cd2247ff *R/export_graph.R
-e75b01170aa2686dc0577979f546aaba *R/filter_graph_series.R
+2cb4c359ebab57b2dc064cb56de4124d *R/filter_graph_series.R
 936da202629b407ada213d0cb54f3582 *R/from_adj_matrix.R
 cafa2b556f7cf927b2bf524adfe02d30 *R/from_igraph.R
 6a223327adb64b511d5f6aa4e7fcaeff *R/fully_connect_nodes_ws.R
@@ -161,7 +161,7 @@ f7d9c6c65e029057263ab6d88e5f6a5d *R/get_periphery.R
 697b88c25744cb67db7c48059ddcfd54 *R/get_similar_nbrs.R
 cfad6b86824a8ae7f7953c676ccb833d *R/get_successors.R
 5fd398119b3c014180b375d7e500a0da *R/get_w_connected_cmpts.R
-b2bb6116c37df4f4d33360bcd0975f1d *R/grViz.R
+87656c489000fcb61b4db877bb2fb9d4 *R/grViz.R
 a301f0d50ad0043d303927ad74028122 *R/import_graph.R
 01408ee998a7ef9a3532d1606e9c7553 *R/invert_selection.R
 67a3f20545175231bcca0424718c1f4e *R/is_edge_loop.R
@@ -180,7 +180,7 @@ b87163185caba34e8a503b01b951b3de *R/is_graph_weighted.R
 531fc5104620ac84289768b0a025bc16 *R/join_edge_attrs.R
 12fa76869429ceea366b93e34e69f192 *R/join_node_attrs.R
 d4cf1a6ac5de7c1436043f50bc3ee867 *R/layout_nodes_w_string.R
-db9516b555df66d8008b5899a5fb7a61 *R/mermaid.R
+d2eeb026551f7f170df4159b00534d97 *R/mermaid.R
 097e346794e7b7cc582150fc0026a8de *R/mutate_edge_attrs.R
 e16592c0d81f46ff9e079fc3a5afc9b4 *R/mutate_edge_attrs_ws.R
 a5791cc426313b4df5c0afb02a5c0909 *R/mutate_node_attrs.R
@@ -219,7 +219,7 @@ c6721859472a2516ef4fad1037fb5119 *R/set_edge_attrs.R
 20a91dda4d071476870da38643ff0634 *R/set_edge_attrs_ws.R
 74cb0f30c4eeebd72220bf80920a019e *R/set_graph_directed.R
 f0e730ce9ae7292164edf7f9993f4019 *R/set_graph_name.R
-c7db99d470fd752ff25db343227d8af9 *R/set_graph_time.R
+ba503e98d12b77fe8762fa9356fa6cef *R/set_graph_time.R
 5bf46b40f09047b0a57b172afacd827c *R/set_graph_undirected.R
 88e8d58fa1c07b61afdfdd5667744af2 *R/set_node_attr_to_display.R
 cee413349693d80be00d76101aacdc64 *R/set_node_attr_w_fcn.R
@@ -263,7 +263,7 @@ b760c6b634d794f2575ee9ba8ac32539 *inst/extdata/projects.csv
 6c8c169b385c1a7d93fb50a67505aa29 *inst/extdata/usd_exchange_rates.csv
 d7071cdd8eab8019d7aff6cda0a7d2a6 *inst/htmlwidgets/DiagrammeR.js
 49b47a8ee6d9356eadd28546e5385573 *inst/htmlwidgets/DiagrammeR.yaml
-07fc9688797ac63b3e2312cc67d446d9 *inst/htmlwidgets/grViz.js
+7d2760fbd2e891bb1894a223be1f092f *inst/htmlwidgets/grViz.js
 f9bc7be493d35b2828649202d65b70f2 *inst/htmlwidgets/grViz.yaml
 978e1a2b230d85b2a012662934abef36 *inst/htmlwidgets/lib/chromatography/LICENSE
 a8b61b57747dc5639a74335066ca5bb2 *inst/htmlwidgets/lib/chromatography/chromatography.js

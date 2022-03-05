@@ -1,7 +1,7 @@
 Type: Package
 Package: DiagrammeR
 Title: Graph/Network Visualization
-Version: 1.0.8
+Version: 1.0.9
 Authors@R: 
     person("Richard", "Iannone", , "riannone@me.com", c("aut", "cre"),
            comment = c(ORCID = "0000-0003-3925-190X"))
@@ -29,8 +29,8 @@ Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.2
 NeedsCompilation: no
-Packaged: 2022-01-24 15:40:43 UTC; rich
+Packaged: 2022-03-04 16:28:06 UTC; rich
 Author: Richard Iannone [aut, cre] (<https://orcid.org/0000-0003-3925-190X>)
 Maintainer: Richard Iannone <riannone@me.com>
 Repository: CRAN
-Date/Publication: 2022-01-24 16:42:50 UTC
+Date/Publication: 2022-03-05 15:40:21 UTC

@@ -1,3 +1,7 @@
+# DiagrammeR 1.0.9
+
+* More safely check inputs to `grViz()` and `mermaid()`
+
 # DiagrammeR 1.0.8
 
 * Reduce minimum R version requirement.
