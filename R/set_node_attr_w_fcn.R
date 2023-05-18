@@ -1,5 +1,7 @@
 #' Set node attribute values with a graph function
 #'
+#' @description
+#'
 #' From a graph object of class `dgr_graph` or a node data frame, set node
 #' attribute properties for all nodes in the graph using one of several
 #' whole-graph functions.
@@ -7,13 +9,12 @@
 #' @inheritParams render_graph
 #' @param node_attr_fcn The name of the function to use for creating a column of
 #'   node attribute values. Valid functions are: [get_alpha_centrality()],
-#'   [get_authority_centrality()], [get_betweenness()], [get_bridging()],
-#'   [get_closeness()], [get_cmty_edge_btwns()], [get_cmty_fast_greedy()],
-#'   [get_cmty_l_eigenvec()], [get_cmty_louvain()], [get_cmty_walktrap()],
-#'   [get_constraint()], [get_degree_distribution()], [get_degree_histogram()],
-#'   [get_degree_in()], [get_degree_out()], [get_degree_total()],
-#'   [get_eccentricity()], [get_eigen_centrality()], [get_pagerank()],
-#'   [get_s_connected_cmpts()], and [get_w_connected_cmpts()].
+#'   [get_authority_centrality()], [get_betweenness()], [get_closeness()],
+#'   [get_cmty_edge_btwns()], [get_cmty_fast_greedy()], [get_cmty_l_eigenvec()],
+#'   [get_cmty_louvain()], [get_cmty_walktrap()], [get_degree_distribution()],
+#'   [get_degree_histogram()], [get_degree_in()], [get_degree_out()],
+#'   [get_degree_total()], [get_eccentricity()], [get_eigen_centrality()],
+#'   [get_pagerank()], [get_s_connected_cmpts()], and [get_w_connected_cmpts()].
 #' @param ... Arguments and values to pass to the named function in
 #'   `node_attr_fcn`, if necessary.
 #' @param column_name An option to supply a column name for the new node
@@ -92,12 +93,16 @@
 #' # Inspect the graph's internal
 #' # node data frame
 #' graph_3 %>% get_node_df()
+#'
 #' @family Node creation and removal
+#'
 #' @export
-set_node_attr_w_fcn <- function(graph,
-                                node_attr_fcn,
-                                ...,
-                                column_name = NULL) {
+set_node_attr_w_fcn <- function(
+    graph,
+    node_attr_fcn,
+    ...,
+    column_name = NULL
+) {
 
   # Get the time of function start
   time_function_start <- Sys.time()

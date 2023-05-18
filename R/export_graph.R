@@ -1,5 +1,7 @@
 #' Export a graph to various image formats
 #'
+#' @description
+#'
 #' Export a graph to a variety of image formats such as PNG, PDF, SVG, and
 #' PostScript.
 #'
@@ -46,14 +48,18 @@
 #' #     file_name = "mypng.png",
 #' #     file_type = "PNG"
 #' #   )
+#'
 #' @family Display and Save
+#'
 #' @export
-export_graph <- function(graph,
-                         file_name = NULL,
-                         file_type = NULL,
-                         title = NULL,
-                         width = NULL,
-                         height = NULL) {
+export_graph <- function(
+    graph,
+    file_name = NULL,
+    file_type = NULL,
+    title = NULL,
+    width = NULL,
+    height = NULL
+) {
 
   # Get the name of the function
   fcn_name <- get_calling_fcn()
@@ -87,12 +93,10 @@ export_graph <- function(graph,
     }
   }
 
-  if ((file_type == "PNG" | file_type == "png") &&
-      requireNamespace("DiagrammeRsvg", quietly = TRUE) &&
-      requireNamespace("rsvg", quietly = TRUE)) {
+  if (file_type == "PNG" | file_type == "png") {
 
     # Stop function if `DiagrammeRsvg` package is not available
-    if (!("DiagrammeRsvg" %in% rownames(utils::installed.packages()))) {
+    if (!requireNamespace("DiagrammeRsvg", quietly = TRUE)) {
 
       emit_error(
         fcn_name = fcn_name,
@@ -103,7 +107,7 @@ export_graph <- function(graph,
     }
 
     # Stop function if `rsvg` package is not available
-    if (!("rsvg" %in% rownames(utils::installed.packages()))) {
+    if (!requireNamespace("rsvg", quietly = TRUE)) {
 
       emit_error(
         fcn_name = fcn_name,
@@ -134,12 +138,10 @@ export_graph <- function(graph,
     )
   }
 
-  if ((file_type == "PDF" | file_type == "pdf") &&
-    requireNamespace("DiagrammeRsvg", quietly = TRUE) &&
-    requireNamespace("rsvg", quietly = TRUE)) {
+  if (file_type == "PDF" | file_type == "pdf") {
 
     # Stop function if `DiagrammeRsvg` package is not available
-    if (!("DiagrammeRsvg" %in% rownames(utils::installed.packages()))) {
+    if (!requireNamespace("DiagrammeRsvg", quietly = TRUE)) {
 
       emit_error(
         fcn_name = fcn_name,
@@ -150,7 +152,7 @@ export_graph <- function(graph,
     }
 
     # Stop function if `rsvg` package is not available
-    if (!("rsvg" %in% rownames(utils::installed.packages()))) {
+    if (!requireNamespace("rsvg", quietly = TRUE)) {
 
       emit_error(
         fcn_name = fcn_name,
@@ -180,12 +182,10 @@ export_graph <- function(graph,
     )
   }
 
-  if ((file_type == "SVG" | file_type == "svg") &&
-      requireNamespace("DiagrammeRsvg", quietly = TRUE) &&
-      requireNamespace("rsvg", quietly = TRUE)) {
+  if (file_type == "SVG" | file_type == "svg") {
 
     # Stop function if `DiagrammeRsvg` package is not available
-    if (!("DiagrammeRsvg" %in% rownames(utils::installed.packages()))) {
+    if (!requireNamespace("DiagrammeRsvg", quietly = TRUE)) {
 
       emit_error(
         fcn_name = fcn_name,
@@ -196,7 +196,7 @@ export_graph <- function(graph,
     }
 
     # Stop function if `rsvg` package is not available
-    if (!("rsvg" %in% rownames(utils::installed.packages()))) {
+    if (!requireNamespace("rsvg", quietly = TRUE)) {
 
       emit_error(
         fcn_name = fcn_name,

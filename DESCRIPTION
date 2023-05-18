@@ -1,7 +1,7 @@
 Type: Package
 Package: DiagrammeR
 Title: Graph/Network Visualization
-Version: 1.0.9
+Version: 1.0.10
 Authors@R: 
     person("Richard", "Iannone", , "riannone@me.com", c("aut", "cre"),
            comment = c(ORCID = "0000-0003-3925-190X"))
@@ -19,18 +19,17 @@ BugReports: https://github.com/rich-iannone/DiagrammeR/issues
 Depends: R (>= 3.2)
 Imports: dplyr (>= 1.0.7), downloader (>= 0.4), glue (>= 1.5.0),
         htmltools (>= 0.5.2), htmlwidgets (>= 1.5), igraph (>= 1.2.11),
-        influenceR (>= 0.1.0.1), magrittr (>= 1.5), purrr (>= 0.3.4),
-        RColorBrewer (>= 1.1-2), readr (>= 2.1.1), rlang (>= 0.4),
-        rstudioapi (>= 0.7), scales (>= 1.1), stringr (>= 1.4), tibble
-        (>= 3.1), tidyr (>= 1.1), viridis (>= 0.6.2), visNetwork (>=
-        2.1.0)
+        magrittr (>= 1.5), purrr (>= 0.3.4), RColorBrewer (>= 1.1-2),
+        readr (>= 2.1.1), rlang (>= 0.4), rstudioapi (>= 0.7), scales
+        (>= 1.1), stringr (>= 1.4), tibble (>= 3.1), tidyr (>= 1.1),
+        viridis (>= 0.6.2), visNetwork (>= 2.1.0)
 Suggests: covr, DiagrammeRsvg, rsvg, knitr, testthat, rmarkdown
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.3
 NeedsCompilation: no
-Packaged: 2022-03-04 16:28:06 UTC; rich
+Packaged: 2023-05-18 13:24:40 UTC; rich
 Author: Richard Iannone [aut, cre] (<https://orcid.org/0000-0003-3925-190X>)
 Maintainer: Richard Iannone <riannone@me.com>
 Repository: CRAN
-Date/Publication: 2022-03-05 15:40:21 UTC
+Date/Publication: 2023-05-18 14:30:07 UTC

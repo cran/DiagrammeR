@@ -119,10 +119,12 @@
 #'
 #' @import htmlwidgets
 #' @export
-mermaid <- function(diagram = "",
-                    ...,
-                    width = NULL,
-                    height = NULL) {
+mermaid <- function(
+    diagram = "",
+    ...,
+    width = NULL,
+    height = NULL
+) {
 
   # Check for a connection or file
   is_connection_or_file <-
@@ -132,6 +134,7 @@ mermaid <- function(diagram = "",
   if (is_connection_or_file) {
 
     diagram <- readLines(diagram, encoding = "UTF-8", warn = FALSE)
+    diagram <- paste0(diagram, collapse = "\n")
 
   } else {
 
