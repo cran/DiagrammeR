@@ -14,14 +14,13 @@
 #' - `label` (of type `character`)
 #'
 #' An arbitrary number of additional columns containing aesthetic or data
-#' attributes can be part of the ndf, so long as they follow the aforementioned
+#' attributes can be part of the ndf, see [node_aes()] for additional attributes that can be used with ..., so long as they follow the aforementioned
 #' columns.
 #'
 #' @param n The total number of nodes to include in the node data frame.
 #' @param type An optional `type` for each node.
 #' @param label An optional `label` for each node.
-#' @param ... One or more vectors for associated node attributes.
-#'
+#' @param ... Additional attributes. Some are present in [node_aes()]
 #' @return A node data frame (ndf).
 #'
 #' @examples
@@ -56,7 +55,7 @@
 #' # Display the node data frame
 #' node_df
 #'
-#' @family Node creation and removal
+#' @family node creation and removal
 #'
 #' @export
 create_node_df <- function(
@@ -66,55 +65,35 @@ create_node_df <- function(
     ...
 ) {
 
-  # Get the name of the function
-  fcn_name <- get_calling_fcn()
+  check_number_whole(n)
+  # FIXME, nothing stopping ae
+  type <- type %||% rep(NA_character_, n)
 
-  if (!(inherits(n, "numeric") | inherits(n, "integer"))) {
-
-    emit_error(
-      fcn_name = fcn_name,
-      reasons = "The value supplied to `n` must be numeric")
+  # Expand vectors with single values to fill to
+  # the number of nodes
+  if (length(type) == 1) {
+    type <- rep(type, n)
   }
 
-  if (length(n) > 1) {
-
-    emit_error(
-      fcn_name = fcn_name,
-      reasons = "The value supplied to `n` must be a single numeric value")
+  # Expand vectors with `length` > `1` and
+  # `length` < `length(nodes)`
+  if (length(type) > 1 &&
+      length(type) < n) {
+    type <- c(type, rep(NA_character_, (n - length(type))))
   }
 
-  if (is.null(type)) {
-    type <- rep(as.character(NA), n)
-  }
-
-  if (!is.null(type)) {
-    # Expand vectors with single values to fill to
-    # the number of nodes
-    if (length(type) == 1) {
-      type <- rep(type, n)
-    }
-
-    # Expand vectors with `length` > `1` and
-    # `length` < `length(nodes)`
-    if (length(type) > 1 &
-        length(type) < n) {
-      type <-
-        c(type, rep(as.character(NA), (n - length(type))))
-    }
-
-    # Trim vectors with number of values exceeding the
-    # number of nodes
-    if (length(type) > n) {
-      type <- type[1:n]
-    }
+  # Trim vectors with number of values exceeding the
+  # number of nodes
+  if (length(type) > n) {
+    type <- type[seq_len(n)]
   }
 
   # Collect extra vectors of data as `extras`
   extras <- list(...)
 
-  if (length(extras) > 0) {
+  if (length(extras) > 0L) {
 
-    for (i in 1:length(extras)) {
+    for (i in seq_along(extras)) {
 
       # Expand vectors with single values to fill to
       # the number of nodes
@@ -124,7 +103,7 @@ create_node_df <- function(
 
       # Expand vectors with `length` > `1` and
       # `length` < `length(nodes)`
-      if (length(extras[[i]]) > 1 &
+      if (length(extras[[i]]) > 1 &&
           length(extras[[i]]) < n) {
         extras[[i]] <-
           c(extras[[i]],
@@ -134,7 +113,7 @@ create_node_df <- function(
       # Trim vectors with number of values exceeding
       # the number of nodes
       if (length(extras[[i]]) > n) {
-        extras[[i]] <- extras[[i]][1:n]
+        extras[[i]] <- extras[[i]][seq_len(n)]
       }
     }
 
@@ -146,16 +125,14 @@ create_node_df <- function(
 
   # Interpret node label values
   if (is.null(label)) {
-    label <- rep(as.character(NA), n)
-  } else if (inherits(label, "numeric") |
-             inherits(label, "character")) {
+    label <- rep(NA_character_, n)
+  } else if (rlang::inherits_any(label, c("numeric", "character"))) {
     label <- as.character(label)
-  } else if (inherits(label, "logical") &
-             length(label) == 1) {
-    if (label == TRUE) {
-      label <- as.character(1:n)
+  } else if (rlang::is_logical(label, n = 1)) {
+    if (label) {
+      label <- as.character(seq_len(n))
     } else {
-      label <- rep(as.character(NA), n)
+      label <- rep(NA_character_, n)
     }
   }
 
@@ -163,7 +140,7 @@ create_node_df <- function(
     nodes_df <-
       dplyr::bind_cols(
         data.frame(
-          id = 1:n,
+          id = seq_len(n),
           type = type,
           label = label,
           stringsAsFactors = FALSE),
@@ -172,7 +149,7 @@ create_node_df <- function(
   } else {
     nodes_df <-
       data.frame(
-        id = 1:n,
+        id = seq_len(n),
         type = type,
         label = label,
         stringsAsFactors = FALSE)
